@@ -4,15 +4,15 @@ PowerAuth 2.0 Push Server is an optional application that facilitates sending AP
 
 ## Deployment tutorials
 
-- [[PowerAuth 2.0 Push Server|Deploying-Push-Server]]
+- [Deploy PowerAuth 2.0 Push Server](https://github.com/lime-company/lime-security-powerauth-push/wiki/Deploying-Push-Server)
 
 ## Integration tutorials
 
-- [[Push Server|Push-Server-Integration]]
+- [Integrate with Push Server](https://github.com/lime-company/lime-security-powerauth-push/wiki/Push-Server-Integration)
 
 ## Reference manual
 
-- [[Push Server REST API|Push-Server-API]]
+- [Push Server REST API](https://github.com/lime-company/lime-security-powerauth-push/wiki/Push-Server-API)
 
 # License
 
