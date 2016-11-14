@@ -1,4 +1,4 @@
-package io.getlime.push.controller.model;
+package io.getlime.push.model;
 
 /**
  * Class representing base error response.
@@ -11,7 +11,7 @@ public class ErrorResponse extends StatusResponse {
      * Default constructor, sets `StatusResponse.ERROR` as a status value.
      */
     public ErrorResponse() {
-        this.setStatus(StatusResponse.ERROR);
+        this.setStatus(ERROR);
     }
 
     /**

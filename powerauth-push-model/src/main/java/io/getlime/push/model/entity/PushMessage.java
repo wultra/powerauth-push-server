@@ -1,7 +1,7 @@
-package io.getlime.push.controller.model.entity;
+package io.getlime.push.model.entity;
 
 /**
- * Class representing a single push message model.
+ * Class representing a single push message io.getlime.push.controller.model.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */

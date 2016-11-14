@@ -15,9 +15,9 @@
  */
 package io.getlime.push.controller;
 
-import io.getlime.push.controller.model.*;
-import io.getlime.push.controller.model.entity.PushMessage;
-import io.getlime.push.controller.model.entity.PushSendResult;
+import io.getlime.push.model.*;
+import io.getlime.push.model.entity.PushMessage;
+import io.getlime.push.model.entity.PushSendResult;
 import io.getlime.push.service.PushSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,8 +29,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Controller responsible for processes related to push notification sending.

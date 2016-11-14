@@ -1,6 +1,4 @@
-package io.getlime.push.controller.model.entity;
-
-import org.joda.time.DateTime;
+package io.getlime.push.model.entity;
 
 import java.util.Date;
 import java.util.Map;

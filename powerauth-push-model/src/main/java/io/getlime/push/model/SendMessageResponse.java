@@ -1,6 +1,6 @@
-package io.getlime.push.controller.model;
+package io.getlime.push.model;
 
-import io.getlime.push.controller.model.entity.PushSendResult;
+import io.getlime.push.model.entity.PushSendResult;
 
 /**
  * Class representing a push message sending response.

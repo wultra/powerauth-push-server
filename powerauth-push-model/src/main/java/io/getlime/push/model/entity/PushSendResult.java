@@ -1,4 +1,4 @@
-package io.getlime.push.controller.model.entity;
+package io.getlime.push.model.entity;
 
 /**
  * Class that contains push message sending result data.

@@ -15,7 +15,7 @@
  */
 package io.getlime.push.errorhandling;
 
-import io.getlime.push.controller.model.ErrorResponse;
+import io.getlime.push.model.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

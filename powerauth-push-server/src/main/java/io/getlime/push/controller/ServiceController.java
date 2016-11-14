@@ -1,6 +1,6 @@
 package io.getlime.push.controller;
 
-import io.getlime.push.controller.model.StatusResponse;
+import io.getlime.push.model.StatusResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;

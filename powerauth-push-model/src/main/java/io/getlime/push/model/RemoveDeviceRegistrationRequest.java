@@ -1,4 +1,4 @@
-package io.getlime.push.controller.model;
+package io.getlime.push.model;
 
 /**
  * Class representing request object responsible for device registration removal.
