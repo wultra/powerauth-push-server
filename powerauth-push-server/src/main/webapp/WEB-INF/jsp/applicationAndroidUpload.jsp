@@ -21,15 +21,23 @@
     <div class="panel-body">
         <form action="${pageContext.request.contextPath}/web/admin/app/${application.id}/android/upload/do.submit" method="POST">
             <div class="row padder10">
-                <div class="col-sm-8">
-                    Bundle ID<br/>
+                <div class="col-sm-12">
+                    <c:if test="${fields.hasFieldErrors('bundle')}">
+                        <div class="red">Please enter a valid Android package name (for example "io.getlime.app.MyApp").</div>
+                    </c:if>
+                    Package name
+                    <br/>
                     <input type="text" name="bundle" value="${bundle}" class="form-control"/>
                 </div>
             </div>
             <div class="row padder10">
-                <div class="col-sm-8">
-                    Firebase Cloud Messaging Token<br/>
-                    <input type="text" name="token" class="form-control" autocomplete="off"/>
+                <div class="col-sm-12">
+                    <c:if test="${fields.hasFieldErrors('token')}">
+                        <div class="red">Please enter a correct FCM token value.</div>
+                    </c:if>
+                    Firebase Cloud Messaging Token
+                    <br/>
+                    <input type="text" name="token" class="form-control" value="${token}" autocomplete="off"/>
                 </div>
             </div>
             <div class="row padder10">

@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-@ControllerAdvice
+@ControllerAdvice(basePackages = { "io.getlime.push.controller.rest" })
 public class DefaultExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400

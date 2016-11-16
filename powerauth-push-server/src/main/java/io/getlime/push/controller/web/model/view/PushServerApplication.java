@@ -1,4 +1,4 @@
-package io.getlime.push.controller.model;
+package io.getlime.push.controller.web.model.view;
 
 public class PushServerApplication {
     

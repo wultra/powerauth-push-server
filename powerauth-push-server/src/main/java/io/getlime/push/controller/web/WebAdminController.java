@@ -1,18 +1,24 @@
-package io.getlime.push.controller;
+package io.getlime.push.controller.web;
 
 import io.getlime.powerauth.soap.GetApplicationListResponse;
-import io.getlime.push.controller.model.PushServerApplication;
+import io.getlime.push.controller.web.model.form.UploadAndroidCredentialsForm;
+import io.getlime.push.controller.web.model.view.PushServerApplication;
+import io.getlime.push.controller.web.model.form.AppCreateForm;
+import io.getlime.push.controller.web.model.form.RemoveIosCredentialsForm;
+import io.getlime.push.controller.web.model.form.UploadIosCredentialsForm;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentials;
 import io.getlime.security.soap.client.PowerAuthServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -111,7 +117,12 @@ public class WebAdminController {
         app.setIos(appCredentials.getIos() != null);
         app.setAndroid(appCredentials.getAndroid() != null);
         app.setAppName(client.getApplicationDetail(appCredentials.getAppId()).getApplicationName());
-        model.put("bundle", appCredentials.getIosBundle());
+        UploadIosCredentialsForm form = (UploadIosCredentialsForm) model.get("form");
+        if (form == null) {
+            model.put("bundle", appCredentials.getIosBundle());
+        } else {
+            model.put("bundle", form.getBundle());
+        }
         model.put("application", app);
         return "applicationIosUpload";
     }
@@ -125,7 +136,13 @@ public class WebAdminController {
         app.setIos(appCredentials.getIos() != null);
         app.setAndroid(appCredentials.getAndroid() != null);
         app.setAppName(client.getApplicationDetail(appCredentials.getAppId()).getApplicationName());
-        model.put("bundle", appCredentials.getAndroidBundle());
+        UploadAndroidCredentialsForm form = (UploadAndroidCredentialsForm) model.get("form");
+        if (form == null) {
+            model.put("bundle", appCredentials.getAndroidBundle());
+        } else {
+            model.put("bundle", form.getBundle());
+            model.put("token", form.getToken());
+        }
         model.put("application", app);
         return "applicationAndroidUpload";
     }
@@ -133,59 +150,58 @@ public class WebAdminController {
     // Action Handlers
 
     @RequestMapping(value = "web/admin/app/create/do.submit", method = RequestMethod.POST)
-    public String actionCreateApplication(@RequestParam(value = "id") Long id) {
+    public String actionCreateApplication(@Valid AppCreateForm form, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "redirect:web/admin/app/create";
+        }
         AppCredentials appCredentials = new AppCredentials();
-        appCredentials.setAppId(id);
+        appCredentials.setAppId(form.getAppId());
         AppCredentials newAppCredentials = credentialsRepository.save(appCredentials);
         return "redirect:/web/admin/app/" + newAppCredentials.getId() + "/edit";
     }
 
-    @RequestMapping(value = "web/admin/app/edit/do.submit", method = RequestMethod.POST)
-    public String actionEditApplication() {
-        return "redirect:/web/admin/app/list";
-    }
-
-    @RequestMapping(value = "web/admin/app/delete/do.submit", method = RequestMethod.POST)
-    public String actionDeleteApplication(@RequestParam(value = "id") String id, Map<String, Object> model) {
-        return "redirect:/web/admin/app/list";
-    }
-
     @RequestMapping(value = "web/admin/app/{id}/ios/upload/do.submit", method = RequestMethod.POST)
-    public String actionUploadIosCredentials(
-            @PathVariable Long id,
-            @RequestParam("bundle") String bundle,
-            @RequestParam("certificate") MultipartFile file,
-            @RequestParam("password") String password) {
+    public String actionUploadIosCredentials(@PathVariable Long id, @Valid UploadIosCredentialsForm form, BindingResult bindingResult, RedirectAttributes attr) {
+        if (bindingResult.hasErrors()) {
+            attr.addFlashAttribute("fields", bindingResult);
+            attr.addFlashAttribute("form", form);
+            return "redirect:/web/admin/app/" + id + "/ios/upload";
+        }
         final AppCredentials appCredentials = credentialsRepository.findOne(id);
         try {
-            appCredentials.setIos(file.getBytes());
+            appCredentials.setIos(form.getCertificate().getBytes());
         } catch (IOException e) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
         }
-        appCredentials.setIosPassword(password);
-        appCredentials.setIosBundle(bundle);
+        appCredentials.setIosPassword(form.getPassword());
+        appCredentials.setIosBundle(form.getBundle());
         credentialsRepository.save(appCredentials);
         return "redirect:/web/admin/app/" + id + "/edit";
     }
 
     @RequestMapping(value = "web/admin/app/{id}/ios/remove/do.submit", method = RequestMethod.POST)
-    public String actionRemoveIosCredentials(@PathVariable Long id) {
-        final AppCredentials appCredentials = credentialsRepository.findOne(id);
+    public String actionRemoveIosCredentials(@Valid RemoveIosCredentialsForm form, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "error";
+        }
+        final AppCredentials appCredentials = credentialsRepository.findOne(form.getId());
         appCredentials.setIos(null);
         appCredentials.setIosPassword(null);
         appCredentials.setIosBundle(null);
-        credentialsRepository.save(appCredentials);
-        return "redirect:/web/admin/app/" + id + "/edit";
+        AppCredentials newAppCredentials = credentialsRepository.save(appCredentials);
+        return "redirect:/web/admin/app/" + newAppCredentials.getId()  + "/edit";
     }
 
     @RequestMapping(value = "web/admin/app/{id}/android/upload/do.submit", method = RequestMethod.POST)
-    public String actionUploadAndroidCredentials(
-            @PathVariable Long id,
-            @RequestParam("bundle") String bundle,
-            @RequestParam("token") String token) {
+    public String actionUploadAndroidCredentials(@PathVariable Long id, @Valid UploadAndroidCredentialsForm form, BindingResult bindingResult, RedirectAttributes attr) {
+        if (bindingResult.hasErrors()) {
+            attr.addFlashAttribute("fields", bindingResult);
+            attr.addFlashAttribute("form", form);
+            return "redirect:/web/admin/app/" + id + "/android/upload";
+        }
         final AppCredentials appCredentials = credentialsRepository.findOne(id);
-        appCredentials.setAndroid(token);
-        appCredentials.setAndroidBundle(bundle);
+        appCredentials.setAndroid(form.getToken());
+        appCredentials.setAndroidBundle(form.getBundle());
         credentialsRepository.save(appCredentials);
         return "redirect:/web/admin/app/" + id + "/edit";
     }

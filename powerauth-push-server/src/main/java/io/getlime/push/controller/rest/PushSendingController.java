@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.controller;
+package io.getlime.push.controller.rest;
 
 import io.getlime.push.model.*;
 import io.getlime.push.model.entity.PushMessage;

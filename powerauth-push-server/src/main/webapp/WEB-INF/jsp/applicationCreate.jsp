@@ -31,9 +31,14 @@
                     You can configure push notifications for any application from you PowerAuth 2.0 Server instance.
                     Which application would you like to configure?
                 </p>
+                <c:if test="${fields.hasErrors('appId')}">
+                    <div class="alert alert-danger">
+                        Unable to configure application - invalid app ID.
+                    </div>
+                </c:if>
                 <form action="${pageContext.request.contextPath}/web/admin/app/create/do.submit" class="form-inline pull-left" method="POST">
                     <div class="form-group padder10">
-                        <select name="id" class="form-control" style="width: 200px;">
+                        <select name="appId" class="form-control" style="width: 200px;">
                             <c:forEach items="${applications}" var="item">
                                 <option value="<c:out value="${item.id}"/>">
                                     <c:out value="${item.applicationName}"/>

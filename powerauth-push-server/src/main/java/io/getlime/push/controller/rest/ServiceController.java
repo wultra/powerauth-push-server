@@ -1,4 +1,4 @@
-package io.getlime.push.controller;
+package io.getlime.push.controller.rest;
 
 import io.getlime.push.model.StatusResponse;
 import org.springframework.stereotype.Controller;
