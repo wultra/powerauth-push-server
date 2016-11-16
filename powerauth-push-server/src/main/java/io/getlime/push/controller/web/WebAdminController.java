@@ -1,23 +1,29 @@
 package io.getlime.push.controller.web;
 
 import io.getlime.powerauth.soap.GetApplicationListResponse;
-import io.getlime.push.controller.web.model.form.UploadAndroidCredentialsForm;
+import io.getlime.push.controller.web.model.form.*;
 import io.getlime.push.controller.web.model.view.PushServerApplication;
-import io.getlime.push.controller.web.model.form.AppCreateForm;
-import io.getlime.push.controller.web.model.form.RemoveIosCredentialsForm;
-import io.getlime.push.controller.web.model.form.UploadIosCredentialsForm;
+import io.getlime.push.model.SendMessageResponse;
+import io.getlime.push.model.SendPushMessageRequest;
+import io.getlime.push.model.entity.PushMessage;
+import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentials;
 import io.getlime.security.soap.client.PowerAuthServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.*;
@@ -147,6 +153,21 @@ public class WebAdminController {
         return "applicationAndroidUpload";
     }
 
+    @RequestMapping(value = "web/admin/message/create", method = RequestMethod.GET)
+    public String createPushMessage(Map<String, Object> model) {
+        final Iterable<AppCredentials> appCredentials = credentialsRepository.findAll();
+        final List<PushServerApplication> appList = new ArrayList<>();
+        for (AppCredentials appCredential: appCredentials) {
+            PushServerApplication app = new PushServerApplication();
+            app.setId(appCredential.getId());
+            app.setAppId(appCredential.getAppId());
+            app.setAppName(client.getApplicationDetail(appCredential.getAppId()).getApplicationName());
+            appList.add(app);
+        }
+        model.put("applications", appList);
+        return "pushMessageCreate";
+    }
+
     // Action Handlers
 
     @RequestMapping(value = "web/admin/app/create/do.submit", method = RequestMethod.POST)
@@ -213,6 +234,30 @@ public class WebAdminController {
         appCredentials.setAndroidBundle(null);
         credentialsRepository.save(appCredentials);
         return "redirect:/web/admin/app/" + id + "/edit";
+    }
+
+    @RequestMapping(value = "web/admin/message/create/do.submit", method = RequestMethod.POST)
+    public String actionCreatePushMessage(@Valid ComposePushMessageForm form, BindingResult bindingResult, RedirectAttributes attr, HttpServletRequest httpRequest) {
+        if (bindingResult.hasErrors()) {
+            attr.addFlashAttribute("fields", bindingResult);
+            attr.addFlashAttribute("form", form);
+            return "redirect:/web/admin/message/create";
+        }
+        SendPushMessageRequest request = new SendPushMessageRequest();
+        request.setAppId(form.getAppId());
+        PushMessage push = new PushMessage();
+        push.setUserId(form.getUserId());
+        PushMessageBody body = new PushMessageBody();
+        body.setTitle(form.getTitle());
+        body.setBody(form.getBody());
+        body.setSound(form.isSound() ? "default" : null);
+        push.setMessage(body);
+        request.setPush(push);
+        HttpEntity<SendPushMessageRequest> requestEntity = new HttpEntity<SendPushMessageRequest>(request);
+        RestTemplate template = new RestTemplate();
+        String baseUrl = String.format("%s://%s:%d/%s",httpRequest.getScheme(),  httpRequest.getServerName(), httpRequest.getServerPort(), httpRequest.getContextPath());
+        template.exchange(baseUrl + "/push/message/send", HttpMethod.POST, requestEntity, SendMessageResponse.class);
+        return "redirect:/web/admin/message/create";
     }
 
 }

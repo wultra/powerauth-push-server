@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
@@ -22,8 +23,8 @@
         <c:choose>
             <c:when test="${fn:length(applications) == 0}">
                 <p>
-                    <strong>Well Done!</strong> There are no more applications to be configured for push notifications
-                    in your PowerAuth 2.0 Server instance.
+                    <strong class="green"><span class="glyphicon glyphicon-ok"></span> Well Done!</strong>
+                    There are no more applications to be configured for push notifications in your PowerAuth 2.0 Server instance.
                 </p>
             </c:when>
             <c:otherwise>
