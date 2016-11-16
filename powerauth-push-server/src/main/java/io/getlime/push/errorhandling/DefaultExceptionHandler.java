@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Implementation of a default exception handler for the push server service.
  *
@@ -36,6 +39,7 @@ public class DefaultExceptionHandler {
     public ErrorResponse handleConflict(Exception e) {
         ErrorResponse response = new ErrorResponse();
         response.setMessage(e.getMessage());
+        Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, null, e);
         return response;
     }
 
