@@ -57,7 +57,8 @@
 	<modules>
 		<module>powerauth-push-server</module>
 		<module>powerauth-push-model</module>
-	</modules>
+        <module>powerauth-push-client</module>
+    </modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

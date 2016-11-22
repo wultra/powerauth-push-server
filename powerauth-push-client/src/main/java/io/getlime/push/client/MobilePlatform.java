@@ -14,31 +14,26 @@
  * limitations under the License.
  */
 
-package io.getlime.push.controller.web.model.form;
-
-import javax.validation.constraints.NotNull;
+package io.getlime.push.client;
 
 /**
- * Form sent when removing iOS / APNs credentials from the application.
+ * Enum representing mobile platforms.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class RemoveIosCredentialsForm {
+public enum MobilePlatform {
 
-    @NotNull
-    private Long id;
+    iOS,
+    Android;
 
-    public Long getId() {
-        return id;
+    public String value() {
+        if (this.equals(MobilePlatform.iOS)) {
+            return "ios";
+        } else if (this.equals(MobilePlatform.Android)) {
+            return "android";
+        } else {
+            return "android"; // guess android by default
+        }
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    @Override public String toString() {
-        return "RemoveIosCredentialsForm{" +
-                "id=" + id +
-                '}';
-    }
 }
