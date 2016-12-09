@@ -2,6 +2,7 @@ CREATE TABLE `push_app_credentials` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `app_id` int(11) DEFAULT NULL,
   `ios` blob,
+  `ios_password` varchar(255) DEFAULT NULL,
   `ios_bundle` varchar(255) DEFAULT NULL,
   `android` text,
   `android_bundle` varchar(255) DEFAULT NULL,

@@ -50,8 +50,8 @@ public class PushMessageEntity implements Serializable {
 
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_device_registration", sequenceName = "push_device_registration_sequence")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_device_registration")
+    @SequenceGenerator(name = "push_message", sequenceName = "push_message_seq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_message")
     private Long id;
 
     @Column(name = "device_registration_id", nullable = false, updatable = false)

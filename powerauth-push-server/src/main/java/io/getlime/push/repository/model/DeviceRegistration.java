@@ -37,7 +37,7 @@ public class DeviceRegistration implements Serializable {
 
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_device_registration", sequenceName = "push_device_registration_sequence")
+    @SequenceGenerator(name = "push_device_registration", sequenceName = "push_registration_seq")
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_device_registration")
     private Long id;
 

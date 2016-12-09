@@ -33,7 +33,7 @@ public class AppCredentials implements Serializable {
 
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_app_credentials", sequenceName = "push_app_credentials_sequence")
+    @SequenceGenerator(name = "push_app_credentials", sequenceName = "push_credentials_seq")
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_app_credentials")
     private Long id;
 
