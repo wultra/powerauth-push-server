@@ -24,7 +24,6 @@ package io.getlime.push.model;
 public class UpdateStatusRequest {
 
     private String activationId;
-    private String status;
 
     /**
      * Get PowerAuth 2.0 Activation ID.
@@ -42,19 +41,4 @@ public class UpdateStatusRequest {
         this.activationId = activationId;
     }
 
-    /**
-     * Get PowerAuth 2.0 Activation status (CREATED, OTP_USED, ACTIVE, BLOCKED, REMOVED).
-     * @return PowerAuth 2.0 Activation status (CREATED, OTP_USED, ACTIVE, BLOCKED, REMOVED).
-     */
-    public String getStatus() {
-        return status;
-    }
-
-    /**
-     * Set PowerAuth 2.0 Activation status (CREATED, OTP_USED, ACTIVE, BLOCKED, REMOVED).
-     * @param status PowerAuth 2.0 Activation status (CREATED, OTP_USED, ACTIVE, BLOCKED, REMOVED).
-     */
-    public void setStatus(String status) {
-        this.status = status;
-    }
 }

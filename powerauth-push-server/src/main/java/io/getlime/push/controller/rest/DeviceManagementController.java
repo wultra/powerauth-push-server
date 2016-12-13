@@ -114,12 +114,12 @@ public class DeviceManagementController {
     public @ResponseBody  StatusResponse updateActivationStatus(@RequestBody UpdateStatusRequest request) {
 
         String activationId = request.getActivationId();
-        String status = request.getStatus();
 
         List<DeviceRegistration> registrations = deviceRegistrationRepository.findByActivationId(activationId);
         if (registrations != null)  {
+            ActivationStatus status = client.getActivationStatus(activationId).getActivationStatus();
             for (DeviceRegistration registration: registrations) {
-                registration.setActive(request.getStatus().toUpperCase().equals(ActivationStatus.ACTIVE.value().toUpperCase()));
+                registration.setActive(status.equals(ActivationStatus.ACTIVE));
                 deviceRegistrationRepository.save(registration);
             }
         }

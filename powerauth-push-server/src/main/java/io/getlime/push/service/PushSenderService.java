@@ -287,7 +287,7 @@ public class PushSenderService {
         payloadBuilder.setCategoryName(push.getMessage().getCategory());
         payloadBuilder.setSoundFileName(push.getMessage().getSound());
         payloadBuilder.setContentAvailable(push.getSilent());
-        payloadBuilder.addCustomProperty("thread-id", push.getMessage().getCollapseKey());
+        //payloadBuilder.setThreadId(push.getMessage().getCollapseKey());
         Map<String, Object> extras = push.getMessage().getExtras();
         if (extras != null) {
             for (String key : extras.keySet()) {
