@@ -17,14 +17,14 @@ package io.getlime.push.controller.rest;
 
 import io.getlime.powerauth.soap.ActivationStatus;
 import io.getlime.powerauth.soap.GetActivationStatusResponse;
-import io.getlime.powerauth.soap.GetEncryptionKeyResponse;
+import io.getlime.powerauth.soap.GetPersonalizedEncryptionKeyResponse;
 import io.getlime.push.model.CreateDeviceRegistrationRequest;
 import io.getlime.push.model.RemoveDeviceRegistrationRequest;
 import io.getlime.push.model.StatusResponse;
 import io.getlime.push.model.UpdateStatusRequest;
 import io.getlime.push.repository.DeviceRegistrationRepository;
 import io.getlime.push.repository.model.DeviceRegistration;
-import io.getlime.security.soap.client.PowerAuthServiceClient;
+import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,7 +88,7 @@ public class DeviceManagementController {
                 registration.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
                 registration.setUserId(activation.getUserId());
                 if (activation.getActivationStatus().equals(ActivationStatus.ACTIVE)) {
-                    final GetEncryptionKeyResponse encryptionKeyResponse = client.generateE2EEncryptionKey(activationId);
+                    final GetPersonalizedEncryptionKeyResponse encryptionKeyResponse = client.generatePersonalizedE2EEncryptionKey(activationId, null);
                     if (encryptionKeyResponse != null) {
                         registration.setEncryptionKey(encryptionKeyResponse.getEncryptionKey());
                         registration.setEncryptionKeyIndex(encryptionKeyResponse.getEncryptionKeyIndex());
