@@ -16,10 +16,15 @@
 
 package io.getlime.push.controller.rest;
 
+import io.getlime.push.configuration.PowerAuthPushServiceConfiguration;
 import io.getlime.push.model.StatusResponse;
+import io.getlime.push.model.SystemStatusResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Date;
 
 /**
  * Class representing controller used for service and maintenance purpose.
@@ -30,14 +35,32 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value = "push/service")
 public class ServiceController {
 
+    @Autowired
+    private PowerAuthPushServiceConfiguration pushServiceConfiguration;
+
     /**
-     * Basic "hello" controller, used to check the service.
+     * Basic "hello" controller resource, used to check the service.
      * @return Basic OK response.
      */
     @RequestMapping(value = "hello")
     public @ResponseBody StatusResponse hello() {
         StatusResponse response = new StatusResponse();
         response.setStatus(StatusResponse.OK);
+        return response;
+    }
+
+    /**
+     * Controller resource with system information.
+     * @return System status info.
+     */
+    @RequestMapping(value = "status")
+    public @ResponseBody SystemStatusResponse systemStatus() {
+        SystemStatusResponse response = new SystemStatusResponse();
+        response.setStatus(StatusResponse.OK);
+        response.setApplicationName(pushServiceConfiguration.getPushServerName());
+        response.setApplicationDisplayName(pushServiceConfiguration.getPushServerDisplayName());
+        response.setApplicationEnvironment(pushServiceConfiguration.getPushServerEnvironment());
+        response.setTimestamp(new Date());
         return response;
     }
 
