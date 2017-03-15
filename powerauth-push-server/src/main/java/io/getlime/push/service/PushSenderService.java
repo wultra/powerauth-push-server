@@ -43,6 +43,8 @@ import org.springframework.web.client.AsyncRestTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -89,11 +91,20 @@ public class PushSenderService {
         // Get APNs and FCM credentials
         AppCredentials credentials = this.appCredentialsRepository.findFirstByAppId(appId);
 
+        // Is there such app?
+        if (credentials == null) {
+            throw new IllegalArgumentException("Application not found");
+        }
+
         // Prepare and connect APNs client
         final String iosTopic = credentials.getIosBundle();
-        final ApnsClient apnsClient = new ApnsClientBuilder()
-                .setClientCredentials(new ByteArrayInputStream(credentials.getIos()), credentials.getIosPassword())
-                .build();
+        final ApnsClient apnsClient = new ApnsClientBuilder().build();
+        try {
+            apnsClient.registerSigningKey(new ByteArrayInputStream(credentials.getIosPrivateKey()), credentials.getIosTeamId(), credentials.getIosKeyId(), credentials.getIosBundle());
+        } catch (InvalidKeyException | NoSuchAlgorithmException e) {
+            Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Invalid private key");
+            throw new IllegalArgumentException("Invalid private key");
+        }
         final Future<Void> connectFuture = apnsClient.connect(ApnsClient.DEVELOPMENT_APNS_HOST);
         connectFuture.await();
 
@@ -101,7 +112,7 @@ public class PushSenderService {
         final AsyncRestTemplate restTemplate = new AsyncRestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "key=" + credentials.getAndroid());
+        headers.set("Authorization", "key=" + credentials.getAndroidServerKey());
 
         // Prepare a phaser for async sending synchronization
         final Phaser phaser = new Phaser(1);

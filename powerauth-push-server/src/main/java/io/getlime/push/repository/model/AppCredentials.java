@@ -40,17 +40,20 @@ public class AppCredentials implements Serializable {
     @Column(name = "app_id", nullable = false, updatable = false)
     private Long appId;
 
-    @Column(name = "ios")
-    private byte[] ios;
+    @Column(name = "ios_private_key")
+    private byte[] iosPrivateKey;
+
+    @Column(name = "ios_team_id")
+    private String iosTeamId;
+
+    @Column(name = "ios_key_id")
+    private String iosKeyId;
 
     @Column(name = "ios_bundle")
     private String iosBundle;
 
-    @Column(name = "ios_password")
-    private String iosPassword;
-
-    @Column(name = "android")
-    private String android;
+    @Column(name = "android_server_key")
+    private String androidServerKey;
 
     @Column(name = "android_bundle")
     private String androidBundle;
@@ -79,28 +82,36 @@ public class AppCredentials implements Serializable {
         this.iosBundle = iosBundle;
     }
 
-    public byte[] getIos() {
-        return ios;
+    public byte[] getIosPrivateKey() {
+        return iosPrivateKey;
     }
 
-    public void setIos(byte[] ios) {
-        this.ios = ios;
+    public void setIosPrivateKey(byte[] iosPrivateKey) {
+        this.iosPrivateKey = iosPrivateKey;
     }
 
-    public String getIosPassword() {
-        return iosPassword;
+    public String getIosTeamId() {
+        return iosTeamId;
     }
 
-    public void setIosPassword(String iosPassword) {
-        this.iosPassword = iosPassword;
+    public void setIosTeamId(String iosTeamId) {
+        this.iosTeamId = iosTeamId;
     }
 
-    public String getAndroid() {
-        return android;
+    public String getIosKeyId() {
+        return iosKeyId;
     }
 
-    public void setAndroid(String android) {
-        this.android = android;
+    public void setIosKeyId(String iosKeyId) {
+        this.iosKeyId = iosKeyId;
+    }
+
+    public String getAndroidServerKey() {
+        return androidServerKey;
+    }
+
+    public void setAndroidServerKey(String androidServerKey) {
+        this.androidServerKey = androidServerKey;
     }
 
     public String getAndroidBundle() {

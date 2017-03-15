@@ -82,8 +82,8 @@ public class WebAdminController {
             app.setId(appCredential.getId());
             app.setAppId(appCredential.getAppId());
             app.setAppName(client.getApplicationDetail(appCredential.getAppId()).getApplicationName());
-            app.setIos(appCredential.getIos() != null);
-            app.setAndroid(appCredential.getAndroid() != null);
+            app.setIos(appCredential.getIosPrivateKey() != null);
+            app.setAndroid(appCredential.getAndroidServerKey() != null);
             appList.add(app);
         }
         model.put("applications", appList);
@@ -121,8 +121,8 @@ public class WebAdminController {
         PushServerApplication app = new PushServerApplication();
         app.setId(appCredentials.getId());
         app.setAppId(appCredentials.getAppId());
-        app.setIos(appCredentials.getIos() != null);
-        app.setAndroid(appCredentials.getAndroid() != null);
+        app.setIos(appCredentials.getIosPrivateKey() != null);
+        app.setAndroid(appCredentials.getAndroidServerKey() != null);
         app.setAppName(client.getApplicationDetail(appCredentials.getAppId()).getApplicationName());
         model.put("application", app);
         return "applicationEdit";
@@ -134,8 +134,8 @@ public class WebAdminController {
         PushServerApplication app = new PushServerApplication();
         app.setId(appCredentials.getId());
         app.setAppId(appCredentials.getAppId());
-        app.setIos(appCredentials.getIos() != null);
-        app.setAndroid(appCredentials.getAndroid() != null);
+        app.setIos(appCredentials.getIosPrivateKey() != null);
+        app.setAndroid(appCredentials.getAndroidServerKey() != null);
         app.setAppName(client.getApplicationDetail(appCredentials.getAppId()).getApplicationName());
         UploadIosCredentialsForm form = (UploadIosCredentialsForm) model.get("form");
         if (form == null) {
@@ -153,8 +153,8 @@ public class WebAdminController {
         PushServerApplication app = new PushServerApplication();
         app.setId(appCredentials.getId());
         app.setAppId(appCredentials.getAppId());
-        app.setIos(appCredentials.getIos() != null);
-        app.setAndroid(appCredentials.getAndroid() != null);
+        app.setIos(appCredentials.getIosPrivateKey() != null);
+        app.setAndroid(appCredentials.getAndroidServerKey() != null);
         app.setAppName(client.getApplicationDetail(appCredentials.getAppId()).getApplicationName());
         UploadAndroidCredentialsForm form = (UploadAndroidCredentialsForm) model.get("form");
         if (form == null) {
@@ -204,24 +204,26 @@ public class WebAdminController {
         }
         final AppCredentials appCredentials = credentialsRepository.findOne(id);
         try {
-            appCredentials.setIos(form.getCertificate().getBytes());
+            appCredentials.setIosPrivateKey(form.getPrivateKey().getBytes());
         } catch (IOException e) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
         }
-        appCredentials.setIosPassword(form.getPassword());
+        appCredentials.setIosTeamId(form.getTeamId());
+        appCredentials.setIosKeyId(form.getKeyId());
         appCredentials.setIosBundle(form.getBundle());
         credentialsRepository.save(appCredentials);
         return "redirect:/web/admin/app/" + id + "/edit";
     }
 
     @RequestMapping(value = "web/admin/app/{id}/ios/remove/do.submit", method = RequestMethod.POST)
-    public String actionRemoveIosCredentials(@Valid RemoveIosCredentialsForm form, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
+    public String actionRemoveIosCredentials(@Valid RemoveIosCredentialsForm form, @PathVariable Long id, BindingResult bindingResult) {
+        if (bindingResult.hasErrors() || (id == null || !id.equals(form.getId()))) {
             return "error";
         }
         final AppCredentials appCredentials = credentialsRepository.findOne(form.getId());
-        appCredentials.setIos(null);
-        appCredentials.setIosPassword(null);
+        appCredentials.setIosPrivateKey(null);
+        appCredentials.setIosTeamId(null);
+        appCredentials.setIosKeyId(null);
         appCredentials.setIosBundle(null);
         AppCredentials newAppCredentials = credentialsRepository.save(appCredentials);
         return "redirect:/web/admin/app/" + newAppCredentials.getId()  + "/edit";
@@ -235,7 +237,7 @@ public class WebAdminController {
             return "redirect:/web/admin/app/" + id + "/android/upload";
         }
         final AppCredentials appCredentials = credentialsRepository.findOne(id);
-        appCredentials.setAndroid(form.getToken());
+        appCredentials.setAndroidServerKey(form.getToken());
         appCredentials.setAndroidBundle(form.getBundle());
         credentialsRepository.save(appCredentials);
         return "redirect:/web/admin/app/" + id + "/edit";
@@ -244,7 +246,7 @@ public class WebAdminController {
     @RequestMapping(value = "web/admin/app/{id}/android/remove/do.submit", method = RequestMethod.POST)
     public String actionRemoveAndroidCredentials(@PathVariable Long id) {
         final AppCredentials appCredentials = credentialsRepository.findOne(id);
-        appCredentials.setAndroid(null);
+        appCredentials.setAndroidServerKey(null);
         appCredentials.setAndroidBundle(null);
         credentialsRepository.save(appCredentials);
         return "redirect:/web/admin/app/" + id + "/edit";
@@ -267,7 +269,7 @@ public class WebAdminController {
         body.setSound(form.isSound() ? "default" : null);
         push.setMessage(body);
         request.setPush(push);
-        HttpEntity<SendPushMessageRequest> requestEntity = new HttpEntity<SendPushMessageRequest>(request);
+        HttpEntity<SendPushMessageRequest> requestEntity = new HttpEntity<>(request);
         RestTemplate template = new RestTemplate();
         String baseUrl = String.format("%s://%s:%d/%s",httpRequest.getScheme(),  httpRequest.getServerName(), httpRequest.getServerPort(), httpRequest.getContextPath());
         template.exchange(baseUrl + "/push/message/send", HttpMethod.POST, requestEntity, SendMessageResponse.class);

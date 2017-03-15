@@ -40,21 +40,13 @@ public class UploadIosCredentialsForm {
     private String bundle;
 
     @NotNull
-    private MultipartFile certificate;
+    private MultipartFile privateKey;
 
-    @AssertTrue
-    public boolean isCertificateValid() {
-        try {
-            final ApnsClient apnsClient = new ApnsClientBuilder()
-                    .setClientCredentials(new ByteArrayInputStream(certificate.getBytes()), password)
-                    .build();
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
-    }
+    @NotNull
+    private String teamId;
 
-    private String password;
+    @NotNull
+    private String keyId;
 
     public String getBundle() {
         return bundle;
@@ -64,28 +56,37 @@ public class UploadIosCredentialsForm {
         this.bundle = bundle;
     }
 
-    public MultipartFile getCertificate() {
-        return certificate;
+    public MultipartFile getPrivateKey() {
+        return privateKey;
     }
 
-    public void setCertificate(MultipartFile certificate) {
-        this.certificate = certificate;
+    public void setPrivateKey(MultipartFile privateKey) {
+        this.privateKey = privateKey;
     }
 
-    public String getPassword() {
-        return password;
+    public String getTeamId() {
+        return teamId;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
 
-    @Override public String toString() {
+    public String getKeyId() {
+        return keyId;
+    }
+
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
+    }
+
+    @Override
+    public String toString() {
         return "UploadIosCredentialsForm{" +
                 "bundle='" + bundle + '\'' +
-                ", certificate=" + certificate +
-                ", password='" + password + '\'' +
+                ", privateKey=" + privateKey +
+                ", teamId='" + teamId + '\'' +
+                ", keyId='" + keyId + '\'' +
                 '}';
     }
-
 }

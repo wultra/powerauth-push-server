@@ -22,7 +22,7 @@
     <div class="panel-body">
         <form action="${pageContext.request.contextPath}/web/admin/app/${application.id}/android/upload/do.submit" method="POST">
             <div class="row padder10">
-                <div class="col-sm-12">
+                <div class="col-sm-6">
                     <c:if test="${fields.hasFieldErrors('bundle')}">
                         <div class="red">Please enter a valid Android package name (for example "io.getlime.app.MyApp").</div>
                     </c:if>
@@ -30,9 +30,7 @@
                     <br/>
                     <input type="text" name="bundle" value="${bundle}" class="form-control"/>
                 </div>
-            </div>
-            <div class="row padder10">
-                <div class="col-sm-12">
+                <div class="col-sm-6">
                     <c:if test="${fields.hasFieldErrors('token')}">
                         <div class="red">Please enter a correct FCM token value.</div>
                     </c:if>
@@ -43,7 +41,7 @@
             </div>
             <div class="row padder10">
                 <div class="col-sm-12">
-                    <input type="submit" value="Save Token" class="btn btn-success"/>
+                    <input type="submit" value="Save" class="btn btn-success"/>
                     <a class="btn btn-default" href="${pageContext.request.contextPath}/web/admin/app/${application.id}/edit">Cancel</a>
                 </div>
             </div>
