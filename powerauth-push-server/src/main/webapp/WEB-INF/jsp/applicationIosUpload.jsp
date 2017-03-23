@@ -28,14 +28,14 @@
                         <div class="red">Please enter a valid team ID.</div>
                     </c:if>
                     Team ID<br/>
-                    <input type="text" name="teamId" class="form-control" autocomplete="off"/>
+                    <input type="text" name="teamId" value="${teamId}" class="form-control" autocomplete="off"/>
                 </div>
                 <div class="col-sm-6">
                     <c:if test="${fields.hasFieldErrors('keyId')}">
                         <div class="red">Please enter a valid key ID.</div>
                     </c:if>
                     Key ID<br/>
-                    <input type="text" name="keyId" class="form-control" autocomplete="off"/>
+                    <input type="text" name="keyId" value="${keyId}" class="form-control" autocomplete="off"/>
                 </div>
                 <div class="col-sm-6">
                     <c:if test="${fields.hasFieldErrors('bundle')}">

@@ -19,9 +19,12 @@ package io.getlime.push.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.relayrides.pushy.apns.*;
+import com.relayrides.pushy.apns.proxy.ProxyHandlerFactory;
+import com.relayrides.pushy.apns.proxy.Socks5ProxyHandlerFactory;
 import com.relayrides.pushy.apns.util.ApnsPayloadBuilder;
 import com.relayrides.pushy.apns.util.SimpleApnsPushNotification;
 import com.relayrides.pushy.apns.util.TokenUtil;
+import io.getlime.push.configuration.PowerAuthPushServiceConfiguration;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushSendResult;
 import io.getlime.push.repository.AppCredentialsRepository;
@@ -30,6 +33,7 @@ import io.getlime.push.repository.PushMessageRepository;
 import io.getlime.push.repository.model.AppCredentials;
 import io.getlime.push.repository.model.DeviceRegistration;
 import io.getlime.push.repository.model.PushMessageEntity;
+import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmNotification;
 import io.getlime.push.service.fcm.FcmSendRequest;
 import io.netty.util.concurrent.Future;
@@ -41,8 +45,10 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 
+import javax.net.ssl.SSLException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -64,18 +70,75 @@ public class PushSenderService {
     private AppCredentialsRepository appCredentialsRepository;
     private DeviceRegistrationRepository deviceRegistrationRepository;
     private PushMessageRepository pushMessageRepository;
+    private PowerAuthPushServiceConfiguration pushServiceConfiguration;
 
     /**
      * Constructor that autowires required repositories.
      * @param appCredentialsRepository Repository with app credentials.
      * @param deviceRegistrationRepository Repository with device registrations.
      * @param pushMessageRepository Repository with logged push messages.
+     * @param pushServiceConfiguration Push Service Configuration
      */
     @Autowired
-    public PushSenderService(AppCredentialsRepository appCredentialsRepository, DeviceRegistrationRepository deviceRegistrationRepository, PushMessageRepository pushMessageRepository) {
+    public PushSenderService(
+            AppCredentialsRepository appCredentialsRepository,
+            DeviceRegistrationRepository deviceRegistrationRepository,
+            PushMessageRepository pushMessageRepository,
+            PowerAuthPushServiceConfiguration pushServiceConfiguration
+    ) {
         this.appCredentialsRepository = appCredentialsRepository;
         this.deviceRegistrationRepository = deviceRegistrationRepository;
         this.pushMessageRepository = pushMessageRepository;
+        this.pushServiceConfiguration = pushServiceConfiguration;
+    }
+
+    private ApnsClient prepareApnsClient(String iosTopic) throws SSLException {
+        // Prepare APNs client builder
+        final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
+
+        // Prepare proxy settings for APNs
+        if (pushServiceConfiguration.isApnsProxyEnabled()) {
+            String proxyUrl = pushServiceConfiguration.getApnsProxyUrl();
+            int proxyPort = pushServiceConfiguration.getApnsProxyPort();
+            String proxyUsername = pushServiceConfiguration.getApnsProxyUsername();
+            String proxyPassword = pushServiceConfiguration.getApnsProxyPassword();
+
+            // Null the credentials, if they are empty
+            if (proxyUsername != null && proxyUsername.isEmpty()) {
+                proxyUsername = null;
+            }
+            if (proxyPassword != null && proxyPassword.isEmpty()) {
+                proxyPassword = null;
+            }
+
+            ProxyHandlerFactory proxyHandlerFactory = new Socks5ProxyHandlerFactory(new InetSocketAddress(proxyUrl, proxyPort), proxyUsername, proxyPassword);
+            apnsClientBuilder.setProxyHandlerFactory(proxyHandlerFactory);
+        }
+
+        // Build a client and connect
+        return apnsClientBuilder.build();
+    }
+
+    private FcmClient prepareFcmClient(String serverKey) {
+        // Prepare and connect FCM client
+        FcmClient client = new FcmClient(serverKey);
+        if (pushServiceConfiguration.isFcmProxyEnabled()) {
+            String proxyUrl = pushServiceConfiguration.getFcmProxyUrl();
+            int proxyPort = pushServiceConfiguration.getFcmProxyPort();
+            String proxyUsername = pushServiceConfiguration.getFcmProxyUsername();
+            String proxyPassword = pushServiceConfiguration.getFcmProxyPassword();
+
+            // Null the credentials, if they are empty
+            if (proxyUsername != null && proxyUsername.isEmpty()) {
+                proxyUsername = null;
+            }
+            if (proxyPassword != null && proxyPassword.isEmpty()) {
+                proxyPassword = null;
+            }
+
+            client.setProxy(proxyUrl, proxyPort, proxyUsername, proxyPassword);
+        }
+        return client;
     }
 
     /**
@@ -96,23 +159,25 @@ public class PushSenderService {
             throw new IllegalArgumentException("Application not found");
         }
 
-        // Prepare and connect APNs client
+        // Prepare client for APNs
         final String iosTopic = credentials.getIosBundle();
-        final ApnsClient apnsClient = new ApnsClientBuilder().build();
+        final ApnsClient apnsClient = prepareApnsClient(iosTopic);
         try {
             apnsClient.registerSigningKey(new ByteArrayInputStream(credentials.getIosPrivateKey()), credentials.getIosTeamId(), credentials.getIosKeyId(), credentials.getIosBundle());
         } catch (InvalidKeyException | NoSuchAlgorithmException e) {
             Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Invalid private key");
             throw new IllegalArgumentException("Invalid private key");
         }
-        final Future<Void> connectFuture = apnsClient.connect(ApnsClient.DEVELOPMENT_APNS_HOST);
+        final Future<Void> connectFuture;
+        if (pushServiceConfiguration.isApnsUseDevelopment()) {
+            connectFuture = apnsClient.connect(ApnsClient.DEVELOPMENT_APNS_HOST);
+        } else {
+            connectFuture = apnsClient.connect(ApnsClient.PRODUCTION_APNS_HOST);
+        }
         connectFuture.await();
 
-        // Prepare and connect FCM client
-        final AsyncRestTemplate restTemplate = new AsyncRestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "key=" + credentials.getAndroidServerKey());
+        // Prepare client for FCM
+        final FcmClient fcmClient = prepareFcmClient(credentials.getAndroidServerKey());
 
         // Prepare a phaser for async sending synchronization
         final Phaser phaser = new Phaser(1);
@@ -211,8 +276,6 @@ public class PushSenderService {
 
                     } else if (platform.equals(DeviceRegistration.Platform.Android)) { // Android - FCM
 
-                        final String fcmSendUrl = "https://fcm.googleapis.com/fcm/send";
-
                         FcmSendRequest request = new FcmSendRequest();
                         request.setTo(registration.getPushToken());
                         request.setData(pushMessage.getMessage().getExtras());
@@ -227,8 +290,7 @@ public class PushSenderService {
                             request.setNotification(notification);
                         }
 
-                        HttpEntity<FcmSendRequest> entity = new HttpEntity<>(request, headers);
-                        final ListenableFuture<ResponseEntity<String>> future = restTemplate.exchange(fcmSendUrl, HttpMethod.POST, entity, String.class);
+                        final ListenableFuture<ResponseEntity<String>> future = fcmClient.exchange(request);
                         result.getAndroid().setTotal(result.getAndroid().getTotal() + 1);
                         future.addCallback(new ListenableFutureCallback<ResponseEntity<String>>() {
                             @Override

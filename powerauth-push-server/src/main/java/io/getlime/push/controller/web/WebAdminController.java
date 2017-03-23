@@ -140,8 +140,12 @@ public class WebAdminController {
         UploadIosCredentialsForm form = (UploadIosCredentialsForm) model.get("form");
         if (form == null) {
             model.put("bundle", appCredentials.getIosBundle());
+            model.put("keyId", appCredentials.getIosKeyId());
+            model.put("teamId", appCredentials.getIosTeamId());
         } else {
             model.put("bundle", form.getBundle());
+            model.put("keyId", form.getKeyId());
+            model.put("teamId", form.getTeamId());
         }
         model.put("application", app);
         return "applicationIosUpload";
@@ -159,6 +163,7 @@ public class WebAdminController {
         UploadAndroidCredentialsForm form = (UploadAndroidCredentialsForm) model.get("form");
         if (form == null) {
             model.put("bundle", appCredentials.getAndroidBundle());
+            model.put("token", appCredentials.getAndroidServerKey());
         } else {
             model.put("bundle", form.getBundle());
             model.put("token", form.getToken());

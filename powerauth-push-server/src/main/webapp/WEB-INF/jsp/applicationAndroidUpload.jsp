@@ -36,7 +36,7 @@
                     </c:if>
                     Firebase Cloud Messaging Token
                     <br/>
-                    <input type="text" name="token" class="form-control" value="${token}" autocomplete="off"/>
+                    <textarea name="token" rows="4" class="form-control">${token}</textarea>
                 </div>
             </div>
             <div class="row padder10">

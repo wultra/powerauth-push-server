@@ -35,6 +35,43 @@ public class PowerAuthPushServiceConfiguration {
     @Value("${powerauth.push.service.applicationEnvironment}")
     private String pushServerEnvironment;
 
+    // APNs Configuration
+
+    @Value("${powerauth.push.service.apns.useDevelopment}")
+    private boolean apnsUseDevelopment;
+
+    @Value("${powerauth.push.service.apns.proxy.enabled}")
+    private boolean apnsProxyEnabled;
+
+    @Value("${powerauth.push.service.apns.proxy.url}")
+    private String apnsProxyUrl;
+
+    @Value("${powerauth.push.service.apns.proxy.port}")
+    private int apnsProxyPort;
+
+    @Value("${powerauth.push.service.apns.proxy.username}")
+    private String apnsProxyUsername;
+
+    @Value("${powerauth.push.service.apns.proxy.password}")
+    private String apnsProxyPassword;
+
+    // FCM Configuration
+
+    @Value("${powerauth.push.service.fcm.proxy.enabled}")
+    private boolean fcmProxyEnabled;
+
+    @Value("${powerauth.push.service.fcm.proxy.url}")
+    private String fcmProxyUrl;
+
+    @Value("${powerauth.push.service.fcm.proxy.port}")
+    private int fcmProxyPort;
+
+    @Value("${powerauth.push.service.fcm.proxy.username}")
+    private String fcmProxyUsername;
+
+    @Value("${powerauth.push.service.fcm.proxy.password}")
+    private String fcmProxyPassword;
+
     /**
      * Get push server name.
      * @return Push server name.
@@ -81,5 +118,181 @@ public class PowerAuthPushServiceConfiguration {
      */
     public void setPushServerEnvironment(String pushServerEnvironment) {
         this.pushServerEnvironment = pushServerEnvironment;
+    }
+
+    /**
+     * Flag indicating if a development or production environment should be used for APNs.
+     * @return True in case APNs should use DEV environment, false for PROD.
+     */
+    public boolean isApnsUseDevelopment() {
+        return apnsUseDevelopment;
+    }
+
+    /**
+     * Set if development environment should be used, instead of production.
+     * @param apnsUseDevelopment True in case APNs should use DEV environment, false for PROD.
+     */
+    public void setApnsUseDevelopment(boolean apnsUseDevelopment) {
+        this.apnsUseDevelopment = apnsUseDevelopment;
+    }
+
+    /**
+     * Flag indicating if proxy should be used for APNs.
+     * @return True if proxy should be used for APNs, false otherwise.
+     */
+    public boolean isApnsProxyEnabled() {
+        return apnsProxyEnabled;
+    }
+
+    /**
+     * Set if proxy should be used for APNs.
+     * @param apnsProxyEnabled True if proxy should be used for APNs, false otherwise.
+     */
+    public void setApnsProxyEnabled(boolean apnsProxyEnabled) {
+        this.apnsProxyEnabled = apnsProxyEnabled;
+    }
+
+    /**
+     * Get APNs proxy URL address.
+     * @return APNs proxy URL address.
+     */
+    public String getApnsProxyUrl() {
+        return apnsProxyUrl;
+    }
+
+    /**
+     * Set APNs proxy URL address.
+     * @param apnsProxyUrl APNs proxy URL address.
+     */
+    public void setApnsProxyUrl(String apnsProxyUrl) {
+        this.apnsProxyUrl = apnsProxyUrl;
+    }
+
+    /**
+     * Get APNs proxy port.
+     * @return APNs proxy port.
+     */
+    public int getApnsProxyPort() {
+        return apnsProxyPort;
+    }
+
+    /**
+     * Set APNs proxy port.
+     * @param apnsProxyPort APNs proxy port.
+     */
+    public void setApnsProxyPort(int apnsProxyPort) {
+        this.apnsProxyPort = apnsProxyPort;
+    }
+
+    /**
+     * Get APNs proxy username.
+     * @return APNs proxy username.
+     */
+    public String getApnsProxyUsername() {
+        return apnsProxyUsername;
+    }
+
+    /**
+     * Set APNs proxy username.
+     * @param apnsProxyUsername APNs proxy username.
+     */
+    public void setApnsProxyUsername(String apnsProxyUsername) {
+        this.apnsProxyUsername = apnsProxyUsername;
+    }
+
+    /**
+     * Get APNs proxy password.
+     * @return APNs proxy password.
+     */
+    public String getApnsProxyPassword() {
+        return apnsProxyPassword;
+    }
+
+    /**
+     * Set APNs proxy password.
+     * @param apnsProxyPassword APNs proxy password.
+     */
+    public void setApnsProxyPassword(String apnsProxyPassword) {
+        this.apnsProxyPassword = apnsProxyPassword;
+    }
+
+    /**
+     * Flag indicating if proxy is enabled for FCM communication.
+     * @return True if FCM uses proxy, false otherwise.
+     */
+    public boolean isFcmProxyEnabled() {
+        return fcmProxyEnabled;
+    }
+
+    /**
+     * Set if proxy should be used for FCM communication.
+     * @param fcmProxyEnabled True if FCM uses proxy, false otherwise.
+     */
+    public void setFcmProxyEnabled(boolean fcmProxyEnabled) {
+        this.fcmProxyEnabled = fcmProxyEnabled;
+    }
+
+    /**
+     * Get FCM proxy URL.
+     * @return FCM proxy URL.
+     */
+    public String getFcmProxyUrl() {
+        return fcmProxyUrl;
+    }
+
+    /**
+     * Set FCM proxy URL.
+     * @param fcmProxyUrl FCM proxy URL.
+     */
+    public void setFcmProxyUrl(String fcmProxyUrl) {
+        this.fcmProxyUrl = fcmProxyUrl;
+    }
+
+    /**
+     * Get FCM proxy port.
+     * @return FCM proxy port.
+     */
+    public int getFcmProxyPort() {
+        return fcmProxyPort;
+    }
+
+    /**
+     * Set FCM proxy port.
+     * @param fcmProxyPort FCM proxy port.
+     */
+    public void setFcmProxyPort(int fcmProxyPort) {
+        this.fcmProxyPort = fcmProxyPort;
+    }
+
+    /**
+     * Get FCM proxy username.
+     * @return FCM proxy username.
+     */
+    public String getFcmProxyUsername() {
+        return fcmProxyUsername;
+    }
+
+    /**
+     * Set FCM proxy username.
+     * @param fcmProxyUsername
+     */
+    public void setFcmProxyUsername(String fcmProxyUsername) {
+        this.fcmProxyUsername = fcmProxyUsername;
+    }
+
+    /**
+     * Get FCM proxy password.
+     * @return FCM proxy password.
+     */
+    public String getFcmProxyPassword() {
+        return fcmProxyPassword;
+    }
+
+    /**
+     * Set FCM proxy password.
+     * @param fcmProxyPassword FCM proxy password.
+     */
+    public void setFcmProxyPassword(String fcmProxyPassword) {
+        this.fcmProxyPassword = fcmProxyPassword;
     }
 }
