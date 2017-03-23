@@ -73,7 +73,7 @@ public class FcmClient {
         }
 
         CloseableHttpClient client = clientBuilder.build();
-        
+
         HttpComponentsAsyncClientHttpRequestFactory factory = new HttpComponentsAsyncClientHttpRequestFactory();
         factory.setHttpClient(client);
 
