@@ -16,8 +16,6 @@
 
 package io.getlime.push.repository.model;
 
-import org.joda.time.DateTime;
-
 import javax.persistence.*;
 import java.io.Serializable;
 

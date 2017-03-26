@@ -44,7 +44,7 @@ import java.util.List;
 @Controller
 @RequestMapping(value = "push/device")
 public class DeviceManagementController {
-
+    
     private DeviceRegistrationRepository deviceRegistrationRepository;
     private PowerAuthServiceClient client;
 
