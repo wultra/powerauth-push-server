@@ -24,6 +24,8 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -60,7 +62,7 @@ public class FcmClient {
      */
     public void setProxy(String host, int port, String username, String password) {
 
-        HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        HttpAsyncClientBuilder clientBuilder = HttpAsyncClientBuilder.create();
         clientBuilder.useSystemProperties();
         clientBuilder.setProxy(new HttpHost(host, port));
 
@@ -72,10 +74,10 @@ public class FcmClient {
             clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
         }
 
-        CloseableHttpClient client = clientBuilder.build();
+        CloseableHttpAsyncClient client = clientBuilder.build();
 
         HttpComponentsAsyncClientHttpRequestFactory factory = new HttpComponentsAsyncClientHttpRequestFactory();
-        factory.setHttpClient(client);
+        factory.setHttpAsyncClient(client);
 
         restTemplate.setAsyncRequestFactory(factory);
     }

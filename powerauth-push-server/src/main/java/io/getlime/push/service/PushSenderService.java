@@ -19,8 +19,8 @@ package io.getlime.push.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.relayrides.pushy.apns.*;
+import com.relayrides.pushy.apns.proxy.HttpProxyHandlerFactory;
 import com.relayrides.pushy.apns.proxy.ProxyHandlerFactory;
-import com.relayrides.pushy.apns.proxy.Socks5ProxyHandlerFactory;
 import com.relayrides.pushy.apns.util.ApnsPayloadBuilder;
 import com.relayrides.pushy.apns.util.SimpleApnsPushNotification;
 import com.relayrides.pushy.apns.util.TokenUtil;
@@ -43,7 +43,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.web.client.AsyncRestTemplate;
 
 import javax.net.ssl.SSLException;
 import java.io.ByteArrayInputStream;
@@ -92,7 +91,7 @@ public class PushSenderService {
         this.pushServiceConfiguration = pushServiceConfiguration;
     }
 
-    private ApnsClient prepareApnsClient(String iosTopic) throws SSLException {
+    private ApnsClient prepareApnsClient() throws SSLException {
         // Prepare APNs client builder
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
 
@@ -111,7 +110,7 @@ public class PushSenderService {
                 proxyPassword = null;
             }
 
-            ProxyHandlerFactory proxyHandlerFactory = new Socks5ProxyHandlerFactory(new InetSocketAddress(proxyUrl, proxyPort), proxyUsername, proxyPassword);
+            ProxyHandlerFactory proxyHandlerFactory = new HttpProxyHandlerFactory(new InetSocketAddress(proxyUrl, proxyPort), proxyUsername, proxyPassword);
             apnsClientBuilder.setProxyHandlerFactory(proxyHandlerFactory);
         }
 
@@ -161,9 +160,9 @@ public class PushSenderService {
 
         // Prepare client for APNs
         final String iosTopic = credentials.getIosBundle();
-        final ApnsClient apnsClient = prepareApnsClient(iosTopic);
+        final ApnsClient apnsClient = prepareApnsClient();
         try {
-            apnsClient.registerSigningKey(new ByteArrayInputStream(credentials.getIosPrivateKey()), credentials.getIosTeamId(), credentials.getIosKeyId(), credentials.getIosBundle());
+            apnsClient.registerSigningKey(new ByteArrayInputStream(credentials.getIosPrivateKey()), credentials.getIosTeamId(), credentials.getIosKeyId(), iosTopic);
         } catch (InvalidKeyException | NoSuchAlgorithmException e) {
             Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Invalid private key");
             throw new IllegalArgumentException("Invalid private key");
