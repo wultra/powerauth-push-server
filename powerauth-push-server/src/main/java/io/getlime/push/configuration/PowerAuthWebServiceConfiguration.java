@@ -25,17 +25,22 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.security.wss4j.Wss4jSecurityInterceptor;
 
+import javax.net.ssl.*;
+
 /**
  * Default PowerAuth Service configuration.
  *
  * @author Petr Dvorak
  */
 @Configuration
-@ComponentScan(basePackages = {"io.getlime.rest"})
+@ComponentScan(basePackages = {"io.getlime.security"})
 public class PowerAuthWebServiceConfiguration {
 
     @Value("${powerauth.service.url}")
     private String powerAuthServiceUrl;
+
+    @Value("${powerauth.service.ssl.acceptInvalidSslCertificate}")
+    private boolean acceptInvalidSslCertificate;
 
     @Value("${powerauth.service.security.clientToken}")
     private String clientToken;
@@ -84,6 +89,42 @@ public class PowerAuthWebServiceConfiguration {
         client.setDefaultUri(powerAuthServiceUrl);
         client.setMarshaller(marshaller);
         client.setUnmarshaller(marshaller);
+
+        // if invalid SSL certificates should be accepted
+        if (acceptInvalidSslCertificate) {
+
+            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            });
+
+            TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+
+                public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                }
+
+                public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                }
+
+            }};
+
+            try {
+                SSLContext sc = SSLContext.getInstance("SSL");
+                sc.init(null, trustAllCerts, new java.security.SecureRandom());
+                HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            } catch (Exception e) {
+                // ... ignore
+            }
+
+        }
+
+
         // if there is a configuration with security credentials, add interceptor
         if (!clientToken.isEmpty()) {
             ClientInterceptor[] interceptors = new ClientInterceptor[]{
