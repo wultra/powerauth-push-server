@@ -8,13 +8,13 @@
 
 	<groupId>io.getlime.security</groupId>
 	<artifactId>powerauth-push-server-parent</artifactId>
-	<version>0.15.0</version>
+	<version>0.16.0</version>
 	<packaging>pom</packaging>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.5.2.RELEASE</version>
+		<version>1.5.3.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
