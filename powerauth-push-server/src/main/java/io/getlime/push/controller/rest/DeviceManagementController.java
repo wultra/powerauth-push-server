@@ -83,7 +83,7 @@ public class DeviceManagementController {
 
         if (activationId != null) {
             final GetActivationStatusResponse activation = client.getActivationStatus(activationId);
-            if (activation != null && ActivationStatus.REMOVED.equals(activation.getActivationStatus())) {
+            if (activation != null && !ActivationStatus.REMOVED.equals(activation.getActivationStatus())) {
                 registration.setActivationId(activationId);
                 registration.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
                 registration.setUserId(activation.getUserId());
