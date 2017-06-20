@@ -18,12 +18,13 @@ package io.getlime.push.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.relayrides.pushy.apns.*;
-import com.relayrides.pushy.apns.proxy.HttpProxyHandlerFactory;
-import com.relayrides.pushy.apns.proxy.ProxyHandlerFactory;
-import com.relayrides.pushy.apns.util.ApnsPayloadBuilder;
-import com.relayrides.pushy.apns.util.SimpleApnsPushNotification;
-import com.relayrides.pushy.apns.util.TokenUtil;
+import com.turo.pushy.apns.*;
+import com.turo.pushy.apns.auth.ApnsSigningKey;
+import com.turo.pushy.apns.proxy.HttpProxyHandlerFactory;
+import com.turo.pushy.apns.proxy.ProxyHandlerFactory;
+import com.turo.pushy.apns.util.ApnsPayloadBuilder;
+import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import com.turo.pushy.apns.util.TokenUtil;
 import io.getlime.push.configuration.PowerAuthPushServiceConfiguration;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushSendResult;
@@ -91,7 +92,7 @@ public class PushSenderService {
         this.pushServiceConfiguration = pushServiceConfiguration;
     }
 
-    private ApnsClient prepareApnsClient() throws SSLException {
+    private ApnsClientBuilder prepareApnsClient() throws SSLException {
         // Prepare APNs client builder
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
 
@@ -115,7 +116,7 @@ public class PushSenderService {
         }
 
         // Build a client and connect
-        return apnsClientBuilder.build();
+        return apnsClientBuilder;
     }
 
     private FcmClient prepareFcmClient(String serverKey) {
@@ -160,13 +161,15 @@ public class PushSenderService {
 
         // Prepare client for APNs
         final String iosTopic = credentials.getIosBundle();
-        final ApnsClient apnsClient = prepareApnsClient();
+        final ApnsClientBuilder apnsClientBuilder = prepareApnsClient();
         try {
-            apnsClient.registerSigningKey(new ByteArrayInputStream(credentials.getIosPrivateKey()), credentials.getIosTeamId(), credentials.getIosKeyId(), iosTopic);
+            ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(credentials.getIosPrivateKey()), credentials.getIosTeamId(), credentials.getIosKeyId());
+            apnsClientBuilder.setSigningKey(key);
         } catch (InvalidKeyException | NoSuchAlgorithmException e) {
             Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Invalid private key");
             throw new IllegalArgumentException("Invalid private key");
         }
+        final ApnsClient apnsClient = apnsClientBuilder.build();
         final Future<Void> connectFuture;
         if (pushServiceConfiguration.isApnsUseDevelopment()) {
             connectFuture = apnsClient.connect(ApnsClient.DEVELOPMENT_APNS_HOST);

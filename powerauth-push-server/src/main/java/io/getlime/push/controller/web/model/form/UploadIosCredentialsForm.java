@@ -16,16 +16,11 @@
 
 package io.getlime.push.controller.web.model.form;
 
-import com.relayrides.pushy.apns.ApnsClient;
-import com.relayrides.pushy.apns.ApnsClientBuilder;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 /**
  * Form sent when uploading iOS / APNs credentials for the application.
