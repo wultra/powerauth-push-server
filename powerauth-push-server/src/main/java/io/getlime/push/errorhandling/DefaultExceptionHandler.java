@@ -15,7 +15,8 @@
  */
 package io.getlime.push.errorhandling;
 
-import io.getlime.push.model.ErrorResponse;
+import io.getlime.core.rest.model.base.entity.Error;
+import io.getlime.core.rest.model.base.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,12 +34,29 @@ import java.util.logging.Logger;
 @ControllerAdvice(basePackages = { "io.getlime.push.controller.rest" })
 public class DefaultExceptionHandler {
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
-    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  // 500
+    @ExceptionHandler(Throwable.class)
     @ResponseBody
     public ErrorResponse handleConflict(Exception e) {
-        ErrorResponse response = new ErrorResponse();
-        response.setMessage(e.getMessage());
+        ErrorResponse response = new ErrorResponse(new Error(Error.Code.ERROR_GENERIC, e.getMessage()));
+        Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, null, e);
+        return response;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
+    @ExceptionHandler(UnableToSendPushException.class)
+    @ResponseBody
+    public ErrorResponse handlePushException(Exception e) {
+        ErrorResponse response = new ErrorResponse(new Error(Error.Code.ERROR_GENERIC, e.getMessage()));
+        Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, null, e);
+        return response;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
+    @ExceptionHandler(UnableToRegisterDeviceException.class)
+    @ResponseBody
+    public ErrorResponse handleDeviceRegistrationFailureException(Exception e) {
+        ErrorResponse response = new ErrorResponse(new Error(Error.Code.ERROR_GENERIC, e.getMessage()));
         Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, null, e);
         return response;
     }

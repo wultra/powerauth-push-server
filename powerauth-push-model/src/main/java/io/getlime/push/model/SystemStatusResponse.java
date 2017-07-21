@@ -23,7 +23,7 @@ import java.util.Date;
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class SystemStatusResponse extends StatusResponse {
+public class SystemStatusResponse {
 
     private String applicationName;
     private String applicationDisplayName;

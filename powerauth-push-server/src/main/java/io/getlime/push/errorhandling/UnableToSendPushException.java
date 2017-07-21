@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2017 Lime - HighTech Solutions s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.model;
 
-import io.getlime.push.model.entity.PushSendResult;
+package io.getlime.push.errorhandling;
 
 /**
- * Class representing a push message sending response.
- *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class SendMessageResponse extends StatusResponse {
+public class UnableToSendPushException extends Exception {
 
-    private PushSendResult result;
-
-    public PushSendResult getResult() {
-        return result;
+    public UnableToSendPushException() {
+        super("Unable to send push message.");
     }
 
-    public void setResult(PushSendResult result) {
-        this.result = result;
+    public UnableToSendPushException(String message) {
+        super(message);
     }
-
 }

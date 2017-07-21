@@ -16,17 +16,20 @@
 
 package io.getlime.push.controller.web;
 
+import io.getlime.core.rest.model.base.request.ObjectRequest;
+import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.powerauth.soap.GetApplicationListResponse;
 import io.getlime.push.controller.web.model.form.*;
 import io.getlime.push.controller.web.model.view.PushServerApplication;
-import io.getlime.push.model.SendMessageResponse;
 import io.getlime.push.model.SendPushMessageRequest;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
+import io.getlime.push.model.entity.PushSendResult;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentials;
 import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
@@ -274,10 +277,10 @@ public class WebAdminController {
         body.setSound(form.isSound() ? "default" : null);
         push.setMessage(body);
         request.setPush(push);
-        HttpEntity<SendPushMessageRequest> requestEntity = new HttpEntity<>(request);
+        HttpEntity<ObjectRequest<SendPushMessageRequest>> requestEntity = new HttpEntity<>(new ObjectRequest<>(request));
         RestTemplate template = new RestTemplate();
         String baseUrl = String.format("%s://%s:%d/%s",httpRequest.getScheme(),  httpRequest.getServerName(), httpRequest.getServerPort(), httpRequest.getContextPath());
-        template.exchange(baseUrl + "/push/message/send", HttpMethod.POST, requestEntity, SendMessageResponse.class);
+        template.exchange(baseUrl + "/push/message/send", HttpMethod.POST, requestEntity, new ParameterizedTypeReference<ObjectResponse<PushSendResult>>() {});
         return "redirect:/web/admin/message/create";
     }
 

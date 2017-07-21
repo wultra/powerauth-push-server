@@ -18,13 +18,20 @@ package io.getlime.push.client;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import io.getlime.core.rest.model.base.entity.Error;
+import io.getlime.core.rest.model.base.request.ObjectRequest;
+import io.getlime.core.rest.model.base.response.ErrorResponse;;
+import io.getlime.core.rest.model.base.response.ObjectResponse;
+import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.model.*;
 import io.getlime.push.model.entity.PushMessage;
+import io.getlime.push.model.entity.PushSendResult;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,12 +43,16 @@ import java.util.List;
  */
 public class PushServerClient {
 
+    private com.fasterxml.jackson.databind.ObjectMapper jacksonObjectMapper = null;
+
     /**
      * Default constructor.
      */
     public PushServerClient() {
+
+        jacksonObjectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
         Unirest.setObjectMapper(new ObjectMapper() {
-            private com.fasterxml.jackson.databind.ObjectMapper jacksonObjectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
 
             public <T> T readValue(String value, Class<T> valueType) {
                 try {
@@ -88,7 +99,7 @@ public class PushServerClient {
      * @param platform Mobile platform (iOS, Android).
      * @return True if device registration was successful, false otherwise.
      */
-    public boolean registerDevice(Long appId, String token, MobilePlatform platform) {
+    public boolean registerDevice(Long appId, String token, MobilePlatform platform) throws PushServerClientException {
         return registerDevice(appId, token, platform, null);
     }
 
@@ -100,14 +111,15 @@ public class PushServerClient {
      * @param activationId PowerAuth 2.0 activation ID.
      * @return True if device registration was successful, false otherwise.
      */
-    public boolean registerDevice(Long appId, String token, MobilePlatform platform, String activationId) {
+    public boolean registerDevice(Long appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
         CreateDeviceRegistrationRequest request = new CreateDeviceRegistrationRequest();
         request.setAppId(appId);
         request.setToken(token);
         request.setPlatform(platform.value());
         request.setActivationId(activationId);
-        StatusResponse response = sendObjectImpl("/push/device/create", request);
-        return response.getStatus().equals(StatusResponse.OK);
+        TypeReference<ObjectResponse> typeReference = new TypeReference<ObjectResponse>() {};
+        ObjectResponse<?> response = sendObjectImpl("/push/device/create", new ObjectRequest<>(request), typeReference);
+        return response.getStatus().equals(Response.Status.OK);
     }
 
     /**
@@ -116,11 +128,12 @@ public class PushServerClient {
      * @param pushMessage Push message to be sent.
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
      */
-    public StatusResponse sendNotification(Long appId, PushMessage pushMessage) {
+    public ObjectResponse<PushSendResult> sendNotification(Long appId, PushMessage pushMessage) throws PushServerClientException {
         SendPushMessageRequest request = new SendPushMessageRequest();
         request.setAppId(appId);
         request.setPush(pushMessage);
-        return sendObjectImpl("/push/message/send", request);
+        TypeReference<ObjectResponse<PushSendResult>> typeReference = new TypeReference<ObjectResponse<PushSendResult>>() {};
+        return sendObjectImpl("/push/message/send", new ObjectRequest<>(request), typeReference);
     }
 
     /**
@@ -129,44 +142,37 @@ public class PushServerClient {
      * @param batch Push message batch to be sent.
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
      */
-    public StatusResponse sendNotificationBatch(Long appId, List<PushMessage> batch) {
+    public ObjectResponse<PushSendResult> sendNotificationBatch(Long appId, List<PushMessage> batch) throws PushServerClientException {
         SendBatchMessageRequest request = new SendBatchMessageRequest();
         request.setAppId(appId);
         request.setBatch(batch);
-        return sendObjectImpl("/push/message/batch/send", request);
+        TypeReference<ObjectResponse<PushSendResult>> typeReference = new TypeReference<ObjectResponse<PushSendResult>>() {};
+        return sendObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), typeReference);
     }
 
-    private StatusResponse sendObjectImpl(String url, Object request) {
+    private <T> ObjectResponse<T> sendObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
         try {
             // Fetch post response from given URL and for provided request object
-            HttpResponse<SendMessageResponse> response = Unirest.post(serviceBaseUrl + url)
+            HttpResponse response = Unirest.post(serviceBaseUrl + url)
                     .header("accept", "application/json")
                     .header("Content-Type", "application/json")
                     .body(request)
-                    .asObject(SendMessageResponse.class);
+                    .asString();
             if (response.getStatus() == 200) {
-                return response.getBody();
+                return this.jacksonObjectMapper.readValue(response.getRawBody(), typeReference);
             } else {
                 com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
                 ErrorResponse errResp = mapper.readValue(response.getRawBody(), ErrorResponse.class);
-                return errResp;
+                throw new PushServerClientException(response.getStatusText(), errResp.getResponseObject());
             }
         } catch (UnirestException e) {
-            ErrorResponse errResp = new ErrorResponse();
-            errResp.setMessage("Network communication has failed.");
-            return errResp;
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
         } catch (JsonParseException e) {
-            ErrorResponse errResp = new ErrorResponse();
-            errResp.setMessage("JSON parsing has failed.");
-            return errResp;
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
         } catch (JsonMappingException e) {
-            ErrorResponse errResp = new ErrorResponse();
-            errResp.setMessage("JSON mapping has failed.");
-            return errResp;
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
         } catch (IOException e) {
-            ErrorResponse errResp = new ErrorResponse();
-            errResp.setMessage("Unknown IO error.");
-            return errResp;
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
         }
     }
 

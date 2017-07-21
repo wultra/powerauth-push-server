@@ -16,8 +16,9 @@
 
 package io.getlime.push.controller.rest;
 
+import io.getlime.core.rest.model.base.response.ObjectResponse;
+import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.configuration.PowerAuthPushServiceConfiguration;
-import io.getlime.push.model.StatusResponse;
 import io.getlime.push.model.SystemStatusResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -43,10 +44,8 @@ public class ServiceController {
      * @return Basic OK response.
      */
     @RequestMapping(value = "hello")
-    public @ResponseBody StatusResponse hello() {
-        StatusResponse response = new StatusResponse();
-        response.setStatus(StatusResponse.OK);
-        return response;
+    public @ResponseBody Response hello() {
+        return new Response();
     }
 
     /**
@@ -54,14 +53,13 @@ public class ServiceController {
      * @return System status info.
      */
     @RequestMapping(value = "status")
-    public @ResponseBody SystemStatusResponse systemStatus() {
+    public @ResponseBody ObjectResponse<SystemStatusResponse> systemStatus() {
         SystemStatusResponse response = new SystemStatusResponse();
-        response.setStatus(StatusResponse.OK);
         response.setApplicationName(pushServiceConfiguration.getPushServerName());
         response.setApplicationDisplayName(pushServiceConfiguration.getPushServerDisplayName());
         response.setApplicationEnvironment(pushServiceConfiguration.getPushServerEnvironment());
         response.setTimestamp(new Date());
-        return response;
+        return new ObjectResponse<>(response);
     }
 
 }

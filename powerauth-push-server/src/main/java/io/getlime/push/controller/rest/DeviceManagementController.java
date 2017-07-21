@@ -15,12 +15,15 @@
  */
 package io.getlime.push.controller.rest;
 
+import io.getlime.core.rest.model.base.request.ObjectRequest;
+import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.powerauth.soap.ActivationStatus;
 import io.getlime.powerauth.soap.GetActivationStatusResponse;
 import io.getlime.powerauth.soap.GetPersonalizedEncryptionKeyResponse;
+import io.getlime.push.errorhandling.UnableToRegisterDeviceException;
+import io.getlime.push.errorhandling.UnableToSendPushException;
 import io.getlime.push.model.CreateDeviceRegistrationRequest;
 import io.getlime.push.model.RemoveDeviceRegistrationRequest;
-import io.getlime.push.model.StatusResponse;
 import io.getlime.push.model.UpdateStatusRequest;
 import io.getlime.push.repository.DeviceRegistrationRepository;
 import io.getlime.push.repository.model.DeviceRegistration;
@@ -65,12 +68,16 @@ public class DeviceManagementController {
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
     @Transactional
-    public @ResponseBody StatusResponse createDevice(@RequestBody CreateDeviceRegistrationRequest request) {
+    public @ResponseBody Response createDevice(@RequestBody ObjectRequest<CreateDeviceRegistrationRequest> request) throws UnableToRegisterDeviceException {
 
-        Long appId = request.getAppId();
-        String pushToken = request.getToken();
-        String platform = request.getPlatform();
-        String activationId = request.getActivationId();
+        if (request.getRequestObject() == null) {
+            throw new UnableToRegisterDeviceException("Invalid or empty input data");
+        }
+
+        Long appId = request.getRequestObject().getAppId();
+        String pushToken = request.getRequestObject().getToken();
+        String platform = request.getRequestObject().getPlatform();
+        String activationId = request.getRequestObject().getActivationId();
 
         DeviceRegistration registration = deviceRegistrationRepository.findFirstByAppIdAndPushToken(appId, pushToken);
         if (registration == null) {
@@ -99,9 +106,7 @@ public class DeviceManagementController {
 
         deviceRegistrationRepository.save(registration);
 
-        StatusResponse response = new StatusResponse();
-        response.setStatus(StatusResponse.OK);
-        return response;
+        return new Response();
     }
 
     /**
@@ -111,9 +116,13 @@ public class DeviceManagementController {
      */
     @RequestMapping(value = "status/update", method = RequestMethod.POST)
     @Transactional
-    public @ResponseBody  StatusResponse updateActivationStatus(@RequestBody UpdateStatusRequest request) {
+    public @ResponseBody Response updateActivationStatus(@RequestBody ObjectRequest<UpdateStatusRequest> request) throws UnableToRegisterDeviceException {
 
-        String activationId = request.getActivationId();
+        if (request.getRequestObject() == null) {
+            throw new UnableToRegisterDeviceException("Invalid or empty input data");
+        }
+
+        String activationId = request.getRequestObject().getActivationId();
 
         List<DeviceRegistration> registrations = deviceRegistrationRepository.findByActivationId(activationId);
         if (registrations != null)  {
@@ -124,9 +133,7 @@ public class DeviceManagementController {
             }
         }
 
-        StatusResponse response = new StatusResponse();
-        response.setStatus(StatusResponse.OK);
-        return response;
+        return new Response();
     }
 
     /**
@@ -136,19 +143,21 @@ public class DeviceManagementController {
      */
     @RequestMapping(value = "remove", method = RequestMethod.POST)
     @Transactional
-    public @ResponseBody StatusResponse deleteActivationStatus(@RequestBody RemoveDeviceRegistrationRequest request) {
+    public @ResponseBody Response deleteActivationStatus(@RequestBody ObjectRequest<RemoveDeviceRegistrationRequest> request) throws UnableToRegisterDeviceException {
 
-        Long appId = request.getAppId();
-        String pushToken = request.getToken();
+        if (request.getRequestObject() == null) {
+            throw new UnableToRegisterDeviceException("Invalid or empty input data");
+        }
+
+        Long appId = request.getRequestObject().getAppId();
+        String pushToken = request.getRequestObject().getToken();
 
         DeviceRegistration registration = deviceRegistrationRepository.findFirstByAppIdAndPushToken(appId, pushToken);
         if (registration != null)  {
             deviceRegistrationRepository.delete(registration);
         }
 
-        StatusResponse response = new StatusResponse();
-        response.setStatus(StatusResponse.OK);
-        return response;
+        return new Response();
     }
 
 }
