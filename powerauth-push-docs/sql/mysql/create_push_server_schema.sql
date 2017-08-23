@@ -42,3 +42,31 @@ CREATE TABLE `push_message` (
   PRIMARY KEY (`id`),
   KEY `USER_ID_INDEX` (`user_id`,`activation_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE push_campaign (
+  `id` INT NOT NULL,
+  `app_id` INT NOT NULL,
+  `message` TEXT NULL,
+  `sent` INT(1) NULL,
+  `timestamp_created` TIMESTAMP NULL,
+  `timestamp_sent` TIMESTAMP NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC));
+
+CREATE TABLE push_campaign_users (
+  `id` INT NOT NULL,
+  `campagin_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `timestamp_added` TIMESTAMP NULL ,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id` ASC));
+
+CREATE TABLE push_campaign_devices (
+  `id` INT NOT NULL,
+  `campaign_id` INT NULL,
+  `platform` VARCHAR(20) NULL,
+  `token` VARCHAR(255) NULL,
+  `status` INT NULL,
+  `timestamp_sent` TIMESTAMP NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC));
