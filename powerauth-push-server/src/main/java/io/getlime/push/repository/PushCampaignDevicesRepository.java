@@ -16,7 +16,7 @@
 
 package io.getlime.push.repository;
 
-import io.getlime.push.repository.model.PushCampaignDevices;
+import io.getlime.push.repository.model.PushCampaignDevice;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -27,5 +27,5 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public interface PushCampaignDevicesRepository extends CrudRepository<PushCampaignDevices, Long> {
+public interface PushCampaignDevicesRepository extends CrudRepository<PushCampaignDevice, Long> {
 }

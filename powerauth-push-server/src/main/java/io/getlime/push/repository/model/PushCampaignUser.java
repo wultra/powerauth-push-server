@@ -25,7 +25,7 @@ import java.util.Date;
  */
 
 @Entity
-public class PushCampaignUsers {
+public class PushCampaignUser {
 
     @Id
     @Column(name = "id")
