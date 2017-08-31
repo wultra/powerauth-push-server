@@ -24,7 +24,7 @@ import java.util.Date;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 
-@Entity
+@Entity(name = "push_campaign_users")
 public class PushCampaignUser {
 
     @Id
@@ -37,7 +37,7 @@ public class PushCampaignUser {
     private Long campaignId;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private String userId;
 
     @Column(name = "timestamp_added", nullable = false)
     private Date timestampAdded;
@@ -58,11 +58,11 @@ public class PushCampaignUser {
         this.campaignId = campaignId;
     }
 
-    public Long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 

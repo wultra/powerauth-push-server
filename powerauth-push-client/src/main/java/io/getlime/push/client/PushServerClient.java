@@ -29,9 +29,11 @@ import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ErrorResponse;;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
-import io.getlime.push.model.*;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushSendResult;
+import io.getlime.push.model.request.CreateDeviceRegistrationRequest;
+import io.getlime.push.model.request.SendBatchMessageRequest;
+import io.getlime.push.model.request.SendPushMessageRequest;
 
 import java.io.IOException;
 import java.util.List;

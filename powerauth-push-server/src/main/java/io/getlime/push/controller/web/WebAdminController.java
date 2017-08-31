@@ -21,7 +21,7 @@ import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.powerauth.soap.GetApplicationListResponse;
 import io.getlime.push.controller.web.model.form.*;
 import io.getlime.push.controller.web.model.view.PushServerApplication;
-import io.getlime.push.model.SendPushMessageRequest;
+import io.getlime.push.model.request.SendPushMessageRequest;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.entity.PushSendResult;

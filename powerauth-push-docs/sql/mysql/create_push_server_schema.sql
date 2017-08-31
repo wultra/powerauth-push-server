@@ -51,15 +51,17 @@ CREATE TABLE push_campaign (
   `timestamp_created` TIMESTAMP NULL,
   `timestamp_sent` TIMESTAMP NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC));
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC))
+  ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE push_campaign_users (
   `id` INT NOT NULL,
-  `campagin_id` INT NOT NULL,
-  `user_id` INT NOT NULL,
+  `campaign_id` INT NOT NULL,
+  `user_id` VARCHAR(255) NOT NULL,
   `timestamp_added` TIMESTAMP NULL ,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id` ASC));
+  UNIQUE KEY `id_UNIQUE` (`id` ASC))
+  ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE push_campaign_devices (
   `id` INT NOT NULL,
@@ -69,4 +71,5 @@ CREATE TABLE push_campaign_devices (
   `status` INT NULL,
   `timestamp_sent` TIMESTAMP NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC));
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC))
+  ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

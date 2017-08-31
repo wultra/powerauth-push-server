@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.model;
+
+package io.getlime.push.model.request;
+
+import io.getlime.push.model.entity.PushMessage;
 
 /**
- * Class representing request object responsible for device registration removal.
+ * Class representing a single push message send request.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class RemoveDeviceRegistrationRequest {
+public class SendPushMessageRequest {
 
     private Long appId;
-    private String token;
+    private PushMessage push;
 
     /**
      * Get app ID.
@@ -42,18 +45,18 @@ public class RemoveDeviceRegistrationRequest {
     }
 
     /**
-     * Get push token value.
-     * @return Push token.
+     * Get push message to be sent.
+     * @return Push message.
      */
-    public String getToken() {
-        return token;
+    public PushMessage getPush() {
+        return push;
     }
 
     /**
-     * Set push token value.
-     * @param token Push token.
+     * Set push message to be sent.
+     * @param push Push message.
      */
-    public void setToken(String token) {
-        this.token = token;
+    public void setPush(PushMessage push) {
+        this.push = push;
     }
 }

@@ -17,6 +17,7 @@ package io.getlime.push.errorhandling;
 
 import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.core.rest.model.base.response.ErrorResponse;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -61,4 +62,12 @@ public class DefaultExceptionHandler {
         return response;
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)  // 404
+    @ExceptionHandler(EmptyResultDataAccessException.class)
+    @ResponseBody
+    public ErrorResponse handleDatabaseNotFound(Exception e) {
+        ErrorResponse response = new ErrorResponse(new Error(DatabaseError.Code.ERROR_DATABASE, e.getMessage()));
+        Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, null, e);
+        return response;
+    }
 }

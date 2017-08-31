@@ -19,7 +19,7 @@ package io.getlime.push.controller.rest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.configuration.PowerAuthPushServiceConfiguration;
-import io.getlime.push.model.SystemStatusResponse;
+import io.getlime.push.model.response.SystemStatusResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -13,51 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.model;
 
-import io.getlime.push.model.entity.PushMessage;
+package io.getlime.push.model.request;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.getlime.push.model.entity.PushMessageBody;
 
 /**
- * Class representing a request for batch of push messages.
+ * Request object used for creating a campaign.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-public class SendBatchMessageRequest {
+
+
+public class CreateCampaignRequest {
 
     private Long appId;
-    private List<PushMessage> batch;
+    private PushMessageBody message;
 
-    /**
-     * Get app ID.
-     * @return App ID.
-     */
     public Long getAppId() {
         return appId;
     }
 
-    /**
-     * Set app ID.
-     * @param appId App ID.
-     */
     public void setAppId(Long appId) {
         this.appId = appId;
     }
 
-    /**
-     * Get batch list with push notifications to be sent.
-     * @param batch Push notification batch.
-     */
-    public void setBatch(List<PushMessage> batch) {
-        this.batch = batch;
+    public PushMessageBody getMessage() {
+        return message;
     }
 
-    /**
-     * Set batch list with push notifications to be sent.
-     * @return Push notification batch.
-     */
-    public List<PushMessage> getBatch() {
-        return batch;
+    public void setMessage(PushMessageBody message) {
+        this.message = message;
     }
 }

@@ -14,31 +14,14 @@
  * limitations under the License.
  */
 
-package io.getlime.push.model;
+package io.getlime.push.model.response;
+
+import java.util.ArrayList;
 
 /**
- * Class representing request object responsible for updating activation status.
+ * Response with the list of campaigns.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-public class UpdateStatusRequest {
-
-    private String activationId;
-
-    /**
-     * Get PowerAuth 2.0 Activation ID.
-     * @return Activation ID.
-     */
-    public String getActivationId() {
-        return activationId;
-    }
-
-    /**
-     * Set PowerAuth 2.0 Activation ID.
-     * @param activationId Activation ID.
-     */
-    public void setActivationId(String activationId) {
-        this.activationId = activationId;
-    }
-
+public class ListOfCampaignResponse extends ArrayList<CampaignResponse> {
 }

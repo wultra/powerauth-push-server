@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.model;
+package io.getlime.push.model.request;
 
 /**
  * Request object used for device registration.
