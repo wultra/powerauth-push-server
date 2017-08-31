@@ -17,11 +17,11 @@ package io.getlime.push.controller.rest;
 
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
-import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.UnableToSendPushException;
-import io.getlime.push.model.*;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushSendResult;
+import io.getlime.push.model.request.SendBatchMessageRequest;
+import io.getlime.push.model.request.SendPushMessageRequest;
 import io.getlime.push.service.PushSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

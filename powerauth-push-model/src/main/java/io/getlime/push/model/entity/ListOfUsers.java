@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-package io.getlime.push.repository;
+package io.getlime.push.model.entity;
 
-import io.getlime.push.repository.model.PushCampaign;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
-
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Repository interface used to access push campaign database.
+ * Request used for adding collection of users to campaign
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-@Repository
-public interface PushCampaignRepository extends CrudRepository<PushCampaign, Long>{
 
-    /**
-     * Finds all push campaigns that are in given send state.
-     * @param sent Flag indicating if only sent campaigns should be returned, or only not sent campaigns.
-     * @return Collection of campaigns in given sent state.
-     */
-    List<PushCampaign> findAllBySent(Boolean sent);
+public class ListOfUsers extends ArrayList<String> {
 
 }

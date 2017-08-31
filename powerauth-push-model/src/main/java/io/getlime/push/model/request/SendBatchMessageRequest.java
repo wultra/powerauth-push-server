@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package io.getlime.push.model;
+package io.getlime.push.model.request;
 
 import io.getlime.push.model.entity.PushMessage;
 
+import java.util.List;
+
 /**
- * Class representing a single push message send request.
+ * Class representing a request for batch of push messages.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class SendPushMessageRequest {
+public class SendBatchMessageRequest {
 
     private Long appId;
-    private PushMessage push;
+    private List<PushMessage> batch;
 
     /**
      * Get app ID.
@@ -45,18 +46,18 @@ public class SendPushMessageRequest {
     }
 
     /**
-     * Get push message to be sent.
-     * @return Push message.
+     * Get batch list with push notifications to be sent.
+     * @param batch Push notification batch.
      */
-    public PushMessage getPush() {
-        return push;
+    public void setBatch(List<PushMessage> batch) {
+        this.batch = batch;
     }
 
     /**
-     * Set push message to be sent.
-     * @param push Push message.
+     * Set batch list with push notifications to be sent.
+     * @return Push notification batch.
      */
-    public void setPush(PushMessage push) {
-        this.push = push;
+    public List<PushMessage> getBatch() {
+        return batch;
     }
 }

@@ -17,8 +17,12 @@
 package io.getlime.push.repository;
 
 import io.getlime.push.repository.model.PushCampaignUser;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Repository interface used to access push campaign users database.
@@ -27,5 +31,9 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public interface PushCampaignUsersRepository extends CrudRepository<PushCampaignUser, Long> {
+public interface PushCampaignUsersRepository extends PagingAndSortingRepository<PushCampaignUser, Long> {
+
+    PushCampaignUser findFirstByUserIdAndCampaignId(String userId, Long campaignId);
+    List<PushCampaignUser> findAllByCampaignId(Long campaignId);
+    List<PushCampaignUser> findAllByCampaignId(Long campaignId, Pageable pageable);
 }
