@@ -21,7 +21,6 @@ import io.getlime.push.model.entity.PushMessageBody;
 
 /**
  * Request object used for creating a campaign.
- * AppID
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */

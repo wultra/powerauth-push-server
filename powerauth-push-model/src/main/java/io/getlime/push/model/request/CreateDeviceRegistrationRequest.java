@@ -68,7 +68,7 @@ public class CreateDeviceRegistrationRequest {
     }
 
     /**
-     * Set the platform name.uu
+     * Set the platform name.
      * @param platform Platform name.
      */
     public void setPlatform(String platform) {

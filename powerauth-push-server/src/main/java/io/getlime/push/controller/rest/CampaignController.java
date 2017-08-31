@@ -64,7 +64,6 @@ public class CampaignController {
 
     private PushCampaignRepository pushCampaignRepository;
     private PushCampaignUsersRepository pushCampaignUsersRepository;
-    private PushCampaignDevicesRepository pushCampaignDevicesRepository;
     private PushSenderService pushSenderService;
 
     @Autowired
@@ -93,12 +92,7 @@ public class CampaignController {
 
         PushMessageBody message = requestObject.getMessage();
 
-        String messageString = null;
-        try {
-            messageString = new ObjectMapper().writeValueAsString(message);
-        } catch (JsonProcessingException e) {
-            Logger.getLogger(CampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-        }
+        String messageString = serializePushMessageBody(message);
 
         campaign.setMessage(messageString);
 
@@ -291,6 +285,16 @@ public class CampaignController {
             Logger.getLogger(CampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
         }
         return pushMessageBody;
+    }
+
+    private String serializePushMessageBody(PushMessageBody message) {
+        String messageString = null;
+        try {
+            messageString = new ObjectMapper().writeValueAsString(message);
+        } catch (JsonProcessingException e) {
+            Logger.getLogger(CampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+        }
+        return messageString;
     }
 
 
