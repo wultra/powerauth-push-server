@@ -67,7 +67,7 @@ CREATE TABLE push_campaign_devices (
   `id` INT NOT NULL,
   `campaign_id` INT NULL,
   `platform` VARCHAR(20) NULL,
-  `token` VARCHAR(255) NULL,
+  `push_token` VARCHAR(255) NULL,
   `status` INT NULL,
   `timestamp_sent` TIMESTAMP NULL,
   PRIMARY KEY (`id`),

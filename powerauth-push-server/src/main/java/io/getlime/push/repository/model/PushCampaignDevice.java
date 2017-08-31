@@ -40,8 +40,8 @@ public class PushCampaignDevice {
     @Column(name = "platform", nullable = false)
     private String platform;
 
-    @Column(name = "token", nullable = false)
-    private String token;
+    @Column(name = "push_token", nullable = false)
+    private String pushToken;
 
     @Column(name = "status")
     private int status;
@@ -73,12 +73,12 @@ public class PushCampaignDevice {
         this.platform = platform;
     }
 
-    public String getToken() {
-        return token;
+    public String getPushToken() {
+        return pushToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setPushToken(String pushToken) {
+        this.pushToken = pushToken;
     }
 
     public int getStatus() {
