@@ -18,7 +18,7 @@ CREATE TABLE `push_device_registration` (
   `app_id` int(11) DEFAULT NULL,
   `platform` varchar(20) DEFAULT NULL,
   `push_token` varchar(255) DEFAULT NULL,
-  `last_registered` varchar(45) DEFAULT NULL,
+  `last_registered` TIMESTAMP NULL,
   `is_active` int(11) DEFAULT NULL,
   `encryption_key` text,
   `encryption_key_index` text,
@@ -44,7 +44,7 @@ CREATE TABLE `push_message` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE push_campaign (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `app_id` INT NOT NULL,
   `message` TEXT NULL,
   `sent` INT(1) NULL,
@@ -55,7 +55,7 @@ CREATE TABLE push_campaign (
   ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE push_campaign_users (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `campaign_id` INT NOT NULL,
   `user_id` VARCHAR(255) NOT NULL,
   `timestamp_added` TIMESTAMP NULL ,
@@ -64,10 +64,10 @@ CREATE TABLE push_campaign_users (
   ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE push_campaign_devices (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `campaign_id` INT NULL,
   `platform` VARCHAR(20) NULL,
-  `token` VARCHAR(255) NULL,
+  `push_token` VARCHAR(255) NULL,
   `status` INT NULL,
   `timestamp_sent` TIMESTAMP NULL,
   PRIMARY KEY (`id`),

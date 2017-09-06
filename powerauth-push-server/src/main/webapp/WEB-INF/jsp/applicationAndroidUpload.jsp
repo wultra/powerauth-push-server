@@ -31,12 +31,12 @@
                     <input type="text" name="bundle" value="${bundle}" class="form-control"/>
                 </div>
                 <div class="col-sm-6">
-                    <c:if test="${fields.hasFieldErrors('token')}">
-                        <div class="red">Please enter a correct FCM token value.</div>
+                    <c:if test="${fields.hasFieldErrors('pushToken')}">
+                        <div class="red">Please enter a correct FCM pushToken value.</div>
                     </c:if>
                     Firebase Cloud Messaging Token
                     <br/>
-                    <textarea name="token" rows="4" class="form-control">${token}</textarea>
+                    <textarea name="pushToken" rows="4" class="form-control">${pushToken}</textarea>
                 </div>
             </div>
             <div class="row padder10">
