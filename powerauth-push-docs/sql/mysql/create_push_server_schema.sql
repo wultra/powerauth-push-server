@@ -18,7 +18,7 @@ CREATE TABLE `push_device_registration` (
   `app_id` int(11) DEFAULT NULL,
   `platform` varchar(20) DEFAULT NULL,
   `push_token` varchar(255) DEFAULT NULL,
-  `last_registered` varchar(45) DEFAULT NULL,
+  `last_registered` TIMESTAMP NULL,
   `is_active` int(11) DEFAULT NULL,
   `encryption_key` text,
   `encryption_key_index` text,
