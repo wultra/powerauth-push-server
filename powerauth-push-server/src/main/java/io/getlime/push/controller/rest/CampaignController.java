@@ -21,19 +21,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
-import io.getlime.push.errorhandling.UnableToSendPushException;
+import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.entity.ListOfUsers;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.request.CreateCampaignRequest;
-import io.getlime.push.model.request.DeleteCampaignRequest;
 import io.getlime.push.model.request.TestingCampaignRequest;
-import io.getlime.push.model.response.CreateCampaignResponse;
-import io.getlime.push.model.response.CampaignResponse;
-import io.getlime.push.model.response.ListOfCampaignResponse;
-import io.getlime.push.model.response.ListOfUsersFromCampaignResponse;
-import io.getlime.push.repository.PushCampaignDevicesRepository;
+import io.getlime.push.model.response.*;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.PushCampaignUsersRepository;
 import io.getlime.push.repository.model.PushCampaign;
@@ -61,7 +56,6 @@ import java.util.logging.Logger;
 @Controller
 @RequestMapping(value = "push/campaign")
 public class CampaignController {
-
     private PushCampaignRepository pushCampaignRepository;
     private PushCampaignUsersRepository pushCampaignUsersRepository;
     private PushSenderService pushSenderService;
@@ -73,114 +67,127 @@ public class CampaignController {
         this.pushSenderService = pushSenderService;
     }
 
-
     /**
      * Create a campaign for specific app.
+     *
      * @param request id of specific app, body of specific messageBody
      * @return ID for created campaign.
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
     @ResponseBody
-    public ObjectResponse<CreateCampaignResponse> createCampaign(@RequestBody ObjectRequest<CreateCampaignRequest> request) {
-
+    public ObjectResponse<CreateCampaignResponse> createCampaign(@RequestBody ObjectRequest<CreateCampaignRequest> request) throws PushServerException {
+        checkRequestNullity(request);
         CreateCampaignRequest requestObject = request.getRequestObject();
-
+        Long appId = requestObject.getAppId();
+        if (appId == null) {
+            throw new PushServerException("Empty appId attribute");
+        }
         PushCampaign campaign = new PushCampaign();
-        campaign.setAppId(requestObject.getAppId());
+        campaign.setAppId(appId);
         campaign.setSent(false);
         campaign.setTimestampCreated(new Date());
-
         PushMessageBody message = requestObject.getMessage();
-
         String messageString = serializePushMessageBody(message);
-
         campaign.setMessage(messageString);
-
         campaign = pushCampaignRepository.save(campaign);
-
         CreateCampaignResponse response = new CreateCampaignResponse();
         response.setId(campaign.getId());
         return new ObjectResponse<>(response);
     }
 
     /**
-     * Removes a certain campaign.
-     * @param request identifier for deleting a campaign
+     * Removes a certain campaign along with users related to this campaign.
+     *
+     * @param campaignId identifier for deleting a campaign
      * @return Remove campaign status response.
      */
-    @RequestMapping(value = "delete", method = RequestMethod.POST)
+    @RequestMapping(value = "{id}/delete", method = RequestMethod.POST)
     @ResponseBody
-    public Response removeCampaign(@RequestBody ObjectRequest<DeleteCampaignRequest> request) {
-        pushCampaignRepository.delete(request.getRequestObject().getId());
-        return new Response();
+    public ObjectResponse<DeleteCampaignResponse> removeCampaign(@PathVariable(value = "id") Long campaignId) {
+        DeleteCampaignResponse deleteCampaignResponse = new DeleteCampaignResponse();
+        if (pushCampaignRepository.findOne(campaignId) == null) {
+            deleteCampaignResponse.setDeleted(false);
+        } else {
+            pushCampaignRepository.delete(campaignId);
+            deleteCampaignResponse.setDeleted(true);
+        }
+        Iterable<PushCampaignUser> usersFromCampaign = pushCampaignUsersRepository.findAllByCampaignId(campaignId);
+        for (PushCampaignUser user : usersFromCampaign) {
+            pushCampaignUsersRepository.delete(user.getId());
+        }
+        return new ObjectResponse<>(deleteCampaignResponse);
     }
 
     /**
      * Method used for getting a list of campaigns
-     * @param sent true - list of all campaigns
-     *             false - list of campaigns which have 'sent' attribute set on false
+     *
+     * @param all true - list of all campaigns
+     *            false - list of campaigns which have 'all' attribute set on false
      * @return List of campaigns.
      */
     @RequestMapping(value = "list", method = RequestMethod.GET)
     @ResponseBody
-    public ObjectResponse<ListOfCampaignResponse> getListOfCampaigns(@RequestParam(value = "sent") boolean sent) {
-
+    public ObjectResponse<ListOfCampaignResponse> getListOfCampaigns(@RequestParam(value = "all") boolean all) {
         Iterable<PushCampaign> campaignList;
         ListOfCampaignResponse listOfCampaignResponse = new ListOfCampaignResponse();
-
-        if (sent) {
+        if (all) {
             campaignList = pushCampaignRepository.findAll();
         } else {
             campaignList = pushCampaignRepository.findAllBySent(false);
         }
-
-        for (PushCampaign campaign: campaignList) {
+        for (PushCampaign campaign : campaignList) {
             CampaignResponse campaignResponse = new CampaignResponse();
             campaignResponse.setId(campaign.getId());
             campaignResponse.setAppId(campaign.getAppId());
             campaignResponse.setSent(campaign.isSent());
             PushMessageBody pushMessageBody = deserializePushMessageBody(campaign.getMessage());
-
             campaignResponse.setMessage(pushMessageBody);
+            listOfCampaignResponse.add(campaignResponse);
         }
         return new ObjectResponse<>(listOfCampaignResponse);
     }
 
     /**
      * Method used for getting a specific campaign
+     *
      * @param campaignId Id of specific campaign
      * @return Campaign Response
      */
     @RequestMapping(value = "{id}/detail", method = RequestMethod.GET)
     @ResponseBody
-    public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) {
+    public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
         PushCampaign campaign = pushCampaignRepository.findOne(campaignId);
+        if (campaign == null) {
+            throw new PushServerException("Campaign with entered ID does not exist");
+        }
         CampaignResponse campaignResponse = new CampaignResponse();
         campaignResponse.setId(campaign.getId());
         campaignResponse.setSent(campaign.isSent());
         campaignResponse.setAppId(campaign.getAppId());
         PushMessageBody message = deserializePushMessageBody(campaign.getMessage());
         campaignResponse.setMessage(message);
-
         return new ObjectResponse<>(campaignResponse);
     }
 
     /**
-     * Add specific users to specific campaign
+     * Add specific request to specific campaign
+     *
      * @param campaignId ID of certain campaign
-     * @param users list of IDs referred to users
+     * @param request    list of IDs referred to request
      * @return Response status
      */
     @RequestMapping(value = "{id}/user/add", method = RequestMethod.PUT)
     @ResponseBody
     @Transactional
-    public Response addUsersToCampaign(@PathVariable(value = "id") Long campaignId, @RequestBody ObjectRequest<ListOfUsers> users) {
-        ListOfUsers listOfUsers = users.getRequestObject();
-
-        for (String user: listOfUsers) {
+    public Response addUsersToCampaign(@PathVariable(value = "id") Long campaignId, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
+        checkRequestNullity(request);
+        if (pushCampaignRepository.findOne(campaignId) == null) {
+            throw new PushServerException("Campaign with entered ID does not exist");
+        }
+        ListOfUsers listOfUsers = request.getRequestObject();
+        for (String user : listOfUsers) {
             if (pushCampaignUsersRepository.findFirstByUserIdAndCampaignId(user, campaignId) == null) {
                 PushCampaignUser pushCampaignUser = new PushCampaignUser();
-
                 pushCampaignUser.setCampaignId(campaignId);
                 pushCampaignUser.setUserId(user);
                 pushCampaignUser.setTimestampAdded(new Date());
@@ -189,85 +196,80 @@ public class CampaignController {
                 Logger.getLogger(CampaignController.class.getName()).log(Level.WARNING, "Duplicate user entry for push campaign: " + user);
             }
         }
-
         return new Response();
     }
 
     /**
      * Method for getting users from specific campaign in paged format
-     * @param id Campaign id
+     *
+     * @param id       Campaign id
      * @param pageable Format for pagination (?page=x&size=y), where "x" is chosen page and "y" is size is number of elements per page, beginning from zero
      * @return campaign id, list of users
      */
     @RequestMapping(value = "{id}/user/list", method = RequestMethod.GET)
     @ResponseBody
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(@PathVariable(value = "id") Long id, Pageable pageable) {
-
         ListOfUsersFromCampaignResponse listOfUsersFromCampaignResponse = new ListOfUsersFromCampaignResponse();
         List<PushCampaignUser> users = pushCampaignUsersRepository.findAllByCampaignId(id, pageable);
         ListOfUsers listOfUsers = new ListOfUsers();
-        for (PushCampaignUser user: users) {
+        for (PushCampaignUser user : users) {
             listOfUsers.add(user.getUserId());
         }
-
         listOfUsersFromCampaignResponse.setCampaingId(id);
         listOfUsersFromCampaignResponse.setUsers(listOfUsers);
-
         PagedResponse<ListOfUsersFromCampaignResponse> pagedResponse = new PagedResponse<>(listOfUsersFromCampaignResponse);
         pagedResponse.setPage(pageable.getPageSize());
         pagedResponse.setSize(pageable.getPageNumber());
-
         return pagedResponse;
     }
 
     /**
      * Removes campaign users identified by list of users userID and campaignID
-     * @param id Campaign ID
+     *
+     * @param id      Campaign ID
      * @param request List of users to remove
      * @return Response status
      */
     @RequestMapping(value = "{id}/user/remove")
     @ResponseBody
-    public Response removeUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request){
-
+    public Response removeUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
         Iterable<PushCampaignUser> listOfUsersFromCampaign = pushCampaignUsersRepository.findAllByCampaignId(id);
         ListOfUsers listOfUsers = request.getRequestObject();
-
-        for (PushCampaignUser userFromCampaign: listOfUsersFromCampaign) {
-            for (String user: listOfUsers) {
+        for (PushCampaignUser userFromCampaign : listOfUsersFromCampaign) {
+            for (String user : listOfUsers) {
                 if (user.equals(userFromCampaign.getUserId())) {
                     pushCampaignUsersRepository.delete(userFromCampaign.getId());
                 }
             }
         }
-
         return new Response();
     }
 
     /**
      * Method for sending testing user on campaign
-     * @param id Campaign ID
+     *
+     * @param id      Campaign ID
      * @param request User ID
      * @return Response status
-     * @throws UnableToSendPushException
      */
     @RequestMapping(value = "{id}/test/send", method = RequestMethod.POST)
     @ResponseBody
-    public Response sendTestingCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestingCampaignRequest> request) throws UnableToSendPushException {
-
+    public Response sendTestingCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestingCampaignRequest> request) throws PushServerException {
+        checkRequestNullity(request);
         PushCampaign campaign = pushCampaignRepository.findOne(id);
+        if (campaign == null) {
+            throw new PushServerException("Campaign with entered id does not exist");
+        }
         PushMessage pushMessage = new PushMessage();
         pushMessage.setUserId(request.getRequestObject().getUserId());
         pushMessage.setMessage(deserializePushMessageBody(campaign.getMessage()));
-
         List<PushMessage> message = new ArrayList<>();
         message.add(pushMessage);
         try {
             pushSenderService.send(campaign.getAppId(), message);
         } catch (InterruptedException | IOException e) {
-            throw new UnableToSendPushException(e.getMessage());
+            throw new PushServerException(e.getMessage());
         }
-
         return new Response();
     }
 
@@ -287,6 +289,12 @@ public class CampaignController {
         return pushMessageBody;
     }
 
+    /**
+     * Method used for parsing message into Json
+     *
+     * @param message string message
+     * @return Json
+     */
     private String serializePushMessageBody(PushMessageBody message) {
         String messageString = null;
         try {
@@ -295,6 +303,18 @@ public class CampaignController {
             Logger.getLogger(CampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
         }
         return messageString;
+    }
+
+    /**
+     * Method used for checking exception about nullity of http request
+     *
+     * @param request an object request to check the nullity
+     * @throws PushServerException defined by certain message
+     */
+    private void checkRequestNullity(ObjectRequest request) throws PushServerException {
+        if (request.getRequestObject() == null) {
+            throw new PushServerException("Empty requestObject data");
+        }
     }
 
 

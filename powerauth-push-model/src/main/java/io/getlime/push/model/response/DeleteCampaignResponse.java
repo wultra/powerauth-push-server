@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package io.getlime.push.model.request;
+package io.getlime.push.model.response;
 /**
- * Request object used for deleting a campaign
+ * Object response for deleting a campaign
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-public class DeleteCampaignRequest {
-    private Long id;
-
-    public Long getId() {
-        return id;
+public class DeleteCampaignResponse {
+    public boolean isDeleted() {
+        return deleted;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
+
+    private boolean deleted;
+
 }

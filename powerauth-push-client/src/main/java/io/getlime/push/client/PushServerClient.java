@@ -26,7 +26,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
-import io.getlime.core.rest.model.base.response.ErrorResponse;;
+import io.getlime.core.rest.model.base.response.ErrorResponse;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.model.entity.PushMessage;
@@ -113,7 +113,7 @@ public class PushServerClient {
      * @param activationId PowerAuth 2.0 activation ID.
      * @return True if device registration was successful, false otherwise.
      */
-    public boolean registerDevice(Long appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
+        public boolean registerDevice(Long appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
         CreateDeviceRegistrationRequest request = new CreateDeviceRegistrationRequest();
         request.setAppId(appId);
         request.setToken(token);

@@ -17,6 +17,7 @@ package io.getlime.push.errorhandling;
 
 import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.core.rest.model.base.response.ErrorResponse;
+import io.getlime.push.errorhandling.exceptions.PushServerException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -45,7 +46,7 @@ public class DefaultExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
-    @ExceptionHandler(UnableToSendPushException.class)
+    @ExceptionHandler(PushServerException.class)
     @ResponseBody
     public ErrorResponse handlePushException(Exception e) {
         ErrorResponse response = new ErrorResponse(new Error(Error.Code.ERROR_GENERIC, e.getMessage()));
@@ -53,14 +54,6 @@ public class DefaultExceptionHandler {
         return response;
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
-    @ExceptionHandler(UnableToRegisterDeviceException.class)
-    @ResponseBody
-    public ErrorResponse handleDeviceRegistrationFailureException(Exception e) {
-        ErrorResponse response = new ErrorResponse(new Error(Error.Code.ERROR_GENERIC, e.getMessage()));
-        Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, null, e);
-        return response;
-    }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)  // 404
     @ExceptionHandler(EmptyResultDataAccessException.class)
