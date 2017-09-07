@@ -288,7 +288,7 @@ public class PushSenderService {
                             notification.setTitle(pushMessage.getMessage().getTitle());
                             notification.setBody(pushMessage.getMessage().getBody());
                             notification.setSound(pushMessage.getMessage().getSound());
-                            notification.setTag(pushMessage.getMessage().getCollapseKey());
+                            notification.setTag(pushMessage.getMessage().getCategory());
                             request.setNotification(notification);
                         }
 
