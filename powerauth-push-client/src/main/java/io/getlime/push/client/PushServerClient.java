@@ -113,7 +113,7 @@ public class PushServerClient {
      * @param activationId PowerAuth 2.0 activation ID.
      * @return True if device registration was successful, false otherwise.
      */
-        public boolean registerDevice(Long appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
+    public boolean registerDevice(Long appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
         CreateDeviceRegistrationRequest request = new CreateDeviceRegistrationRequest();
         request.setAppId(appId);
         request.setToken(token);
