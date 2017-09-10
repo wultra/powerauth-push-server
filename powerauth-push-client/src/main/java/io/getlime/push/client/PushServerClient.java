@@ -119,9 +119,13 @@ public class PushServerClient {
         request.setToken(token);
         request.setPlatform(platform.value());
         request.setActivationId(activationId);
-        TypeReference<ObjectResponse> typeReference = new TypeReference<ObjectResponse>() {};
-        ObjectResponse<?> response = sendObjectImpl("/push/device/create", new ObjectRequest<>(request), typeReference);
-        return response.getStatus().equals(Response.Status.OK);
+        TypeReference<Response> typeReference = new TypeReference<Response>() {};
+        Response response = sendObjectImpl("/push/device/create", new ObjectRequest<>(request), typeReference);
+        if (response != null) {
+            return response.getStatus().equals(Response.Status.OK);
+        } else {
+            return false;
+        }
     }
 
     /**

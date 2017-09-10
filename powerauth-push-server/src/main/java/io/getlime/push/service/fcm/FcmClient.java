@@ -21,14 +21,11 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
@@ -37,7 +34,7 @@ import org.springframework.web.client.AsyncRestTemplate;
  */
 public class FcmClient {
 
-    private final String fcm_url = "https://fcm.googleapis.com/fcm/send";
+    private static final String fcm_url = "https://fcm.googleapis.com/fcm/send";
 
     private final HttpHeaders headers;
     private final AsyncRestTemplate restTemplate;
