@@ -20,7 +20,7 @@ import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.powerauth.soap.ActivationStatus;
 import io.getlime.powerauth.soap.GetActivationStatusResponse;
 import io.getlime.powerauth.soap.GetPersonalizedEncryptionKeyResponse;
-import io.getlime.push.errorhandling.UnableToRegisterDeviceException;
+import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.request.CreateDeviceRegistrationRequest;
 import io.getlime.push.model.request.RemoveDeviceRegistrationRequest;
 import io.getlime.push.model.request.UpdateStatusRequest;
@@ -67,10 +67,10 @@ public class DeviceManagementController {
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
     @Transactional
-    public @ResponseBody Response createDevice(@RequestBody ObjectRequest<CreateDeviceRegistrationRequest> request) throws UnableToRegisterDeviceException {
+    public @ResponseBody Response createDevice(@RequestBody ObjectRequest<CreateDeviceRegistrationRequest> request) throws PushServerException {
 
         if (request.getRequestObject() == null) {
-            throw new UnableToRegisterDeviceException("Invalid or empty input data");
+            throw new PushServerException("Invalid or empty input data");
         }
 
         Long appId = request.getRequestObject().getAppId();
@@ -115,10 +115,10 @@ public class DeviceManagementController {
      */
     @RequestMapping(value = "status/update", method = RequestMethod.POST)
     @Transactional
-    public @ResponseBody Response updateActivationStatus(@RequestBody ObjectRequest<UpdateStatusRequest> request) throws UnableToRegisterDeviceException {
+    public @ResponseBody Response updateActivationStatus(@RequestBody ObjectRequest<UpdateStatusRequest> request) throws PushServerException {
 
         if (request.getRequestObject() == null) {
-            throw new UnableToRegisterDeviceException("Invalid or empty input data");
+            throw new PushServerException("Invalid or empty input data");
         }
 
         String activationId = request.getRequestObject().getActivationId();
@@ -142,10 +142,10 @@ public class DeviceManagementController {
      */
     @RequestMapping(value = "remove", method = RequestMethod.POST)
     @Transactional
-    public @ResponseBody Response deleteActivationStatus(@RequestBody ObjectRequest<RemoveDeviceRegistrationRequest> request) throws UnableToRegisterDeviceException {
+    public @ResponseBody Response deleteActivationStatus(@RequestBody ObjectRequest<RemoveDeviceRegistrationRequest> request) throws PushServerException {
 
         if (request.getRequestObject() == null) {
-            throw new UnableToRegisterDeviceException("Invalid or empty input data");
+            throw new PushServerException("Invalid or empty input data");
         }
 
         Long appId = request.getRequestObject().getAppId();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Lime - HighTech Solutions s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package io.getlime.push.errorhandling;
-
+package io.getlime.push.errorhandling.exceptions;
 /**
- * @author Petr Dvorak, petr@lime-company.eu
+ * General exception class thrown in specific push server methods, exception accompanied by specific message
+ *
+ * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-public class UnableToSendPushException extends Exception {
+public class PushServerException extends Exception {
 
-    public UnableToSendPushException() {
-        super("Unable to send push message.");
-    }
-
-    public UnableToSendPushException(String message) {
+    public PushServerException(String message) {
         super(message);
     }
 }
