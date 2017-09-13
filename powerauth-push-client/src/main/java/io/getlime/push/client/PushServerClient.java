@@ -29,19 +29,25 @@ import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ErrorResponse;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
+import io.getlime.push.model.base.PagedResponse;
+import io.getlime.push.model.entity.ListOfUsers;
 import io.getlime.push.model.entity.PushMessage;
+import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.entity.PushSendResult;
-import io.getlime.push.model.request.CreateDeviceRegistrationRequest;
-import io.getlime.push.model.request.SendBatchMessageRequest;
-import io.getlime.push.model.request.SendPushMessageRequest;
-
+import io.getlime.push.model.request.*;
+import io.getlime.push.model.response.*;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Simple class for interacting with the push server.
  *
  * @author Petr Dvorak, petr@lime-company.eu
+ * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 public class PushServerClient {
 
@@ -88,6 +94,7 @@ public class PushServerClient {
 
     /**
      * Set the service base URL.
+     *
      * @param serviceBaseUrl Base URL.
      */
     public void setServiceBaseUrl(String serviceBaseUrl) {
@@ -96,67 +103,273 @@ public class PushServerClient {
 
     /**
      * Register anonymous device to the push server.
+     *
      * @param appId PowerAuth 2.0 application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
      * @param platform Mobile platform (iOS, Android).
      * @return True if device registration was successful, false otherwise.
      */
-    public boolean registerDevice(Long appId, String token, MobilePlatform platform) throws PushServerClientException {
-        return registerDevice(appId, token, platform, null);
+    public boolean createDevice(Long appId, String token, MobilePlatform platform) throws PushServerClientException {
+        return createDevice(appId, token, platform, null);
     }
 
     /**
      * Register device associated with activation ID to the push server.
+     *
      * @param appId PowerAuth 2.0 application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
      * @param platform Mobile platform (iOS, Android).
      * @param activationId PowerAuth 2.0 activation ID.
      * @return True if device registration was successful, false otherwise.
      */
-    public boolean registerDevice(Long appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
-        CreateDeviceRegistrationRequest request = new CreateDeviceRegistrationRequest();
+    public boolean createDevice(Long appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
+        CreateDeviceRequest request = new CreateDeviceRequest();
         request.setAppId(appId);
         request.setToken(token);
         request.setPlatform(platform.value());
         request.setActivationId(activationId);
-        TypeReference<Response> typeReference = new TypeReference<Response>() {};
-        Response response = sendObjectImpl("/push/device/create", new ObjectRequest<>(request), typeReference);
-        if (response != null) {
-            return response.getStatus().equals(Response.Status.OK);
-        } else {
-            return false;
-        }
+        TypeReference<Response> typeReference = new TypeReference<Response>() {
+        };
+        ObjectResponse<?> response = postObjectImpl("/push/device/create", new ObjectRequest<>(request), typeReference);
+        return response.getStatus().equals(Response.Status.OK);
+    }
+
+    /**
+     * Remove device from the push server
+     *
+     * @param appId PowerAuth 2.0 application app ID.
+     * @param token Token received from the push service provider.
+     * @return True if device removal was successful, false otherwise.
+     */
+    public boolean deleteDevice(Long appId, String token) throws PushServerClientException {
+        DeleteDeviceRequest request = new DeleteDeviceRequest();
+        request.setAppId(appId);
+        request.setToken(token);
+        TypeReference<Response> typeReference = new TypeReference<Response>() {
+        };
+        ObjectResponse<?> response = postObjectImpl("/push/device/delete", request, typeReference);
+        return response.getStatus().equals(Response.Status.OK);
     }
 
     /**
      * Send a single push message to application with given ID.
+     *
      * @param appId PowerAuth 2.0 application app ID.
      * @param pushMessage Push message to be sent.
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
      */
-    public ObjectResponse<PushSendResult> sendNotification(Long appId, PushMessage pushMessage) throws PushServerClientException {
+    public ObjectResponse<PushSendResult> sendPushMessage(Long appId, PushMessage pushMessage) throws PushServerClientException {
         SendPushMessageRequest request = new SendPushMessageRequest();
         request.setAppId(appId);
         request.setPush(pushMessage);
-        TypeReference<ObjectResponse<PushSendResult>> typeReference = new TypeReference<ObjectResponse<PushSendResult>>() {};
-        return sendObjectImpl("/push/message/send", new ObjectRequest<>(request), typeReference);
+        TypeReference<ObjectResponse<PushSendResult>> typeReference = new TypeReference<ObjectResponse<PushSendResult>>() {
+        };
+        return postObjectImpl("/push/message/send", new ObjectRequest<>(request), typeReference);
     }
 
     /**
      * Send a push message batch to application with given ID.
+     *
      * @param appId PowerAuth 2.0 application app ID.
      * @param batch Push message batch to be sent.
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
      */
-    public ObjectResponse<PushSendResult> sendNotificationBatch(Long appId, List<PushMessage> batch) throws PushServerClientException {
-        SendBatchMessageRequest request = new SendBatchMessageRequest();
+    public ObjectResponse<PushSendResult> sendPushMessageBatch(Long appId, List<PushMessage> batch) throws PushServerClientException {
+        SendPushMessageBatchRequest request = new SendPushMessageBatchRequest();
         request.setAppId(appId);
         request.setBatch(batch);
-        TypeReference<ObjectResponse<PushSendResult>> typeReference = new TypeReference<ObjectResponse<PushSendResult>>() {};
-        return sendObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), typeReference);
+        TypeReference<ObjectResponse<PushSendResult>> typeReference = new TypeReference<ObjectResponse<PushSendResult>>() {
+        };
+        return postObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), typeReference);
     }
 
-    private <T> ObjectResponse<T> sendObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
+    /**
+     * Create a campaign.
+     *
+     * @param message Message which attributes are defined in PushMessageBody.
+     * @return ID of new created campaign.
+     */
+    public ObjectResponse<CreateCampaignResponse> createCampaign(Long appId, PushMessageBody message) throws PushServerClientException {
+        CreateCampaignRequest request = new CreateCampaignRequest();
+        request.setAppId(appId);
+        request.setMessage(message);
+        TypeReference<ObjectResponse<CreateCampaignRequest>> typeReference = new TypeReference<ObjectResponse<CreateCampaignRequest>>() {
+        };
+        return postObjectImpl("/push/campaign/create", new ObjectRequest<>(request), typeReference);
+    }
+
+    /**
+     * Delete a campaign specified with campaignId.
+     *
+     * @return True if campaign is removed, false otherwise.
+     */
+    public boolean deleteCampaign(Long campaignId) throws PushServerClientException {
+        try {
+            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
+            TypeReference<ObjectResponse<DeleteCampaignResponse>> typeReference = new TypeReference<ObjectResponse<DeleteCampaignResponse>>() {
+            };
+            ObjectResponse<?> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, typeReference);
+            return response.getStatus().equals(Response.Status.OK);
+        } catch (UnsupportedEncodingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        }
+    }
+
+    /**
+     * Get list of campaigns, dependent on all param
+     *
+     * @param all true to get whole list, false to get campaigns that are only sent
+     * @return List of campaigns.
+     */
+    public ObjectResponse<ListOfCampaignResponse> getListOfCampaigns(boolean all) throws PushServerClientException {
+        TypeReference<ObjectResponse<ListOfCampaignResponse>> typeReference = new TypeReference<ObjectResponse<ListOfCampaignResponse>>() {
+        };
+        Map<String, Object> params = new HashMap<>();
+        params.put("all", all);
+        return getObjectImpl("/push/campaign/list", params, typeReference);
+    }
+
+    /**
+     * Get a campaign specified with campaignID.
+     *
+     * @param campaignId ID of campaign to get.
+     * @return Details of campaign, defined in CampaignResponse
+     */
+    public ObjectResponse<CampaignResponse> getCampaign(Long campaignId) throws PushServerClientException {
+        try {
+            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
+            TypeReference<ObjectResponse<CampaignResponse>> typeReference = new TypeReference<ObjectResponse<CampaignResponse>>() {
+            };
+            return getObjectImpl("/push/campaign/" + campaignIdSanitized + "/detail", null, typeReference);
+        } catch (UnsupportedEncodingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        }
+    }
+
+    /**
+     * Add a list of users to a specific campaign
+     *
+     * @param campaignId Identifier of campaign.
+     * @param users List of users to add.
+     * @return True if adding was successful, false otherwise.
+     */
+    public boolean addUsersToCampaign(Long campaignId, List<String> users) throws PushServerClientException {
+        try {
+            ListOfUsers listOfUsers = new ListOfUsers();
+            listOfUsers.addAll(users);
+            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
+            TypeReference<Response> typeReference = new TypeReference<Response>() {
+            };
+            ObjectResponse<?> response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", listOfUsers, typeReference);
+            return response.getStatus().equals(Response.Status.OK);
+        } catch (UnsupportedEncodingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        }
+    }
+
+    /**
+     * Get a list of users in paged format from specific campaign
+     *
+     * @param campaignId Identifier of campaign.
+     * @param page Page number.
+     * @param size Size of elements per page.
+     * @return Page of users specified with params.
+     */
+    public ObjectResponse<PagedResponse<ListOfUsersFromCampaignResponse>> getListOfUsersFromCampaign(Long campaignId, int page, int size) throws PushServerClientException {
+        try {
+            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
+            TypeReference<ObjectResponse<PagedResponse<ListOfUsersFromCampaignResponse>>> typeReference = new TypeReference<ObjectResponse<PagedResponse<ListOfUsersFromCampaignResponse>>>() {
+            };
+            Map<String, Object> params = new HashMap<>();
+            params.put("page", page);
+            params.put("size", size);
+            return getObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
+        } catch (UnsupportedEncodingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        }
+    }
+
+    /**
+     * Delete a list of users from specific campaign.
+     *
+     * @param campaignId Identifier of campaign.
+     * @param users List of users' Identifiers to delete.
+     * @return True if deletion was successful, false otherwise.
+     */
+    public boolean deleteUsersFromCampaign(Long campaignId, List<String> users) throws PushServerClientException {
+        try {
+            ListOfUsers listOfUsers = new ListOfUsers();
+            listOfUsers.addAll(users);
+            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
+            TypeReference<Response> typeReference = new TypeReference<Response>() {
+            };
+            ObjectResponse<?> response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", listOfUsers, typeReference);
+            return response.getStatus().equals(Response.Status.OK);
+        } catch (UnsupportedEncodingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        }
+    }
+
+    /**
+     * Send a campaign on test user for trying its correctness.
+     *
+     * @param campaignId Identifier of campaign.
+     * @param userId Identifier of test user.
+     * @return True if sent, else otherwise.
+     */
+    public boolean sendTestCampaign(Long campaignId, String userId) throws PushServerClientException {
+        try {
+            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
+            TestCampaignRequest testCampaignRequest = new TestCampaignRequest();
+            testCampaignRequest.setUserId(userId);
+            TypeReference<Response> typeReference = new TypeReference<Response>() {
+            };
+            ObjectResponse<?> response = postObjectImpl("/push/campaign" + campaignIdSanitized + "/test/send", testCampaignRequest, typeReference);
+            return response.getStatus().equals(Response.Status.OK);
+        } catch (UnsupportedEncodingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        }
+    }
+
+    /**
+     * Send a specific campaign to users carrying this campaignID in PushCampaignUser model, but only once per device identified by token.
+     *
+     * @param campaignId Identifier of campaign.
+     * @return True if sent, else otherwise.
+     */
+    public boolean sendCampaign(Long campaignId) throws PushServerClientException {
+        try {
+            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
+            TypeReference<Response> typeReference = new TypeReference<Response>() {
+            };
+            ObjectResponse<?> response = postObjectImpl("/push/campaign" + campaignIdSanitized + "/send", null, typeReference);
+            return response.getStatus().equals(Response.Status.OK);
+        } catch (UnsupportedEncodingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        }
+    }
+
+    private <T> ObjectResponse<T> getObjectImpl(String url, Map<String, Object> params, TypeReference typeReference) throws PushServerClientException {
+        try {
+            HttpResponse response = Unirest.get(serviceBaseUrl + url)
+                    .header("accept", "application/json")
+                    .header("Content-Type", "application/json")
+                    .queryString(params)
+                    .asString();
+            return checkStatus(typeReference, response);
+        } catch (UnirestException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
+        } catch (JsonParseException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
+        } catch (JsonMappingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
+        } catch (IOException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
+        }
+
+    }
+
+    private <T> ObjectResponse<T> postObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
         try {
             // Fetch post response from given URL and for provided request object
             HttpResponse response = Unirest.post(serviceBaseUrl + url)
@@ -164,13 +377,7 @@ public class PushServerClient {
                     .header("Content-Type", "application/json")
                     .body(request)
                     .asString();
-            if (response.getStatus() == 200) {
-                return this.jacksonObjectMapper.readValue(response.getRawBody(), typeReference);
-            } else {
-                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                ErrorResponse errResp = mapper.readValue(response.getRawBody(), ErrorResponse.class);
-                throw new PushServerClientException(response.getStatusText(), errResp.getResponseObject());
-            }
+            return checkStatus(typeReference, response);
         } catch (UnirestException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
         } catch (JsonParseException e) {
@@ -182,5 +389,33 @@ public class PushServerClient {
         }
     }
 
+    private <T> ObjectResponse<T> putObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
+        try {
+            HttpResponse response = Unirest.put(serviceBaseUrl + url)
+                    .header("accept", "application/json")
+                    .header("Content-Type", "application/json")
+                    .body(request)
+                    .asString();
+            return checkStatus(typeReference, response);
+        } catch (UnirestException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
+        } catch (JsonParseException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
+        } catch (JsonMappingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
+        } catch (IOException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
+        }
+    }
+
+    private <T> ObjectResponse<T> checkStatus(TypeReference typeReference, HttpResponse response) throws IOException, PushServerClientException {
+        if (response.getStatus() == 200) {
+            return jacksonObjectMapper.readValue(response.getRawBody(), typeReference);
+        } else {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            ErrorResponse errorResponse = mapper.readValue(response.getRawBody(), ErrorResponse.class);
+            throw new PushServerClientException(response.getStatusText(), errorResponse.getResponseObject());
+        }
+    }
 
 }

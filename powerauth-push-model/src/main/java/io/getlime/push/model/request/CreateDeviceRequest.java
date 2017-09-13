@@ -20,7 +20,7 @@ package io.getlime.push.model.request;
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class CreateDeviceRegistrationRequest {
+public class CreateDeviceRequest {
 
     private Long appId;
     private String token;

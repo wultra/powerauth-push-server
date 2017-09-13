@@ -19,7 +19,7 @@ package io.getlime.push.model.response;
 import io.getlime.push.model.entity.PushMessageBody;
 
 /**
- * Response object used for getting a list of campaigns
+ * Response object used for getting a campaign
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */

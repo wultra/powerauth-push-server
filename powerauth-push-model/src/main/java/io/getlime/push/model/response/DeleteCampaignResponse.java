@@ -15,6 +15,7 @@
  */
 
 package io.getlime.push.model.response;
+
 /**
  * Object response for deleting a campaign
  *
@@ -30,4 +31,5 @@ public class DeleteCampaignResponse {
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
+
 }
