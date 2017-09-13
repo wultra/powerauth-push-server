@@ -21,8 +21,6 @@ package io.getlime.push.model.response;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 public class DeleteCampaignResponse {
-    private boolean deleted;
-
     public boolean isDeleted() {
         return deleted;
     }
@@ -30,4 +28,7 @@ public class DeleteCampaignResponse {
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
+
+    private boolean deleted;
+
 }
