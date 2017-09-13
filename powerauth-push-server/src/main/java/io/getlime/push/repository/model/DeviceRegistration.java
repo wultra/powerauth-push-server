@@ -30,7 +30,7 @@ public class DeviceRegistration implements Serializable {
 
     private static final long serialVersionUID = 1530682530822178192L;
 
-    public class Platform {
+    public static class Platform {
         public static final String iOS = "ios";
         public static final String Android = "android";
     }

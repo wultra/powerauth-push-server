@@ -23,7 +23,7 @@ package io.getlime.push.model.entity;
  */
 public class PushSendResult {
 
-    public class iOS {
+    public static class iOS {
 
         private int sent;
         private int failed;
@@ -78,7 +78,7 @@ public class PushSendResult {
         }
     }
 
-    public class Android {
+    public static class Android {
 
         private int sent;
         private int failed;

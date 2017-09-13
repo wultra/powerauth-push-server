@@ -54,6 +54,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Phaser;
 import java.util.logging.Level;
@@ -288,7 +289,7 @@ public class PushSenderService {
                             notification.setTitle(pushMessage.getMessage().getTitle());
                             notification.setBody(pushMessage.getMessage().getBody());
                             notification.setSound(pushMessage.getMessage().getSound());
-                            notification.setTag(pushMessage.getMessage().getCollapseKey());
+                            notification.setTag(pushMessage.getMessage().getCategory());
                             request.setNotification(notification);
                         }
 
@@ -365,8 +366,8 @@ public class PushSenderService {
         //payloadBuilder.setThreadId(push.getMessage().getCollapseKey());
         Map<String, Object> extras = push.getMessage().getExtras();
         if (extras != null) {
-            for (String key : extras.keySet()) {
-                payloadBuilder.addCustomProperty(key, extras.get(key));
+            for (Map.Entry<String, Object> entry : extras.entrySet()) {
+                payloadBuilder.addCustomProperty(entry.getKey(), entry.getValue());
             }
         }
         return payloadBuilder.buildWithDefaultMaximumLength();
