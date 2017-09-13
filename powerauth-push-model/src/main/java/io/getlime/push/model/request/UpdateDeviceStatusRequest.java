@@ -17,20 +17,28 @@
 package io.getlime.push.model.request;
 
 /**
- * Request used for sending a testing campaign
+ * Class representing request object responsible for updating activation status.
  *
- * @author Martin Tupy, martin.tupy.work@gmail.com
+ * @author Petr Dvorak, petr@lime-company.eu
  */
+public class UpdateDeviceStatusRequest {
 
-public class TestingCampaignRequest {
+    private String activationId;
 
-    private String userId;
-
-    public String getUserId() {
-        return userId;
+    /**
+     * Get PowerAuth 2.0 Activation ID.
+     * @return Activation ID.
+     */
+    public String getActivationId() {
+        return activationId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    /**
+     * Set PowerAuth 2.0 Activation ID.
+     * @param activationId Activation ID.
+     */
+    public void setActivationId(String activationId) {
+        this.activationId = activationId;
     }
+
 }

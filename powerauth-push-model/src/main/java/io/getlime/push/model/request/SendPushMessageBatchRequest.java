@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class SendBatchMessageRequest {
+public class SendPushMessageBatchRequest {
 
     private Long appId;
     private List<PushMessage> batch;

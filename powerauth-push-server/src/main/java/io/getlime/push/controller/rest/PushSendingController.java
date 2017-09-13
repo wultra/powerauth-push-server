@@ -20,7 +20,7 @@ import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushSendResult;
-import io.getlime.push.model.request.SendBatchMessageRequest;
+import io.getlime.push.model.request.SendPushMessageBatchRequest;
 import io.getlime.push.model.request.SendPushMessageRequest;
 import io.getlime.push.service.PushSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +77,7 @@ public class PushSendingController {
      * @return Response with message sending results.
      */
     @RequestMapping(value = "batch/send", method = RequestMethod.POST)
-    public @ResponseBody ObjectResponse<PushSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendBatchMessageRequest> request) throws PushServerException {
+    public @ResponseBody ObjectResponse<PushSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
 
         if (request.getRequestObject() == null || request.getRequestObject().getBatch() == null || request.getRequestObject().getAppId() == null) {
             throw new PushServerException("Invalid or empty input data");

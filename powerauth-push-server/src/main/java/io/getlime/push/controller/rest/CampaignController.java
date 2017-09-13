@@ -27,7 +27,7 @@ import io.getlime.push.model.entity.ListOfUsers;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.request.CreateCampaignRequest;
-import io.getlime.push.model.request.TestingCampaignRequest;
+import io.getlime.push.model.request.TestCampaignRequest;
 import io.getlime.push.model.response.*;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.PushCampaignUsersRepository;
@@ -102,7 +102,7 @@ public class CampaignController {
      */
     @RequestMapping(value = "{id}/delete", method = RequestMethod.POST)
     @ResponseBody
-    public ObjectResponse<DeleteCampaignResponse> removeCampaign(@PathVariable(value = "id") Long campaignId) {
+    public ObjectResponse<DeleteCampaignResponse> deleteCampaign(@PathVariable(value = "id") Long campaignId) {
         DeleteCampaignResponse deleteCampaignResponse = new DeleteCampaignResponse();
         if (pushCampaignRepository.findOne(campaignId) == null) {
             deleteCampaignResponse.setDeleted(false);
@@ -229,9 +229,9 @@ public class CampaignController {
      * @param request List of users to remove
      * @return Response status
      */
-    @RequestMapping(value = "{id}/user/remove")
+    @RequestMapping(value = "{id}/user/remove", method = RequestMethod.PUT)
     @ResponseBody
-    public Response removeUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
+    public Response deleteUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
         Iterable<PushCampaignUser> listOfUsersFromCampaign = pushCampaignUsersRepository.findAllByCampaignId(id);
         ListOfUsers listOfUsers = request.getRequestObject();
         for (PushCampaignUser userFromCampaign : listOfUsersFromCampaign) {
@@ -253,7 +253,7 @@ public class CampaignController {
      */
     @RequestMapping(value = "{id}/test/send", method = RequestMethod.POST)
     @ResponseBody
-    public Response sendTestingCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestingCampaignRequest> request) throws PushServerException {
+    public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
         checkRequestNullity(request);
         PushCampaign campaign = pushCampaignRepository.findOne(id);
         if (campaign == null) {
