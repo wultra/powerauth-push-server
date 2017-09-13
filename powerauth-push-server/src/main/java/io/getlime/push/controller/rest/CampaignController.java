@@ -39,7 +39,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -230,7 +229,7 @@ public class CampaignController {
      * @param request List of users to remove
      * @return Response status
      */
-    @RequestMapping(value = "{id}/user/remove", method = RequestMethod.PUT)
+    @RequestMapping(value = "{id}/user/delete", method = RequestMethod.POST)
     @ResponseBody
     public Response deleteUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
         Iterable<PushCampaignUser> listOfUsersFromCampaign = pushCampaignUsersRepository.findAllByCampaignId(id);
