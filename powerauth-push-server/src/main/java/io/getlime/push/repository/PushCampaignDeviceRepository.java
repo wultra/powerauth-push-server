@@ -27,5 +27,5 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public interface PushCampaignDevicesRepository extends CrudRepository<PushCampaignDevice, Long> {
+public interface PushCampaignDeviceRepository extends CrudRepository<PushCampaignDevice, Long> {
 }

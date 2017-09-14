@@ -16,23 +16,24 @@
 
 package io.getlime.push.repository;
 
-import io.getlime.push.repository.model.AppCredentials;
+import io.getlime.push.repository.model.PushCampaignUser;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
- * Repository interface used to access app credentials database.
+ * Repository interface used to access push campaign users database.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Martin Tupy, martin.tupy.work@gmail.com
  */
+
 @Repository
-public interface AppCredentialsRepository extends CrudRepository<AppCredentials, Long> {
+public interface PushCampaignUserRepository extends PagingAndSortingRepository<PushCampaignUser, Long> {
 
-    /**
-     * Find app push service credentials for given app ID.
-     * @param appId App ID.
-     * @return Push service app credentials.
-     */
-    AppCredentials findFirstByAppId(Long appId);
-
+    PushCampaignUser findFirstByUserIdAndCampaignId(String userId, Long campaignId);
+    List<PushCampaignUser> findAllByCampaignId(Long campaignId);
+    List<PushCampaignUser> findAllByCampaignId(Long campaignId, Pageable pageable);
 }
