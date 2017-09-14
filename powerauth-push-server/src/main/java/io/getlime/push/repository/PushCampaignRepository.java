@@ -16,7 +16,7 @@
 
 package io.getlime.push.repository;
 
-import io.getlime.push.repository.model.PushCampaign;
+import io.getlime.push.repository.model.PushCampaignEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -28,13 +28,13 @@ import java.util.List;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 @Repository
-public interface PushCampaignRepository extends CrudRepository<PushCampaign, Long>{
+public interface PushCampaignRepository extends CrudRepository<PushCampaignEntity, Long>{
 
     /**
      * Finds all push campaigns that are in given send state.
      * @param sent Flag indicating if only sent campaigns should be returned, or only not sent campaigns.
      * @return Collection of campaigns in given sent state.
      */
-    List<PushCampaign> findAllBySent(Boolean sent);
+    List<PushCampaignEntity> findAllBySent(Boolean sent);
 
 }

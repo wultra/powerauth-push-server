@@ -20,12 +20,13 @@ import javax.persistence.*;
 import java.util.Date;
 
 /**
- * Class representing campaign sent via push notification.
+ * Class representing campaign devices to sent a certain message.
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-@Entity(name = "push_campaign")
-public class PushCampaign {
+
+@Entity(name = "push_campaign_device")
+public class PushCampaignDeviceEntity {
 
     @Id
     @Column(name = "id")
@@ -33,17 +34,17 @@ public class PushCampaign {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_campaign")
     private Long id;
 
-    @Column(name = "app_id", nullable = false)
-    private Long appId;
+    @Column(name = "campaign_id", nullable = false)
+    private Long campaignId;
 
-    @Column(name = "message")
-    private String message;
+    @Column(name = "platform", nullable = false)
+    private String platform;
 
-    @Column(name = "sent")
-    private boolean sent;
+    @Column(name = "push_token", nullable = false)
+    private String pushToken;
 
-    @Column(name = "timestamp_created", nullable = false)
-    private Date timestampCreated;
+    @Column(name = "status")
+    private int status;
 
     @Column(name = "timestamp_sent")
     private Date timestampSent;
@@ -56,36 +57,36 @@ public class PushCampaign {
         this.id = id;
     }
 
-    public Long getAppId() {
-        return appId;
+    public Long getCampaignId() {
+        return campaignId;
     }
 
-    public void setAppId(Long appId) {
-        this.appId = appId;
+    public void setCampaignId(Long campaignId) {
+        this.campaignId = campaignId;
     }
 
-    public String getMessage() {
-        return message;
+    public String getPlatform() {
+        return platform;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setPlatform(String platform) {
+        this.platform = platform;
     }
 
-    public boolean isSent() {
-        return sent;
+    public String getPushToken() {
+        return pushToken;
     }
 
-    public void setSent(boolean sent) {
-        this.sent = sent;
+    public void setPushToken(String pushToken) {
+        this.pushToken = pushToken;
     }
 
-    public Date getTimestampCreated() {
-        return timestampCreated;
+    public int getStatus() {
+        return status;
     }
 
-    public void setTimestampCreated(Date timestampCreated) {
-        this.timestampCreated = timestampCreated;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public Date getTimestampSent() {

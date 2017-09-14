@@ -16,9 +16,8 @@
 
 package io.getlime.push.repository;
 
-import io.getlime.push.repository.model.PushCampaignUser;
+import io.getlime.push.repository.model.PushCampaignUserEntity;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
@@ -31,9 +30,9 @@ import java.util.List;
  */
 
 @Repository
-public interface PushCampaignUserRepository extends PagingAndSortingRepository<PushCampaignUser, Long> {
+public interface PushCampaignUserRepository extends PagingAndSortingRepository<PushCampaignUserEntity, Long> {
 
-    PushCampaignUser findFirstByUserIdAndCampaignId(String userId, Long campaignId);
-    List<PushCampaignUser> findAllByCampaignId(Long campaignId);
-    List<PushCampaignUser> findAllByCampaignId(Long campaignId, Pageable pageable);
+    PushCampaignUserEntity findFirstByUserIdAndCampaignId(String userId, Long campaignId);
+    List<PushCampaignUserEntity> findAllByCampaignId(Long campaignId);
+    List<PushCampaignUserEntity> findAllByCampaignId(Long campaignId, Pageable pageable);
 }
