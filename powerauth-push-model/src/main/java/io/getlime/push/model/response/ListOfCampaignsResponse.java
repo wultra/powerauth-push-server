@@ -23,5 +23,5 @@ import java.util.ArrayList;
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-public class ListOfCampaignResponse extends ArrayList<CampaignResponse> {
+public class ListOfCampaignsResponse extends ArrayList<CampaignResponse> {
 }

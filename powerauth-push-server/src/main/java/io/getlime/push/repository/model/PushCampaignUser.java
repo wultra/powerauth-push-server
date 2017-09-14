@@ -24,13 +24,13 @@ import java.util.Date;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 
-@Entity(name = "push_campaign_users")
+@Entity(name = "push_campaign_user")
 public class PushCampaignUser {
 
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_campaign_users", sequenceName = "push_campaign_users_seq")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_campaign_users")
+    @SequenceGenerator(name = "push_campaign_user", sequenceName = "push_campaign_user_seq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_campaign_user")
     private Long id;
 
     @Column(name = "campaign_id", nullable = false)
