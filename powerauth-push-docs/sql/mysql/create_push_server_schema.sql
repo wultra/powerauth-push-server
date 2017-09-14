@@ -1,4 +1,4 @@
-CREATE TABLE `push_app_credentials` (
+CREATE TABLE `push_app_credential` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `app_id` int(11) DEFAULT NULL,
   `ios_private_key` blob,
@@ -11,7 +11,7 @@ CREATE TABLE `push_app_credentials` (
   KEY `app_id_index` (`app_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `push_device_registration` (
+CREATE TABLE `push_device` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `activation_id` varchar(37) DEFAULT NULL,
   `user_id` varchar(255) DEFAULT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE push_campaign (
   UNIQUE INDEX `id_UNIQUE` (`id` ASC))
   ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE push_campaign_users (
+CREATE TABLE push_campaign_user (
   `id` INT NOT NULL AUTO_INCREMENT,
   `campaign_id` INT NOT NULL,
   `user_id` VARCHAR(255) NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE push_campaign_users (
   UNIQUE KEY `id_UNIQUE` (`id` ASC))
   ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE push_campaign_devices (
+CREATE TABLE push_campaign_device (
   `id` INT NOT NULL AUTO_INCREMENT,
   `campaign_id` INT NULL,
   `platform` VARCHAR(20) NULL,

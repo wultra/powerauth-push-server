@@ -25,8 +25,8 @@ import java.util.Date;
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-@Entity(name = "push_device_registration")
-public class DeviceRegistration implements Serializable {
+@Entity(name = "push_device")
+public class PushDevice implements Serializable {
 
     private static final long serialVersionUID = 1530682530822178192L;
 
@@ -37,8 +37,8 @@ public class DeviceRegistration implements Serializable {
 
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_device_registration", sequenceName = "push_registration_seq")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_device_registration")
+    @SequenceGenerator(name = "push_device", sequenceName = "push_device_seq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_device")
     private Long id;
 
     @Column(name = "activation_id")

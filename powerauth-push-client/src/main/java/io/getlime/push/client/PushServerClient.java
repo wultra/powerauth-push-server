@@ -221,8 +221,8 @@ public class PushServerClient {
      * @param all true to get whole list, false to get campaigns that are only sent
      * @return List of campaigns.
      */
-    public ObjectResponse<ListOfCampaignResponse> getListOfCampaigns(boolean all) throws PushServerClientException {
-        TypeReference<ObjectResponse<ListOfCampaignResponse>> typeReference = new TypeReference<ObjectResponse<ListOfCampaignResponse>>() {
+    public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(boolean all) throws PushServerClientException {
+        TypeReference<ObjectResponse<ListOfCampaignsResponse>> typeReference = new TypeReference<ObjectResponse<ListOfCampaignsResponse>>() {
         };
         Map<String, Object> params = new HashMap<>();
         params.put("all", all);
@@ -303,7 +303,7 @@ public class PushServerClient {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
             TypeReference<Response> typeReference = new TypeReference<Response>() {
             };
-            ObjectResponse<?> response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", listOfUsers, typeReference);
+            ObjectResponse<?> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", listOfUsers, typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));

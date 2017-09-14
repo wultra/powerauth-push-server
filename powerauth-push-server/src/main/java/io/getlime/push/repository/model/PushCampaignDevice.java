@@ -25,7 +25,7 @@ import java.util.Date;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 
-@Entity
+@Entity(name = "push_campaign_device")
 public class PushCampaignDevice {
 
     @Id

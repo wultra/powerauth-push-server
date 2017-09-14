@@ -16,7 +16,7 @@
 
 package io.getlime.push.repository.converter;
 
-import io.getlime.push.repository.model.PushMessageEntity;
+import io.getlime.push.repository.model.PushMessage;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.AttributeConverter;
@@ -29,22 +29,22 @@ import javax.persistence.Converter;
  */
 @Component
 @Converter
-public class PushMessageStatusConverter implements AttributeConverter<PushMessageEntity.Status, Integer> {
+public class PushMessageStatusConverter implements AttributeConverter<PushMessage.Status, Integer> {
 
     @Override
-    public Integer convertToDatabaseColumn(PushMessageEntity.Status status) {
+    public Integer convertToDatabaseColumn(PushMessage.Status status) {
         return status.getStatus();
     }
 
     @Override
-    public PushMessageEntity.Status convertToEntityAttribute(Integer integer) {
+    public PushMessage.Status convertToEntityAttribute(Integer integer) {
         switch (integer) {
             case 0:
-                return PushMessageEntity.Status.PENDING;
+                return PushMessage.Status.PENDING;
             case 1:
-                return PushMessageEntity.Status.SENT;
+                return PushMessage.Status.SENT;
             default:
-                return PushMessageEntity.Status.FAILED;
+                return PushMessage.Status.FAILED;
         }
     }
 }

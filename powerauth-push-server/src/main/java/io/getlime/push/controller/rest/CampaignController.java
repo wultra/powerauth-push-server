@@ -30,7 +30,7 @@ import io.getlime.push.model.request.CreateCampaignRequest;
 import io.getlime.push.model.request.TestCampaignRequest;
 import io.getlime.push.model.response.*;
 import io.getlime.push.repository.PushCampaignRepository;
-import io.getlime.push.repository.PushCampaignUsersRepository;
+import io.getlime.push.repository.PushCampaignUserRepository;
 import io.getlime.push.repository.model.PushCampaign;
 import io.getlime.push.repository.model.PushCampaignUser;
 import io.getlime.push.service.PushSenderService;
@@ -56,13 +56,13 @@ import java.util.logging.Logger;
 @RequestMapping(value = "push/campaign")
 public class CampaignController {
     private PushCampaignRepository pushCampaignRepository;
-    private PushCampaignUsersRepository pushCampaignUsersRepository;
+    private PushCampaignUserRepository pushCampaignUserRepository;
     private PushSenderService pushSenderService;
 
     @Autowired
-    public CampaignController(PushCampaignRepository pushCampaignRepository, PushCampaignUsersRepository pushCampaignUsersRepository, PushSenderService pushSenderService) {
+    public CampaignController(PushCampaignRepository pushCampaignRepository, PushCampaignUserRepository pushCampaignUserRepository, PushSenderService pushSenderService) {
         this.pushCampaignRepository = pushCampaignRepository;
-        this.pushCampaignUsersRepository = pushCampaignUsersRepository;
+        this.pushCampaignUserRepository = pushCampaignUserRepository;
         this.pushSenderService = pushSenderService;
     }
 
@@ -110,9 +110,9 @@ public class CampaignController {
             pushCampaignRepository.delete(campaignId);
             deleteCampaignResponse.setDeleted(true);
         }
-        Iterable<PushCampaignUser> usersFromCampaign = pushCampaignUsersRepository.findAllByCampaignId(campaignId);
+        Iterable<PushCampaignUser> usersFromCampaign = pushCampaignUserRepository.findAllByCampaignId(campaignId);
         for (PushCampaignUser user : usersFromCampaign) {
-            pushCampaignUsersRepository.delete(user.getId());
+            pushCampaignUserRepository.delete(user.getId());
         }
         return new ObjectResponse<>(deleteCampaignResponse);
     }
@@ -126,9 +126,9 @@ public class CampaignController {
      */
     @RequestMapping(value = "list", method = RequestMethod.GET)
     @ResponseBody
-    public ObjectResponse<ListOfCampaignResponse> getListOfCampaigns(@RequestParam(value = "all") boolean all) {
+    public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(@RequestParam(value = "all") boolean all) {
         Iterable<PushCampaign> campaignList;
-        ListOfCampaignResponse listOfCampaignResponse = new ListOfCampaignResponse();
+        ListOfCampaignsResponse listOfCampaignsResponse = new ListOfCampaignsResponse();
         if (all) {
             campaignList = pushCampaignRepository.findAll();
         } else {
@@ -141,9 +141,9 @@ public class CampaignController {
             campaignResponse.setSent(campaign.isSent());
             PushMessageBody pushMessageBody = deserializePushMessageBody(campaign.getMessage());
             campaignResponse.setMessage(pushMessageBody);
-            listOfCampaignResponse.add(campaignResponse);
+            listOfCampaignsResponse.add(campaignResponse);
         }
-        return new ObjectResponse<>(listOfCampaignResponse);
+        return new ObjectResponse<>(listOfCampaignsResponse);
     }
 
     /**
@@ -185,12 +185,12 @@ public class CampaignController {
         }
         ListOfUsers listOfUsers = request.getRequestObject();
         for (String user : listOfUsers) {
-            if (pushCampaignUsersRepository.findFirstByUserIdAndCampaignId(user, campaignId) == null) {
+            if (pushCampaignUserRepository.findFirstByUserIdAndCampaignId(user, campaignId) == null) {
                 PushCampaignUser pushCampaignUser = new PushCampaignUser();
                 pushCampaignUser.setCampaignId(campaignId);
                 pushCampaignUser.setUserId(user);
                 pushCampaignUser.setTimestampAdded(new Date());
-                pushCampaignUsersRepository.save(pushCampaignUser);
+                pushCampaignUserRepository.save(pushCampaignUser);
             } else {
                 Logger.getLogger(CampaignController.class.getName()).log(Level.WARNING, "Duplicate user entry for push campaign: " + user);
             }
@@ -209,7 +209,7 @@ public class CampaignController {
     @ResponseBody
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(@PathVariable(value = "id") Long id, Pageable pageable) {
         ListOfUsersFromCampaignResponse listOfUsersFromCampaignResponse = new ListOfUsersFromCampaignResponse();
-        List<PushCampaignUser> users = pushCampaignUsersRepository.findAllByCampaignId(id, pageable);
+        List<PushCampaignUser> users = pushCampaignUserRepository.findAllByCampaignId(id, pageable);
         ListOfUsers listOfUsers = new ListOfUsers();
         for (PushCampaignUser user : users) {
             listOfUsers.add(user.getUserId());
@@ -232,12 +232,12 @@ public class CampaignController {
     @RequestMapping(value = "{id}/user/delete", method = RequestMethod.POST)
     @ResponseBody
     public Response deleteUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
-        Iterable<PushCampaignUser> listOfUsersFromCampaign = pushCampaignUsersRepository.findAllByCampaignId(id);
+        Iterable<PushCampaignUser> listOfUsersFromCampaign = pushCampaignUserRepository.findAllByCampaignId(id);
         ListOfUsers listOfUsers = request.getRequestObject();
         for (PushCampaignUser userFromCampaign : listOfUsersFromCampaign) {
             for (String user : listOfUsers) {
                 if (user.equals(userFromCampaign.getUserId())) {
-                    pushCampaignUsersRepository.delete(userFromCampaign.getId());
+                    pushCampaignUserRepository.delete(userFromCampaign.getId());
                 }
             }
         }

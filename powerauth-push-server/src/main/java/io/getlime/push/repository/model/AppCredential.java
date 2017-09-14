@@ -24,15 +24,15 @@ import java.io.Serializable;
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-@Entity(name = "push_app_credentials")
-public class AppCredentials implements Serializable {
+@Entity(name = "push_app_credential")
+public class AppCredential implements Serializable {
 
     private static final long serialVersionUID = -8904070389354612019L;
 
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_app_credentials", sequenceName = "push_credentials_seq")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_app_credentials")
+    @SequenceGenerator(name = "push_app_credential", sequenceName = "push_credential_seq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_app_credential")
     private Long id;
 
     @Column(name = "app_id", nullable = false, updatable = false)
