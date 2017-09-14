@@ -30,9 +30,9 @@ import io.getlime.push.model.entity.PushSendResult;
 import io.getlime.push.repository.AppCredentialRepository;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.PushMessageRepository;
-import io.getlime.push.repository.model.AppCredential;
-import io.getlime.push.repository.model.PushDevice;
-import io.getlime.push.repository.model.PushMessage;
+import io.getlime.push.repository.model.AppCredentialEntity;
+import io.getlime.push.repository.model.PushDeviceEntity;
+import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmNotification;
 import io.getlime.push.service.fcm.FcmSendRequest;
@@ -151,7 +151,7 @@ public class PushSenderService {
     public PushSendResult send(Long appId, List<io.getlime.push.model.entity.PushMessage> pushMessageList) throws InterruptedException, IOException {
 
         // Get APNs and FCM credentials
-        AppCredential credentials = this.appCredentialRepository.findFirstByAppId(appId);
+        AppCredentialEntity credentials = this.appCredentialRepository.findFirstByAppId(appId);
 
         // Is there such app?
         if (credentials == null) {
@@ -197,7 +197,7 @@ public class PushSenderService {
 
             // Get user device registrations
             String activationId = pushMessage.getActivationId();
-            List<PushDevice> registrations;
+            List<PushDeviceEntity> registrations;
             if (activationId != null) { // in case the message should go to the specific device
                 registrations = pushDeviceRepository.findByUserIdAndAppIdAndActivationId(userId, appId, activationId);
             } else {
@@ -205,10 +205,10 @@ public class PushSenderService {
             }
 
             // Send push messages to given devices
-            for (final PushDevice registration : registrations) {
+            for (final PushDeviceEntity registration : registrations) {
 
                 // Store the message in the database
-                final PushMessage sentMessage = this.storePushMessageInDatabase(pushMessage, registration.getId());
+                final PushMessageEntity sentMessage = this.storePushMessageInDatabase(pushMessage, registration.getId());
 
                 // Check if given push is not personal, or if it is, that registration is in active state.
                 // This avoids sending personal notifications to registrations that are blocked or removed.
@@ -218,7 +218,7 @@ public class PushSenderService {
 
                     // Send a push message to the provided mobile platform.
                     String platform = registration.getPlatform();
-                    if (platform.equals(PushDevice.Platform.iOS)) { // iOS - APNs
+                    if (platform.equals(PushDeviceEntity.Platform.iOS)) { // iOS - APNs
 
                         final String token = TokenUtil.sanitizeTokenString(registration.getPushToken());
                         final String payload = buildApnsPayload(pushMessage);
@@ -240,7 +240,7 @@ public class PushSenderService {
                                     if (pushNotificationResponse != null) {
                                         if (!pushNotificationResponse.isAccepted()) {
                                             Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: " + pushNotificationResponse.getRejectionReason());
-                                            sentMessage.setStatus(PushMessage.Status.FAILED);
+                                            sentMessage.setStatus(PushMessageEntity.Status.FAILED);
                                             pushMessageRepository.save(sentMessage);
 
                                             result.getIos().setFailed(result.getIos().getFailed() + 1);
@@ -255,13 +255,13 @@ public class PushSenderService {
                                                 Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "\t... and the token is invalid as of " + pushNotificationResponse.getTokenInvalidationTimestamp());
                                             }
                                         } else {
-                                            sentMessage.setStatus(PushMessage.Status.SENT);
+                                            sentMessage.setStatus(PushMessageEntity.Status.SENT);
                                             pushMessageRepository.save(sentMessage);
                                             result.getIos().setSent(result.getIos().getSent() + 1);
                                         }
                                     } else {
                                         Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: unknown error, will retry");
-                                        sentMessage.setStatus(PushMessage.Status.PENDING);
+                                        sentMessage.setStatus(PushMessageEntity.Status.PENDING);
                                         pushMessageRepository.save(sentMessage);
                                     }
                                 } catch (final ExecutionException e) {
@@ -275,7 +275,7 @@ public class PushSenderService {
 
                         });
 
-                    } else if (platform.equals(PushDevice.Platform.Android)) { // Android - FCM
+                    } else if (platform.equals(PushDeviceEntity.Platform.Android)) { // Android - FCM
 
                         FcmSendRequest request = new FcmSendRequest();
                         request.setTo(registration.getPushToken());
@@ -296,7 +296,7 @@ public class PushSenderService {
                         future.addCallback(new ListenableFutureCallback<ResponseEntity<String>>() {
                             @Override
                             public void onFailure(Throwable throwable) {
-                                sentMessage.setStatus(PushMessage.Status.FAILED);
+                                sentMessage.setStatus(PushMessageEntity.Status.FAILED);
                                 pushMessageRepository.save(sentMessage);
                                 result.getAndroid().setFailed(result.getAndroid().getFailed() + 1);
                                 Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway:" + throwable.getLocalizedMessage());
@@ -306,7 +306,7 @@ public class PushSenderService {
 
                             @Override
                             public void onSuccess(ResponseEntity<String> stringResponseEntity) {
-                                sentMessage.setStatus(PushMessage.Status.SENT);
+                                sentMessage.setStatus(PushMessageEntity.Status.SENT);
                                 pushMessageRepository.save(sentMessage);
                                 result.getAndroid().setSent(result.getAndroid().getSent() + 1);
                                 phaser.arriveAndDeregister();
@@ -331,16 +331,16 @@ public class PushSenderService {
      * @return New database entity with push message information.
      * @throws JsonProcessingException In case message body JSON serialization fails.
      */
-    private PushMessage storePushMessageInDatabase(io.getlime.push.model.entity.PushMessage pushMessage, Long registrationId) throws JsonProcessingException {
+    private PushMessageEntity storePushMessageInDatabase(io.getlime.push.model.entity.PushMessage pushMessage, Long registrationId) throws JsonProcessingException {
         // Store the message in database
-        PushMessage entity = new PushMessage();
+        PushMessageEntity entity = new PushMessageEntity();
         entity.setDeviceRegistrationId(registrationId);
         entity.setUserId(pushMessage.getUserId());
         entity.setActivationId(pushMessage.getActivationId());
         entity.setEncrypted(pushMessage.getEncrypted());
         entity.setPersonal(pushMessage.getPersonal());
         entity.setSilent(pushMessage.getSilent());
-        entity.setStatus(PushMessage.Status.PENDING);
+        entity.setStatus(PushMessageEntity.Status.PENDING);
         entity.setTimestampCreated(new Date());
         ObjectMapper mapper = new ObjectMapper();
         String messageBody = mapper.writeValueAsString(pushMessage.getMessage());

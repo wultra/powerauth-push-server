@@ -31,8 +31,8 @@ import io.getlime.push.model.request.TestCampaignRequest;
 import io.getlime.push.model.response.*;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.PushCampaignUserRepository;
-import io.getlime.push.repository.model.PushCampaign;
-import io.getlime.push.repository.model.PushCampaignUser;
+import io.getlime.push.repository.model.PushCampaignEntity;
+import io.getlime.push.repository.model.PushCampaignUserEntity;
 import io.getlime.push.service.PushSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -81,7 +81,7 @@ public class CampaignController {
         if (appId == null) {
             throw new PushServerException("Empty appId attribute");
         }
-        PushCampaign campaign = new PushCampaign();
+        PushCampaignEntity campaign = new PushCampaignEntity();
         campaign.setAppId(appId);
         campaign.setSent(false);
         campaign.setTimestampCreated(new Date());
@@ -110,8 +110,8 @@ public class CampaignController {
             pushCampaignRepository.delete(campaignId);
             deleteCampaignResponse.setDeleted(true);
         }
-        Iterable<PushCampaignUser> usersFromCampaign = pushCampaignUserRepository.findAllByCampaignId(campaignId);
-        for (PushCampaignUser user : usersFromCampaign) {
+        Iterable<PushCampaignUserEntity> usersFromCampaign = pushCampaignUserRepository.findAllByCampaignId(campaignId);
+        for (PushCampaignUserEntity user : usersFromCampaign) {
             pushCampaignUserRepository.delete(user.getId());
         }
         return new ObjectResponse<>(deleteCampaignResponse);
@@ -127,14 +127,14 @@ public class CampaignController {
     @RequestMapping(value = "list", method = RequestMethod.GET)
     @ResponseBody
     public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(@RequestParam(value = "all") boolean all) {
-        Iterable<PushCampaign> campaignList;
+        Iterable<PushCampaignEntity> campaignList;
         ListOfCampaignsResponse listOfCampaignsResponse = new ListOfCampaignsResponse();
         if (all) {
             campaignList = pushCampaignRepository.findAll();
         } else {
             campaignList = pushCampaignRepository.findAllBySent(false);
         }
-        for (PushCampaign campaign : campaignList) {
+        for (PushCampaignEntity campaign : campaignList) {
             CampaignResponse campaignResponse = new CampaignResponse();
             campaignResponse.setId(campaign.getId());
             campaignResponse.setAppId(campaign.getAppId());
@@ -155,7 +155,7 @@ public class CampaignController {
     @RequestMapping(value = "{id}/detail", method = RequestMethod.GET)
     @ResponseBody
     public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
-        PushCampaign campaign = pushCampaignRepository.findOne(campaignId);
+        PushCampaignEntity campaign = pushCampaignRepository.findOne(campaignId);
         if (campaign == null) {
             throw new PushServerException("Campaign with entered ID does not exist");
         }
@@ -186,11 +186,11 @@ public class CampaignController {
         ListOfUsers listOfUsers = request.getRequestObject();
         for (String user : listOfUsers) {
             if (pushCampaignUserRepository.findFirstByUserIdAndCampaignId(user, campaignId) == null) {
-                PushCampaignUser pushCampaignUser = new PushCampaignUser();
-                pushCampaignUser.setCampaignId(campaignId);
-                pushCampaignUser.setUserId(user);
-                pushCampaignUser.setTimestampAdded(new Date());
-                pushCampaignUserRepository.save(pushCampaignUser);
+                PushCampaignUserEntity pushCampaignUserEntity = new PushCampaignUserEntity();
+                pushCampaignUserEntity.setCampaignId(campaignId);
+                pushCampaignUserEntity.setUserId(user);
+                pushCampaignUserEntity.setTimestampAdded(new Date());
+                pushCampaignUserRepository.save(pushCampaignUserEntity);
             } else {
                 Logger.getLogger(CampaignController.class.getName()).log(Level.WARNING, "Duplicate user entry for push campaign: " + user);
             }
@@ -209,9 +209,9 @@ public class CampaignController {
     @ResponseBody
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(@PathVariable(value = "id") Long id, Pageable pageable) {
         ListOfUsersFromCampaignResponse listOfUsersFromCampaignResponse = new ListOfUsersFromCampaignResponse();
-        List<PushCampaignUser> users = pushCampaignUserRepository.findAllByCampaignId(id, pageable);
+        List<PushCampaignUserEntity> users = pushCampaignUserRepository.findAllByCampaignId(id, pageable);
         ListOfUsers listOfUsers = new ListOfUsers();
-        for (PushCampaignUser user : users) {
+        for (PushCampaignUserEntity user : users) {
             listOfUsers.add(user.getUserId());
         }
         listOfUsersFromCampaignResponse.setCampaingId(id);
@@ -232,9 +232,9 @@ public class CampaignController {
     @RequestMapping(value = "{id}/user/delete", method = RequestMethod.POST)
     @ResponseBody
     public Response deleteUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
-        Iterable<PushCampaignUser> listOfUsersFromCampaign = pushCampaignUserRepository.findAllByCampaignId(id);
+        Iterable<PushCampaignUserEntity> listOfUsersFromCampaign = pushCampaignUserRepository.findAllByCampaignId(id);
         ListOfUsers listOfUsers = request.getRequestObject();
-        for (PushCampaignUser userFromCampaign : listOfUsersFromCampaign) {
+        for (PushCampaignUserEntity userFromCampaign : listOfUsersFromCampaign) {
             for (String user : listOfUsers) {
                 if (user.equals(userFromCampaign.getUserId())) {
                     pushCampaignUserRepository.delete(userFromCampaign.getId());
@@ -255,7 +255,7 @@ public class CampaignController {
     @ResponseBody
     public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
         checkRequestNullity(request);
-        PushCampaign campaign = pushCampaignRepository.findOne(id);
+        PushCampaignEntity campaign = pushCampaignRepository.findOne(id);
         if (campaign == null) {
             throw new PushServerException("Campaign with entered id does not exist");
         }

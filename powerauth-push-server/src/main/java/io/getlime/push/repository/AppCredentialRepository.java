@@ -16,7 +16,7 @@
 
 package io.getlime.push.repository;
 
-import io.getlime.push.repository.model.AppCredential;
+import io.getlime.push.repository.model.AppCredentialEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -26,13 +26,13 @@ import org.springframework.stereotype.Repository;
  * @author Petr Dvorak, petr@lime-company.eu
  */
 @Repository
-public interface AppCredentialRepository extends CrudRepository<AppCredential, Long> {
+public interface AppCredentialRepository extends CrudRepository<AppCredentialEntity, Long> {
 
     /**
      * Find app push service credentials for given app ID.
      * @param appId App ID.
      * @return Push service app credentials.
      */
-    AppCredential findFirstByAppId(Long appId);
+    AppCredentialEntity findFirstByAppId(Long appId);
 
 }

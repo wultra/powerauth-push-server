@@ -26,7 +26,7 @@ import java.util.Date;
  * @author Petr Dvorak, petr@lime-company.eu
  */
 @Entity(name = "push_device")
-public class PushDevice implements Serializable {
+public class PushDeviceEntity implements Serializable {
 
     private static final long serialVersionUID = 1530682530822178192L;
 

@@ -16,7 +16,7 @@
 
 package io.getlime.push.repository;
 
-import io.getlime.push.repository.model.PushDevice;
+import io.getlime.push.repository.model.PushDeviceEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -28,7 +28,7 @@ import java.util.List;
  * @author Petr Dvorak, petr@lime-company.eu
  */
 @Repository
-public interface PushDeviceRepository extends CrudRepository<PushDevice, Long> {
+public interface PushDeviceRepository extends CrudRepository<PushDeviceEntity, Long> {
 
     /**
      * Find first device for given app ID and push token.
@@ -36,14 +36,14 @@ public interface PushDeviceRepository extends CrudRepository<PushDevice, Long> {
      * @param pushToken Push token.
      * @return Device registration with provided values.
      */
-    PushDevice findFirstByAppIdAndPushToken(Long appId, String pushToken);
+    PushDeviceEntity findFirstByAppIdAndPushToken(Long appId, String pushToken);
 
     /**
      * Find all device registrations by given activation ID. In normal case, the list will contain only one value.
      * @param activationId Activation ID.
      * @return List of device registrations.
      */
-    List<PushDevice> findByActivationId(String activationId);
+    List<PushDeviceEntity> findByActivationId(String activationId);
 
     /**
      * Find all device registration by given user ID and app ID. This list represents all devices that a single user
@@ -52,7 +52,7 @@ public interface PushDeviceRepository extends CrudRepository<PushDevice, Long> {
      * @param appId App ID.
      * @return List of device registrations.
      */
-    List<PushDevice> findByUserIdAndAppId(String userId, Long appId);
+    List<PushDeviceEntity> findByUserIdAndAppId(String userId, Long appId);
 
     /**
      * Find all device registration by given user ID, app ID and activation ID. This list should contain one record
@@ -62,6 +62,6 @@ public interface PushDeviceRepository extends CrudRepository<PushDevice, Long> {
      * @param activationId Activation ID.
      * @return List of device registrations.
      */
-    List<PushDevice> findByUserIdAndAppIdAndActivationId(String userId, Long appId, String activationId);
+    List<PushDeviceEntity> findByUserIdAndAppIdAndActivationId(String userId, Long appId, String activationId);
 
 }
