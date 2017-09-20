@@ -80,7 +80,7 @@ public class DeviceController {
             registration.setAppId(appId);
             registration.setPushToken(pushToken);
         }
-        registration.setLastRegistered(new Date());
+        registration.setTimestampCreated(new Date());
         registration.setPlatform(platform);
         if (activationId != null) {
             final GetActivationStatusResponse activation = client.getActivationStatus(activationId);

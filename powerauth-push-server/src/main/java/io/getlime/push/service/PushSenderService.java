@@ -25,7 +25,7 @@ import com.turo.pushy.apns.proxy.ProxyHandlerFactory;
 import com.turo.pushy.apns.util.ApnsPayloadBuilder;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.apns.util.TokenUtil;
-import io.getlime.push.configuration.PowerAuthPushServiceConfiguration;
+import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.model.entity.PushSendResult;
 import io.getlime.push.repository.AppCredentialRepository;
 import io.getlime.push.repository.PushDeviceRepository;
@@ -69,7 +69,7 @@ public class PushSenderService {
     private AppCredentialRepository appCredentialRepository;
     private PushDeviceRepository pushDeviceRepository;
     private PushMessageRepository pushMessageRepository;
-    private PowerAuthPushServiceConfiguration pushServiceConfiguration;
+    private PushServiceConfiguration pushServiceConfiguration;
 
     /**
      * Constructor that autowires required repositories.
@@ -83,7 +83,7 @@ public class PushSenderService {
             AppCredentialRepository appCredentialRepository,
             PushDeviceRepository pushDeviceRepository,
             PushMessageRepository pushMessageRepository,
-            PowerAuthPushServiceConfiguration pushServiceConfiguration
+            PushServiceConfiguration pushServiceConfiguration
     ) {
         this.appCredentialRepository = appCredentialRepository;
         this.pushDeviceRepository = pushDeviceRepository;

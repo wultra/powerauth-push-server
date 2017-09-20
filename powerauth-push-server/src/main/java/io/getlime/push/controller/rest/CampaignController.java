@@ -189,7 +189,7 @@ public class CampaignController {
                 PushCampaignUserEntity pushCampaignUserEntity = new PushCampaignUserEntity();
                 pushCampaignUserEntity.setCampaignId(campaignId);
                 pushCampaignUserEntity.setUserId(user);
-                pushCampaignUserEntity.setTimestampAdded(new Date());
+                pushCampaignUserEntity.setTimestampCreated(new Date());
                 pushCampaignUserRepository.save(pushCampaignUserEntity);
             } else {
                 Logger.getLogger(CampaignController.class.getName()).log(Level.WARNING, "Duplicate user entry for push campaign: " + user);

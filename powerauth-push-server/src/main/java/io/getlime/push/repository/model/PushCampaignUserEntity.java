@@ -39,8 +39,8 @@ public class PushCampaignUserEntity {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(name = "timestamp_added", nullable = false)
-    private Date timestampAdded;
+    @Column(name = "timestamp_created", nullable = false)
+    private Date timestampCreated;
 
     public Long getId() {
         return id;
@@ -66,11 +66,11 @@ public class PushCampaignUserEntity {
         this.userId = userId;
     }
 
-    public Date getTimestampAdded() {
-        return timestampAdded;
+    public Date getTimestampCreated() {
+        return timestampCreated;
     }
 
-    public void setTimestampAdded(Date timestampAdded) {
-        this.timestampAdded = timestampAdded;
+    public void setTimestampCreated(Date timestampCreated) {
+        this.timestampCreated = timestampCreated;
     }
 }

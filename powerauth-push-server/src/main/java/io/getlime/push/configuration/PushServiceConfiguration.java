@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Petr Dvorak, petr@lime-company.eu
  */
 @Configuration
-public class PowerAuthPushServiceConfiguration {
+public class PushServiceConfiguration {
 
     @Value("${powerauth.push.service.applicationName}")
     private String pushServerName;

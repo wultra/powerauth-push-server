@@ -41,7 +41,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "push/message")
-public class PushSendingController {
+public class PushMessageController {
 
     @Autowired
     private PushSenderService pushSenderService;
