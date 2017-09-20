@@ -106,7 +106,7 @@ public class PushServerClient {
      *
      * @return True if service is running.
      */
-    public boolean getServiceStatus() {
+    public boolean getServiceStatus() throws PushServerClientException {
         TypeReference<ServiceStatusResponse> typeReference = new TypeReference<ServiceStatusResponse>() {
         };
         ObjectResponse<?> response = getObjectImpl("/push/service/status", null, typeReference);
