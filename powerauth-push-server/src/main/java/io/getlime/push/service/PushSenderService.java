@@ -26,6 +26,7 @@ import com.turo.pushy.apns.util.ApnsPayloadBuilder;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.apns.util.TokenUtil;
 import io.getlime.push.configuration.PushServiceConfiguration;
+import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushSendResult;
 import io.getlime.push.repository.AppCredentialRepository;
 import io.getlime.push.repository.PushDeviceRepository;
@@ -43,7 +44,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-
 import javax.net.ssl.SSLException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -65,57 +65,184 @@ import java.util.logging.Logger;
  */
 @Service
 public class PushSenderService {
-
     private AppCredentialRepository appCredentialRepository;
     private PushDeviceRepository pushDeviceRepository;
     private PushMessageRepository pushMessageRepository;
     private PushServiceConfiguration pushServiceConfiguration;
 
-    /**
-     * Constructor that autowires required repositories.
-     * @param appCredentialRepository Repository with app credentials.
-     * @param pushDeviceRepository Repository with device registrations.
-     * @param pushMessageRepository Repository with logged push messages.
-     * @param pushServiceConfiguration Push Service Configuration
-     */
     @Autowired
-    public PushSenderService(
-            AppCredentialRepository appCredentialRepository,
-            PushDeviceRepository pushDeviceRepository,
-            PushMessageRepository pushMessageRepository,
-            PushServiceConfiguration pushServiceConfiguration
-    ) {
+    public PushSenderService(AppCredentialRepository appCredentialRepository,
+                             PushDeviceRepository pushDeviceRepository,
+                             PushMessageRepository pushMessageRepository,
+                             PushServiceConfiguration pushServiceConfiguration) {
         this.appCredentialRepository = appCredentialRepository;
         this.pushDeviceRepository = pushDeviceRepository;
         this.pushMessageRepository = pushMessageRepository;
         this.pushServiceConfiguration = pushServiceConfiguration;
     }
 
-    private ApnsClientBuilder prepareApnsClient() throws SSLException {
-        // Prepare APNs client builder
-        final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
 
-        // Prepare proxy settings for APNs
-        if (pushServiceConfiguration.isApnsProxyEnabled()) {
-            String proxyUrl = pushServiceConfiguration.getApnsProxyUrl();
-            int proxyPort = pushServiceConfiguration.getApnsProxyPort();
-            String proxyUsername = pushServiceConfiguration.getApnsProxyUsername();
-            String proxyPassword = pushServiceConfiguration.getApnsProxyPassword();
-
-            // Null the credentials, if they are empty
-            if (proxyUsername != null && proxyUsername.isEmpty()) {
-                proxyUsername = null;
-            }
-            if (proxyPassword != null && proxyPassword.isEmpty()) {
-                proxyPassword = null;
-            }
-
-            ProxyHandlerFactory proxyHandlerFactory = new HttpProxyHandlerFactory(new InetSocketAddress(proxyUrl, proxyPort), proxyUsername, proxyPassword);
-            apnsClientBuilder.setProxyHandlerFactory(proxyHandlerFactory);
+    /**
+     * Send push notifications to given application.
+     * @param appId App ID used for addressing push messages. Required so that appropriate APNs/FCM credentials can be obtained.
+     * @param pushMessageList List with push message objects.
+     * @return Result of this batch sending.
+     * @throws InterruptedException In case sending is interrupted.
+     * @throws IOException In case certificate data cannot be read.
+     */
+    public PushSendResult send(Long appId, List<PushMessage> pushMessageList) throws InterruptedException, IOException {
+        AppCredentialEntity credentials = appCredentialRepository.findFirstByAppId(appId);
+        if (credentials == null) {
+            throw new IllegalArgumentException("Application not found");
         }
+        final String iosTopic = credentials.getIosBundle();
+        final ApnsClient apnsClient = prepareApnsClient(credentials);
+        final FcmClient fcmClient = prepareFcmClient(credentials.getAndroidServerKey());
+        final Phaser phaser = new Phaser(1);
+        final PushSendResult result = new PushSendResult();
 
-        // Build a client and connect
-        return apnsClientBuilder;
+        // Send push message batch
+        for (PushMessage pushMessage : pushMessageList) {
+            List<PushDeviceEntity> devices = getPushDevices(appId, pushMessage);
+            for (final PushDeviceEntity device : devices) {
+                final PushMessageEntity sentMessage = storePushMessageInDatabase(pushMessage, device.getId());
+                // Check if given push is not personal, or if it is, that device is in active state.
+                // This avoids sending personal notifications to devices that are blocked or removed.
+                if (!pushMessage.getPersonal() || device.getActive()) {
+                    phaser.register();
+                    String platform = device.getPlatform();
+                    if (platform.equals(PushDeviceEntity.Platform.iOS)) {
+                        sendMessageToIos(iosTopic, apnsClient, phaser, result, pushMessage, device, sentMessage);
+                    }
+                    else if (platform.equals(PushDeviceEntity.Platform.Android)) {
+                        sendMessageToAndroid(fcmClient, phaser, result, pushMessage, device, sentMessage);
+                    }
+                }
+            }
+        }
+        phaser.arriveAndAwaitAdvance();
+        return result;
+    }
+
+    // Send message to iOS platform
+    private void sendMessageToIos(String iosTopic, final ApnsClient apnsClient, final Phaser phaser, final PushSendResult result, PushMessage pushMessage, final PushDeviceEntity device, final PushMessageEntity sentMessage) throws InterruptedException {
+        final String token = TokenUtil.sanitizeTokenString(device.getPushToken());
+        final String payload = buildApnsPayload(pushMessage);
+        Date validUntil = pushMessage.getMessage().getValidUntil();
+        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushMessage.getMessage().getCollapseKey());
+        final Future<PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
+        sendNotificationFuture.addListener(new GenericFutureListener<Future<PushNotificationResponse<SimpleApnsPushNotification>>>() {
+            @Override
+            public void operationComplete(Future<PushNotificationResponse<SimpleApnsPushNotification>> future) throws Exception {
+                try {
+                    final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = future.get();
+                    result.getIos().setTotal(result.getIos().getTotal() + 1);
+                    if (pushNotificationResponse != null) {
+                        if (!pushNotificationResponse.isAccepted()) {
+                            Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: " + pushNotificationResponse.getRejectionReason());
+                            sentMessage.setStatus(PushMessageEntity.Status.FAILED);
+                            pushMessageRepository.save(sentMessage);
+                            result.getIos().setFailed(result.getIos().getFailed() + 1);
+                            if (pushNotificationResponse.getRejectionReason().equals("BadDeviceToken")) {
+                                pushDeviceRepository.delete(device);
+                                Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "\t... due to bad device token value.");
+                            }
+                            if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
+                                pushDeviceRepository.delete(device);
+                                Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "\t... and the token is invalid as of " + pushNotificationResponse.getTokenInvalidationTimestamp());
+                            }
+                        } else {
+                            sentMessage.setStatus(PushMessageEntity.Status.SENT);
+                            pushMessageRepository.save(sentMessage);
+                            result.getIos().setSent(result.getIos().getSent() + 1);
+                        }
+                    } else {
+                        Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: unknown error, will retry");
+                        sentMessage.setStatus(PushMessageEntity.Status.PENDING);
+                        pushMessageRepository.save(sentMessage);
+                    }
+                } catch (final ExecutionException e) {
+                    if (e.getCause() instanceof ClientNotConnectedException) {
+                        apnsClient.getReconnectionFuture().await();
+                    }
+                } finally {
+                    phaser.arriveAndDeregister();
+                }
+            }
+        });
+    }
+
+    // Send message to Android platform
+    private void sendMessageToAndroid(FcmClient fcmClient, final Phaser phaser, final PushSendResult result, PushMessage pushMessage, PushDeviceEntity device, final PushMessageEntity sentMessage) {
+        FcmSendRequest request = new FcmSendRequest();
+        request.setTo(device.getPushToken());
+        request.setData(pushMessage.getMessage().getExtras());
+        request.setCollapseKey(pushMessage.getMessage().getCollapseKey());
+        if (!pushMessage.getSilent()) {
+            FcmNotification notification = new FcmNotification();
+            notification.setTitle(pushMessage.getMessage().getTitle());
+            notification.setBody(pushMessage.getMessage().getBody());
+            notification.setSound(pushMessage.getMessage().getSound());
+            notification.setTag(pushMessage.getMessage().getCategory());
+            request.setNotification(notification);
+        }
+        final ListenableFuture<ResponseEntity<String>> future = fcmClient.exchange(request);
+        result.getAndroid().setTotal(result.getAndroid().getTotal() + 1);
+        future.addCallback(new ListenableFutureCallback<ResponseEntity<String>>() {
+            @Override
+            public void onFailure(Throwable throwable) {
+                sentMessage.setStatus(PushMessageEntity.Status.FAILED);
+                pushMessageRepository.save(sentMessage);
+                result.getAndroid().setFailed(result.getAndroid().getFailed() + 1);
+                Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway:" + throwable.getLocalizedMessage());
+                Logger.getLogger(PushSenderService.class.getName()).log(Level.INFO, throwable.getLocalizedMessage());
+                phaser.arriveAndDeregister();
+            }
+            @Override
+            public void onSuccess(ResponseEntity<String> stringResponseEntity) {
+                sentMessage.setStatus(PushMessageEntity.Status.SENT);
+                pushMessageRepository.save(sentMessage);
+                result.getAndroid().setSent(result.getAndroid().getSent() + 1);
+                phaser.arriveAndDeregister();
+            }
+        });
+    }
+
+    // If application exists return list of devices related to that app
+    private List<PushDeviceEntity> getPushDevices(Long appId, PushMessage pushMessage) {
+        String userId = pushMessage.getUserId();
+        if (userId == null || userId.isEmpty()) {
+            throw new IllegalArgumentException("No userId was specified");
+        }
+        String activationId = pushMessage.getActivationId();
+        List<PushDeviceEntity> devices;
+        if (activationId != null) { // in case the message should go to the specific device
+            devices = pushDeviceRepository.findByUserIdAndAppIdAndActivationId(userId, appId, activationId);
+        } else {
+            devices = pushDeviceRepository.findByUserIdAndAppId(userId, appId);
+        }
+        return devices;
+    }
+
+    private ApnsClient prepareApnsClient(AppCredentialEntity credentials) throws IOException, InterruptedException {
+        final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
+        setApnsClientProxy(apnsClientBuilder);
+        try {
+            ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(credentials.getIosPrivateKey()), credentials.getIosTeamId(), credentials.getIosKeyId());
+            apnsClientBuilder.setSigningKey(key);
+        } catch (InvalidKeyException | NoSuchAlgorithmException e) {
+            Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Invalid private key");
+            throw new IllegalArgumentException("Invalid private key");
+        }
+        final ApnsClient apnsClient = apnsClientBuilder.build();
+        final Future<Void> future;
+        if (pushServiceConfiguration.isApnsUseDevelopment()) {
+            future = apnsClient.connect(ApnsClient.DEVELOPMENT_APNS_HOST);
+        } else {
+            future = apnsClient.connect(ApnsClient.PRODUCTION_APNS_HOST);
+        }
+        future.await();
+        return apnsClient;
     }
 
     private FcmClient prepareFcmClient(String serverKey) {
@@ -126,202 +253,32 @@ public class PushSenderService {
             int proxyPort = pushServiceConfiguration.getFcmProxyPort();
             String proxyUsername = pushServiceConfiguration.getFcmProxyUsername();
             String proxyPassword = pushServiceConfiguration.getFcmProxyPassword();
-
-            // Null the credentials, if they are empty
-            if (proxyUsername != null && proxyUsername.isEmpty()) {
-                proxyUsername = null;
-            }
-            if (proxyPassword != null && proxyPassword.isEmpty()) {
-                proxyPassword = null;
-            }
-
+            setCredentialsToNull(proxyUsername, proxyPassword);
             client.setProxy(proxyUrl, proxyPort, proxyUsername, proxyPassword);
         }
         return client;
     }
 
-    /**
-     * Send push notifications to given application.
-     * @param appId App ID used for addressing push messages. Required so that appropriate APNs/FCM credentials can be obtained.
-     * @param pushMessageList List with push message objects.
-     * @return Result of this batch sending.
-     * @throws InterruptedException In case sending is interrupted.
-     * @throws IOException In case certificate data cannot be read.
-     */
-    public PushSendResult send(Long appId, List<io.getlime.push.model.entity.PushMessage> pushMessageList) throws InterruptedException, IOException {
-
-        // Get APNs and FCM credentials
-        AppCredentialEntity credentials = this.appCredentialRepository.findFirstByAppId(appId);
-
-        // Is there such app?
-        if (credentials == null) {
-            throw new IllegalArgumentException("Application not found");
+    private void setApnsClientProxy(ApnsClientBuilder apnsClientBuilder) throws SSLException {
+        // Prepare proxy settings for APNs
+        if (pushServiceConfiguration.isApnsProxyEnabled()) {
+            String proxyUrl = pushServiceConfiguration.getApnsProxyUrl();
+            int proxyPort = pushServiceConfiguration.getApnsProxyPort();
+            String proxyUsername = pushServiceConfiguration.getApnsProxyUsername();
+            String proxyPassword = pushServiceConfiguration.getApnsProxyPassword();
+            setCredentialsToNull(proxyUsername, proxyPassword);
+            ProxyHandlerFactory proxyHandlerFactory = new HttpProxyHandlerFactory(new InetSocketAddress(proxyUrl, proxyPort), proxyUsername, proxyPassword);
+            apnsClientBuilder.setProxyHandlerFactory(proxyHandlerFactory);
         }
+    }
 
-        // Prepare client for APNs
-        final String iosTopic = credentials.getIosBundle();
-        final ApnsClientBuilder apnsClientBuilder = prepareApnsClient();
-        try {
-            ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(credentials.getIosPrivateKey()), credentials.getIosTeamId(), credentials.getIosKeyId());
-            apnsClientBuilder.setSigningKey(key);
-        } catch (InvalidKeyException | NoSuchAlgorithmException e) {
-            Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Invalid private key");
-            throw new IllegalArgumentException("Invalid private key");
+    private void setCredentialsToNull(String proxyUsername, String proxyPassword) {
+        if (proxyUsername != null && proxyUsername.isEmpty()) {
+            proxyUsername = null;
         }
-        final ApnsClient apnsClient = apnsClientBuilder.build();
-        final Future<Void> connectFuture;
-        if (pushServiceConfiguration.isApnsUseDevelopment()) {
-            connectFuture = apnsClient.connect(ApnsClient.DEVELOPMENT_APNS_HOST);
-        } else {
-            connectFuture = apnsClient.connect(ApnsClient.PRODUCTION_APNS_HOST);
+        if (proxyPassword != null && proxyPassword.isEmpty()) {
+            proxyPassword = null;
         }
-        connectFuture.await();
-
-        // Prepare client for FCM
-        final FcmClient fcmClient = prepareFcmClient(credentials.getAndroidServerKey());
-
-        // Prepare a phaser for async sending synchronization
-        final Phaser phaser = new Phaser(1);
-
-        // Prepare a result object
-        final PushSendResult result = new PushSendResult();
-
-        // Send push message batch
-        for (io.getlime.push.model.entity.PushMessage pushMessage : pushMessageList) {
-
-            // Get the message user ID
-            String userId = pushMessage.getUserId();
-            if (userId == null || userId.isEmpty()) {
-                throw new IllegalArgumentException("No userId was specified");
-            }
-
-            // Get user device registrations
-            String activationId = pushMessage.getActivationId();
-            List<PushDeviceEntity> registrations;
-            if (activationId != null) { // in case the message should go to the specific device
-                registrations = pushDeviceRepository.findByUserIdAndAppIdAndActivationId(userId, appId, activationId);
-            } else {
-                registrations = pushDeviceRepository.findByUserIdAndAppId(userId, appId);
-            }
-
-            // Send push messages to given devices
-            for (final PushDeviceEntity registration : registrations) {
-
-                // Store the message in the database
-                final PushMessageEntity sentMessage = this.storePushMessageInDatabase(pushMessage, registration.getId());
-
-                // Check if given push is not personal, or if it is, that registration is in active state.
-                // This avoids sending personal notifications to registrations that are blocked or removed.
-                if (!pushMessage.getPersonal() || registration.getActive()) {
-
-                    phaser.register();
-
-                    // Send a push message to the provided mobile platform.
-                    String platform = registration.getPlatform();
-                    if (platform.equals(PushDeviceEntity.Platform.iOS)) { // iOS - APNs
-
-                        final String token = TokenUtil.sanitizeTokenString(registration.getPushToken());
-                        final String payload = buildApnsPayload(pushMessage);
-                        Date validUntil = pushMessage.getMessage().getValidUntil();
-
-                        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushMessage.getMessage().getCollapseKey());
-
-                        final Future<PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
-
-                        sendNotificationFuture.addListener(new GenericFutureListener<Future<PushNotificationResponse<SimpleApnsPushNotification>>>() {
-
-                            @Override
-                            public void operationComplete(Future<PushNotificationResponse<SimpleApnsPushNotification>> future) throws Exception {
-                                try {
-                                    final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = future.get();
-
-                                    result.getIos().setTotal(result.getIos().getTotal() + 1);
-
-                                    if (pushNotificationResponse != null) {
-                                        if (!pushNotificationResponse.isAccepted()) {
-                                            Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: " + pushNotificationResponse.getRejectionReason());
-                                            sentMessage.setStatus(PushMessageEntity.Status.FAILED);
-                                            pushMessageRepository.save(sentMessage);
-
-                                            result.getIos().setFailed(result.getIos().getFailed() + 1);
-
-                                            if (pushNotificationResponse.getRejectionReason().equals("BadDeviceToken")) {
-                                                pushDeviceRepository.delete(registration);
-                                                Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "\t... due to bad device token value.");
-                                            }
-
-                                            if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
-                                                pushDeviceRepository.delete(registration);
-                                                Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "\t... and the token is invalid as of " + pushNotificationResponse.getTokenInvalidationTimestamp());
-                                            }
-                                        } else {
-                                            sentMessage.setStatus(PushMessageEntity.Status.SENT);
-                                            pushMessageRepository.save(sentMessage);
-                                            result.getIos().setSent(result.getIos().getSent() + 1);
-                                        }
-                                    } else {
-                                        Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: unknown error, will retry");
-                                        sentMessage.setStatus(PushMessageEntity.Status.PENDING);
-                                        pushMessageRepository.save(sentMessage);
-                                    }
-                                } catch (final ExecutionException e) {
-                                    if (e.getCause() instanceof ClientNotConnectedException) {
-                                        apnsClient.getReconnectionFuture().await();
-                                    }
-                                } finally {
-                                    phaser.arriveAndDeregister();
-                                }
-                            }
-
-                        });
-
-                    } else if (platform.equals(PushDeviceEntity.Platform.Android)) { // Android - FCM
-
-                        FcmSendRequest request = new FcmSendRequest();
-                        request.setTo(registration.getPushToken());
-                        request.setData(pushMessage.getMessage().getExtras());
-                        request.setCollapseKey(pushMessage.getMessage().getCollapseKey());
-
-                        if (!pushMessage.getSilent()) {
-                            FcmNotification notification = new FcmNotification();
-                            notification.setTitle(pushMessage.getMessage().getTitle());
-                            notification.setBody(pushMessage.getMessage().getBody());
-                            notification.setSound(pushMessage.getMessage().getSound());
-                            notification.setTag(pushMessage.getMessage().getCategory());
-                            request.setNotification(notification);
-                        }
-
-                        final ListenableFuture<ResponseEntity<String>> future = fcmClient.exchange(request);
-                        result.getAndroid().setTotal(result.getAndroid().getTotal() + 1);
-                        future.addCallback(new ListenableFutureCallback<ResponseEntity<String>>() {
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                                sentMessage.setStatus(PushMessageEntity.Status.FAILED);
-                                pushMessageRepository.save(sentMessage);
-                                result.getAndroid().setFailed(result.getAndroid().getFailed() + 1);
-                                Logger.getLogger(PushSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway:" + throwable.getLocalizedMessage());
-                                Logger.getLogger(PushSenderService.class.getName()).log(Level.INFO, throwable.getLocalizedMessage());
-                                phaser.arriveAndDeregister();
-                            }
-
-                            @Override
-                            public void onSuccess(ResponseEntity<String> stringResponseEntity) {
-                                sentMessage.setStatus(PushMessageEntity.Status.SENT);
-                                pushMessageRepository.save(sentMessage);
-                                result.getAndroid().setSent(result.getAndroid().getSent() + 1);
-                                phaser.arriveAndDeregister();
-                            }
-                        });
-
-                    }
-                }
-            }
-
-        }
-
-        phaser.arriveAndAwaitAdvance();
-
-        return result;
     }
 
     /**
@@ -331,7 +288,7 @@ public class PushSenderService {
      * @return New database entity with push message information.
      * @throws JsonProcessingException In case message body JSON serialization fails.
      */
-    private PushMessageEntity storePushMessageInDatabase(io.getlime.push.model.entity.PushMessage pushMessage, Long registrationId) throws JsonProcessingException {
+    private PushMessageEntity storePushMessageInDatabase(PushMessage pushMessage, Long registrationId) throws JsonProcessingException {
         // Store the message in database
         PushMessageEntity entity = new PushMessageEntity();
         entity.setDeviceRegistrationId(registrationId);
@@ -353,7 +310,7 @@ public class PushSenderService {
      * @param push Push message object with APNs data.
      * @return String with APNs JSON payload.
      */
-    private String buildApnsPayload(io.getlime.push.model.entity.PushMessage push) {
+    private String buildApnsPayload(PushMessage push) {
         final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
         payloadBuilder.setAlertTitle(push.getMessage().getTitle());
         payloadBuilder.setAlertBody(push.getMessage().getBody());
