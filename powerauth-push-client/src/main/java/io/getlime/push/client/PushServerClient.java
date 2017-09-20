@@ -102,6 +102,18 @@ public class PushServerClient {
     }
 
     /**
+     * Returns service information
+     *
+     * @return True if service is running.
+     */
+    public boolean getServiceStatus() {
+        TypeReference<ServiceStatusResponse> typeReference = new TypeReference<ServiceStatusResponse>() {
+        };
+        ObjectResponse<?> response = getObjectImpl("/push/service/status", null, typeReference);
+        return response.getStatus().equals(Response.Status.OK);
+    }
+
+    /**
      * Register anonymous device to the push server.
      *
      * @param appId PowerAuth 2.0 application app ID.
@@ -148,6 +160,21 @@ public class PushServerClient {
         TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
         ObjectResponse<?> response = postObjectImpl("/push/device/delete", request, typeReference);
+        return response.getStatus().equals(Response.Status.OK);
+    }
+
+    /**
+     * Update activation status for given device registration.
+     *
+     * @param activationId Identifier of activation
+     * @return True if updating went successful, false otherwise.
+     */
+    public boolean updateDeviceStatus(String activationId) throws PushServerClientException {
+        UpdateDeviceStatusRequest request = new UpdateDeviceStatusRequest();
+        request.setActivationId(activationId);
+        TypeReference<Response> typeReference = new TypeReference<Response>() {
+        };
+        ObjectResponse<?> response = putObjectImpl("/push/device/status/update", request, typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
