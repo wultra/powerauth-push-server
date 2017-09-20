@@ -56,8 +56,8 @@ public class PushDeviceEntity implements Serializable {
     @Column(name = "push_token", nullable = false)
     private String pushToken;
 
-    @Column(name = "timestamp_created", nullable = false)
-    private Date timestampCreated;
+    @Column(name = "timestamp_last_registered", nullable = false)
+    private Date timestampLastRegistered;
 
     @Column(name = "is_active")
     private Boolean active;
@@ -116,12 +116,12 @@ public class PushDeviceEntity implements Serializable {
         this.pushToken = pushToken;
     }
 
-    public Date getTimestampCreated() {
-        return timestampCreated;
+    public Date getTimestampLastRegistered() {
+        return timestampLastRegistered;
     }
 
-    public void setTimestampCreated(Date timestampCreated) {
-        this.timestampCreated = timestampCreated;
+    public void setTimestampLastRegistered(Date timestampLastRegistered) {
+        this.timestampLastRegistered = timestampLastRegistered;
     }
 
     public Boolean getActive() {

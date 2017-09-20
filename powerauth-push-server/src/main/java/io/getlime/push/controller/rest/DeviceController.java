@@ -74,30 +74,30 @@ public class DeviceController {
         String pushToken = request.getRequestObject().getToken();
         String platform = request.getRequestObject().getPlatform();
         String activationId = request.getRequestObject().getActivationId();
-        PushDeviceEntity registration = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
-        if (registration == null) {
-            registration = new PushDeviceEntity();
-            registration.setAppId(appId);
-            registration.setPushToken(pushToken);
+        PushDeviceEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
+        if (device == null) {
+            device = new PushDeviceEntity();
+            device.setAppId(appId);
+            device.setPushToken(pushToken);
         }
-        registration.setTimestampCreated(new Date());
-        registration.setPlatform(platform);
+        device.setTimestampLastRegistered(new Date());
+        device.setPlatform(platform);
         if (activationId != null) {
             final GetActivationStatusResponse activation = client.getActivationStatus(activationId);
             if (activation != null && !ActivationStatus.REMOVED.equals(activation.getActivationStatus())) {
-                registration.setActivationId(activationId);
-                registration.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
-                registration.setUserId(activation.getUserId());
+                device.setActivationId(activationId);
+                device.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
+                device.setUserId(activation.getUserId());
                 if (activation.getActivationStatus().equals(ActivationStatus.ACTIVE)) {
                     final GetPersonalizedEncryptionKeyResponse encryptionKeyResponse = client.generatePersonalizedE2EEncryptionKey(activationId, null);
                     if (encryptionKeyResponse != null) {
-                        registration.setEncryptionKey(encryptionKeyResponse.getEncryptionKey());
-                        registration.setEncryptionKeyIndex(encryptionKeyResponse.getEncryptionKeyIndex());
+                        device.setEncryptionKey(encryptionKeyResponse.getEncryptionKey());
+                        device.setEncryptionKeyIndex(encryptionKeyResponse.getEncryptionKeyIndex());
                     }
                 }
             }
         }
-        pushDeviceRepository.save(registration);
+        pushDeviceRepository.save(device);
         return new Response();
     }
 
@@ -106,17 +106,17 @@ public class DeviceController {
      * @param request Status update request.
      * @return Status update response.
      */
-    @RequestMapping(value = "status/update", method = RequestMethod.PUT)
+    @RequestMapping(value = "status/update", method = RequestMethod.POST)
     @Transactional
     public @ResponseBody Response updateDeviceStatus(@RequestBody ObjectRequest<UpdateDeviceStatusRequest> request) throws PushServerException {
         if (request.getRequestObject() == null) {
             throw new PushServerException("Invalid or empty input data");
         }
         String activationId = request.getRequestObject().getActivationId();
-        List<PushDeviceEntity> registrations = pushDeviceRepository.findByActivationId(activationId);
-        if (registrations != null)  {
+        List<PushDeviceEntity> device = pushDeviceRepository.findByActivationId(activationId);
+        if (device != null)  {
             ActivationStatus status = client.getActivationStatus(activationId).getActivationStatus();
-            for (PushDeviceEntity registration: registrations) {
+            for (PushDeviceEntity registration: device) {
                 registration.setActive(status.equals(ActivationStatus.ACTIVE));
                 pushDeviceRepository.save(registration);
             }
@@ -137,9 +137,9 @@ public class DeviceController {
         }
         Long appId = request.getRequestObject().getAppId();
         String pushToken = request.getRequestObject().getToken();
-        PushDeviceEntity registration = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
-        if (registration != null)  {
-            pushDeviceRepository.delete(registration);
+        PushDeviceEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
+        if (device != null)  {
+            pushDeviceRepository.delete(device);
         }
         return new Response();
     }

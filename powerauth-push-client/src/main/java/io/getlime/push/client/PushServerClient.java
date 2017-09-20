@@ -106,11 +106,10 @@ public class PushServerClient {
      *
      * @return True if service is running.
      */
-    public boolean getServiceStatus() throws PushServerClientException {
-        TypeReference<ServiceStatusResponse> typeReference = new TypeReference<ServiceStatusResponse>() {
+    public ObjectResponse<ServiceStatusResponse> getServiceStatus() throws PushServerClientException {
+        TypeReference<ObjectResponse<ServiceStatusResponse>> typeReference = new TypeReference<ObjectResponse<ServiceStatusResponse>>() {
         };
-        ObjectResponse<?> response = getObjectImpl("/push/service/status", null, typeReference);
-        return response.getStatus().equals(Response.Status.OK);
+        return getObjectImpl("/push/service/status", null, typeReference);
     }
 
     /**
@@ -174,7 +173,7 @@ public class PushServerClient {
         request.setActivationId(activationId);
         TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        ObjectResponse<?> response = putObjectImpl("/push/device/status/update", request, typeReference);
+        ObjectResponse<?> response = postObjectImpl("/push/device/status/update", request, typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
