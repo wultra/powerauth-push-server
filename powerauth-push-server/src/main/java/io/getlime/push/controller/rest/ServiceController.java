@@ -17,12 +17,12 @@
 package io.getlime.push.controller.rest;
 
 import io.getlime.core.rest.model.base.response.ObjectResponse;
-import io.getlime.core.rest.model.base.response.Response;
-import io.getlime.push.configuration.PowerAuthPushServiceConfiguration;
-import io.getlime.push.model.response.SystemStatusResponse;
+import io.getlime.push.configuration.PushServiceConfiguration;
+import io.getlime.push.model.response.ServiceStatusResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
@@ -37,24 +37,15 @@ import java.util.Date;
 public class ServiceController {
 
     @Autowired
-    private PowerAuthPushServiceConfiguration pushServiceConfiguration;
-
-    /**
-     * Basic "hello" controller resource, used to check the service.
-     * @return Basic OK response.
-     */
-    @RequestMapping(value = "hello")
-    public @ResponseBody Response hello() {
-        return new Response();
-    }
+    private PushServiceConfiguration pushServiceConfiguration;
 
     /**
      * Controller resource with system information.
      * @return System status info.
      */
-    @RequestMapping(value = "status")
-    public @ResponseBody ObjectResponse<SystemStatusResponse> systemStatus() {
-        SystemStatusResponse response = new SystemStatusResponse();
+    @RequestMapping(value = "status", method = RequestMethod.GET)
+    public @ResponseBody ObjectResponse<ServiceStatusResponse> getServiceStatus() {
+        ServiceStatusResponse response = new ServiceStatusResponse();
         response.setApplicationName(pushServiceConfiguration.getPushServerName());
         response.setApplicationDisplayName(pushServiceConfiguration.getPushServerDisplayName());
         response.setApplicationEnvironment(pushServiceConfiguration.getPushServerEnvironment());

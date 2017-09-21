@@ -21,7 +21,7 @@ package io.getlime.push.model.entity;
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class PushSendResult {
+public class PushMessageSendResult {
 
     public static class iOS {
 
@@ -136,7 +136,7 @@ public class PushSendResult {
     private iOS ios;
     private Android android;
 
-    public PushSendResult() {
+    public PushMessageSendResult() {
         this.ios = new iOS();
         this.android = new Android();
     }

@@ -46,8 +46,8 @@ public class PushCampaignDeviceEntity {
     @Column(name = "status")
     private int status;
 
-    @Column(name = "timestamp_sent")
-    private Date timestampSent;
+    @Column(name = "timestamp_created", nullable = false)
+    private Date timestampCreated;
 
     public Long getId() {
         return id;
@@ -89,11 +89,11 @@ public class PushCampaignDeviceEntity {
         this.status = status;
     }
 
-    public Date getTimestampSent() {
-        return timestampSent;
+    public Date getTimestampCreated() {
+        return timestampCreated;
     }
 
-    public void setTimestampSent(Date timestampSent) {
-        this.timestampSent = timestampSent;
+    public void setTimestampCreated(Date timestampCreated) {
+        this.timestampCreated = timestampCreated;
     }
 }

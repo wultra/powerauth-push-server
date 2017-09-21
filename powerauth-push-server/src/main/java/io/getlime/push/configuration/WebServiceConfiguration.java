@@ -34,7 +34,7 @@ import javax.net.ssl.*;
  */
 @Configuration
 @ComponentScan(basePackages = {"io.getlime.security"})
-public class PowerAuthWebServiceConfiguration {
+public class WebServiceConfiguration {
 
     @Value("${powerauth.service.url}")
     private String powerAuthServiceUrl;

@@ -24,7 +24,7 @@ import io.getlime.push.controller.web.model.view.PushServerApplication;
 import io.getlime.push.model.request.SendPushMessageRequest;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
-import io.getlime.push.model.entity.PushSendResult;
+import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.repository.AppCredentialRepository;
 import io.getlime.push.repository.model.AppCredentialEntity;
 import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
@@ -276,11 +276,11 @@ public class WebAdminController {
         body.setBody(form.getBody());
         body.setSound(form.isSound() ? "default" : null);
         push.setMessage(body);
-        request.setPush(push);
+        request.setPushMessage(push);
         HttpEntity<ObjectRequest<SendPushMessageRequest>> requestEntity = new HttpEntity<>(new ObjectRequest<>(request));
         RestTemplate template = new RestTemplate();
         String baseUrl = String.format("%s://%s:%d/%s",httpRequest.getScheme(),  httpRequest.getServerName(), httpRequest.getServerPort(), httpRequest.getContextPath());
-        template.exchange(baseUrl + "/push/message/send", HttpMethod.POST, requestEntity, new ParameterizedTypeReference<ObjectResponse<PushSendResult>>() {});
+        template.exchange(baseUrl + "/push/message/send", HttpMethod.POST, requestEntity, new ParameterizedTypeReference<ObjectResponse<PushMessageSendResult>>() {});
         return "redirect:/web/admin/message/create";
     }
 

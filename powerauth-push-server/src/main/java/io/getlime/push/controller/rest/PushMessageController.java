@@ -19,10 +19,10 @@ import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
-import io.getlime.push.model.entity.PushSendResult;
+import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.request.SendPushMessageBatchRequest;
 import io.getlime.push.model.request.SendPushMessageRequest;
-import io.getlime.push.service.PushSenderService;
+import io.getlime.push.service.PushMessageSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,10 +41,10 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "push/message")
-public class PushSendingController {
+public class PushMessageController {
 
     @Autowired
-    private PushSenderService pushSenderService;
+    private PushMessageSenderService pushMessageSenderService;
 
     /**
      * Send a single push message.
@@ -52,18 +52,18 @@ public class PushSendingController {
      * @return Response with message sending results.
      */
     @RequestMapping(value = "send", method = RequestMethod.POST)
-    public @ResponseBody ObjectResponse<PushSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
+    public @ResponseBody ObjectResponse<PushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
 
-        if (request.getRequestObject() == null || request.getRequestObject().getPush() == null || request.getRequestObject().getAppId() == null) {
+        if (request.getRequestObject() == null || request.getRequestObject().getPushMessage() == null || request.getRequestObject().getAppId() == null) {
             throw new PushServerException("Invalid or empty input data");
         }
 
         final Long appId = request.getRequestObject().getAppId();
         final List<PushMessage> pushMessageList = new ArrayList<>();
-        pushMessageList.add(request.getRequestObject().getPush());
-        PushSendResult result;
+        pushMessageList.add(request.getRequestObject().getPushMessage());
+        PushMessageSendResult result;
         try {
-            result = pushSenderService.send(appId, pushMessageList);
+            result = pushMessageSenderService.send(appId, pushMessageList);
         } catch (InterruptedException | IOException e) {
             throw new PushServerException(e.getMessage());
         }
@@ -77,7 +77,7 @@ public class PushSendingController {
      * @return Response with message sending results.
      */
     @RequestMapping(value = "batch/send", method = RequestMethod.POST)
-    public @ResponseBody ObjectResponse<PushSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
+    public @ResponseBody ObjectResponse<PushMessageSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
 
         if (request.getRequestObject() == null || request.getRequestObject().getBatch() == null || request.getRequestObject().getAppId() == null) {
             throw new PushServerException("Invalid or empty input data");
@@ -90,9 +90,9 @@ public class PushSendingController {
             throw new PushServerException("Too many messages in batch - do no send more than 20 messages at once to avoid server congestion.");
         }
 
-        PushSendResult result;
+        PushMessageSendResult result;
         try {
-            result = pushSenderService.send(appId, batch);
+            result = pushMessageSenderService.send(appId, batch);
         } catch (InterruptedException | IOException e) {
             throw new PushServerException(e.getMessage());
         }
