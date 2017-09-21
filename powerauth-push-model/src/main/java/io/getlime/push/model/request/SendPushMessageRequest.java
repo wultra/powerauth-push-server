@@ -26,7 +26,7 @@ import io.getlime.push.model.entity.PushMessage;
 public class SendPushMessageRequest {
 
     private Long appId;
-    private PushMessage push;
+    private PushMessage pushMessage;
 
     /**
      * Get app ID.
@@ -48,15 +48,15 @@ public class SendPushMessageRequest {
      * Get push message to be sent.
      * @return Push message.
      */
-    public PushMessage getPush() {
-        return push;
+    public PushMessage getPushMessage() {
+        return pushMessage;
     }
 
     /**
      * Set push message to be sent.
-     * @param push Push message.
+     * @param pushMessage Push message.
      */
-    public void setPush(PushMessage push) {
-        this.push = push;
+    public void setPushMessage(PushMessage pushMessage) {
+        this.pushMessage = pushMessage;
     }
 }

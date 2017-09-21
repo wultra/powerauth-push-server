@@ -33,7 +33,7 @@ import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.PushCampaignUserRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.PushCampaignUserEntity;
-import io.getlime.push.service.PushSenderService;
+import io.getlime.push.service.PushMessageSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -54,16 +54,16 @@ import java.util.logging.Logger;
 
 @Controller
 @RequestMapping(value = "push/campaign")
-public class CampaignController {
+public class PushCampaignController {
     private PushCampaignRepository pushCampaignRepository;
     private PushCampaignUserRepository pushCampaignUserRepository;
-    private PushSenderService pushSenderService;
+    private PushMessageSenderService pushMessageSenderService;
 
     @Autowired
-    public CampaignController(PushCampaignRepository pushCampaignRepository, PushCampaignUserRepository pushCampaignUserRepository, PushSenderService pushSenderService) {
+    public PushCampaignController(PushCampaignRepository pushCampaignRepository, PushCampaignUserRepository pushCampaignUserRepository, PushMessageSenderService pushMessageSenderService) {
         this.pushCampaignRepository = pushCampaignRepository;
         this.pushCampaignUserRepository = pushCampaignUserRepository;
-        this.pushSenderService = pushSenderService;
+        this.pushMessageSenderService = pushMessageSenderService;
     }
 
     /**
@@ -192,7 +192,7 @@ public class CampaignController {
                 pushCampaignUserEntity.setTimestampCreated(new Date());
                 pushCampaignUserRepository.save(pushCampaignUserEntity);
             } else {
-                Logger.getLogger(CampaignController.class.getName()).log(Level.WARNING, "Duplicate user entry for push campaign: " + user);
+                Logger.getLogger(PushCampaignController.class.getName()).log(Level.WARNING, "Duplicate user entry for push campaign: " + user);
             }
         }
         return new Response();
@@ -265,7 +265,7 @@ public class CampaignController {
         List<PushMessage> message = new ArrayList<>();
         message.add(pushMessage);
         try {
-            pushSenderService.send(campaign.getAppId(), message);
+            pushMessageSenderService.send(campaign.getAppId(), message);
         } catch (InterruptedException | IOException e) {
             throw new PushServerException(e.getMessage());
         }
@@ -283,7 +283,7 @@ public class CampaignController {
         try {
             pushMessageBody = new ObjectMapper().readValue(message, PushMessageBody.class);
         } catch (IOException e) {
-            Logger.getLogger(CampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            Logger.getLogger(PushCampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
         }
         return pushMessageBody;
     }
@@ -299,7 +299,7 @@ public class CampaignController {
         try {
             messageString = new ObjectMapper().writeValueAsString(message);
         } catch (JsonProcessingException e) {
-            Logger.getLogger(CampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            Logger.getLogger(PushCampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
         }
         return messageString;
     }

@@ -33,7 +33,7 @@ import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.entity.ListOfUsers;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
-import io.getlime.push.model.entity.PushSendResult;
+import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.request.*;
 import io.getlime.push.model.response.*;
 import java.io.IOException;
@@ -184,11 +184,11 @@ public class PushServerClient {
      * @param pushMessage Push message to be sent.
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
      */
-    public ObjectResponse<PushSendResult> sendPushMessage(Long appId, PushMessage pushMessage) throws PushServerClientException {
+    public ObjectResponse<PushMessageSendResult> sendPushMessage(Long appId, PushMessage pushMessage) throws PushServerClientException {
         SendPushMessageRequest request = new SendPushMessageRequest();
         request.setAppId(appId);
-        request.setPush(pushMessage);
-        TypeReference<ObjectResponse<PushSendResult>> typeReference = new TypeReference<ObjectResponse<PushSendResult>>() {
+        request.setPushMessage(pushMessage);
+        TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {
         };
         return postObjectImpl("/push/message/send", new ObjectRequest<>(request), typeReference);
     }
@@ -200,11 +200,11 @@ public class PushServerClient {
      * @param batch Push message batch to be sent.
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
      */
-    public ObjectResponse<PushSendResult> sendPushMessageBatch(Long appId, List<PushMessage> batch) throws PushServerClientException {
+    public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(Long appId, List<PushMessage> batch) throws PushServerClientException {
         SendPushMessageBatchRequest request = new SendPushMessageBatchRequest();
         request.setAppId(appId);
         request.setBatch(batch);
-        TypeReference<ObjectResponse<PushSendResult>> typeReference = new TypeReference<ObjectResponse<PushSendResult>>() {
+        TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {
         };
         return postObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), typeReference);
     }

@@ -44,13 +44,13 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "push/device")
-public class DeviceController {
+public class PushDeviceController {
 
     private PushDeviceRepository pushDeviceRepository;
     private PowerAuthServiceClient client;
 
     @Autowired
-    public DeviceController(PushDeviceRepository pushDeviceRepository) {
+    public PushDeviceController(PushDeviceRepository pushDeviceRepository) {
         this.pushDeviceRepository = pushDeviceRepository;
     }
 
