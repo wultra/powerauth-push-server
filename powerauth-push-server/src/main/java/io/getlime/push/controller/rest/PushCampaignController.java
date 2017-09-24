@@ -264,20 +264,18 @@ public class PushCampaignController {
         pushMessage.setMessage(deserializePushMessageBody(campaign.getMessage()));
         List<PushMessage> message = new ArrayList<>();
         message.add(pushMessage);
-        try {
-            pushMessageSenderService.send(campaign.getAppId(), message);
-        } catch (InterruptedException | IOException e) {
-            throw new PushServerException(e.getMessage());
-        }
+        pushMessageSenderService.send(campaign.getAppId(), message);
         return new Response();
     }
 
-    @RequestMapping(value = "{id}/send", method = RequestMethod.POST)
-    @ResponseBody
-    public Response sendCampaign(@PathVariable(value = "id") Long id) {
-        return null;
-    }
 
+
+    /**
+     * Parsing message from Json to PushMessagebody object
+     *
+     * @param message message to parse
+     * @return PushMessageBody
+     */
     private PushMessageBody deserializePushMessageBody(String message) {
         PushMessageBody pushMessageBody = null;
         try {

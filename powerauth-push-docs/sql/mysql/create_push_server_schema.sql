@@ -63,13 +63,3 @@ CREATE TABLE push_campaign_user (
   UNIQUE KEY `id_UNIQUE` (`id` ASC))
   ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE push_campaign_device (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `campaign_id` bigint(20) NULL,
-  `platform` VARCHAR(20) NULL,
-  `push_token` VARCHAR(255) NULL,
-  `status` int(11) NULL,
-  `timestamp_created` TIMESTAMP NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC))
-  ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
