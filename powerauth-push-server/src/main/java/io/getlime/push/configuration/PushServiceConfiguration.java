@@ -17,7 +17,6 @@
 package io.getlime.push.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -71,6 +70,10 @@ public class PushServiceConfiguration {
 
     @Value("${powerauth.push.service.fcm.proxy.password}")
     private String fcmProxyPassword;
+
+    // Campaign Configuration
+    @Value("${powerauth.push.service.campaign.batchSize}")
+    private int campaignBatchSize;
 
     /**
      * Get push server name.
@@ -274,7 +277,7 @@ public class PushServiceConfiguration {
 
     /**
      * Set FCM proxy username.
-     * @param fcmProxyUsername
+     * @param fcmProxyUsername FCM proxy username.
      */
     public void setFcmProxyUsername(String fcmProxyUsername) {
         this.fcmProxyUsername = fcmProxyUsername;
@@ -294,5 +297,21 @@ public class PushServiceConfiguration {
      */
     public void setFcmProxyPassword(String fcmProxyPassword) {
         this.fcmProxyPassword = fcmProxyPassword;
+    }
+
+    /**
+     * Get the batch size used while sending a push campaign.
+     * @return Batch size.
+     */
+    public int getCampaignBatchSize() {
+        return campaignBatchSize;
+    }
+
+    /**
+     * Set the batch size used while sending a push campaign.
+     * @param campaignBatchSize Batch size.
+     */
+    public void setCampaignBatchSize(int campaignBatchSize) {
+        this.campaignBatchSize = campaignBatchSize;
     }
 }

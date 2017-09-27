@@ -22,10 +22,7 @@ import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
@@ -49,29 +46,34 @@ import java.util.logging.Logger;
 @RequestMapping(value = "push/campaign/send")
 public class SendCampaignController {
 
-    @Autowired
-    private JobLauncher jobLauncher;
+    private final JobLauncher jobLauncher;
+    private final Job job;
+    private final PushCampaignRepository pushCampaignRepository;
 
     @Autowired
-    private Job job;
-
-    @Autowired
-    private PushCampaignRepository pushCampaignRepository;
+    public SendCampaignController(JobLauncher jobLauncher, Job job, PushCampaignRepository pushCampaignRepository) {
+        this.job = job;
+        this.jobLauncher = jobLauncher;
+        this.pushCampaignRepository = pushCampaignRepository;
+    }
 
     @RequestMapping(value = "{id}", method = RequestMethod.POST)
     @ResponseBody
     public Response sendCampaign(@PathVariable(value = "id") Long id) throws PushServerException {
         try {
+
             PushCampaignEntity campaign = pushCampaignRepository.findOne(id);
-            PushMessageBody pushMessageBody = deserializePushMessageBody(campaign.getMessage());
             if (campaign == null) {
                 throw new PushServerException("Campaign with entered id does not exist");
             }
 
-            Map<String, JobParameter> jobParameterMap = new HashMap<>();
-            jobParameterMap.put("id", new JobParameter(id));
-            jobParameterMap.put("timestamp", new JobParameter(new Date()));
-            jobLauncher.run(job, new JobParameters(jobParameterMap));
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addLong("campaignId", id)
+                    .addDate("timestamp", new Date())
+                    .toJobParameters();
+            jobLauncher.run(job, jobParameters);
+            return new Response();
+
         } catch (JobExecutionAlreadyRunningException e) {
             throw new PushServerException("Job execution already running");
         } catch (JobRestartException e) {
@@ -81,8 +83,6 @@ public class SendCampaignController {
         } catch (JobParametersInvalidException e) {
             throw new PushServerException("Job parameters are invalid");
         }
-
-        return null;
     }
 
 
