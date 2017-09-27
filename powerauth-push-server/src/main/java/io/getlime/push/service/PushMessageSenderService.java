@@ -19,7 +19,6 @@ package io.getlime.push.service;
 import com.turo.pushy.apns.*;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.proxy.HttpProxyHandlerFactory;
-import com.turo.pushy.apns.proxy.ProxyHandlerFactory;
 import com.turo.pushy.apns.util.ApnsPayloadBuilder;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.apns.util.TokenUtil;
@@ -37,6 +36,7 @@ import io.getlime.push.repository.model.AppCredentialEntity;
 import io.getlime.push.repository.model.PushDeviceEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
+import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
 import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmNotification;
 import io.getlime.push.service.fcm.FcmSendRequest;
@@ -47,6 +47,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
+
+import javax.net.ssl.SSLException;
+import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -73,6 +76,8 @@ public class PushMessageSenderService {
     private PushMessageRepository pushMessageRepository;
     private PushServiceConfiguration pushServiceConfiguration;
 
+    private AppCredentialStorageMap appRelatedPushClientMap = new AppCredentialStorageMap();
+
     @Autowired
     public PushMessageSenderService(AppCredentialRepository appCredentialRepository,
                                     PushDeviceRepository pushDeviceRepository,
@@ -91,14 +96,11 @@ public class PushMessageSenderService {
      * @param pushMessageList List with push message objects.
      * @return Result of this batch sending.
      */
+    @Transactional
     public PushMessageSendResult send(Long appId, List<PushMessage> pushMessageList) throws InterruptedException, IOException, PushServerException {
 
-        // Fetch application credentials
-        final AppCredentialEntity credentials = getAppCredentials(appId);
-
         // Prepare clients
-        final ApnsClient apnsClient = prepareApnsClient(credentials.getIosPrivateKey(), credentials.getIosTeamId(), credentials.getIosKeyId());
-        final FcmClient fcmClient = prepareFcmClient(credentials.getAndroidServerKey());
+        AppRelatedPushClient pushClient = prepareClients(appId);
 
         // Prepare synchronization primitive for parallel push message sending
         final Phaser phaser = new Phaser(1);
@@ -117,6 +119,7 @@ public class PushMessageSenderService {
 
             // Iterate over all devices for given user
             for (final PushDeviceEntity device : devices) {
+
                 final PushMessageEntity sentMessage = storePushMessageInDatabase(pushMessage, device.getId());
 
                 // Check if given push is not personal, or if it is, that device is in active state.
@@ -131,7 +134,7 @@ public class PushMessageSenderService {
                     // Decide if the device is iOS or Android and send message accordingly
                     String platform = device.getPlatform();
                     if (platform.equals(PushDeviceEntity.Platform.iOS)) {
-                        sendMessageToIos(apnsClient, pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), credentials.getIosBundle(), new PushSendingCallback() {
+                        sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), new PushSendingCallback() {
                             @Override
                             public void didFinishSendingMessage(Result sendingResult) {
 
@@ -167,7 +170,7 @@ public class PushMessageSenderService {
                         });
                     }
                     else if (platform.equals(PushDeviceEntity.Platform.Android)) {
-                        sendMessageToAndroid(fcmClient, pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), new PushSendingCallback() {
+                        sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), new PushSendingCallback() {
                             @Override
                             public void didFinishSendingMessage(Result sendingResult) {
 
@@ -213,7 +216,7 @@ public class PushMessageSenderService {
     /**
      * Send push message content with related message attributes to provided device (platform and token) using
      * credentials for given application. Return the result in the callback.
-     * @param appCredentials APNS and FCM credentials for given app.
+     * @param appId App ID.
      * @param platform Mobile platform (iOS, Android).
      * @param token Push message token.
      * @param pushMessageBody Push message body.
@@ -221,14 +224,14 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      * the error can be found in exception message.
      */
-    public void sendMessage(AppCredentialEntity appCredentials, String platform, String token, PushMessageBody pushMessageBody, PushSendingCallback callback) throws PushServerException {
-        sendMessage(appCredentials, platform, token, pushMessageBody, null, callback);
+    public void sendMessage(Long appId, String platform, String token, PushMessageBody pushMessageBody, PushSendingCallback callback) throws PushServerException {
+        sendMessage(appId, platform, token, pushMessageBody, null, callback);
     }
 
     /**
      * Send push message content with related message attributes to provided device (platform and token) using
      * credentials for given application. Return the result in the callback.
-     * @param appCredentials APNS and FCM credentials for given app.
+     * @param appId App ID.
      * @param platform Mobile platform (iOS, Android).
      * @param token Push message token.
      * @param pushMessageBody Push message body.
@@ -237,13 +240,14 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      * the error can be found in exception message.
      */
-    public void sendMessage(AppCredentialEntity appCredentials, String platform, String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, PushSendingCallback callback) throws PushServerException {
+    @Transactional
+    public void sendMessage(Long appId, String platform, String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, PushSendingCallback callback) throws PushServerException {
+        // Prepare clients
+        AppRelatedPushClient pushClient = prepareClients(appId);
         if (platform.equals(PushDeviceEntity.Platform.iOS)) {
-            ApnsClient client = prepareApnsClient(appCredentials.getIosPrivateKey(), appCredentials.getIosTeamId(), appCredentials.getIosKeyId());
-            sendMessageToIos(client, pushMessageBody, attributes, token, appCredentials.getIosBundle(), callback);
+            sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), callback);
         } else if (platform.equals(PushDeviceEntity.Platform.Android)) {
-            FcmClient client = prepareFcmClient(appCredentials.getAndroidServerKey());
-            sendMessageToAndroid(client, pushMessageBody, attributes, token, callback);
+            sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, callback);
         }
     }
 
@@ -280,10 +284,7 @@ public class PushMessageSenderService {
                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
                     }
                 } catch (final ExecutionException e) {
-                    if (e.getCause() instanceof ClientNotConnectedException) {
-                        apnsClient.getReconnectionFuture().await();
-                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
-                    }
+                    callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                 }
             }
 
@@ -349,27 +350,24 @@ public class PushMessageSenderService {
     // Prepare and connect APNS client.
     private ApnsClient prepareApnsClient(byte[] apnsPrivateKey, String teamId, String keyId) throws PushServerException {
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
-        setApnsClientProxy(apnsClientBuilder);
+        apnsClientBuilder.setProxyHandlerFactory(apnsClientProxy());
+        if (pushServiceConfiguration.isApnsUseDevelopment()) {
+            apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
+        } else {
+            apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
+        }
         try {
             ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);
             apnsClientBuilder.setSigningKey(key);
         } catch (InvalidKeyException | NoSuchAlgorithmException | IOException e) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Invalid private key");
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage());
             throw new PushServerException("Invalid private key");
         }
         try {
-            final ApnsClient apnsClient = apnsClientBuilder.build();
-            final Future<Void> future;
-            if (pushServiceConfiguration.isApnsUseDevelopment()) {
-                future = apnsClient.connect(ApnsClient.DEVELOPMENT_APNS_HOST);
-            } else {
-                future = apnsClient.connect(ApnsClient.PRODUCTION_APNS_HOST);
-            }
-            future.await();
-            return apnsClient;
-        } catch (InterruptedException | IOException e) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Unable to connect to APNS service");
-            throw new PushServerException("Unable to connect to APNS service");
+            return apnsClientBuilder.build();
+        } catch (SSLException e) {
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage());
+            throw new PushServerException("SSL problem");
         }
     }
 
@@ -392,8 +390,24 @@ public class PushMessageSenderService {
         return client;
     }
 
+    // Prepare and cached APNS and FCM clients for provided app
+    private AppRelatedPushClient prepareClients(Long appId) throws PushServerException {
+        AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
+        if (pushClient == null) {
+            final AppCredentialEntity credentials = getAppCredentials(appId);
+            ApnsClient apnsClient = prepareApnsClient(credentials.getIosPrivateKey(), credentials.getIosTeamId(), credentials.getIosKeyId());
+            FcmClient fcmClient = prepareFcmClient(credentials.getAndroidServerKey());
+            pushClient = new AppRelatedPushClient();
+            pushClient.setAppCredentials(credentials);
+            pushClient.setApnsClient(apnsClient);
+            pushClient.setFcmClient(fcmClient);
+            appRelatedPushClientMap.put(appId, pushClient);
+        }
+        return pushClient;
+    }
+
     // Prepare proxy settings for APNs
-    private void setApnsClientProxy(ApnsClientBuilder apnsClientBuilder) {
+    private HttpProxyHandlerFactory apnsClientProxy() {
         if (pushServiceConfiguration.isApnsProxyEnabled()) {
             String proxyUrl = pushServiceConfiguration.getApnsProxyUrl();
             int proxyPort = pushServiceConfiguration.getApnsProxyPort();
@@ -405,9 +419,9 @@ public class PushMessageSenderService {
             if (proxyPassword != null && proxyPassword.isEmpty()) {
                 proxyPassword = null;
             }
-            ProxyHandlerFactory proxyHandlerFactory = new HttpProxyHandlerFactory(new InetSocketAddress(proxyUrl, proxyPort), proxyUsername, proxyPassword);
-            apnsClientBuilder.setProxyHandlerFactory(proxyHandlerFactory);
+            return new HttpProxyHandlerFactory(new InetSocketAddress(proxyUrl, proxyPort), proxyUsername, proxyPassword);
         }
+        return null;
     }
 
     /**

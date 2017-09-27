@@ -16,26 +16,28 @@
 package io.getlime.push.service.batch.storage;
 
 import io.getlime.push.repository.model.AppCredentialEntity;
+import io.getlime.push.service.AppRelatedPushClient;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Simple in-memory storage cache for app credentials. Uses {@link HashMap} as an underlying storage.
+ * Simple in-memory storage cache for app credentials and push service clients.
+ * Uses {@link HashMap} as an underlying storage.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class AppCredentialStorageMap implements ItemStorageMap<Long, AppCredentialEntity> {
+public class AppCredentialStorageMap implements ItemStorageMap<Long, AppRelatedPushClient> {
 
-    private Map<Long, AppCredentialEntity> map = new HashMap<>();
+    private Map<Long, AppRelatedPushClient> map = new HashMap<>();
 
     @Override
-    public AppCredentialEntity get(Long key) {
+    public AppRelatedPushClient get(Long key) {
         return map.get(key);
     }
 
     @Override
-    public void put(Long key, AppCredentialEntity value) {
+    public void put(Long key, AppRelatedPushClient value) {
         map.put(key, value);
     }
 

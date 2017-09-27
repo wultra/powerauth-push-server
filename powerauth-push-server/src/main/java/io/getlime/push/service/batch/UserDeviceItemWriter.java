@@ -19,7 +19,6 @@ package io.getlime.push.service.batch;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.repository.AppCredentialRepository;
 import io.getlime.push.repository.PushCampaignRepository;
-import io.getlime.push.repository.model.AppCredentialEntity;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.aggregate.UserDevice;
 import io.getlime.push.repository.serialization.JSONSerialization;
@@ -42,7 +41,6 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
 
     private PushMessageSenderService pushMessageSenderService;
     private PushCampaignRepository pushCampaignRepository;
-    private AppCredentialRepository appCredentialRepository;
 
     // Non-autowired fields
     private CampaignMessageStorageMap campaignStorageMap = new CampaignMessageStorageMap();
@@ -50,11 +48,9 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
 
     @Autowired
     public UserDeviceItemWriter(PushMessageSenderService pushMessageSenderService,
-                                PushCampaignRepository pushCampaignRepository,
-                                AppCredentialRepository appCredentialRepository) {
+                                PushCampaignRepository pushCampaignRepository) {
         this.pushMessageSenderService = pushMessageSenderService;
         this.pushCampaignRepository = pushCampaignRepository;
-        this.appCredentialRepository = appCredentialRepository;
     }
 
     @Override
@@ -73,15 +69,8 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
                 campaignStorageMap.put(campaignId, messageBody);
             }
 
-            // Load and cache app information
-            AppCredentialEntity credentialEntity = appCredentialStorageMap.get(appId);
-            if (credentialEntity == null) {
-                credentialEntity = appCredentialRepository.findFirstByAppId(appId);
-                appCredentialStorageMap.put(appId, credentialEntity);
-            }
-
             // Send the push message using push sender service
-            pushMessageSenderService.sendMessage(credentialEntity, platform, token, messageBody, new PushSendingCallback() {
+            pushMessageSenderService.sendMessage(appId, platform, token, messageBody, new PushSendingCallback() {
                 @Override
                 public void didFinishSendingMessage(Result result) {
 
