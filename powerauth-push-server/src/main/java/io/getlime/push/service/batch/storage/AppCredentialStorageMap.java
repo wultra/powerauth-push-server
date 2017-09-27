@@ -13,27 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.getlime.push.service.batch.storage;
+
+import io.getlime.push.repository.model.AppCredentialEntity;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class CampaignStorageMap<K, V> implements ItemStorageMap<K, V> {
-    private Map<K, V> mapStorage = new HashMap<>();
+/**
+ * Simple in-memory storage cache for app credentials. Uses {@link HashMap} as an underlying storage.
+ *
+ * @author Petr Dvorak, petr@lime-company.eu
+ */
+public class AppCredentialStorageMap implements ItemStorageMap<Long, AppCredentialEntity> {
+
+    private Map<Long, AppCredentialEntity> map = new HashMap<>();
 
     @Override
-    public V get(K key) {
-        return mapStorage.get(key);
+    public AppCredentialEntity get(Long key) {
+        return map.get(key);
     }
 
     @Override
-    public void put(K key, V value) {
-        mapStorage.put(key, value);
+    public void put(Long key, AppCredentialEntity value) {
+        map.put(key, value);
     }
 
     @Override
-    public boolean contains(K key) {
-        return mapStorage.containsKey(key);
+    public boolean contains(Long key) {
+        return map.containsKey(key);
     }
 }

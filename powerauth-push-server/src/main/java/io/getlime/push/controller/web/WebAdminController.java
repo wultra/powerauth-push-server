@@ -269,14 +269,14 @@ public class WebAdminController {
         }
         SendPushMessageRequest request = new SendPushMessageRequest();
         request.setAppId(form.getAppId());
-        PushMessage push = new PushMessage();
-        push.setUserId(form.getUserId());
+        PushMessage message = new PushMessage();
+        message.setUserId(form.getUserId());
         PushMessageBody body = new PushMessageBody();
         body.setTitle(form.getTitle());
         body.setBody(form.getBody());
         body.setSound(form.isSound() ? "default" : null);
-        push.setMessage(body);
-        request.setPushMessage(push);
+        message.setBody(body);
+        request.setMessage(message);
         HttpEntity<ObjectRequest<SendPushMessageRequest>> requestEntity = new HttpEntity<>(new ObjectRequest<>(request));
         RestTemplate template = new RestTemplate();
         String baseUrl = String.format("%s://%s:%d/%s",httpRequest.getScheme(),  httpRequest.getServerName(), httpRequest.getServerPort(), httpRequest.getContextPath());

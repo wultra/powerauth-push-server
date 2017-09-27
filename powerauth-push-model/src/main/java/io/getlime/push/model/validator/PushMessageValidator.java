@@ -8,7 +8,7 @@ import io.getlime.push.model.entity.PushMessage;
 public class PushMessageValidator {
 
     public static String validatePushMessage(PushMessage pushMessage) {
-        if (pushMessage.getMessage() == null) {
+        if (pushMessage.getBody() == null) {
             return "Push message payload must not be null";
         }
         if (pushMessage.getUserId() == null) {

@@ -13,28 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.getlime.push.service.batch.storage;
 
-import java.util.HashSet;
-import java.util.Set;
+import io.getlime.push.model.entity.PushMessageBody;
+import io.getlime.push.repository.model.PushCampaignEntity;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * In memory storage (uses {@link HashSet} internally) for unique
- * {@link io.getlime.push.repository.model.aggregate.UserDevice} objects.
+ * Simple to use class for storing campaigns. Simple in-memory storage cache for app credentials. Uses {@link HashMap}
+ * as an underlying storage.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class UserDeviceStorageSet<T> implements ItemStorageSet<T> {
+public class CampaignMessageStorageMap implements ItemStorageMap<Long, PushMessageBody> {
 
-    private Set<T> items = new HashSet<>();
+    private Map<Long, PushMessageBody> mapStorage = new HashMap<>();
 
     @Override
-    public boolean exists(T item) {
-        return items.contains(item);
+    public PushMessageBody get(Long key) {
+        return mapStorage.get(key);
     }
 
     @Override
-    public void put(T item) {
-        items.add(item);
+    public void put(Long key, PushMessageBody value) {
+        mapStorage.put(key, value);
+    }
+
+    @Override
+    public boolean contains(Long key) {
+        return mapStorage.containsKey(key);
     }
 }

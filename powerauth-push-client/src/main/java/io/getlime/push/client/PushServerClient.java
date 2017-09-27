@@ -187,7 +187,7 @@ public class PushServerClient {
     public ObjectResponse<PushMessageSendResult> sendPushMessage(Long appId, PushMessage pushMessage) throws PushServerClientException {
         SendPushMessageRequest request = new SendPushMessageRequest();
         request.setAppId(appId);
-        request.setPushMessage(pushMessage);
+        request.setMessage(pushMessage);
         TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {
         };
         return postObjectImpl("/push/message/send", new ObjectRequest<>(request), typeReference);

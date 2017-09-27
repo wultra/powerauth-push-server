@@ -16,14 +16,17 @@
 
 package io.getlime.push.service.batch;
 
-import io.getlime.push.model.entity.PushMessage;
+import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.repository.AppCredentialRepository;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.AppCredentialEntity;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.aggregate.UserDevice;
+import io.getlime.push.repository.serialization.JSONSerialization;
 import io.getlime.push.service.PushMessageSenderService;
 import io.getlime.push.service.PushSendingCallback;
+import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
+import io.getlime.push.service.batch.storage.CampaignMessageStorageMap;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.InitializingBean;
@@ -40,6 +43,10 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
     private PushMessageSenderService pushMessageSenderService;
     private PushCampaignRepository pushCampaignRepository;
     private AppCredentialRepository appCredentialRepository;
+
+    // Non-autowired fields
+    private CampaignMessageStorageMap campaignStorageMap = new CampaignMessageStorageMap();
+    private AppCredentialStorageMap appCredentialStorageMap = new AppCredentialStorageMap();
 
     @Autowired
     public UserDeviceItemWriter(PushMessageSenderService pushMessageSenderService,
@@ -58,14 +65,23 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
             Long appId = device.getAppId();
             Long campaignId = device.getCampaignId();
 
-            PushCampaignEntity campaignEntity = pushCampaignRepository.findOne(campaignId);
-            AppCredentialEntity credentialEntity = appCredentialRepository.findFirstByAppId(appId);
+            // Load and cache campaign information
+            PushMessageBody messageBody = campaignStorageMap.get(campaignId);
+            if (messageBody == null) {
+                final PushCampaignEntity campaignEntity = pushCampaignRepository.findOne(campaignId);
+                messageBody = JSONSerialization.deserializePushMessageBody(campaignEntity.getMessage());
+                campaignStorageMap.put(campaignId, messageBody);
+            }
 
-            // TODO: Use PushMessageBody here.
-            PushMessage message = new PushMessage();
+            // Load and cache app information
+            AppCredentialEntity credentialEntity = appCredentialStorageMap.get(appId);
+            if (credentialEntity == null) {
+                credentialEntity = appCredentialRepository.findFirstByAppId(appId);
+                appCredentialStorageMap.put(appId, credentialEntity);
+            }
 
-
-            pushMessageSenderService.sendMessage(credentialEntity, platform, token, message, new PushSendingCallback() {
+            // Send the push message using push sender service
+            pushMessageSenderService.sendMessage(credentialEntity, platform, token, messageBody, new PushSendingCallback() {
                 @Override
                 public void didFinishSendingMessage(Result result) {
 

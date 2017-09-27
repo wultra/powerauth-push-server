@@ -17,7 +17,7 @@
 package io.getlime.push.model.entity;
 
 /**
- * Class representing a single push message io.getlime.push.controller.web.model.
+ * Class representing a single push message payload.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
@@ -25,10 +25,12 @@ public class PushMessage {
 
     private String userId;
     private String activationId;
-    private Boolean silent = false;
-    private Boolean personal = false;
-    private Boolean encrypted = false;
-    private PushMessageBody message;
+    private PushMessageAttributes attributes;
+    private PushMessageBody body;
+
+    public PushMessage() {
+        attributes = new PushMessageAttributes();
+    }
 
     /**
      * Get user ID.
@@ -63,74 +65,34 @@ public class PushMessage {
     }
 
     /**
-     * Specifies if the message should be silent - it does not play any sound and trigger any displayable message.
-     * Default value if false.
-     * @return True if the message should be silent, false otherwise.  Default value if false.
+     * Get the push body contents.
+     * @return Push body contents.
      */
-    public Boolean getSilent() {
-        return silent;
+    public PushMessageBody getBody() {
+        return body;
     }
 
     /**
-     * Set if the message should be silent - it does not play any sound and trigger any displayable message.
-     * Default value if false.
-     * @param silent True if the message should be silent, false otherwise. Default value if false.
+     * Set the push body contents.
+     * @param body Push body contents.
      */
-    public void setSilent(Boolean silent) {
-        this.silent = silent;
+    public void setBody(PushMessageBody body) {
+        this.body = body;
     }
 
     /**
-     * Specifies if the message is personal. Personal messages are delivered to provided recipient only in case
-     * associated PowerAuth 2.0 activations are in active state. They are not delivered in case of any other
-     * activation states. Default value if false.
-     * @return True if the message is personal, false otherwise. Default value if false.
+     * Get push body attributes.
+     * @return Attributes.
      */
-    public Boolean getPersonal() {
-        return personal;
+    public PushMessageAttributes getAttributes() {
+        return attributes;
     }
 
     /**
-     * Set if the message is personal. Personal messages are delivered to provided recipient only in case
-     * associated PowerAuth 2.0 activations are in active state. They are not delivered in case of any other
-     * activation states.  Default value if false.
-     * @param personal True if the message is personal, false otherwise.  Default value if false.
+     * Set push body attributes.
+     * @param attributes Attributes.
      */
-    public void setPersonal(Boolean personal) {
-        this.personal = personal;
-    }
-
-    /**
-     * Specifies if the message data payload ('extras') should be encrypted using PowerAuth 2.0 end-to-end
-     * encryption. Default value if false.
-     * @return True if the message should be encrypted, false otherwise. Default value if false.
-     */
-    public Boolean getEncrypted() {
-        return encrypted;
-    }
-
-    /**
-     * Sets if the message data payload ('extras') should be encrypted using PowerAuth 2.0 end-to-end
-     * encryption. Default value if false.
-     * @param encrypted True if the message should be encrypted, false otherwise. Default value if false.
-     */
-    public void setEncrypted(Boolean encrypted) {
-        this.encrypted = encrypted;
-    }
-
-    /**
-     * Get the push message contents.
-     * @return Push message contents.
-     */
-    public PushMessageBody getMessage() {
-        return message;
-    }
-
-    /**
-     * Set the push message contents.
-     * @param message Push message contents.
-     */
-    public void setMessage(PushMessageBody message) {
-        this.message = message;
+    public void setAttributes(PushMessageAttributes attributes) {
+        this.attributes = attributes;
     }
 }

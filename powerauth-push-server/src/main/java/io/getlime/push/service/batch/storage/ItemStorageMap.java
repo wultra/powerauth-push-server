@@ -16,8 +16,17 @@
 
 package io.getlime.push.service.batch.storage;
 
-public interface ItemStorageMap<K,V>{
+/**
+ * Interface for generic item storage
+ * @param <K> Key class for item storage.
+ * @param <V> Value class for item storage.
+ */
+public interface ItemStorageMap<K,V> {
+
     V get(K key);
+
     void put(K key, V value);
+
     boolean contains(K key);
+
 }

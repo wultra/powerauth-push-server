@@ -16,10 +16,15 @@
 
 package io.getlime.push.controller.rest;
 
+import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.model.entity.PushMessage;
+import io.getlime.push.model.request.TestCampaignRequest;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
+import io.getlime.push.repository.serialization.JSONSerialization;
+import io.getlime.push.service.PushMessageSenderService;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -27,11 +32,12 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Controller class storing send campaign methods
@@ -45,15 +51,17 @@ public class SendCampaignController {
     private final JobLauncher jobLauncher;
     private final Job job;
     private final PushCampaignRepository pushCampaignRepository;
+    private final PushMessageSenderService pushMessageSenderService;
 
     @Autowired
-    public SendCampaignController(JobLauncher jobLauncher, Job job, PushCampaignRepository pushCampaignRepository) {
+    public SendCampaignController(JobLauncher jobLauncher, Job job, PushCampaignRepository pushCampaignRepository, PushMessageSenderService pushMessageSenderService) {
         this.job = job;
         this.jobLauncher = jobLauncher;
         this.pushCampaignRepository = pushCampaignRepository;
+        this.pushMessageSenderService = pushMessageSenderService;
     }
 
-    @RequestMapping(value = "{id}", method = RequestMethod.POST)
+    @RequestMapping(value = "live/{id}", method = RequestMethod.POST)
     @ResponseBody
     public Response sendCampaign(@PathVariable(value = "id") Long id) throws PushServerException {
         try {
@@ -76,5 +84,32 @@ public class SendCampaignController {
         } catch (JobParametersInvalidException e) {
             throw new PushServerException("Job parameters are invalid");
         }
+    }
+
+    /**
+     * Method for sending testing user on campaign
+     *
+     * @param id      Campaign ID
+     * @param request User ID
+     * @return Response status
+     */
+    @RequestMapping(value = "test/{id}", method = RequestMethod.POST)
+    @ResponseBody
+    public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
+        PushCampaignEntity campaign = pushCampaignRepository.findOne(id);
+        if (campaign == null) {
+            throw new PushServerException("Campaign with entered id does not exist");
+        }
+        PushMessage pushMessage = new PushMessage();
+        pushMessage.setUserId(request.getRequestObject().getUserId());
+        pushMessage.setBody(JSONSerialization.deserializePushMessageBody(campaign.getMessage()));
+        List<PushMessage> message = new ArrayList<>();
+        message.add(pushMessage);
+        try {
+            pushMessageSenderService.send(campaign.getAppId(), message);
+        } catch (InterruptedException | IOException e) {
+            throw new PushServerException(e.getMessage());
+        }
+        return new Response();
     }
 }

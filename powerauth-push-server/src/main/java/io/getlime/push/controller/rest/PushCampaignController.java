@@ -16,8 +16,6 @@
 
 package io.getlime.push.controller.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
@@ -33,6 +31,7 @@ import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.PushCampaignUserRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.PushCampaignUserEntity;
+import io.getlime.push.repository.serialization.JSONSerialization;
 import io.getlime.push.service.PushMessageSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -86,7 +85,7 @@ public class PushCampaignController {
         campaign.setSent(false);
         campaign.setTimestampCreated(new Date());
         PushMessageBody message = requestObject.getMessage();
-        String messageString = serializePushMessageBody(message);
+        String messageString = JSONSerialization.serializePushMessageBody(message);
         campaign.setMessage(messageString);
         campaign = pushCampaignRepository.save(campaign);
         CreateCampaignResponse response = new CreateCampaignResponse();
@@ -118,28 +117,30 @@ public class PushCampaignController {
     }
 
     /**
-     * Method used for getting a list of campaigns
+     * Method used for getting a list of campaigns.
      *
-     * @param all true - list of all campaigns
-     *            false - list of campaigns which have 'all' attribute set on false
+     * @param all If true, method returns list of all campaigns. If false, it returns
+     *            only campaigns that were not sent yet.
      * @return List of campaigns.
      */
     @RequestMapping(value = "list", method = RequestMethod.GET)
     @ResponseBody
-    public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(@RequestParam(value = "all") boolean all) {
+    public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(@RequestParam(value = "all", required = false) boolean all) {
+        // Fetch campaigns from the repository
         Iterable<PushCampaignEntity> campaignList;
-        ListOfCampaignsResponse listOfCampaignsResponse = new ListOfCampaignsResponse();
         if (all) {
             campaignList = pushCampaignRepository.findAll();
         } else {
             campaignList = pushCampaignRepository.findAllBySent(false);
         }
+        // Prepare response with list of campaigns
+        ListOfCampaignsResponse listOfCampaignsResponse = new ListOfCampaignsResponse();
         for (PushCampaignEntity campaign : campaignList) {
             CampaignResponse campaignResponse = new CampaignResponse();
             campaignResponse.setId(campaign.getId());
             campaignResponse.setAppId(campaign.getAppId());
             campaignResponse.setSent(campaign.isSent());
-            PushMessageBody pushMessageBody = deserializePushMessageBody(campaign.getMessage());
+            PushMessageBody pushMessageBody = JSONSerialization.deserializePushMessageBody(campaign.getMessage());
             campaignResponse.setMessage(pushMessageBody);
             listOfCampaignsResponse.add(campaignResponse);
         }
@@ -163,7 +164,7 @@ public class PushCampaignController {
         campaignResponse.setId(campaign.getId());
         campaignResponse.setSent(campaign.isSent());
         campaignResponse.setAppId(campaign.getAppId());
-        PushMessageBody message = deserializePushMessageBody(campaign.getMessage());
+        PushMessageBody message = JSONSerialization.deserializePushMessageBody(campaign.getMessage());
         campaignResponse.setMessage(message);
         return new ObjectResponse<>(campaignResponse);
     }
@@ -219,8 +220,8 @@ public class PushCampaignController {
         listOfUsersFromCampaignResponse.setCampaingId(id);
         listOfUsersFromCampaignResponse.setUsers(listOfUsers);
         PagedResponse<ListOfUsersFromCampaignResponse> pagedResponse = new PagedResponse<>(listOfUsersFromCampaignResponse);
-        pagedResponse.setPage(pageable.getPageSize());
-        pagedResponse.setSize(pageable.getPageNumber());
+        pagedResponse.setPage(pageable.getPageNumber());
+        pagedResponse.setSize(pageable.getPageSize());
         return pagedResponse;
     }
 
@@ -244,66 +245,6 @@ public class PushCampaignController {
             }
         }
         return new Response();
-    }
-
-    /**
-     * Method for sending testing user on campaign
-     *
-     * @param id      Campaign ID
-     * @param request User ID
-     * @return Response status
-     */
-    @RequestMapping(value = "{id}/test/send", method = RequestMethod.POST)
-    @ResponseBody
-    public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
-        checkRequestNullity(request);
-        PushCampaignEntity campaign = pushCampaignRepository.findOne(id);
-        if (campaign == null) {
-            throw new PushServerException("Campaign with entered id does not exist");
-        }
-        PushMessage pushMessage = new PushMessage();
-        pushMessage.setUserId(request.getRequestObject().getUserId());
-        pushMessage.setMessage(deserializePushMessageBody(campaign.getMessage()));
-        List<PushMessage> message = new ArrayList<>();
-        message.add(pushMessage);
-        try {
-            pushMessageSenderService.send(campaign.getAppId(), message);
-        } catch (InterruptedException | IOException e) {
-            throw new PushServerException(e.getMessage());
-        }
-        return new Response();
-    }
-
-    /**
-     * Parsing message from Json to PushMessagebody object
-     *
-     * @param message message to parse
-     * @return PushMessageBody
-     */
-    private PushMessageBody deserializePushMessageBody(String message) {
-        PushMessageBody pushMessageBody = null;
-        try {
-            pushMessageBody = new ObjectMapper().readValue(message, PushMessageBody.class);
-        } catch (IOException e) {
-            Logger.getLogger(PushCampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-        }
-        return pushMessageBody;
-    }
-
-    /**
-     * Method used for parsing message into Json
-     *
-     * @param message string message
-     * @return Json
-     */
-    private String serializePushMessageBody(PushMessageBody message) {
-        String messageString = null;
-        try {
-            messageString = new ObjectMapper().writeValueAsString(message);
-        } catch (JsonProcessingException e) {
-            Logger.getLogger(PushCampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-        }
-        return messageString;
     }
 
     /**

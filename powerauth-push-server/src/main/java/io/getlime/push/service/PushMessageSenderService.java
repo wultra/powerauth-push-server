@@ -16,8 +16,6 @@
 
 package io.getlime.push.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turo.pushy.apns.*;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.proxy.HttpProxyHandlerFactory;
@@ -28,6 +26,8 @@ import com.turo.pushy.apns.util.TokenUtil;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
+import io.getlime.push.model.entity.PushMessageAttributes;
+import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.validator.PushMessageValidator;
 import io.getlime.push.repository.AppCredentialRepository;
@@ -36,6 +36,7 @@ import io.getlime.push.repository.PushMessageRepository;
 import io.getlime.push.repository.model.AppCredentialEntity;
 import io.getlime.push.repository.model.PushDeviceEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
+import io.getlime.push.repository.serialization.JSONSerialization;
 import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmNotification;
 import io.getlime.push.service.fcm.FcmSendRequest;
@@ -107,6 +108,11 @@ public class PushMessageSenderService {
 
         // Send push message batch
         for (PushMessage pushMessage : pushMessageList) {
+
+            // Validate push message before sending
+            validatePushMessage(pushMessage);
+
+            // Fetch connected devices
             List<PushDeviceEntity> devices = getPushDevices(appId, pushMessage.getUserId(), pushMessage.getActivationId());
 
             // Iterate over all devices for given user
@@ -115,13 +121,17 @@ public class PushMessageSenderService {
 
                 // Check if given push is not personal, or if it is, that device is in active state.
                 // This avoids sending personal notifications to devices that are blocked or removed.
-                if (!pushMessage.getPersonal() || device.getActive()) {
+                boolean isMessagePersonal = pushMessage.getAttributes() != null && pushMessage.getAttributes().getPersonal();
+                boolean isDeviceActive = device.getActive();
+                if (!isMessagePersonal || isDeviceActive) {
+
+                    // Register phaser for synchronization
                     phaser.register();
-                    String platform = device.getPlatform();
 
                     // Decide if the device is iOS or Android and send message accordingly
+                    String platform = device.getPlatform();
                     if (platform.equals(PushDeviceEntity.Platform.iOS)) {
-                        sendMessageToIos(apnsClient, pushMessage, device.getPushToken(), credentials.getIosBundle(), new PushSendingCallback() {
+                        sendMessageToIos(apnsClient, pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), credentials.getIosBundle(), new PushSendingCallback() {
                             @Override
                             public void didFinishSendingMessage(Result sendingResult) {
 
@@ -157,7 +167,7 @@ public class PushMessageSenderService {
                         });
                     }
                     else if (platform.equals(PushDeviceEntity.Platform.Android)) {
-                        sendMessageToAndroid(fcmClient, pushMessage, device.getPushToken(), new PushSendingCallback() {
+                        sendMessageToAndroid(fcmClient, pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), new PushSendingCallback() {
                             @Override
                             public void didFinishSendingMessage(Result sendingResult) {
 
@@ -200,26 +210,50 @@ public class PushMessageSenderService {
         return result;
     }
 
-    //TODO: JavaDoc
-    public void sendMessage(AppCredentialEntity appCredentials, String platform, String token, PushMessage pushMessage, PushSendingCallback callback) throws PushServerException, InterruptedException {
+    /**
+     * Send push message content with related message attributes to provided device (platform and token) using
+     * credentials for given application. Return the result in the callback.
+     * @param appCredentials APNS and FCM credentials for given app.
+     * @param platform Mobile platform (iOS, Android).
+     * @param token Push message token.
+     * @param pushMessageBody Push message body.
+     * @param callback Callback with the result.
+     * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
+     * the error can be found in exception message.
+     */
+    public void sendMessage(AppCredentialEntity appCredentials, String platform, String token, PushMessageBody pushMessageBody, PushSendingCallback callback) throws PushServerException {
+        sendMessage(appCredentials, platform, token, pushMessageBody, null, callback);
+    }
+
+    /**
+     * Send push message content with related message attributes to provided device (platform and token) using
+     * credentials for given application. Return the result in the callback.
+     * @param appCredentials APNS and FCM credentials for given app.
+     * @param platform Mobile platform (iOS, Android).
+     * @param token Push message token.
+     * @param pushMessageBody Push message body.
+     * @param attributes Push message attributes.
+     * @param callback Callback with the result.
+     * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
+     * the error can be found in exception message.
+     */
+    public void sendMessage(AppCredentialEntity appCredentials, String platform, String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, PushSendingCallback callback) throws PushServerException {
         if (platform.equals(PushDeviceEntity.Platform.iOS)) {
             ApnsClient client = prepareApnsClient(appCredentials.getIosPrivateKey(), appCredentials.getIosTeamId(), appCredentials.getIosKeyId());
-            sendMessageToIos(client, pushMessage, token, appCredentials.getIosBundle(), callback);
+            sendMessageToIos(client, pushMessageBody, attributes, token, appCredentials.getIosBundle(), callback);
         } else if (platform.equals(PushDeviceEntity.Platform.Android)) {
             FcmClient client = prepareFcmClient(appCredentials.getAndroidServerKey());
-            sendMessageToAndroid(client, pushMessage, token,  callback);
+            sendMessageToAndroid(client, pushMessageBody, attributes, token, callback);
         }
     }
 
     // Send message to iOS platform
-    private void sendMessageToIos(final ApnsClient apnsClient, final PushMessage pushMessage, final String pushToken, final String iosTopic, final PushSendingCallback callback) throws InterruptedException, PushServerException {
-
-        validatePushMessage(pushMessage);
+    private void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final String iosTopic, final PushSendingCallback callback) throws PushServerException {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
-        final String payload = buildApnsPayload(pushMessage);
-        Date validUntil = pushMessage.getMessage().getValidUntil();
-        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushMessage.getMessage().getCollapseKey());
+        final String payload = buildApnsPayload(pushMessageBody, attributes == null ? false : attributes.getSilent()); // In case there are no attributes, the message is not silent
+        Date validUntil = pushMessageBody.getValidUntil();
+        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushMessageBody.getCollapseKey());
         final Future<PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
         sendNotificationFuture.addListener(new GenericFutureListener<Future<PushNotificationResponse<SimpleApnsPushNotification>>>() {
@@ -257,20 +291,18 @@ public class PushMessageSenderService {
     }
 
     // Send message to Android platform
-    private void sendMessageToAndroid(final FcmClient fcmClient, final PushMessage pushMessage, final String pushToken, final PushSendingCallback callback) throws PushServerException {
-
-        validatePushMessage(pushMessage);
+    private void sendMessageToAndroid(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final PushSendingCallback callback) throws PushServerException {
 
         FcmSendRequest request = new FcmSendRequest();
         request.setTo(pushToken);
-        request.setData(pushMessage.getMessage().getExtras());
-        request.setCollapseKey(pushMessage.getMessage().getCollapseKey());
-        if (!pushMessage.getSilent()) {
+        request.setData(pushMessageBody.getExtras());
+        request.setCollapseKey(pushMessageBody.getCollapseKey());
+        if (attributes == null || !attributes.getSilent()) { // if there are no attributes, assume the message is not silent
             FcmNotification notification = new FcmNotification();
-            notification.setTitle(pushMessage.getMessage().getTitle());
-            notification.setBody(pushMessage.getMessage().getBody());
-            notification.setSound(pushMessage.getMessage().getSound());
-            notification.setTag(pushMessage.getMessage().getCategory());
+            notification.setTitle(pushMessageBody.getTitle());
+            notification.setBody(pushMessageBody.getBody());
+            notification.setSound(pushMessageBody.getSound());
+            notification.setTag(pushMessageBody.getCategory());
             request.setNotification(notification);
         }
         final ListenableFuture<ResponseEntity<String>> future = fcmClient.exchange(request);
@@ -386,24 +418,20 @@ public class PushMessageSenderService {
      * @throws PushServerException In case message body JSON serialization fails.
      */
     private PushMessageEntity storePushMessageInDatabase(PushMessage pushMessage, Long registrationId) throws PushServerException {
-        try {
-            PushMessageEntity entity = new PushMessageEntity();
-            entity.setDeviceRegistrationId(registrationId);
-            entity.setUserId(pushMessage.getUserId());
-            entity.setActivationId(pushMessage.getActivationId());
-            entity.setEncrypted(pushMessage.getEncrypted());
-            entity.setPersonal(pushMessage.getPersonal());
-            entity.setSilent(pushMessage.getSilent());
-            entity.setStatus(PushMessageEntity.Status.PENDING);
-            entity.setTimestampCreated(new Date());
-            ObjectMapper mapper = new ObjectMapper();
-            String messageBody = mapper.writeValueAsString(pushMessage.getMessage());
-            entity.setMessageBody(messageBody);
-            return pushMessageRepository.save(entity);
-        } catch (JsonProcessingException e) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Unable to serialize JSON");
-            throw new PushServerException("Unable to serialize JSON");
+        PushMessageEntity entity = new PushMessageEntity();
+        entity.setDeviceRegistrationId(registrationId);
+        entity.setUserId(pushMessage.getUserId());
+        entity.setActivationId(pushMessage.getActivationId());
+        if (pushMessage.getAttributes() != null) {
+            entity.setEncrypted(pushMessage.getAttributes().getEncrypted());
+            entity.setPersonal(pushMessage.getAttributes().getPersonal());
+            entity.setSilent(pushMessage.getAttributes().getSilent());
         }
+        entity.setStatus(PushMessageEntity.Status.PENDING);
+        entity.setTimestampCreated(new Date());
+        String messageBody = JSONSerialization.serializePushMessageBody(pushMessage.getBody());
+        entity.setMessageBody(messageBody);
+        return pushMessageRepository.save(entity);
     }
 
     // Use validator to check there are no errors in push message
@@ -418,18 +446,19 @@ public class PushMessageSenderService {
     /**
      * Method to build APNs message payload.
      * @param push Push message object with APNs data.
+     * @param isSilent Indicates if the message is silent or not.
      * @return String with APNs JSON payload.
      */
-    private String buildApnsPayload(PushMessage push) {
+    private String buildApnsPayload(PushMessageBody push, boolean isSilent) {
         final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
-        payloadBuilder.setAlertTitle(push.getMessage().getTitle());
-        payloadBuilder.setAlertBody(push.getMessage().getBody());
-        payloadBuilder.setBadgeNumber(push.getMessage().getBadge());
-        payloadBuilder.setCategoryName(push.getMessage().getCategory());
-        payloadBuilder.setSoundFileName(push.getMessage().getSound());
-        payloadBuilder.setContentAvailable(push.getSilent());
-        //payloadBuilder.setThreadId(push.getPushMessage().getCollapseKey());
-        Map<String, Object> extras = push.getMessage().getExtras();
+        payloadBuilder.setAlertTitle(push.getTitle());
+        payloadBuilder.setAlertBody(push.getBody());
+        payloadBuilder.setBadgeNumber(push.getBadge());
+        payloadBuilder.setCategoryName(push.getCategory());
+        payloadBuilder.setSoundFileName(push.getSound());
+        payloadBuilder.setContentAvailable(isSilent);
+        //payloadBuilder.setThreadId(push.getBody().getCollapseKey());
+        Map<String, Object> extras = push.getExtras();
         if (extras != null) {
             for (Map.Entry<String, Object> entry : extras.entrySet()) {
                 payloadBuilder.addCustomProperty(entry.getKey(), entry.getValue());

@@ -57,12 +57,12 @@ public class PushMessageController {
      */
     @RequestMapping(value = "send", method = RequestMethod.POST)
     public @ResponseBody ObjectResponse<PushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
-        if (request.getRequestObject() == null || request.getRequestObject().getPushMessage() == null || request.getRequestObject().getAppId() == null) {
+        if (request.getRequestObject() == null || request.getRequestObject().getMessage() == null || request.getRequestObject().getAppId() == null) {
             throw new PushServerException("Invalid or empty input data");
         }
         final Long appId = request.getRequestObject().getAppId();
         final List<PushMessage> pushMessageList = new ArrayList<>();
-        pushMessageList.add(request.getRequestObject().getPushMessage());
+        pushMessageList.add(request.getRequestObject().getMessage());
         PushMessageSendResult result;
         try {
             result = pushMessageSenderService.send(appId, pushMessageList);
