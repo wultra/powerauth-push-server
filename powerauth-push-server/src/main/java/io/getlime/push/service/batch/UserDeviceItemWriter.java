@@ -16,20 +16,21 @@
 
 package io.getlime.push.service.batch;
 
+import io.getlime.push.model.entity.PushMessage;
+import io.getlime.push.repository.AppCredentialRepository;
 import io.getlime.push.repository.PushCampaignRepository;
+import io.getlime.push.repository.model.AppCredentialEntity;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.aggregate.UserDevice;
 import io.getlime.push.service.PushMessageSenderService;
-import io.getlime.push.service.batch.storage.CampaignStorageMap;
+import io.getlime.push.service.PushSendingCallback;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Component
@@ -37,15 +38,16 @@ import java.util.Map;
 public class UserDeviceItemWriter implements ItemWriter<UserDevice>, InitializingBean {
 
     private PushMessageSenderService pushMessageSenderService;
-    private CampaignStorageMap<Long, PushCampaignEntity> storage;
     private PushCampaignRepository pushCampaignRepository;
-    Map<Integer, Integer> map = new HashMap<>();
+    private AppCredentialRepository appCredentialRepository;
 
     @Autowired
     public UserDeviceItemWriter(PushMessageSenderService pushMessageSenderService,
-                                PushCampaignRepository pushCampaignRepository) {
+                                PushCampaignRepository pushCampaignRepository,
+                                AppCredentialRepository appCredentialRepository) {
         this.pushMessageSenderService = pushMessageSenderService;
         this.pushCampaignRepository = pushCampaignRepository;
+        this.appCredentialRepository = appCredentialRepository;
     }
 
     @Override
@@ -55,9 +57,20 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
             String token = device.getToken();
             Long appId = device.getAppId();
             Long campaignId = device.getCampaignId();
-            if (!storage.contains(campaignId)){
-                storage.put(campaignId, pushCampaignRepository.findOne(campaignId));
-            }
+
+            PushCampaignEntity campaignEntity = pushCampaignRepository.findOne(campaignId);
+            AppCredentialEntity credentialEntity = appCredentialRepository.findFirstByAppId(appId);
+
+            // TODO: Use PushMessageBody here.
+            PushMessage message = new PushMessage();
+
+
+            pushMessageSenderService.sendMessage(credentialEntity, platform, token, message, new PushSendingCallback() {
+                @Override
+                public void didFinishSendingMessage(Result result) {
+
+                }
+            });
         }
     }
 

@@ -200,6 +200,17 @@ public class PushMessageSenderService {
         return result;
     }
 
+    //TODO: JavaDoc
+    public void sendMessage(AppCredentialEntity appCredentials, String platform, String token, PushMessage pushMessage, PushSendingCallback callback) throws PushServerException, InterruptedException {
+        if (platform.equals(PushDeviceEntity.Platform.iOS)) {
+            ApnsClient client = prepareApnsClient(appCredentials.getIosPrivateKey(), appCredentials.getIosTeamId(), appCredentials.getIosKeyId());
+            sendMessageToIos(client, pushMessage, token, appCredentials.getIosBundle(), callback);
+        } else if (platform.equals(PushDeviceEntity.Platform.Android)) {
+            FcmClient client = prepareFcmClient(appCredentials.getAndroidServerKey());
+            sendMessageToAndroid(client, pushMessage, token,  callback);
+        }
+    }
+
     // Send message to iOS platform
     private void sendMessageToIos(final ApnsClient apnsClient, final PushMessage pushMessage, final String pushToken, final String iosTopic, final PushSendingCallback callback) throws InterruptedException, PushServerException {
 
