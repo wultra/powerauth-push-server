@@ -45,7 +45,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -88,8 +87,6 @@ public class PushMessageSenderService {
      * @param appId App ID used for addressing push messages. Required so that appropriate APNs/FCM credentials can be obtained.
      * @param pushMessageList List with push message objects.
      * @return Result of this batch sending.
-     * @throws InterruptedException In case sending is interrupted.
-     * @throws IOException In case certificate data cannot be read.
      */
     public PushMessageSendResult send(Long appId, List<PushMessage> pushMessageList) throws  PushServerException {
         AppCredentialEntity credentials = appCredentialRepository.findFirstByAppId(appId);
@@ -293,7 +290,6 @@ public class PushMessageSenderService {
      * @param pushMessage Push message to be stored.
      * @param registrationId Device registration ID to be used for this message.
      * @return New database entity with push message information.
-     * @throws JsonProcessingException In case message body JSON serialization fails.
      */
     private PushMessageEntity storePushMessageInDatabase(PushMessage pushMessage, Long registrationId) throws PushServerException {
         try {

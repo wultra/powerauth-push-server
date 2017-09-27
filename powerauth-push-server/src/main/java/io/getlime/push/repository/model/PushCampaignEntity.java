@@ -17,6 +17,7 @@
 package io.getlime.push.repository.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -24,8 +25,9 @@ import java.util.Date;
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-@Entity(name = "push_campaign")
-public class PushCampaignEntity {
+@Entity
+@Table(name = "push_campaign")
+public class PushCampaignEntity implements Serializable {
 
     @Id
     @Column(name = "id")

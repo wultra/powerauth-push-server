@@ -27,7 +27,8 @@ import java.util.Date;
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-@Entity(name = "push_message")
+@Entity
+@Table(name = "push_message")
 public class PushMessageEntity implements Serializable {
 
     public enum Status {

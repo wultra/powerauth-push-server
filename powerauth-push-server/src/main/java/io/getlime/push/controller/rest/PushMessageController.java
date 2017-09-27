@@ -29,8 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,9 +41,9 @@ import java.util.List;
 @RequestMapping(value = "push/message")
 public class PushMessageController {
 
-    @Autowired
     private PushMessageSenderService pushMessageSenderService;
 
+    @Autowired
     public PushMessageController(PushMessageSenderService pushMessageSenderService) {
         this.pushMessageSenderService = pushMessageSenderService;
     }
@@ -75,22 +73,16 @@ public class PushMessageController {
      */
     @RequestMapping(value = "batch/send", method = RequestMethod.POST)
     public @ResponseBody ObjectResponse<PushMessageSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
-
         if (request.getRequestObject() == null || request.getRequestObject().getBatch() == null || request.getRequestObject().getAppId() == null) {
             throw new PushServerException("Invalid or empty input data");
         }
-
         final Long appId = request.getRequestObject().getAppId();
         final List<PushMessage> batch = request.getRequestObject().getBatch();
-
         if (batch.size() > 20) {
             throw new PushServerException("Too many messages in batch - do no send more than 20 messages at once to avoid server congestion.");
         }
-
         PushMessageSendResult result;
         result = pushMessageSenderService.send(appId, batch);
-
         return new ObjectResponse<>(result);
     }
-
 }
