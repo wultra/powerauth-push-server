@@ -26,6 +26,7 @@ import com.turo.pushy.apns.util.ApnsPayloadBuilder;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.apns.util.TokenUtil;
 import io.getlime.push.configuration.PushServiceConfiguration;
+import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.repository.AppCredentialRepository;
@@ -44,7 +45,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import javax.net.ssl.SSLException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -90,7 +91,7 @@ public class PushMessageSenderService {
      * @throws InterruptedException In case sending is interrupted.
      * @throws IOException In case certificate data cannot be read.
      */
-    public PushMessageSendResult send(Long appId, List<PushMessage> pushMessageList) throws InterruptedException, IOException {
+    public PushMessageSendResult send(Long appId, List<PushMessage> pushMessageList) throws  PushServerException {
         AppCredentialEntity credentials = appCredentialRepository.findFirstByAppId(appId);
         if (credentials == null) {
             throw new IllegalArgumentException("Application not found");
@@ -115,7 +116,7 @@ public class PushMessageSenderService {
                         sendMessageToIos(iosTopic, apnsClient, phaser, result, pushMessage, device, sentMessage);
                     }
                     else if (platform.equals(PushDeviceEntity.Platform.Android)) {
-                        sendMessageToAndroid(fcmClient, phaser, result, pushMessage, device, sentMessage);
+                        sendMessageToAndroidImpl(fcmClient, phaser, result, pushMessage, device, sentMessage);
                     }
                 }
             }
@@ -125,7 +126,7 @@ public class PushMessageSenderService {
     }
 
     // Send message to iOS platform
-    private void sendMessageToIos(String iosTopic, final ApnsClient apnsClient, final Phaser phaser, final PushMessageSendResult result, PushMessage pushMessage, final PushDeviceEntity device, final PushMessageEntity sentMessage) throws InterruptedException {
+    private void sendMessageToIos(String iosTopic, final ApnsClient apnsClient, final Phaser phaser, final PushMessageSendResult result, PushMessage pushMessage, final PushDeviceEntity device, final PushMessageEntity sentMessage) {
         final String token = TokenUtil.sanitizeTokenString(device.getPushToken());
         final String payload = buildApnsPayload(pushMessage);
         Date validUntil = pushMessage.getMessage().getValidUntil();
@@ -173,7 +174,7 @@ public class PushMessageSenderService {
     }
 
     // Send message to Android platform
-    private void sendMessageToAndroid(FcmClient fcmClient, final Phaser phaser, final PushMessageSendResult result, PushMessage pushMessage, PushDeviceEntity device, final PushMessageEntity sentMessage) {
+    private void sendMessageToAndroidImpl(FcmClient fcmClient, final Phaser phaser, final PushMessageSendResult result, PushMessage pushMessage, PushDeviceEntity device, final PushMessageEntity sentMessage) {
         FcmSendRequest request = new FcmSendRequest();
         request.setTo(device.getPushToken());
         request.setData(pushMessage.getMessage().getExtras());
@@ -208,11 +209,12 @@ public class PushMessageSenderService {
         });
     }
 
-    // If user exists return list of devices related to that app
-    private List<PushDeviceEntity> getPushDevices(Long appId, PushMessage pushMessage) {
+    // Return list of devices
+    private List<PushDeviceEntity> getPushDevices(Long appId, PushMessage pushMessage) throws PushServerException {
         String userId = pushMessage.getUserId();
         if (userId == null || userId.isEmpty()) {
-            throw new IllegalArgumentException("No userId was specified");
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "No userId was specified");
+            throw new PushServerException("No userId was specified");
         }
         String activationId = pushMessage.getActivationId();
         List<PushDeviceEntity> devices;
@@ -224,25 +226,30 @@ public class PushMessageSenderService {
         return devices;
     }
 
-    private ApnsClient prepareApnsClient(AppCredentialEntity credentials) throws IOException, InterruptedException {
+    private ApnsClient prepareApnsClient(AppCredentialEntity credentials) throws PushServerException {
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
         setApnsClientProxy(apnsClientBuilder);
         try {
             ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(credentials.getIosPrivateKey()), credentials.getIosTeamId(), credentials.getIosKeyId());
             apnsClientBuilder.setSigningKey(key);
-        } catch (InvalidKeyException | NoSuchAlgorithmException e) {
+        } catch (InvalidKeyException | NoSuchAlgorithmException | IOException e) {
             Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Invalid private key");
-            throw new IllegalArgumentException("Invalid private key");
+            throw new PushServerException("Invalid private key");
         }
-        final ApnsClient apnsClient = apnsClientBuilder.build();
-        final Future<Void> future;
-        if (pushServiceConfiguration.isApnsUseDevelopment()) {
-            future = apnsClient.connect(ApnsClient.DEVELOPMENT_APNS_HOST);
-        } else {
-            future = apnsClient.connect(ApnsClient.PRODUCTION_APNS_HOST);
+        try {
+            final ApnsClient apnsClient = apnsClientBuilder.build();
+            final Future<Void> future;
+            if (pushServiceConfiguration.isApnsUseDevelopment()) {
+                future = apnsClient.connect(ApnsClient.DEVELOPMENT_APNS_HOST);
+            } else {
+                future = apnsClient.connect(ApnsClient.PRODUCTION_APNS_HOST);
+            }
+            future.await();
+            return apnsClient;
+        } catch (InterruptedException | IOException e) {
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Unable to connect to APNS service");
+            throw new PushServerException("Unable to connect to APNS service");
         }
-        future.await();
-        return apnsClient;
     }
 
     // Prepare and connect FCM client
@@ -260,7 +267,7 @@ public class PushMessageSenderService {
     }
 
     // Prepare proxy settings for APNs
-    private void setApnsClientProxy(ApnsClientBuilder apnsClientBuilder) throws SSLException {
+    private void setApnsClientProxy(ApnsClientBuilder apnsClientBuilder) {
         if (pushServiceConfiguration.isApnsProxyEnabled()) {
             String proxyUrl = pushServiceConfiguration.getApnsProxyUrl();
             int proxyPort = pushServiceConfiguration.getApnsProxyPort();
@@ -288,21 +295,26 @@ public class PushMessageSenderService {
      * @return New database entity with push message information.
      * @throws JsonProcessingException In case message body JSON serialization fails.
      */
-    private PushMessageEntity storePushMessageInDatabase(PushMessage pushMessage, Long registrationId) throws JsonProcessingException {
-        // Store the message in database
-        PushMessageEntity entity = new PushMessageEntity();
-        entity.setDeviceRegistrationId(registrationId);
-        entity.setUserId(pushMessage.getUserId());
-        entity.setActivationId(pushMessage.getActivationId());
-        entity.setEncrypted(pushMessage.getEncrypted());
-        entity.setPersonal(pushMessage.getPersonal());
-        entity.setSilent(pushMessage.getSilent());
-        entity.setStatus(PushMessageEntity.Status.PENDING);
-        entity.setTimestampCreated(new Date());
-        ObjectMapper mapper = new ObjectMapper();
-        String messageBody = mapper.writeValueAsString(pushMessage.getMessage());
-        entity.setMessageBody(messageBody);
-        return pushMessageRepository.save(entity);
+    private PushMessageEntity storePushMessageInDatabase(PushMessage pushMessage, Long registrationId) throws PushServerException {
+        try {
+            PushMessageEntity entity = new PushMessageEntity();
+            entity.setDeviceRegistrationId(registrationId);
+            entity.setUserId(pushMessage.getUserId());
+            entity.setActivationId(pushMessage.getActivationId());
+            entity.setEncrypted(pushMessage.getEncrypted());
+            entity.setPersonal(pushMessage.getPersonal());
+            entity.setSilent(pushMessage.getSilent());
+            entity.setStatus(PushMessageEntity.Status.PENDING);
+            entity.setTimestampCreated(new Date());
+            ObjectMapper mapper = new ObjectMapper();
+            String messageBody = null;
+            messageBody = mapper.writeValueAsString(pushMessage.getMessage());
+            entity.setMessageBody(messageBody);
+            return pushMessageRepository.save(entity);
+        } catch (JsonProcessingException e) {
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Unable to serialize Json");
+            throw new PushServerException("Unable to serialize Json");
+        }
     }
 
     /**

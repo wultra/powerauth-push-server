@@ -74,7 +74,7 @@ public class FcmClient {
         CloseableHttpAsyncClient client = clientBuilder.build();
 
         HttpComponentsAsyncClientHttpRequestFactory factory = new HttpComponentsAsyncClientHttpRequestFactory();
-        factory.setHttpAsyncClient(client);
+        factory.setAsyncClient(client);
 
         restTemplate.setAsyncRequestFactory(factory);
     }
