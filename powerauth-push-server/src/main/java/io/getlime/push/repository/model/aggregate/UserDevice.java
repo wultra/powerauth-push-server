@@ -1,6 +1,8 @@
 package io.getlime.push.repository.model.aggregate;
 
 /**
+ * Object used in sending campaign
+ *
  * @author Petr Dvorak, petr@lime-company.eu
  */
 public class UserDevice {
