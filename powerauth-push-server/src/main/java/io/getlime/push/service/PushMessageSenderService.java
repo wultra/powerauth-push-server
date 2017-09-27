@@ -46,7 +46,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import javax.net.ssl.SSLException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -292,9 +292,10 @@ public class PushMessageSenderService {
     }
 
     // Return list of devices related to given user or activation ID (if present). List of devices is related to particular application as well.
-    private List<PushDeviceEntity> getPushDevices(Long appId, String userId, String activationId) {
+    private List<PushDeviceEntity> getPushDevices(Long appId, String userId, String activationId) throws PushServerException {
         if (userId == null || userId.isEmpty()) {
-            throw new IllegalArgumentException("No userId was specified");
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "No userId was specified");
+            throw new PushServerException("No userId was specified");
         }
         List<PushDeviceEntity> devices;
         if (activationId != null) { // in case the message should go to the specific device
@@ -306,25 +307,30 @@ public class PushMessageSenderService {
     }
 
     // Prepare and connect APNS client.
-    private ApnsClient prepareApnsClient(byte[] apnsPrivateKey, String teamId, String keyId) throws IOException, InterruptedException {
+    private ApnsClient prepareApnsClient(byte[] apnsPrivateKey, String teamId, String keyId) throws PushServerException {
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
         setApnsClientProxy(apnsClientBuilder);
         try {
             ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);
             apnsClientBuilder.setSigningKey(key);
-        } catch (InvalidKeyException | NoSuchAlgorithmException e) {
+        } catch (InvalidKeyException | NoSuchAlgorithmException | IOException e) {
             Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Invalid private key");
-            throw new IllegalArgumentException("Invalid private key");
+            throw new PushServerException("Invalid private key");
         }
-        final ApnsClient apnsClient = apnsClientBuilder.build();
-        final Future<Void> future;
-        if (pushServiceConfiguration.isApnsUseDevelopment()) {
-            future = apnsClient.connect(ApnsClient.DEVELOPMENT_APNS_HOST);
-        } else {
-            future = apnsClient.connect(ApnsClient.PRODUCTION_APNS_HOST);
+        try {
+            final ApnsClient apnsClient = apnsClientBuilder.build();
+            final Future<Void> future;
+            if (pushServiceConfiguration.isApnsUseDevelopment()) {
+                future = apnsClient.connect(ApnsClient.DEVELOPMENT_APNS_HOST);
+            } else {
+                future = apnsClient.connect(ApnsClient.PRODUCTION_APNS_HOST);
+            }
+            future.await();
+            return apnsClient;
+        } catch (InterruptedException | IOException e) {
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Unable to connect to APNS service");
+            throw new PushServerException("Unable to connect to APNS service");
         }
-        future.await();
-        return apnsClient;
     }
 
     // Prepare and connect FCM client
@@ -347,7 +353,7 @@ public class PushMessageSenderService {
     }
 
     // Prepare proxy settings for APNs
-    private void setApnsClientProxy(ApnsClientBuilder apnsClientBuilder) throws SSLException {
+    private void setApnsClientProxy(ApnsClientBuilder apnsClientBuilder) {
         if (pushServiceConfiguration.isApnsProxyEnabled()) {
             String proxyUrl = pushServiceConfiguration.getApnsProxyUrl();
             int proxyPort = pushServiceConfiguration.getApnsProxyPort();
@@ -369,23 +375,27 @@ public class PushMessageSenderService {
      * @param pushMessage Push message to be stored.
      * @param registrationId Device registration ID to be used for this message.
      * @return New database entity with push message information.
-     * @throws JsonProcessingException In case message body JSON serialization fails.
+     * @throws PushServerException In case message body JSON serialization fails.
      */
-    private PushMessageEntity storePushMessageInDatabase(PushMessage pushMessage, Long registrationId) throws JsonProcessingException {
-        // Store the message in database
-        PushMessageEntity entity = new PushMessageEntity();
-        entity.setDeviceRegistrationId(registrationId);
-        entity.setUserId(pushMessage.getUserId());
-        entity.setActivationId(pushMessage.getActivationId());
-        entity.setEncrypted(pushMessage.getEncrypted());
-        entity.setPersonal(pushMessage.getPersonal());
-        entity.setSilent(pushMessage.getSilent());
-        entity.setStatus(PushMessageEntity.Status.PENDING);
-        entity.setTimestampCreated(new Date());
-        ObjectMapper mapper = new ObjectMapper();
-        String messageBody = mapper.writeValueAsString(pushMessage.getMessage());
-        entity.setMessageBody(messageBody);
-        return pushMessageRepository.save(entity);
+    private PushMessageEntity storePushMessageInDatabase(PushMessage pushMessage, Long registrationId) throws PushServerException {
+        try {
+            PushMessageEntity entity = new PushMessageEntity();
+            entity.setDeviceRegistrationId(registrationId);
+            entity.setUserId(pushMessage.getUserId());
+            entity.setActivationId(pushMessage.getActivationId());
+            entity.setEncrypted(pushMessage.getEncrypted());
+            entity.setPersonal(pushMessage.getPersonal());
+            entity.setSilent(pushMessage.getSilent());
+            entity.setStatus(PushMessageEntity.Status.PENDING);
+            entity.setTimestampCreated(new Date());
+            ObjectMapper mapper = new ObjectMapper();
+            String messageBody = mapper.writeValueAsString(pushMessage.getMessage());
+            entity.setMessageBody(messageBody);
+            return pushMessageRepository.save(entity);
+        } catch (JsonProcessingException e) {
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Unable to serialize JSON");
+            throw new PushServerException("Unable to serialize JSON");
+        }
     }
 
     // Use validator to check there are no errors in push message

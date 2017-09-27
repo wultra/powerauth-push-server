@@ -13,19 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.getlime.push.service.batch;
 
-package io.getlime.push.repository;
-
-import io.getlime.push.repository.model.PushCampaignDeviceEntity;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * Repository interface used to access push campaign database.
- *
- * @author Martin Tupy, martin.tupy.work@gmail.com
+ * @author Petr Dvorak, petr@lime-company.eu
  */
+public class HashSetProcessingItemStore<T> implements ProcessingItemStore<T> {
 
-@Repository
-public interface PushCampaignDeviceRepository extends CrudRepository<PushCampaignDeviceEntity, Long> {
+    private Set<T> items = new HashSet<>();
+
+    @Override
+    public boolean exists(T item) {
+        return items.contains(item);
+    }
+
+    @Override
+    public T put(T item) {
+        items.add(item);
+        return item;
+    }
 }

@@ -13,25 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push;
-
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package io.getlime.push.service.batch;
 
 /**
- * Spring Boot main class
+ * @author Petr Dvorak, petr@lime-company.eu
  */
-@SpringBootApplication
-@EnableBatchProcessing
-public class PowerAuthPushServerJavaApplication {
+public interface ProcessingItemStore<T> {
 
-    /**
-     * Main method
-     *
-     * @param args Arguments
-     */
-    public static void main(String[] args) {
-        SpringApplication.run(PowerAuthPushServerJavaApplication.class, args);
-    }
+    boolean exists(T item);
+    T put(T item);
+
 }

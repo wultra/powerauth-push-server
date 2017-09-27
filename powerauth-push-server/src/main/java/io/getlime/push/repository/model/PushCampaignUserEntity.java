@@ -16,7 +16,9 @@
 package io.getlime.push.repository.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Class representing campaign users to get a certain message.
@@ -24,8 +26,9 @@ import java.util.Date;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 
-@Entity(name = "push_campaign_user")
-public class PushCampaignUserEntity {
+@Entity
+@Table(name = "push_campaign_user")
+public class PushCampaignUserEntity implements Serializable {
 
     @Id
     @Column(name = "id")
@@ -38,6 +41,9 @@ public class PushCampaignUserEntity {
 
     @Column(name = "user_id", nullable = false)
     private String userId;
+
+    @Column(name = "app_id", nullable = false)
+    private Long appId;
 
     @Column(name = "timestamp_created", nullable = false)
     private Date timestampCreated;
@@ -56,6 +62,14 @@ public class PushCampaignUserEntity {
 
     public void setCampaignId(Long campaignId) {
         this.campaignId = campaignId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
     }
 
     public String getUserId() {
