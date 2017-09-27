@@ -22,7 +22,6 @@ import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import javax.persistence.EntityManagerFactory;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +43,6 @@ public class UserDeviceItemReader extends JpaPagingItemReader<UserDevice> {
                 " new io.getlime.push.repository.model.aggregate.UserDevice(c.userId, c.campaignId, c.appId, d.platform, d.pushToken) " +
                 " from PushCampaignUserEntity c, PushDeviceEntity d " +
                 " where c.appId = d.appId and c.userId = d.userId and c.campaignId = :campaignId");
-
         // Map parameters to query
         this.setPageSize(configuration.getCampaignBatchSize());
     }

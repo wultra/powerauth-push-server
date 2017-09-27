@@ -46,7 +46,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -90,8 +89,6 @@ public class PushMessageSenderService {
      * @param appId App ID used for addressing push messages. Required so that appropriate APNs/FCM credentials can be obtained.
      * @param pushMessageList List with push message objects.
      * @return Result of this batch sending.
-     * @throws InterruptedException In case sending is interrupted.
-     * @throws IOException In case certificate data cannot be read.
      */
     public PushMessageSendResult send(Long appId, List<PushMessage> pushMessageList) throws InterruptedException, IOException, PushServerException {
 
@@ -201,6 +198,17 @@ public class PushMessageSenderService {
         }
         phaser.arriveAndAwaitAdvance();
         return result;
+    }
+
+    //TODO: JavaDoc
+    public void sendMessage(AppCredentialEntity appCredentials, String platform, String token, PushMessage pushMessage, PushSendingCallback callback) throws PushServerException, InterruptedException {
+        if (platform.equals(PushDeviceEntity.Platform.iOS)) {
+            ApnsClient client = prepareApnsClient(appCredentials.getIosPrivateKey(), appCredentials.getIosTeamId(), appCredentials.getIosKeyId());
+            sendMessageToIos(client, pushMessage, token, appCredentials.getIosBundle(), callback);
+        } else if (platform.equals(PushDeviceEntity.Platform.Android)) {
+            FcmClient client = prepareFcmClient(appCredentials.getAndroidServerKey());
+            sendMessageToAndroid(client, pushMessage, token,  callback);
+        }
     }
 
     // Send message to iOS platform

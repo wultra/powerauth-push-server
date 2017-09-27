@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.service.batch;
 
-/**
- * @author Petr Dvorak, petr@lime-company.eu
- */
-public interface ProcessingItemStore<T> {
+package io.getlime.push.service.batch.storage;
 
-    boolean exists(T item);
-    T put(T item);
-
+public interface ItemStorageMap<K,V>{
+    V get(K key);
+    void put(K key, V value);
+    boolean contains(K key);
 }

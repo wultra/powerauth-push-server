@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.service.batch;
+package io.getlime.push.service.batch.storage;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * In memory storage(HashSet) for unique userDevice objects
+ *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class HashSetProcessingItemStore<T> implements ProcessingItemStore<T> {
+public class UserDeviceStorageSet<T> implements ItemStorageSet<T> {
 
     private Set<T> items = new HashSet<>();
 
@@ -31,8 +33,7 @@ public class HashSetProcessingItemStore<T> implements ProcessingItemStore<T> {
     }
 
     @Override
-    public T put(T item) {
+    public void put(T item) {
         items.add(item);
-        return item;
     }
 }

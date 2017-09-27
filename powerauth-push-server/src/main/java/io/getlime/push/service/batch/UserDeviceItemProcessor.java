@@ -16,25 +16,36 @@
 package io.getlime.push.service.batch;
 
 import io.getlime.push.repository.model.aggregate.UserDevice;
+import io.getlime.push.service.batch.storage.UserDeviceStorageSet;
+import io.getlime.push.service.batch.storage.ItemStorageSet;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
 /**
+ * Processor used in batch sending campaign
+ *
  * @author Petr Dvorak, petr@lime-company.eu
  */
 @Component
 @StepScope
 public class UserDeviceItemProcessor implements ItemProcessor<UserDevice, UserDevice> {
 
-    private ProcessingItemStore<UserDevice> itemStore = new HashSetProcessingItemStore<>();
+    private ItemStorageSet<UserDevice> itemStore = new UserDeviceStorageSet<>();
 
+    /**
+     * Decides if current userDevice is going to be processed to sending
+     *
+     * @param userDevice object used in sending campaign
+     * @return userDevice
+     */
     @Override
-    public UserDevice process(UserDevice userDevice) throws Exception {
+    public UserDevice process(UserDevice userDevice) {
         if (itemStore.exists(userDevice)) {
             return null;
         }
-        return itemStore.put(userDevice);
+        itemStore.put(userDevice);
+        return userDevice;
     }
 
 }

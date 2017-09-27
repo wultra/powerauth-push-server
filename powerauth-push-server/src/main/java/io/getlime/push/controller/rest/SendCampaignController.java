@@ -16,10 +16,8 @@
 
 package io.getlime.push.controller.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
-import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import org.springframework.batch.core.*;
@@ -33,12 +31,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.io.IOException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+/**
+ * Controller class storing send campaign methods
+ *
+ * @author Martin Tupy, martin.tupy.work@gmail.com
+ */
 @Controller
 @RequestMapping(value = "push/campaign/send")
 public class SendCampaignController {
@@ -58,19 +57,16 @@ public class SendCampaignController {
     @ResponseBody
     public Response sendCampaign(@PathVariable(value = "id") Long id) throws PushServerException {
         try {
-
             PushCampaignEntity campaign = pushCampaignRepository.findOne(id);
             if (campaign == null) {
                 throw new PushServerException("Campaign with entered id does not exist");
             }
-
             JobParameters jobParameters = new JobParametersBuilder()
                     .addLong("campaignId", id)
                     .addDate("timestamp", new Date())
                     .toJobParameters();
             jobLauncher.run(job, jobParameters);
             return new Response();
-
         } catch (JobExecutionAlreadyRunningException e) {
             throw new PushServerException("Job execution already running");
         } catch (JobRestartException e) {
@@ -81,22 +77,4 @@ public class SendCampaignController {
             throw new PushServerException("Job parameters are invalid");
         }
     }
-
-
-    /**
-     * Parsing message from Json to PushMessagebody object
-     *
-     * @param message message to parse
-     * @return PushMessageBody
-     */
-    private PushMessageBody deserializePushMessageBody(String message) {
-        PushMessageBody pushMessageBody = null;
-        try {
-            pushMessageBody = new ObjectMapper().readValue(message, PushMessageBody.class);
-        } catch (IOException e) {
-            Logger.getLogger(PushCampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-        }
-        return pushMessageBody;
-    }
-
 }
