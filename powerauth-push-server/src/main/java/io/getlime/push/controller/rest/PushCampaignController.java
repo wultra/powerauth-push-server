@@ -180,7 +180,8 @@ public class PushCampaignController {
     @Transactional
     public Response addUsersToCampaign(@PathVariable(value = "id") Long campaignId, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
         checkRequestNullity(request);
-        if (pushCampaignRepository.findOne(campaignId) == null) {
+        final PushCampaignEntity campaignEntity = pushCampaignRepository.findOne(campaignId);
+        if (campaignEntity == null) {
             throw new PushServerException("Campaign with entered ID does not exist");
         }
         ListOfUsers listOfUsers = request.getRequestObject();
@@ -189,6 +190,7 @@ public class PushCampaignController {
                 PushCampaignUserEntity pushCampaignUserEntity = new PushCampaignUserEntity();
                 pushCampaignUserEntity.setCampaignId(campaignId);
                 pushCampaignUserEntity.setUserId(user);
+                pushCampaignUserEntity.setAppId(campaignEntity.getAppId());
                 pushCampaignUserEntity.setTimestampCreated(new Date());
                 pushCampaignUserRepository.save(pushCampaignUserEntity);
             } else {
@@ -264,11 +266,13 @@ public class PushCampaignController {
         pushMessage.setMessage(deserializePushMessageBody(campaign.getMessage()));
         List<PushMessage> message = new ArrayList<>();
         message.add(pushMessage);
-        pushMessageSenderService.send(campaign.getAppId(), message);
+        try {
+            pushMessageSenderService.send(campaign.getAppId(), message);
+        } catch (InterruptedException | IOException e) {
+            throw new PushServerException(e.getMessage());
+        }
         return new Response();
     }
-
-
 
     /**
      * Parsing message from Json to PushMessagebody object

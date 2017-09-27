@@ -27,6 +27,7 @@ public class PushMessageSendResult {
 
         private int sent;
         private int failed;
+        private int pending;
         private int total;
 
         /**
@@ -59,6 +60,22 @@ public class PushMessageSendResult {
          */
         public void setFailed(int failed) {
             this.failed = failed;
+        }
+
+        /**
+         * Get number of messages that are still in pending state after attempted sending.
+         * @return Number of pending messages.
+         */
+        public int getPending() {
+            return pending;
+        }
+
+        /**
+         * Set number of messages that are still in pending state after attempted sending.
+         * @param pending Number of pending messages.
+         */
+        public void setPending(int pending) {
+            this.pending = pending;
         }
 
         /**
@@ -82,6 +99,7 @@ public class PushMessageSendResult {
 
         private int sent;
         private int failed;
+        private int pending;
         private int total;
 
         /**
@@ -114,6 +132,22 @@ public class PushMessageSendResult {
          */
         public void setFailed(int failed) {
             this.failed = failed;
+        }
+
+        /**
+         * Get number of messages that are still in pending state after attempted sending.
+         * @return Number of pending messages.
+         */
+        public int getPending() {
+            return pending;
+        }
+
+        /**
+         * Set number of messages that are still in pending state after attempted sending.
+         * @param pending Number of pending messages.
+         */
+        public void setPending(int pending) {
+            this.pending = pending;
         }
 
         /**

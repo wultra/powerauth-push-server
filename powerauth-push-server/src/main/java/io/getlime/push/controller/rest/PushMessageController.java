@@ -62,7 +62,11 @@ public class PushMessageController {
         final List<PushMessage> pushMessageList = new ArrayList<>();
         pushMessageList.add(request.getRequestObject().getPushMessage());
         PushMessageSendResult result;
-        result = pushMessageSenderService.send(appId, pushMessageList);
+        try {
+            result = pushMessageSenderService.send(appId, pushMessageList);
+        } catch (InterruptedException | IOException e) {
+            throw new PushServerException(e.getMessage());
+        }
         return new ObjectResponse<>(result);
     }
 
@@ -82,7 +86,12 @@ public class PushMessageController {
             throw new PushServerException("Too many messages in batch - do no send more than 20 messages at once to avoid server congestion.");
         }
         PushMessageSendResult result;
-        result = pushMessageSenderService.send(appId, batch);
+        try {
+            result = pushMessageSenderService.send(appId, batch);
+        } catch (InterruptedException | IOException e) {
+            throw new PushServerException(e.getMessage());
+        }
+
         return new ObjectResponse<>(result);
     }
 }
