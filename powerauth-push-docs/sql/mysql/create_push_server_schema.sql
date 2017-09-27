@@ -37,7 +37,7 @@ CREATE TABLE `push_message` (
   `personal` bigint(20) DEFAULT NULL,
   `encrypted` bigint(20) DEFAULT NULL,
   `message_body` text,
-  `timestamp_created` TIMESTAMP DEFAULT NULL,
+  `timestamp_created` TIMESTAMP NULL,
   `status` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `USER_ID_INDEX` (`user_id`,`activation_id`)
