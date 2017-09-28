@@ -17,7 +17,6 @@
 package io.getlime.push.service.batch.storage;
 
 import io.getlime.push.model.entity.PushMessageBody;
-import io.getlime.push.repository.model.PushCampaignEntity;
 
 import java.util.HashMap;
 import java.util.Map;

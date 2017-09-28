@@ -16,7 +16,10 @@
 
 package io.getlime.push.service;
 
-import com.turo.pushy.apns.*;
+import com.turo.pushy.apns.ApnsClient;
+import com.turo.pushy.apns.ApnsClientBuilder;
+import com.turo.pushy.apns.DeliveryPriority;
+import com.turo.pushy.apns.PushNotificationResponse;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.proxy.HttpProxyHandlerFactory;
 import com.turo.pushy.apns.util.ApnsPayloadBuilder;
@@ -43,7 +46,7 @@ import io.getlime.push.service.fcm.FcmSendRequest;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -392,18 +395,20 @@ public class PushMessageSenderService {
 
     // Prepare and cached APNS and FCM clients for provided app
     private AppRelatedPushClient prepareClients(Long appId) throws PushServerException {
-        AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
-        if (pushClient == null) {
-            final AppCredentialEntity credentials = getAppCredentials(appId);
-            ApnsClient apnsClient = prepareApnsClient(credentials.getIosPrivateKey(), credentials.getIosTeamId(), credentials.getIosKeyId());
-            FcmClient fcmClient = prepareFcmClient(credentials.getAndroidServerKey());
-            pushClient = new AppRelatedPushClient();
-            pushClient.setAppCredentials(credentials);
-            pushClient.setApnsClient(apnsClient);
-            pushClient.setFcmClient(fcmClient);
-            appRelatedPushClientMap.put(appId, pushClient);
+        synchronized (this) {
+            AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
+            if (pushClient == null) {
+                final AppCredentialEntity credentials = getAppCredentials(appId);
+                ApnsClient apnsClient = prepareApnsClient(credentials.getIosPrivateKey(), credentials.getIosTeamId(), credentials.getIosKeyId());
+                FcmClient fcmClient = prepareFcmClient(credentials.getAndroidServerKey());
+                pushClient = new AppRelatedPushClient();
+                pushClient.setAppCredentials(credentials);
+                pushClient.setApnsClient(apnsClient);
+                pushClient.setFcmClient(fcmClient);
+                appRelatedPushClientMap.put(appId, pushClient);
+            }
+            return pushClient;
         }
-        return pushClient;
     }
 
     // Prepare proxy settings for APNs

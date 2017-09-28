@@ -16,8 +16,8 @@
 package io.getlime.push.service.batch;
 
 import io.getlime.push.repository.model.aggregate.UserDevice;
-import io.getlime.push.service.batch.storage.UserDeviceStorageSet;
 import io.getlime.push.service.batch.storage.ItemStorageSet;
+import io.getlime.push.service.batch.storage.UserDeviceStorageSet;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;

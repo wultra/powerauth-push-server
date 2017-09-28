@@ -16,7 +16,6 @@
 
 package io.getlime.push.model.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.getlime.push.model.entity.PushMessageBody;
 
 /**
