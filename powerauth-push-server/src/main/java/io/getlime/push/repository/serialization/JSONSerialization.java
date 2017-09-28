@@ -1,12 +1,3 @@
-package io.getlime.push.repository.serialization;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.getlime.push.controller.rest.PushCampaignController;
-import io.getlime.push.model.entity.PushMessageBody;
-
-import java.io.IOException;
-import java.util.logging.Level;
 /*
  * Copyright 2016 Lime - HighTech Solutions s.r.o.
  *
@@ -22,6 +13,16 @@ import java.util.logging.Level;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package io.getlime.push.repository.serialization;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.getlime.push.controller.rest.PushCampaignController;
+import io.getlime.push.model.entity.PushMessageBody;
+
+import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

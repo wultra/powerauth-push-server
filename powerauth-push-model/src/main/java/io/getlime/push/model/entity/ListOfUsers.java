@@ -17,7 +17,6 @@
 package io.getlime.push.model.entity;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Request used for adding collection of users to campaign

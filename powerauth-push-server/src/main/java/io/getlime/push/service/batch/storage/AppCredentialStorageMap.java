@@ -15,7 +15,6 @@
  */
 package io.getlime.push.service.batch.storage;
 
-import io.getlime.push.repository.model.AppCredentialEntity;
 import io.getlime.push.service.AppRelatedPushClient;
 
 import java.util.HashMap;

@@ -24,7 +24,6 @@ import io.getlime.push.repository.model.aggregate.UserDevice;
 import io.getlime.push.repository.serialization.JSONSerialization;
 import io.getlime.push.service.PushMessageSenderService;
 import io.getlime.push.service.PushSendingCallback;
-import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
 import io.getlime.push.service.batch.storage.CampaignMessageStorageMap;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
@@ -45,7 +44,6 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
 
     // Non-autowired fields
     private CampaignMessageStorageMap campaignStorageMap = new CampaignMessageStorageMap();
-    private AppCredentialStorageMap appCredentialStorageMap = new AppCredentialStorageMap();
 
     @Autowired
     public UserDeviceItemWriter(PushMessageSenderService pushMessageSenderService,
