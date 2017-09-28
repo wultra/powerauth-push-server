@@ -17,8 +17,8 @@
 package io.getlime.push.service.batch;
 
 import io.getlime.push.model.entity.PushMessageBody;
-import io.getlime.push.repository.AppCredentialRepository;
 import io.getlime.push.repository.PushCampaignRepository;
+import io.getlime.push.repository.PushMessageRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.aggregate.UserDevice;
 import io.getlime.push.repository.serialization.JSONSerialization;
@@ -41,6 +41,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
 
     private PushMessageSenderService pushMessageSenderService;
     private PushCampaignRepository pushCampaignRepository;
+    private PushMessageRepository pushMessageRepository;
 
     // Non-autowired fields
     private CampaignMessageStorageMap campaignStorageMap = new CampaignMessageStorageMap();
@@ -48,9 +49,11 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
 
     @Autowired
     public UserDeviceItemWriter(PushMessageSenderService pushMessageSenderService,
-                                PushCampaignRepository pushCampaignRepository) {
+                                PushCampaignRepository pushCampaignRepository,
+                                PushMessageRepository pushMessageRepository) {
         this.pushMessageSenderService = pushMessageSenderService;
         this.pushCampaignRepository = pushCampaignRepository;
+        this.pushMessageRepository = pushMessageRepository;
     }
 
     @Override
