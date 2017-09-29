@@ -36,8 +36,6 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -92,7 +90,7 @@ public class SendCampaignController {
     /**
      * Method for sending testing user on campaign
      *
-     * @param id      Campaign ID
+     * @param id Campaign ID
      * @param request User ID
      * @return Response status
      */
@@ -108,11 +106,7 @@ public class SendCampaignController {
         pushMessage.setBody(JSONSerialization.deserializePushMessageBody(campaign.getMessage()));
         List<PushMessage> message = new ArrayList<>();
         message.add(pushMessage);
-        try {
-            pushMessageSenderService.send(campaign.getAppId(), message);
-        } catch (InterruptedException | IOException e) {
-            throw new PushServerException(e.getMessage());
-        }
+        pushMessageSenderService.sendPushMessage(campaign.getAppId(), message);
         return new Response();
     }
 }

@@ -64,4 +64,5 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceEntity, L
      */
     List<PushDeviceEntity> findByUserIdAndAppIdAndActivationId(String userId, Long appId, String activationId);
 
+
 }

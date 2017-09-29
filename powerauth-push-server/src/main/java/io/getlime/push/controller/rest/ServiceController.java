@@ -36,8 +36,12 @@ import java.util.Date;
 @RequestMapping(value = "push/service")
 public class ServiceController {
 
+    private final PushServiceConfiguration pushServiceConfiguration;
+
     @Autowired
-    private PushServiceConfiguration pushServiceConfiguration;
+    public ServiceController(PushServiceConfiguration pushServiceConfiguration) {
+        this.pushServiceConfiguration = pushServiceConfiguration;
+    }
 
     /**
      * Controller resource with system information.

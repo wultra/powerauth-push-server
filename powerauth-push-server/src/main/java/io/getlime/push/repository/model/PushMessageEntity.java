@@ -55,8 +55,8 @@ public class PushMessageEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_message")
     private Long id;
 
-    @Column(name = "device_registration_id", nullable = false, updatable = false)
-    private Long deviceRegistrationId;
+    @Column(name = "device_id", nullable = false, updatable = false)
+    private Long deviceId;
 
     @Column(name = "user_id", nullable = false, updatable = false)
     private String userId;
@@ -91,12 +91,12 @@ public class PushMessageEntity implements Serializable {
         this.id = id;
     }
 
-    public Long getDeviceRegistrationId() {
-        return deviceRegistrationId;
+    public Long getDeviceId() {
+        return deviceId;
     }
 
-    public void setDeviceRegistrationId(Long deviceRegistrationId) {
-        this.deviceRegistrationId = deviceRegistrationId;
+    public void setDeviceId(Long deviceId) {
+        this.deviceId = deviceId;
     }
 
     public String getUserId() {

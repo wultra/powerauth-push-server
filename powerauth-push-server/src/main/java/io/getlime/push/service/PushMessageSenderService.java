@@ -34,11 +34,10 @@ import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.validator.PushMessageValidator;
 import io.getlime.push.repository.AppCredentialRepository;
 import io.getlime.push.repository.PushDeviceRepository;
-import io.getlime.push.repository.PushMessageRepository;
+import io.getlime.push.repository.dao.PushMessageDAO;
 import io.getlime.push.repository.model.AppCredentialEntity;
 import io.getlime.push.repository.model.PushDeviceEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
-import io.getlime.push.repository.serialization.JSONSerialization;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
 import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmNotification;
@@ -50,7 +49,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-
 import javax.net.ssl.SSLException;
 import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
@@ -76,7 +74,7 @@ public class PushMessageSenderService {
 
     private AppCredentialRepository appCredentialRepository;
     private PushDeviceRepository pushDeviceRepository;
-    private PushMessageRepository pushMessageRepository;
+    private PushMessageDAO pushMessageDAO;
     private PushServiceConfiguration pushServiceConfiguration;
 
     private AppCredentialStorageMap appRelatedPushClientMap = new AppCredentialStorageMap();
@@ -84,11 +82,11 @@ public class PushMessageSenderService {
     @Autowired
     public PushMessageSenderService(AppCredentialRepository appCredentialRepository,
                                     PushDeviceRepository pushDeviceRepository,
-                                    PushMessageRepository pushMessageRepository,
+                                    PushMessageDAO pushMessageDAO,
                                     PushServiceConfiguration pushServiceConfiguration) {
         this.appCredentialRepository = appCredentialRepository;
         this.pushDeviceRepository = pushDeviceRepository;
-        this.pushMessageRepository = pushMessageRepository;
+        this.pushMessageDAO = pushMessageDAO;
         this.pushServiceConfiguration = pushServiceConfiguration;
     }
 
@@ -99,9 +97,7 @@ public class PushMessageSenderService {
      * @param pushMessageList List with push message objects.
      * @return Result of this batch sending.
      */
-    @Transactional
-    public PushMessageSendResult send(Long appId, List<PushMessage> pushMessageList) throws InterruptedException, IOException, PushServerException {
-
+    public PushMessageSendResult sendPushMessage(Long appId, List<PushMessage> pushMessageList) throws PushServerException {
         // Prepare clients
         AppRelatedPushClient pushClient = prepareClients(appId);
 
@@ -109,7 +105,7 @@ public class PushMessageSenderService {
         final Phaser phaser = new Phaser(1);
 
         // Prepare result object
-        final PushMessageSendResult result = new PushMessageSendResult();
+        final PushMessageSendResult sendResult = new PushMessageSendResult();
 
         // Send push message batch
         for (PushMessage pushMessage : pushMessageList) {
@@ -122,8 +118,7 @@ public class PushMessageSenderService {
 
             // Iterate over all devices for given user
             for (final PushDeviceEntity device : devices) {
-
-                final PushMessageEntity sentMessage = storePushMessageInDatabase(pushMessage, device.getId());
+                final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getUserId(), pushMessage.getActivationId(), device.getId());
 
                 // Check if given push is not personal, or if it is, that device is in active state.
                 // This avoids sending personal notifications to devices that are blocked or removed.
@@ -139,35 +134,35 @@ public class PushMessageSenderService {
                     if (platform.equals(PushDeviceEntity.Platform.iOS)) {
                         sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), new PushSendingCallback() {
                             @Override
-                            public void didFinishSendingMessage(Result sendingResult) {
-
-                                switch (sendingResult) {
+                            public void didFinishSendingMessage(Result result) {
+                                switch (result) {
                                     case OK: {
-                                        sentMessage.setStatus(PushMessageEntity.Status.SENT);
-                                        result.getIos().setSent(result.getIos().getSent() + 1);
-                                        pushMessageRepository.save(sentMessage);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
+                                        sendResult.getIos().setSent(sendResult.getIos().getSent() + 1);
+                                        pushMessageDAO.save(pushMessageObject);
                                         break;
                                     }
                                     case PENDING: {
-                                        sentMessage.setStatus(PushMessageEntity.Status.PENDING);
-                                        result.getIos().setPending(result.getIos().getPending() + 1);
-                                        pushMessageRepository.save(sentMessage);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
+                                        sendResult.getIos().setPending(sendResult.getIos().getPending() + 1);
+                                        pushMessageDAO.save(pushMessageObject);
                                         break;
                                     }
                                     case FAILED: {
-                                        sentMessage.setStatus(PushMessageEntity.Status.FAILED);
-                                        result.getIos().setFailed(result.getIos().getFailed() + 1);
-                                        pushMessageRepository.save(sentMessage);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                                        sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
+                                        pushMessageDAO.save(pushMessageObject);
                                         break;
                                     }
                                     case FAILED_DELETE: {
-                                        sentMessage.setStatus(PushMessageEntity.Status.FAILED);
-                                        result.getIos().setFailed(result.getIos().getFailed() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                                        sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
+                                        pushMessageDAO.save(pushMessageObject);
                                         pushDeviceRepository.delete(device);
+                                        break;
                                     }
                                 }
-
-                                result.getIos().setTotal(result.getIos().getTotal() + 1);
+                                sendResult.getIos().setTotal(sendResult.getIos().getTotal() + 1);
                                 phaser.arriveAndDeregister();
                             }
                         });
@@ -176,35 +171,34 @@ public class PushMessageSenderService {
                         sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), new PushSendingCallback() {
                             @Override
                             public void didFinishSendingMessage(Result sendingResult) {
-
                                 switch (sendingResult) {
                                     case OK: {
-                                        result.getAndroid().setSent(result.getAndroid().getSent() + 1);
-                                        sentMessage.setStatus(PushMessageEntity.Status.SENT);
-                                        pushMessageRepository.save(sentMessage);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
+                                        sendResult.getAndroid().setSent(sendResult.getAndroid().getSent() + 1);
+                                        pushMessageDAO.save(pushMessageObject);
                                         break;
                                     }
                                     case PENDING: {
-                                        sentMessage.setStatus(PushMessageEntity.Status.PENDING);
-                                        result.getAndroid().setPending(result.getAndroid().getPending() + 1);
-                                        pushMessageRepository.save(sentMessage);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
+                                        sendResult.getAndroid().setPending(sendResult.getAndroid().getPending() + 1);
+                                        pushMessageDAO.save(pushMessageObject);
                                         break;
                                     }
                                     case FAILED: {
-                                        result.getAndroid().setFailed(result.getAndroid().getFailed() + 1);
-                                        sentMessage.setStatus(PushMessageEntity.Status.FAILED);
-                                        pushMessageRepository.save(sentMessage);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                                        sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
+                                        pushMessageDAO.save(pushMessageObject);
                                         break;
                                     }
                                     case FAILED_DELETE: {
-                                        result.getAndroid().setFailed(result.getAndroid().getFailed() + 1);
-                                        sentMessage.setStatus(PushMessageEntity.Status.FAILED);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                                        sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
+                                        pushMessageDAO.save(pushMessageObject);
                                         pushDeviceRepository.delete(device);
                                         break;
                                     }
                                 }
-
-                                result.getAndroid().setTotal(result.getAndroid().getTotal() + 1);
+                                sendResult.getAndroid().setTotal(sendResult.getAndroid().getTotal() + 1);
                                 phaser.arriveAndDeregister();
                             }
                         });
@@ -213,7 +207,7 @@ public class PushMessageSenderService {
             }
         }
         phaser.arriveAndAwaitAdvance();
-        return result;
+        return sendResult;
     }
 
     /**
@@ -223,12 +217,11 @@ public class PushMessageSenderService {
      * @param platform Mobile platform (iOS, Android).
      * @param token Push message token.
      * @param pushMessageBody Push message body.
-     * @param callback Callback with the result.
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      * the error can be found in exception message.
      */
-    public void sendMessage(Long appId, String platform, String token, PushMessageBody pushMessageBody, PushSendingCallback callback) throws PushServerException {
-        sendMessage(appId, platform, token, pushMessageBody, null, callback);
+    public void sendCampaignMessage(Long appId, String platform, String token, PushMessageBody pushMessageBody, String userId) throws PushServerException {
+        sendCampaignMessage(appId, platform, token, pushMessageBody, null, userId);
     }
 
     /**
@@ -239,18 +232,72 @@ public class PushMessageSenderService {
      * @param token Push message token.
      * @param pushMessageBody Push message body.
      * @param attributes Push message attributes.
-     * @param callback Callback with the result.
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      * the error can be found in exception message.
      */
-    @Transactional
-    public void sendMessage(Long appId, String platform, String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, PushSendingCallback callback) throws PushServerException {
-        // Prepare clients
-        AppRelatedPushClient pushClient = prepareClients(appId);
+    public void sendCampaignMessage(final Long appId, String platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, String userId) throws PushServerException {
+
+        final AppRelatedPushClient pushClient = prepareClients(appId);
+
+        final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, null, null);
         if (platform.equals(PushDeviceEntity.Platform.iOS)) {
-            sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), callback);
+            sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), new PushSendingCallback() {
+                @Override
+                public void didFinishSendingMessage(Result result) {
+                    switch (result) {
+                        case OK: {
+                            pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
+                            pushMessageDAO.save(pushMessageObject);
+                            break;
+                        }
+                        case PENDING: {
+                            pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
+                            pushMessageDAO.save(pushMessageObject);
+                            break;
+                        }
+                        case FAILED: {
+                            pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                            pushMessageDAO.save(pushMessageObject);
+                            break;
+                        }
+                        case FAILED_DELETE: {
+                            pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                            pushMessageDAO.save(pushMessageObject);
+                            pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
+                            break;
+                        }
+                    }
+                }
+            });
         } else if (platform.equals(PushDeviceEntity.Platform.Android)) {
-            sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, callback);
+            sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, new PushSendingCallback() {
+                @Override
+                public void didFinishSendingMessage(Result sendingResult) {
+                    switch (sendingResult) {
+                        case OK: {
+                            pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
+                            pushMessageDAO.save(pushMessageObject);
+                            break;
+                        }
+                        case PENDING: {
+                            pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
+                            pushMessageDAO.save(pushMessageObject);
+                            break;
+                        }
+                        case FAILED: {
+                            pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                            pushMessageDAO.save(pushMessageObject);
+                            break;
+                        }
+                        case FAILED_DELETE: {
+                            pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                            pushMessageDAO.save(pushMessageObject);
+                            pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
+                            break;
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -266,7 +313,7 @@ public class PushMessageSenderService {
         sendNotificationFuture.addListener(new GenericFutureListener<Future<PushNotificationResponse<SimpleApnsPushNotification>>>() {
 
             @Override
-            public void operationComplete(Future<PushNotificationResponse<SimpleApnsPushNotification>> future) throws Exception {
+            public void operationComplete(Future<PushNotificationResponse<SimpleApnsPushNotification>> future) {
                 try {
                     final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = future.get();
                     if (pushNotificationResponse != null) {
@@ -286,7 +333,7 @@ public class PushMessageSenderService {
                         Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: unknown error, will retry");
                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
                     }
-                } catch (final ExecutionException e) {
+                } catch (ExecutionException | InterruptedException e) {
                     callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                 }
             }
@@ -429,29 +476,6 @@ public class PushMessageSenderService {
         return null;
     }
 
-    /**
-     * Stores a push message in the database table `push_message`.
-     * @param pushMessage Push message to be stored.
-     * @param registrationId Device registration ID to be used for this message.
-     * @return New database entity with push message information.
-     * @throws PushServerException In case message body JSON serialization fails.
-     */
-    private PushMessageEntity storePushMessageInDatabase(PushMessage pushMessage, Long registrationId) throws PushServerException {
-        PushMessageEntity entity = new PushMessageEntity();
-        entity.setDeviceRegistrationId(registrationId);
-        entity.setUserId(pushMessage.getUserId());
-        entity.setActivationId(pushMessage.getActivationId());
-        if (pushMessage.getAttributes() != null) {
-            entity.setEncrypted(pushMessage.getAttributes().getEncrypted());
-            entity.setPersonal(pushMessage.getAttributes().getPersonal());
-            entity.setSilent(pushMessage.getAttributes().getSilent());
-        }
-        entity.setStatus(PushMessageEntity.Status.PENDING);
-        entity.setTimestampCreated(new Date());
-        String messageBody = JSONSerialization.serializePushMessageBody(pushMessage.getBody());
-        entity.setMessageBody(messageBody);
-        return pushMessageRepository.save(entity);
-    }
 
     // Use validator to check there are no errors in push message
     private void validatePushMessage(PushMessage pushMessage) throws PushServerException {
