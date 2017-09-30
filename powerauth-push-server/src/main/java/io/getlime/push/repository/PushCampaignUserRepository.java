@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -30,9 +31,38 @@ import java.util.List;
  */
 
 @Repository
+@Transactional
 public interface PushCampaignUserRepository extends PagingAndSortingRepository<PushCampaignUserEntity, Long> {
 
+    /**
+     * Fetches detailed information about the user who is scheduled to given campaign.
+     * @param userId User ID.
+     * @param campaignId Campaign ID.
+     * @return Detailed information about user scheduled in given campaign.
+     */
     PushCampaignUserEntity findFirstByUserIdAndCampaignId(String userId, Long campaignId);
-    List<PushCampaignUserEntity> findAllByCampaignId(Long campaignId);
+
+    /**
+     * Find all users who are added to given campaign. Since there could be many users, this
+     * resource is paged.
+     * @param campaignId Campaign ID.
+     * @param pageable Paging information.
+     * @return List of users who are added in given campaign (paged).
+     */
     List<PushCampaignUserEntity> findAllByCampaignId(Long campaignId, Pageable pageable);
+
+    /**
+     * Delete all users who are associated with given campaign.
+     * @param campaignId Campaign ID.
+     * @return Number of deleted records.
+     */
+    Long deleteByCampaignId(Long campaignId);
+
+    /**
+     * Delete user with given ID from campaign with given ID.
+     * @param campaignId Campaign ID.
+     * @param userId User ID.
+     * @return Number of deleted records.
+     */
+    Long deleteByCampaignIdAndUserId(Long campaignId, String userId);
 }

@@ -28,13 +28,17 @@ package io.getlime.push.repository.model.aggregate;
 public class UserDevice {
 
     private String userId;
+    private Long deviceId;
+    private String activationId;
     private Long campaignId;
     private Long appId;
     private String platform;
     private String token;
 
-    public UserDevice(String userId, Long campaignId, Long appId, String platform, String token) {
+    public UserDevice(String userId, Long deviceId, String activationId, Long campaignId, Long appId, String platform, String token) {
         this.userId = userId;
+        this.deviceId = deviceId;
+        this.activationId = activationId;
         this.campaignId = campaignId;
         this.appId = appId;
         this.platform = platform;
@@ -47,6 +51,22 @@ public class UserDevice {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public Long getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(Long deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public String getActivationId() {
+        return activationId;
+    }
+
+    public void setActivationId(String activationId) {
+        this.activationId = activationId;
     }
 
     public Long getCampaignId() {
