@@ -22,20 +22,17 @@ import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.aggregate.UserDevice;
 import io.getlime.push.repository.serialization.JSONSerialization;
 import io.getlime.push.service.PushMessageSenderService;
-import io.getlime.push.service.PushSendingCallback;
 import io.getlime.push.service.batch.storage.CampaignMessageStorageMap;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 
 
 @Component
 @StepScope
-public class UserDeviceItemWriter implements ItemWriter<UserDevice>, InitializingBean {
+public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
 
     private PushMessageSenderService pushMessageSenderService;
     private PushCampaignRepository pushCampaignRepository;
@@ -55,6 +52,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
         for (UserDevice device: list) {
             String platform = device.getPlatform();
             String token = device.getToken();
+            String userID = device.getUserId();
             Long appId = device.getAppId();
             Long campaignId = device.getCampaignId();
 
@@ -67,18 +65,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
             }
 
             // Send the push message using push sender service
-            pushMessageSenderService.sendMessage(appId, platform, token, messageBody, new PushSendingCallback() {
-                @Override
-                public void didFinishSendingMessage(Result result) {
-
-                }
-            });
+            pushMessageSenderService.sendCampaignMessage(appId, platform, token, messageBody, userID);
         }
     }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
-    }
-
 }

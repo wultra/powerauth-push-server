@@ -16,10 +16,14 @@
 
 package io.getlime.push.repository;
 
+import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.repository.model.PushMessageEntity;
+import io.getlime.push.repository.serialization.JSONSerialization;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,11 +34,11 @@ import java.util.List;
 @Repository
 public interface PushMessageRepository extends CrudRepository<PushMessageEntity, Long> {
 
+    //TODO: search pending push messages in order to send them later
     /**
      * Find all push messages with given status. Used primarily to obtain pending activations (in PENDING status).
      * @param status Push message status.
      * @return List of all messages with given status.
      */
-    List<PushMessageEntity> findByStatus(PushMessageEntity.Status status);
-
+    public List<PushMessageEntity> findByStatus(PushMessageEntity.Status status);
 }

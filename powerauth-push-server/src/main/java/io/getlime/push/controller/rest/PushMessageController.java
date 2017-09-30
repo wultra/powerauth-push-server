@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.io.IOException;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,11 +64,7 @@ public class PushMessageController {
         final List<PushMessage> pushMessageList = new ArrayList<>();
         pushMessageList.add(request.getRequestObject().getMessage());
         PushMessageSendResult result;
-        try {
-            result = pushMessageSenderService.send(appId, pushMessageList);
-        } catch (InterruptedException | IOException e) {
-            throw new PushServerException(e.getMessage());
-        }
+        result = pushMessageSenderService.sendPushMessage(appId, pushMessageList);
         return new ObjectResponse<>(result);
     }
 
@@ -88,11 +84,7 @@ public class PushMessageController {
             throw new PushServerException("Too many messages in batch - do no send more than 20 messages at once to avoid server congestion.");
         }
         PushMessageSendResult result;
-        try {
-            result = pushMessageSenderService.send(appId, batch);
-        } catch (InterruptedException | IOException e) {
-            throw new PushServerException(e.getMessage());
-        }
+        result = pushMessageSenderService.sendPushMessage(appId, batch);
 
         return new ObjectResponse<>(result);
     }

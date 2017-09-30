@@ -19,6 +19,7 @@ package io.getlime.push.repository.serialization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getlime.push.controller.rest.PushCampaignController;
+import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageBody;
 
 import java.io.IOException;
@@ -38,12 +39,13 @@ public class JSONSerialization {
      * @param message Message to parse
      * @return PushMessageBody
      */
-    public static PushMessageBody deserializePushMessageBody(String message) {
+    public static PushMessageBody deserializePushMessageBody(String message) throws PushServerException {
         PushMessageBody pushMessageBody = null;
         try {
             pushMessageBody = new ObjectMapper().readValue(message, PushMessageBody.class);
         } catch (IOException e) {
             Logger.getLogger(PushCampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            throw new PushServerException("Failed parsing from JSON");
         }
         return pushMessageBody;
     }
@@ -54,12 +56,13 @@ public class JSONSerialization {
      * @param message string Message to be serialized.
      * @return JSON containing the message contents.
      */
-    public static String serializePushMessageBody(PushMessageBody message) {
+    public static String serializePushMessageBody(PushMessageBody message) throws PushServerException {
         String messageString = null;
         try {
             messageString = new ObjectMapper().writeValueAsString(message);
         } catch (JsonProcessingException e) {
             Logger.getLogger(PushCampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            throw new PushServerException("Failed parsing into JSON");
         }
         return messageString;
     }

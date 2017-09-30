@@ -30,7 +30,7 @@ CREATE TABLE `push_device` (
 
 CREATE TABLE `push_message` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `device_registration_id` bigint(20) DEFAULT NULL,
+  `device_id` bigint(20) DEFAULT NULL,
   `user_id` varchar(255) DEFAULT NULL,
   `activation_id` varchar(37) DEFAULT NULL,
   `silent` bigint(20) DEFAULT NULL,

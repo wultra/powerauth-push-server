@@ -30,7 +30,6 @@ import io.getlime.push.repository.PushCampaignUserRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.PushCampaignUserEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
-import io.getlime.push.service.PushMessageSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -53,13 +52,12 @@ import java.util.logging.Logger;
 public class PushCampaignController {
     private PushCampaignRepository pushCampaignRepository;
     private PushCampaignUserRepository pushCampaignUserRepository;
-    private PushMessageSenderService pushMessageSenderService;
 
     @Autowired
-    public PushCampaignController(PushCampaignRepository pushCampaignRepository, PushCampaignUserRepository pushCampaignUserRepository, PushMessageSenderService pushMessageSenderService) {
+    public PushCampaignController(PushCampaignRepository pushCampaignRepository,
+                                  PushCampaignUserRepository pushCampaignUserRepository) {
         this.pushCampaignRepository = pushCampaignRepository;
         this.pushCampaignUserRepository = pushCampaignUserRepository;
-        this.pushMessageSenderService = pushMessageSenderService;
     }
 
     /**
@@ -122,7 +120,7 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "list", method = RequestMethod.GET)
     @ResponseBody
-    public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(@RequestParam(value = "all", required = false) boolean all) {
+    public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(@RequestParam(value = "all", required = false) boolean all) throws PushServerException {
         // Fetch campaigns from the repository
         Iterable<PushCampaignEntity> campaignList;
         if (all) {
@@ -175,7 +173,6 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/user/add", method = RequestMethod.PUT)
     @ResponseBody
-    @Transactional
     public Response addUsersToCampaign(@PathVariable(value = "id") Long campaignId, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
         checkRequestNullity(request);
         final PushCampaignEntity campaignEntity = pushCampaignRepository.findOne(campaignId);
