@@ -66,7 +66,6 @@ public class PushDeviceController {
      * @return Device registration status.
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
-    @Transactional
     public @ResponseBody Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
         if (request.getRequestObject() == null) {
             throw new PushServerException("Invalid or empty input data");
@@ -108,7 +107,6 @@ public class PushDeviceController {
      * @return Status update response.
      */
     @RequestMapping(value = "status/update", method = RequestMethod.POST)
-    @Transactional
     public @ResponseBody Response updateDeviceStatus(@RequestBody ObjectRequest<UpdateDeviceStatusRequest> request) throws PushServerException {
         if (request.getRequestObject() == null) {
             throw new PushServerException("Invalid or empty input data");
@@ -131,7 +129,6 @@ public class PushDeviceController {
      * @return Removal status response.
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST)
-    @Transactional
     public @ResponseBody Response deleteDevice(@RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
         if (request.getRequestObject() == null) {
             throw new PushServerException("Invalid or empty input data");

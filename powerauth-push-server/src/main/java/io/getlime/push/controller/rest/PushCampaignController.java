@@ -173,7 +173,6 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/user/add", method = RequestMethod.PUT)
     @ResponseBody
-    @Transactional
     public Response addUsersToCampaign(@PathVariable(value = "id") Long campaignId, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
         checkRequestNullity(request);
         final PushCampaignEntity campaignEntity = pushCampaignRepository.findOne(campaignId);

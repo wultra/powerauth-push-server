@@ -24,8 +24,6 @@ import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.transaction.Transactional;
 import java.util.Date;
 
 @Component
@@ -44,7 +42,6 @@ public class PushMessageDAO {
      * @return New database entity with push message information.
      * @throws PushServerException In case message body JSON serialization fails.
      */
-    @Transactional
     public PushMessageEntity storePushMessageObject(PushMessageBody pushMessageBody, PushMessageAttributes pushMessageAttributes, String userId, String activationId, Long deviceId) throws PushServerException {
         PushMessageEntity entity = new PushMessageEntity();
         entity.setDeviceId(deviceId);

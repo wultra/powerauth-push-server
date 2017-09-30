@@ -25,16 +25,14 @@ import io.getlime.push.service.PushMessageSenderService;
 import io.getlime.push.service.batch.storage.CampaignMessageStorageMap;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 
 
 @Component
 @StepScope
-public class UserDeviceItemWriter implements ItemWriter<UserDevice>, InitializingBean {
+public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
 
     private PushMessageSenderService pushMessageSenderService;
     private PushCampaignRepository pushCampaignRepository;
@@ -70,10 +68,4 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice>, Initializin
             pushMessageSenderService.sendCampaignMessage(appId, platform, token, messageBody, userID);
         }
     }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
-    }
-
 }
