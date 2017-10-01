@@ -251,7 +251,7 @@ public class PushMessageSenderService {
 
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
-        final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, null, 6L);
+        final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, activationId, deviceId);
 
         if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
             sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), new PushSendingCallback() {
@@ -383,39 +383,40 @@ public class PushMessageSenderService {
             }
 
             @Override
-            public void onSuccess(ResponseEntity<FcmSendResponse> stringResponseEntity) {
-                for (FcmResult fcmResult : stringResponseEntity.getBody().getFcmResults()) {
+            public void onSuccess(ResponseEntity<FcmSendResponse> response) {
+                int notSuccessful = response.getBody().getFailure() + response.getBody().getCanonicalIds();
+                for (FcmResult fcmResult : response.getBody().getFcmResults()) {
                     //no issues, straight sending
-                    if (stringResponseEntity.getBody().getFailure() + stringResponseEntity.getBody().getCanonicalIds() == 0) {
+                    if (notSuccessful == 0) {
                         Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent");
                         callback.didFinishSendingMessage(PushSendingCallback.Result.OK, null);
                     } else {
                         //message sent, token has to be updated (stored in map under key "updateToken")
-                        if (fcmResult.getRegistrationId() != null) {
+                        if (fcmResult.getMessageId() != null && fcmResult.getRegistrationId() != null) {
                             Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent and token has been updated");
                             Map<String, Object> contextData = new HashMap<>();
                             contextData.put("updateToken", fcmResult.getRegistrationId());
                             callback.didFinishSendingMessage(PushSendingCallback.Result.OK, contextData);
-                            stringResponseEntity.getBody().setFailure(stringResponseEntity.getBody().getCanonicalIds() - 1);
+                            notSuccessful--;
                         } else {
                             switch (fcmResult.getFcmError()) {
                                 //token doesn't exist, remove device registration
                                 case "NotRegistered":
                                     Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, invalid token, will be deleted: ");
                                     callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
-                                    stringResponseEntity.getBody().setFailure(stringResponseEntity.getBody().getFailure() - 1);
+                                    notSuccessful--;
                                     break;
                                 //retry to send later
                                 case "Unavailable":
                                     Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, will retry to send: ");
                                     callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING, null);
-                                    stringResponseEntity.getBody().setFailure(stringResponseEntity.getBody().getFailure() - 1);
+                                    notSuccessful--;
                                     break;
                                 // non-recoverable error, remove device registration
                                 default:
                                     Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, non-recoverable error, will be deleted: ");
                                     callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
-                                    stringResponseEntity.getBody().setFailure(stringResponseEntity.getBody().getFailure() - 1);
+                                    notSuccessful--;
                                     break;
                             }
                         }

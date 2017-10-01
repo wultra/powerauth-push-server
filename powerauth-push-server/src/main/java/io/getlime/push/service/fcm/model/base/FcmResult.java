@@ -16,6 +16,7 @@
 
 package io.getlime.push.service.fcm.model.base;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -26,49 +27,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class FcmResult {
 
     @JsonProperty(value = "message_id")
-    private Long messageId;
+    private String messageId;
     @JsonProperty(value = "registration_id")
-    private Long registrationId;
+    private String registrationId;
     @JsonProperty(value = "error")
     private String fcmError;
 
-    /**
-     * message rejected
-     * @param fcmError specification of error
-     */
-    public FcmResult(String fcmError) {
-        this.fcmError = fcmError;
-    }
-
-    /**
-     * message sent
-     */
-    public FcmResult(Long messageId) {
-        this(messageId, null);
-    }
-
-    /**
-     * message sent, token has to be updated for further communication with device
-     * @param registrationId ID to whose to be updated
-     */
-    public FcmResult(Long messageId, Long registrationId) {
-        this.messageId = messageId;
-        this.registrationId = registrationId;
-    }
-
-    public Long getMessageId() {
+    public String getMessageId() {
         return messageId;
     }
 
-    public void setMessageId(Long messageId) {
+    public void setMessageId(String messageId) {
         this.messageId = messageId;
     }
 
-    public Long getRegistrationId() {
+    public String getRegistrationId() {
         return registrationId;
     }
 
-    public void setRegistrationId(Long registrationId) {
+    public void setRegistrationId(String registrationId) {
         this.registrationId = registrationId;
     }
 
