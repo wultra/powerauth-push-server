@@ -28,6 +28,7 @@ import javax.transaction.Transactional;
  * @author Petr Dvorak, petr@lime-company.eu
  */
 @Repository
+@Transactional
 public interface AppCredentialRepository extends CrudRepository<AppCredentialEntity, Long> {
 
     /**

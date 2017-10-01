@@ -28,10 +28,12 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Configuration class for job used in batch sending campaign
@@ -39,7 +41,7 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 @Configuration
-public class PushCampaignSendConfiguration extends DefaultBatchConfigurer {
+public class BatchSendingConfiguration extends DefaultBatchConfigurer {
 
     private final JobRepository jobRepository;
     private final JobBuilderFactory jobBuilderFactory;
@@ -48,15 +50,17 @@ public class PushCampaignSendConfiguration extends DefaultBatchConfigurer {
     private final UserDeviceItemReader userDeviceItemReader;
     private final UserDeviceItemProcessor userDeviceItemProcessor;
     private final UserDeviceItemWriter userDeviceItemWriter;
+    private final PlatformTransactionManager transactionManager;
 
     @Autowired
-    public PushCampaignSendConfiguration(JobRepository jobRepository,
-                                         JobBuilderFactory jobBuilderFactory,
-                                         StepBuilderFactory stepBuilderFactory,
-                                         PushServiceConfiguration pushServiceConfiguration,
-                                         UserDeviceItemReader userDeviceItemReader,
-                                         UserDeviceItemProcessor userDeviceItemProcessor,
-                                         UserDeviceItemWriter userDeviceItemWriter) {
+    public BatchSendingConfiguration(JobRepository jobRepository,
+                                     PlatformTransactionManager transactionManager,
+                                     JobBuilderFactory jobBuilderFactory,
+                                     StepBuilderFactory stepBuilderFactory,
+                                     PushServiceConfiguration pushServiceConfiguration,
+                                     UserDeviceItemReader userDeviceItemReader,
+                                     UserDeviceItemProcessor userDeviceItemProcessor,
+                                     UserDeviceItemWriter userDeviceItemWriter) {
         this.jobRepository = jobRepository;
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
@@ -64,6 +68,7 @@ public class PushCampaignSendConfiguration extends DefaultBatchConfigurer {
         this.userDeviceItemReader = userDeviceItemReader;
         this.userDeviceItemProcessor = userDeviceItemProcessor;
         this.userDeviceItemWriter = userDeviceItemWriter;
+        this.transactionManager = transactionManager;
     }
 
     @Override
@@ -74,20 +79,23 @@ public class PushCampaignSendConfiguration extends DefaultBatchConfigurer {
         return jobLauncher;
     }
 
-
-
     @Bean
     public Job sendCampaignJob() {
-        return jobBuilderFactory.get("sendCampaignJob")
+        final TaskletStep step = buildTaskletStep();
+        return jobBuilderFactory.get("SendCampaignJob")
                 .incrementer(new RunIdIncrementer())
-                .flow(
-                        stepBuilderFactory.get("sendCampaignStep")
-                                .<UserDevice,UserDevice>chunk(pushServiceConfiguration.getCampaignBatchSize())
-                                .reader(userDeviceItemReader)
-                                .processor(userDeviceItemProcessor)
-                                .writer(userDeviceItemWriter)
-                                .build())
+                .flow(step)
                 .end()
                 .build();
+    }
+
+    private TaskletStep buildTaskletStep() {
+        return stepBuilderFactory.get("SendCampaignStep")
+                    .<UserDevice, UserDevice>chunk(pushServiceConfiguration.getCampaignBatchSize())
+                    .reader(userDeviceItemReader)
+                    .processor(userDeviceItemProcessor)
+                    .writer(userDeviceItemWriter)
+                    .transactionManager(transactionManager)
+                    .build();
     }
 }

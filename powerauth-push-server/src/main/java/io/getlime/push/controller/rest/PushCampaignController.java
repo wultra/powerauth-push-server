@@ -33,7 +33,6 @@ import io.getlime.push.repository.serialization.JSONSerialization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -104,10 +103,7 @@ public class PushCampaignController {
             pushCampaignRepository.delete(campaignId);
             deleteCampaignResponse.setDeleted(true);
         }
-        Iterable<PushCampaignUserEntity> usersFromCampaign = pushCampaignUserRepository.findAllByCampaignId(campaignId);
-        for (PushCampaignUserEntity user : usersFromCampaign) {
-            pushCampaignUserRepository.delete(user.getId());
-        }
+        pushCampaignUserRepository.deleteByCampaignId(campaignId);
         return new ObjectResponse<>(deleteCampaignResponse);
     }
 
@@ -229,14 +225,9 @@ public class PushCampaignController {
     @RequestMapping(value = "{id}/user/delete", method = RequestMethod.POST)
     @ResponseBody
     public Response deleteUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
-        Iterable<PushCampaignUserEntity> listOfUsersFromCampaign = pushCampaignUserRepository.findAllByCampaignId(id);
         ListOfUsers listOfUsers = request.getRequestObject();
-        for (PushCampaignUserEntity userFromCampaign : listOfUsersFromCampaign) {
-            for (String user : listOfUsers) {
-                if (user.equals(userFromCampaign.getUserId())) {
-                    pushCampaignUserRepository.delete(userFromCampaign.getId());
-                }
-            }
+        for (String user : listOfUsers) {
+            pushCampaignUserRepository.deleteByCampaignIdAndUserId(id, user);
         }
         return new Response();
     }

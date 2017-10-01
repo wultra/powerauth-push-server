@@ -29,6 +29,7 @@ import java.util.List;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 @Repository
+@Transactional
 public interface PushCampaignRepository extends CrudRepository<PushCampaignEntity, Long>{
 
     /**
