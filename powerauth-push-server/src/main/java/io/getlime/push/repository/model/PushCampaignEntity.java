@@ -35,19 +35,19 @@ public class PushCampaignEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_campaign")
     private Long id;
 
-    @Column(name = "app_id", nullable = false)
+    @Column(name = "app_id", nullable = false, updatable = false)
     private Long appId;
 
-    @Column(name = "message")
+    @Column(name = "message", nullable = false, updatable = false)
     private String message;
 
-    @Column(name = "sent")
+    @Column(name = "is_sent")
     private boolean sent;
 
-    @Column(name = "timestamp_created", nullable = false)
+    @Column(name = "timestamp_created", nullable = false, updatable = false)
     private Date timestampCreated;
 
-    @Column(name = "timestamp_sent")
+    @Column(name = "timestamp_sent", updatable = false)
     private Date timestampSent;
 
     public Long getId() {

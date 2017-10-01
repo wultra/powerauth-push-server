@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package io.getlime.push.service.fcm;
+package io.getlime.push.service.fcm.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.getlime.push.service.fcm.FcmNotification;
 
 import java.util.Map;
 

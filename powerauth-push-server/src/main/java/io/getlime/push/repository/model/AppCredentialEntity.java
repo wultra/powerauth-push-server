@@ -27,7 +27,6 @@ import java.io.Serializable;
 @Entity
 @Table(name = "push_app_credential")
 public class AppCredentialEntity implements Serializable {
-
     private static final long serialVersionUID = -8904070389354612019L;
 
     @Id

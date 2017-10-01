@@ -37,11 +37,9 @@ public class PushMessageEntity implements Serializable {
         FAILED(-1);
 
         private final int status;
-
         Status(int status) {
             this.status = status;
         }
-
         public int getStatus() {
             return status;
         }
@@ -55,22 +53,22 @@ public class PushMessageEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_message")
     private Long id;
 
-    @Column(name = "device_id", nullable = false, updatable = false)
+    @Column(name = "device_registration_id", nullable = false, updatable = false)
     private Long deviceId;
 
-    @Column(name = "user_id", nullable = false, updatable = false)
+    @Column(name = "user_id", updatable = false)
     private String userId;
 
     @Column(name = "activation_id", updatable = false)
     private String activationId;
 
-    @Column(name = "silent", nullable = false, updatable = false)
+    @Column(name = "is_silent", updatable = false)
     private Boolean silent;
 
-    @Column(name = "personal", nullable = false, updatable = false)
+    @Column(name = "is_personal", updatable = false)
     private Boolean personal;
 
-    @Column(name = "encrypted", nullable = false, updatable = false)
+    @Column(name = "is_encrypted", updatable = false)
     private Boolean encrypted;
 
     @Column(name = "message_body", nullable = false, updatable = false)
