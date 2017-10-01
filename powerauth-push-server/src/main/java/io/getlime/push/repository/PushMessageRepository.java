@@ -23,6 +23,7 @@ import io.getlime.push.repository.serialization.JSONSerialization;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 
@@ -32,6 +33,7 @@ import java.util.List;
  * @author Petr Dvorak, petr@lime-company.eu
  */
 @Repository
+@Transactional
 public interface PushMessageRepository extends CrudRepository<PushMessageEntity, Long> {
 
     //TODO: search pending push messages in order to send them later
@@ -40,5 +42,5 @@ public interface PushMessageRepository extends CrudRepository<PushMessageEntity,
      * @param status Push message status.
      * @return List of all messages with given status.
      */
-    public List<PushMessageEntity> findByStatus(PushMessageEntity.Status status);
+    List<PushMessageEntity> findByStatus(PushMessageEntity.Status status);
 }

@@ -33,8 +33,8 @@ import javax.net.ssl.*;
  * @author Petr Dvorak
  */
 @Configuration
-@ComponentScan(basePackages = {"io.getlime.security"})
-public class WebServiceConfiguration {
+@ComponentScan(basePackages = {"io.getlime.security", "io.getlime.push"})
+public class PowerAuthWebServiceConfiguration {
 
     @Value("${powerauth.service.url}")
     private String powerAuthServiceUrl;

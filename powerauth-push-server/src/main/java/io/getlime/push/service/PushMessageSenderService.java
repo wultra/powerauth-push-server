@@ -229,8 +229,9 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      *                             the error can be found in exception message.
      */
-    public void sendCampaignMessage(Long appId, String platform, String token, PushMessageBody pushMessageBody, String userId) throws PushServerException {
-        sendCampaignMessage(appId, platform, token, pushMessageBody, null, userId);
+    @Transactional
+    public void sendCampaignMessage(Long appId, String platform, String token, PushMessageBody pushMessageBody, String userId, Long deviceId, String activationId) throws PushServerException {
+        sendCampaignMessage(appId, platform, token, pushMessageBody, null, userId, deviceId, activationId);
     }
 
     /**
@@ -246,7 +247,7 @@ public class PushMessageSenderService {
      * the error can be found in exception message.
      */
     @Transactional
-    public void sendCampaignMessage(final Long appId, String platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, String userId) throws PushServerException {
+    public void sendCampaignMessage(final Long appId, String platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, String userId, Long deviceId, String activationId) throws PushServerException {
 
         final AppRelatedPushClient pushClient = prepareClients(appId);
 

@@ -29,6 +29,7 @@ import java.util.List;
  * @author Petr Dvorak, petr@lime-company.eu
  */
 @Repository
+@Transactional
 public interface PushDeviceRepository extends CrudRepository<PushDeviceEntity, Long> {
 
     /**

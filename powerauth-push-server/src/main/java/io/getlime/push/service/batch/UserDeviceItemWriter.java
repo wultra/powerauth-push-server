@@ -55,6 +55,8 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
             String userID = device.getUserId();
             Long appId = device.getAppId();
             Long campaignId = device.getCampaignId();
+            Long deviceId = device.getDeviceId();
+            String activationId = device.getActivationId();
 
             // Load and cache campaign information
             PushMessageBody messageBody = campaignStorageMap.get(campaignId);
@@ -65,7 +67,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
             }
 
             // Send the push message using push sender service
-            pushMessageSenderService.sendCampaignMessage(appId, platform, token, messageBody, userID);
+            pushMessageSenderService.sendCampaignMessage(appId, platform, token, messageBody, userID, deviceId, activationId);
         }
     }
 }

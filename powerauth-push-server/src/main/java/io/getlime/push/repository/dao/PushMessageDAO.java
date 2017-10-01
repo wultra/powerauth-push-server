@@ -24,9 +24,13 @@ import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+
+import javax.transaction.Transactional;
 import java.util.Date;
 
-@Component
+@Repository
+@Transactional
 public class PushMessageDAO {
 
     private PushMessageRepository pushMessageRepository;
@@ -51,6 +55,10 @@ public class PushMessageDAO {
             entity.setEncrypted(pushMessageAttributes.getEncrypted());
             entity.setPersonal(pushMessageAttributes.getPersonal());
             entity.setSilent(pushMessageAttributes.getSilent());
+        } else {
+            entity.setEncrypted(false);
+            entity.setPersonal(false);
+            entity.setSilent(false);
         }
         entity.setStatus(PushMessageEntity.Status.PENDING);
         entity.setTimestampCreated(new Date());
