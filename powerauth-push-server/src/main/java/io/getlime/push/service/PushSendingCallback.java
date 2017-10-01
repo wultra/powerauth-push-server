@@ -16,6 +16,8 @@
 
 package io.getlime.push.service;
 
+import java.util.Map;
+
 /**
  * Interface used for handling result of the push message sending attempt.
  *
@@ -29,7 +31,7 @@ public interface PushSendingCallback {
     enum Result {
 
         /**
-         * Message was successfully sent.
+         * Message was successfully sent. Optionally if contextData has key updateToken, token will be updated in database of device registrations.
          */
         OK,
 
@@ -52,8 +54,9 @@ public interface PushSendingCallback {
     /**
      * Called after the push message sending attempt is made.
      *
+     * @param contextData map for passing params to method declarations
      * @param result Result of the push message sending.
      */
-    void didFinishSendingMessage(Result result);
+    void didFinishSendingMessage(Result result, Map<String, Object> contextData);
 
 }

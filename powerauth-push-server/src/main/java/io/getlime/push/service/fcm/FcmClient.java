@@ -16,6 +16,8 @@
 
 package io.getlime.push.service.fcm;
 
+import io.getlime.push.service.fcm.model.FcmSendRequest;
+import io.getlime.push.service.fcm.model.FcmSendResponse;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -84,8 +86,8 @@ public class FcmClient {
      * @param request FCM data request.
      * @return Listenable future for result callbacks.
      */
-    public ListenableFuture<ResponseEntity<String>> exchange(FcmSendRequest request) {
+    public ListenableFuture<ResponseEntity<FcmSendResponse>> exchange(FcmSendRequest request) {
         HttpEntity<FcmSendRequest> entity = new HttpEntity<>(request, headers);
-        return restTemplate.exchange(fcm_url, HttpMethod.POST, entity, String.class);
+        return restTemplate.exchange(fcm_url, HttpMethod.POST, entity, FcmSendResponse.class);
     }
 }
