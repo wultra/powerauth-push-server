@@ -56,19 +56,19 @@ public class PushMessageEntity implements Serializable {
     @Column(name = "device_id", nullable = false, updatable = false)
     private Long deviceId;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", updatable = false)
     private String userId;
 
-    @Column(name = "activation_id")
+    @Column(name = "activation_id", updatable = false)
     private String activationId;
 
-    @Column(name = "is_silent")
+    @Column(name = "is_silent", updatable = false)
     private Boolean silent;
 
-    @Column(name = "is_personal")
+    @Column(name = "is_personal", updatable = false)
     private Boolean personal;
 
-    @Column(name = "is_encrypted")
+    @Column(name = "is_encrypted", updatable = false)
     private Boolean encrypted;
 
     @Column(name = "message_body", nullable = false, updatable = false)
