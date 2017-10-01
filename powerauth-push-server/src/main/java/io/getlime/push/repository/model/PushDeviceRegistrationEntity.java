@@ -26,8 +26,8 @@ import java.util.Date;
  * @author Petr Dvorak, petr@lime-company.eu
  */
 @Entity
-@Table(name = "push_device")
-public class PushDeviceEntity implements Serializable {
+@Table(name = "push_device_registration")
+public class PushDeviceRegistrationEntity implements Serializable {
 
     private static final long serialVersionUID = 1530682530822178192L;
 
@@ -38,8 +38,8 @@ public class PushDeviceEntity implements Serializable {
 
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_device", sequenceName = "push_device_seq")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_device")
+    @SequenceGenerator(name = "push_device_registration", sequenceName = "push_device_registration_seq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_device_registration")
     private Long id;
 
     @Column(name = "activation_id")
@@ -51,7 +51,7 @@ public class PushDeviceEntity implements Serializable {
     @Column(name = "app_id", nullable = false, updatable = false)
     private Long appId;
 
-    @Column(name = "platform", nullable = false)
+    @Column(name = "platform", nullable = false, updatable = false)
     private String platform;
 
     @Column(name = "push_token", nullable = false)

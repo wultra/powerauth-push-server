@@ -36,7 +36,7 @@ import io.getlime.push.repository.AppCredentialRepository;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.dao.PushMessageDAO;
 import io.getlime.push.repository.model.AppCredentialEntity;
-import io.getlime.push.repository.model.PushDeviceEntity;
+import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
 import io.getlime.push.service.fcm.FcmClient;
@@ -118,10 +118,10 @@ public class PushMessageSenderService {
             validatePushMessage(pushMessage);
 
             // Fetch connected devices
-            List<PushDeviceEntity> devices = getPushDevices(appId, pushMessage.getUserId(), pushMessage.getActivationId());
+            List<PushDeviceRegistrationEntity> devices = getPushDevices(appId, pushMessage.getUserId(), pushMessage.getActivationId());
 
             // Iterate over all devices for given user
-            for (final PushDeviceEntity device : devices) {
+            for (final PushDeviceRegistrationEntity device : devices) {
                 final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getUserId(), pushMessage.getActivationId(), device.getId());
 
                 // Check if given push is not personal, or if it is, that device is in active state.
@@ -135,7 +135,7 @@ public class PushMessageSenderService {
 
                     // Decide if the device is iOS or Android and send message accordingly
                     String platform = device.getPlatform();
-                    if (platform.equals(PushDeviceEntity.Platform.iOS)) {
+                    if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
                         sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), new PushSendingCallback() {
                             @Override
                             public void didFinishSendingMessage(Result result, Map<String, Object> contextData) {
@@ -170,7 +170,7 @@ public class PushMessageSenderService {
                                 phaser.arriveAndDeregister();
                             }
                         });
-                    } else if (platform.equals(PushDeviceEntity.Platform.Android)) {
+                    } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
                         final String token = device.getPushToken();
                         sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), token, new PushSendingCallback() {
                             @Override
@@ -180,7 +180,7 @@ public class PushMessageSenderService {
                                         pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
                                         sendResult.getAndroid().setSent(sendResult.getAndroid().getSent() + 1);
                                         String updatedToken = (String)contextData.get("updateToken");
-                                        PushDeviceEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token);
+                                        PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token);
                                         device.setPushToken(updatedToken);
                                         pushDeviceRepository.save(device);
                                         pushMessageDAO.save(pushMessageObject);
@@ -253,7 +253,7 @@ public class PushMessageSenderService {
 
         final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, null, 6L);
 
-        if (platform.equals(PushDeviceEntity.Platform.iOS)) {
+        if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
             sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), new PushSendingCallback() {
                 @Override
                 public void didFinishSendingMessage(Result result, Map<String, Object> contextData) {
@@ -282,7 +282,7 @@ public class PushMessageSenderService {
                     }
                 }
             });
-        } else if (platform.equals(PushDeviceEntity.Platform.Android)) {
+        } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
             sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, new PushSendingCallback() {
                 @Override
                 public void didFinishSendingMessage(Result result, Map<String, Object> contextData) {
@@ -290,7 +290,7 @@ public class PushMessageSenderService {
                         case OK: {
                             pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
                             String updatedToken = (String)contextData.get("updateToken");
-                            PushDeviceEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token);
+                            PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token);
                             device.setPushToken(updatedToken);
                             pushDeviceRepository.save(device);
                             pushMessageDAO.save(pushMessageObject);
@@ -435,12 +435,12 @@ public class PushMessageSenderService {
     }
 
     // Return list of devices related to given user or activation ID (if present). List of devices is related to particular application as well.
-    private List<PushDeviceEntity> getPushDevices(Long appId, String userId, String activationId) throws PushServerException {
+    private List<PushDeviceRegistrationEntity> getPushDevices(Long appId, String userId, String activationId) throws PushServerException {
         if (userId == null || userId.isEmpty()) {
             Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "No userId was specified");
             throw new PushServerException("No userId was specified");
         }
-        List<PushDeviceEntity> devices;
+        List<PushDeviceRegistrationEntity> devices;
         if (activationId != null) { // in case the message should go to the specific device
             devices = pushDeviceRepository.findByUserIdAndAppIdAndActivationId(userId, appId, activationId);
         } else {

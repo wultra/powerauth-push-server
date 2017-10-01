@@ -25,11 +25,10 @@ import io.getlime.push.model.request.CreateDeviceRequest;
 import io.getlime.push.model.request.DeleteDeviceRequest;
 import io.getlime.push.model.request.UpdateDeviceStatusRequest;
 import io.getlime.push.repository.PushDeviceRepository;
-import io.getlime.push.repository.model.PushDeviceEntity;
+import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -74,9 +73,9 @@ public class PushDeviceController {
         String pushToken = request.getRequestObject().getToken();
         String platform = request.getRequestObject().getPlatform();
         String activationId = request.getRequestObject().getActivationId();
-        PushDeviceEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
+        PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
         if (device == null) {
-            device = new PushDeviceEntity();
+            device = new PushDeviceRegistrationEntity();
             device.setAppId(appId);
             device.setPushToken(pushToken);
         }
@@ -112,10 +111,10 @@ public class PushDeviceController {
             throw new PushServerException("Invalid or empty input data");
         }
         String activationId = request.getRequestObject().getActivationId();
-        List<PushDeviceEntity> device = pushDeviceRepository.findByActivationId(activationId);
+        List<PushDeviceRegistrationEntity> device = pushDeviceRepository.findByActivationId(activationId);
         if (device != null)  {
             ActivationStatus status = client.getActivationStatus(activationId).getActivationStatus();
-            for (PushDeviceEntity registration: device) {
+            for (PushDeviceRegistrationEntity registration: device) {
                 registration.setActive(status.equals(ActivationStatus.ACTIVE));
                 pushDeviceRepository.save(registration);
             }
@@ -135,7 +134,7 @@ public class PushDeviceController {
         }
         Long appId = request.getRequestObject().getAppId();
         String pushToken = request.getRequestObject().getToken();
-        PushDeviceEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
+        PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
         if (device != null)  {
             pushDeviceRepository.delete(device);
         }

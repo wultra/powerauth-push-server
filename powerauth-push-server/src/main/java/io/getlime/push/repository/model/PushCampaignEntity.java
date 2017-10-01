@@ -38,10 +38,10 @@ public class PushCampaignEntity implements Serializable {
     @Column(name = "app_id", nullable = false)
     private Long appId;
 
-    @Column(name = "message")
+    @Column(name = "message", nullable = false)
     private String message;
 
-    @Column(name = "sent")
+    @Column(name = "is_sent")
     private boolean sent;
 
     @Column(name = "timestamp_created", nullable = false)

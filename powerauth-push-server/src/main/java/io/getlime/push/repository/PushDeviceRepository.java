@@ -16,7 +16,7 @@
 
 package io.getlime.push.repository;
 
-import io.getlime.push.repository.model.PushDeviceEntity;
+import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -30,7 +30,7 @@ import java.util.List;
  */
 @Repository
 @Transactional
-public interface PushDeviceRepository extends CrudRepository<PushDeviceEntity, Long> {
+public interface PushDeviceRepository extends CrudRepository<PushDeviceRegistrationEntity, Long> {
 
     /**
      * Find first device for given app ID and push token.
@@ -38,14 +38,14 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceEntity, L
      * @param pushToken Push token.
      * @return Device registration with provided values.
      */
-    PushDeviceEntity findFirstByAppIdAndPushToken(Long appId, String pushToken);
+    PushDeviceRegistrationEntity findFirstByAppIdAndPushToken(Long appId, String pushToken);
 
     /**
      * Find all device registrations by given activation ID. In normal case, the list will contain only one value.
      * @param activationId Activation ID.
      * @return List of device registrations.
      */
-    List<PushDeviceEntity> findByActivationId(String activationId);
+    List<PushDeviceRegistrationEntity> findByActivationId(String activationId);
 
     /**
      * Find all device registration by given user ID and app ID. This list represents all devices that a single user
@@ -54,7 +54,7 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceEntity, L
      * @param appId App ID.
      * @return List of device registrations.
      */
-    List<PushDeviceEntity> findByUserIdAndAppId(String userId, Long appId);
+    List<PushDeviceRegistrationEntity> findByUserIdAndAppId(String userId, Long appId);
 
     /**
      * Find all device registration by given user ID, app ID and activation ID. This list should contain one record
@@ -64,6 +64,6 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceEntity, L
      * @param activationId Activation ID.
      * @return List of device registrations.
      */
-    List<PushDeviceEntity> findByUserIdAndAppIdAndActivationId(String userId, Long appId, String activationId);
+    List<PushDeviceRegistrationEntity> findByUserIdAndAppIdAndActivationId(String userId, Long appId, String activationId);
 
 }
