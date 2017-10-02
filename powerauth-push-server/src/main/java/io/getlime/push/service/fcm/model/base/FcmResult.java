@@ -16,7 +16,6 @@
 
 package io.getlime.push.service.fcm.model.base;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -26,10 +25,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class FcmResult {
 
+    public static final String KEY_UPDATE_TOKEN = "updateToken";
+
     @JsonProperty(value = "message_id")
     private String messageId;
+
     @JsonProperty(value = "registration_id")
     private String registrationId;
+
     @JsonProperty(value = "error")
     private String fcmError;
 
