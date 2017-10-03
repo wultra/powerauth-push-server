@@ -54,7 +54,8 @@ public interface PushSendingCallback {
     /**
      * Called after the push message sending attempt is made.
      *
-     * @param contextData map for passing params to method declarations
+     * @param contextData Map for passing params to method declarations, or null in case no parameters need to be
+     *                    passed (make sure to null check).
      * @param result Result of the push message sending.
      */
     void didFinishSendingMessage(Result result, Map<String, Object> contextData);

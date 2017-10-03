@@ -141,26 +141,26 @@ public class PushMessageSenderService {
                             public void didFinishSendingMessage(Result result, Map<String, Object> contextData) {
                                 switch (result) {
                                     case OK: {
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
                                         sendResult.getIos().setSent(sendResult.getIos().getSent() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
                                         pushMessageDAO.save(pushMessageObject);
                                         break;
                                     }
                                     case PENDING: {
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
                                         sendResult.getIos().setPending(sendResult.getIos().getPending() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
                                         pushMessageDAO.save(pushMessageObject);
                                         break;
                                     }
                                     case FAILED: {
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
                                         sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
                                         pushMessageDAO.save(pushMessageObject);
                                         break;
                                     }
                                     case FAILED_DELETE: {
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
                                         sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
                                         pushMessageDAO.save(pushMessageObject);
                                         pushDeviceRepository.delete(device);
                                         break;
@@ -177,30 +177,27 @@ public class PushMessageSenderService {
                             public void didFinishSendingMessage(Result sendingResult, Map<String, Object> contextData) {
                                 switch (sendingResult) {
                                     case OK: {
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
                                         sendResult.getAndroid().setSent(sendResult.getAndroid().getSent() + 1);
-                                        String updatedToken = (String)contextData.get("updateToken");
-                                        PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token);
-                                        device.setPushToken(updatedToken);
-                                        pushDeviceRepository.save(device);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
                                         pushMessageDAO.save(pushMessageObject);
+                                        updateFcmTokenIfNeeded(appId, token, contextData);
                                         break;
                                     }
                                     case PENDING: {
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
                                         sendResult.getAndroid().setPending(sendResult.getAndroid().getPending() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
                                         pushMessageDAO.save(pushMessageObject);
                                         break;
                                     }
                                     case FAILED: {
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
                                         sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
                                         pushMessageDAO.save(pushMessageObject);
                                         break;
                                     }
                                     case FAILED_DELETE: {
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
                                         sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
                                         pushMessageDAO.save(pushMessageObject);
                                         pushDeviceRepository.delete(device);
                                         break;
@@ -289,11 +286,8 @@ public class PushMessageSenderService {
                     switch (result) {
                         case OK: {
                             pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                            String updatedToken = (String)contextData.get("updateToken");
-                            PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token);
-                            device.setPushToken(updatedToken);
-                            pushDeviceRepository.save(device);
                             pushMessageDAO.save(pushMessageObject);
+                            updateFcmTokenIfNeeded(appId, token, contextData);
                             break;
                         }
                         case PENDING: {
@@ -375,48 +369,45 @@ public class PushMessageSenderService {
         final ListenableFuture<ResponseEntity<FcmSendResponse>> future = fcmClient.exchange(request);
 
         future.addCallback(new ListenableFutureCallback<ResponseEntity<FcmSendResponse>>() {
+
             @Override
             public void onFailure(Throwable throwable) {
-                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway:" + throwable.getLocalizedMessage());
-                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, throwable.getLocalizedMessage());
+                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway: " + throwable.getLocalizedMessage());
                 callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
             }
 
             @Override
             public void onSuccess(ResponseEntity<FcmSendResponse> response) {
-                int notSuccessful = response.getBody().getFailure() + response.getBody().getCanonicalIds();
                 for (FcmResult fcmResult : response.getBody().getFcmResults()) {
-                    //no issues, straight sending
-                    if (notSuccessful == 0) {
-                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent");
-                        callback.didFinishSendingMessage(PushSendingCallback.Result.OK, null);
-                    } else {
-                        //message sent, token has to be updated (stored in map under key "updateToken")
-                        if (fcmResult.getMessageId() != null && fcmResult.getRegistrationId() != null) {
+                    if (fcmResult.getMessageId() != null) {
+                        // no issues, straight sending
+                        if (fcmResult.getRegistrationId() == null) {
+                            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent");
+                            callback.didFinishSendingMessage(PushSendingCallback.Result.OK, null);
+                        } else {
+                            // no issues, straight sending + update token (pass it via context)
                             Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent and token has been updated");
                             Map<String, Object> contextData = new HashMap<>();
-                            contextData.put("updateToken", fcmResult.getRegistrationId());
+                            contextData.put(FcmResult.KEY_UPDATE_TOKEN, fcmResult.getRegistrationId());
                             callback.didFinishSendingMessage(PushSendingCallback.Result.OK, contextData);
-                            notSuccessful--;
-                        } else {
-                            switch (fcmResult.getFcmError()) {
-                                //token doesn't exist, remove device registration
-                                case "NotRegistered":
+                        }
+                    } else {
+                        if (fcmResult.getFcmError() != null) {
+                            switch (fcmResult.getFcmError().toLowerCase()) { // make sure to account for case issues
+                                // token doesn't exist, remove device registration
+                                case "notregistered":
                                     Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, invalid token, will be deleted: ");
                                     callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
-                                    notSuccessful--;
                                     break;
-                                //retry to send later
-                                case "Unavailable":
+                                // retry to send later
+                                case "unavailable":
                                     Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, will retry to send: ");
                                     callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING, null);
-                                    notSuccessful--;
                                     break;
                                 // non-recoverable error, remove device registration
                                 default:
                                     Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, non-recoverable error, will be deleted: ");
                                     callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
-                                    notSuccessful--;
                                     break;
                             }
                         }
@@ -536,6 +527,18 @@ public class PushMessageSenderService {
         if (error != null) {
             Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.WARNING, error);
             throw new PushServerException(error);
+        }
+    }
+
+    // Update FCM token based on context data
+    private void updateFcmTokenIfNeeded(Long appId, String token, Map<String, Object> contextData) {
+        if (contextData != null) {
+            String updatedToken = (String) contextData.get(FcmResult.KEY_UPDATE_TOKEN);
+            if (updatedToken != null) {
+                PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token);
+                device.setPushToken(updatedToken);
+                pushDeviceRepository.save(device);
+            }
         }
     }
 
