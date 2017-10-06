@@ -16,7 +16,6 @@
 
 package io.getlime.push.controller.rest;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
@@ -37,7 +36,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
