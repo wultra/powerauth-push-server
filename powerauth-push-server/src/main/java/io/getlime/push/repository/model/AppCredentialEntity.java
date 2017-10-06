@@ -25,7 +25,7 @@ import java.io.Serializable;
  * @author Petr Dvorak, petr@lime-company.eu
  */
 @Entity
-@Table(name = "push_app_credential")
+@Table(name = "push_app_credentials")
 public class AppCredentialEntity implements Serializable {
     private static final long serialVersionUID = -8904070389354612019L;
 
