@@ -14,36 +14,26 @@
  * limitations under the License.
  */
 
-package io.getlime.push.model.request;
+package io.getlime.push.model.validator;
 
-import io.getlime.push.model.entity.PushMessageBody;
+import io.getlime.push.model.request.CreateCampaignRequest;
 
 /**
- * Request object used for creating a campaign.
+ * Validator class used in creating a campaign
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-
-
-public class CreateCampaignRequest {
-
-    private Long appId;
-
-    private PushMessageBody message;
-
-    public Long getAppId() {
-        return appId;
-    }
-
-    public void setAppId(Long appId) {
-        this.appId = appId;
-    }
-
-    public PushMessageBody getMessage() {
-        return message;
-    }
-
-    public void setMessage(PushMessageBody message) {
-        this.message = message;
+public class CreateCampaignRequestValidator {
+    public static String validate(CreateCampaignRequest request) {
+        if (request == null) {
+            return "Empty request";
+        } else if (request.getAppId() == null || request.getAppId() < 1) {
+            return "Empty or invalid appId";
+        } else if (request.getMessage() == null) {
+            return "Empty message";
+        } else if (request.getMessage().getBody() == null) {
+            return "Empty body";
+        }
+        return null;
     }
 }

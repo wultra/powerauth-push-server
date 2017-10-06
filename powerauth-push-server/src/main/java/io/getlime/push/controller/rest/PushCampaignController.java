@@ -16,6 +16,7 @@
 
 package io.getlime.push.controller.rest;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
@@ -25,6 +26,7 @@ import io.getlime.push.model.entity.ListOfUsers;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.request.CreateCampaignRequest;
 import io.getlime.push.model.response.*;
+import io.getlime.push.model.validator.CreateCampaignRequestValidator;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.PushCampaignUserRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
@@ -35,6 +37,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -68,18 +71,17 @@ public class PushCampaignController {
     @RequestMapping(value = "create", method = RequestMethod.POST)
     @ResponseBody
     public ObjectResponse<CreateCampaignResponse> createCampaign(@RequestBody ObjectRequest<CreateCampaignRequest> request) throws PushServerException {
-        checkRequestNullity(request);
         CreateCampaignRequest requestObject = request.getRequestObject();
-        Long appId = requestObject.getAppId();
-        if (appId == null) {
-            throw new PushServerException("Empty appId attribute");
+        String errorMessage = CreateCampaignRequestValidator.validate(requestObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
         }
         PushCampaignEntity campaign = new PushCampaignEntity();
-        campaign.setAppId(appId);
-        campaign.setSent(false);
-        campaign.setTimestampCreated(new Date());
         PushMessageBody message = requestObject.getMessage();
         String messageString = JSONSerialization.serializePushMessageBody(message);
+        campaign.setAppId(requestObject.getAppId());
+        campaign.setSent(false);
+        campaign.setTimestampCreated(new Date());
         campaign.setMessage(messageString);
         campaign = pushCampaignRepository.save(campaign);
         CreateCampaignResponse response = new CreateCampaignResponse();

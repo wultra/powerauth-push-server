@@ -22,6 +22,8 @@ import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.request.SendPushMessageBatchRequest;
 import io.getlime.push.model.request.SendPushMessageRequest;
+import io.getlime.push.model.validator.SendPushMessageBatchRequestValidator;
+import io.getlime.push.model.validator.SendPushMessageRequestValidator;
 import io.getlime.push.service.PushMessageSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -56,12 +58,14 @@ public class PushMessageController {
      */
     @RequestMapping(value = "send", method = RequestMethod.POST)
     public @ResponseBody ObjectResponse<PushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
-        if (request.getRequestObject() == null || request.getRequestObject().getMessage() == null || request.getRequestObject().getAppId() == null) {
-            throw new PushServerException("Invalid or empty input data");
+        SendPushMessageRequest requestObject = request.getRequestObject();
+        String errorMessage = SendPushMessageRequestValidator.validate(requestObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
         }
-        final Long appId = request.getRequestObject().getAppId();
+        final Long appId = requestObject.getAppId();
         final List<PushMessage> pushMessageList = new ArrayList<>();
-        pushMessageList.add(request.getRequestObject().getMessage());
+        pushMessageList.add(requestObject.getMessage());
         PushMessageSendResult result;
         result = pushMessageSenderService.sendPushMessage(appId, pushMessageList);
         return new ObjectResponse<>(result);
@@ -74,14 +78,13 @@ public class PushMessageController {
      */
     @RequestMapping(value = "batch/send", method = RequestMethod.POST)
     public @ResponseBody ObjectResponse<PushMessageSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
-        if (request.getRequestObject() == null || request.getRequestObject().getBatch() == null || request.getRequestObject().getAppId() == null) {
-            throw new PushServerException("Invalid or empty input data");
+        SendPushMessageBatchRequest requestObject = request.getRequestObject();
+        String errorMessage = SendPushMessageBatchRequestValidator.validate(requestObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
         }
-        final Long appId = request.getRequestObject().getAppId();
-        final List<PushMessage> batch = request.getRequestObject().getBatch();
-        if (batch.size() > 20) {
-            throw new PushServerException("Too many messages in batch - do no send more than 20 messages at once to avoid server congestion.");
-        }
+        final Long appId = requestObject.getAppId();
+        final List<PushMessage> batch = requestObject.getBatch();
         PushMessageSendResult result;
         result = pushMessageSenderService.sendPushMessage(appId, batch);
         return new ObjectResponse<>(result);
