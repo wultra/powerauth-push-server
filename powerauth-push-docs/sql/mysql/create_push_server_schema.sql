@@ -1,4 +1,4 @@
-CREATE TABLE `push_app_credential` (
+CREATE TABLE `push_app_credentials` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `app_id` bigint(20) NOT NULL,
   `ios_private_key` blob DEFAULT NULL,
