@@ -19,7 +19,7 @@ package io.getlime.push.model.entity;
 import java.util.ArrayList;
 
 /**
- * Request used for adding collection of users to campaign
+ * Class representing an object of users' ids stored in arraylist
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */

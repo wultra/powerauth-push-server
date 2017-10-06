@@ -105,12 +105,12 @@ public class PushServerClient {
     /**
      * Returns service information
      *
-     * @return True if service is running.
+     * @return Response of service status in JSON
      */
     public ObjectResponse<ServiceStatusResponse> getServiceStatus() throws PushServerClientException {
         TypeReference<ObjectResponse<ServiceStatusResponse>> typeReference = new TypeReference<ObjectResponse<ServiceStatusResponse>>() {
         };
-        return getObjectImpl("/push/service/status", null, typeReference);
+        return prepareServerResponse("/push/service/status", null, null, typeReference);
     }
 
     /**
@@ -142,7 +142,7 @@ public class PushServerClient {
         request.setActivationId(activationId);
         TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        ObjectResponse<?> response = postObjectImpl("/push/device/create", new ObjectRequest<>(request), typeReference);
+        ObjectResponse<?> response = prepareServerResponse("/push/device/create", null, new ObjectRequest<>(request), typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
@@ -159,7 +159,7 @@ public class PushServerClient {
         request.setToken(token);
         TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        ObjectResponse<?> response = postObjectImpl("/push/device/delete", request, typeReference);
+        ObjectResponse<?> response = prepareServerResponse("/push/device/delete", null, new ObjectRequest<>(request), typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
@@ -174,7 +174,7 @@ public class PushServerClient {
         request.setActivationId(activationId);
         TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        ObjectResponse<?> response = postObjectImpl("/push/device/status/update", request, typeReference);
+        ObjectResponse<?> response = prepareServerResponse("/push/device/status/update", null, new ObjectRequest<>(request), typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
@@ -191,7 +191,7 @@ public class PushServerClient {
         request.setMessage(pushMessage);
         TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {
         };
-        return postObjectImpl("/push/message/send", new ObjectRequest<>(request), typeReference);
+        return prepareServerResponse("/push/message/send", null, new ObjectRequest<>(request), typeReference);
     }
 
     /**
@@ -207,14 +207,14 @@ public class PushServerClient {
         request.setBatch(batch);
         TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {
         };
-        return postObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), typeReference);
+        return prepareServerResponse("/push/message/batch/send", null, new ObjectRequest<>(request), typeReference);
     }
 
     /**
      * Create a campaign.
      *
      * @param message Message which attributes are defined in PushMessageBody.
-     * @return ID of new created campaign.
+     * @return ID of new created campaign in JSON.
      */
     public ObjectResponse<CreateCampaignResponse> createCampaign(Long appId, PushMessageBody message) throws PushServerClientException {
         CreateCampaignRequest request = new CreateCampaignRequest();
@@ -222,38 +222,23 @@ public class PushServerClient {
         request.setMessage(message);
         TypeReference<ObjectResponse<CreateCampaignRequest>> typeReference = new TypeReference<ObjectResponse<CreateCampaignRequest>>() {
         };
-        return postObjectImpl("/push/campaign/create", new ObjectRequest<>(request), typeReference);
+        return prepareServerResponse("/push/campaign/create", null, new ObjectRequest<>(request), typeReference);
     }
 
     /**
      * Delete a campaign specified with campaignId.
      *
-     * @return True if campaign is removed, false otherwise.
+     * @return Response of deletion campaign in JSON
      */
-    public boolean deleteCampaign(Long campaignId) throws PushServerClientException {
+    public ObjectResponse<DeleteCampaignResponse> deleteCampaign(Long campaignId) throws PushServerClientException {
         try {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
             TypeReference<ObjectResponse<DeleteCampaignResponse>> typeReference = new TypeReference<ObjectResponse<DeleteCampaignResponse>>() {
             };
-            ObjectResponse<?> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, typeReference);
-            return response.getStatus().equals(Response.Status.OK);
+            return prepareServerResponse("/push/campaign/" + campaignIdSanitized + "/delete", null, null, typeReference);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
         }
-    }
-
-    /**
-     * Get list of campaigns, dependent on all param
-     *
-     * @param all true to get whole list, false to get campaigns that are only sent
-     * @return List of campaigns.
-     */
-    public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(boolean all) throws PushServerClientException {
-        TypeReference<ObjectResponse<ListOfCampaignsResponse>> typeReference = new TypeReference<ObjectResponse<ListOfCampaignsResponse>>() {
-        };
-        Map<String, Object> params = new HashMap<>();
-        params.put("all", all);
-        return getObjectImpl("/push/campaign/list", params, typeReference);
     }
 
     /**
@@ -267,11 +252,26 @@ public class PushServerClient {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
             TypeReference<ObjectResponse<CampaignResponse>> typeReference = new TypeReference<ObjectResponse<CampaignResponse>>() {
             };
-            return getObjectImpl("/push/campaign/" + campaignIdSanitized + "/detail", null, typeReference);
+            return prepareServerResponse("/push/campaign/" + campaignIdSanitized + "/detail", null, null, typeReference);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
         }
     }
+
+    /**
+     * Get list of campaigns, dependent on all param
+     *
+     * @param all true to get whole list, false to get campaigns that are only sent
+     * @return List of campaigns in JSON.
+     */
+    public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(boolean all) throws PushServerClientException {
+        TypeReference<ObjectResponse<ListOfCampaignsResponse>> typeReference = new TypeReference<ObjectResponse<ListOfCampaignsResponse>>() {
+        };
+        Map<String, Object> params = new HashMap<>();
+        params.put("all", all);
+        return prepareServerResponse("/push/campaign/list", params, null, typeReference);
+    }
+
 
     /**
      * Add a list of users to a specific campaign
@@ -282,12 +282,12 @@ public class PushServerClient {
      */
     public boolean addUsersToCampaign(Long campaignId, List<String> users) throws PushServerClientException {
         try {
-            ListOfUsers listOfUsers = new ListOfUsers();
-            listOfUsers.addAll(users);
+            ListOfUsers request = new ListOfUsers();
+            request.addAll(users);
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
             TypeReference<Response> typeReference = new TypeReference<Response>() {
             };
-            ObjectResponse<?> response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", listOfUsers, typeReference);
+            ObjectResponse<?> response = prepareServerResponse("/push/campaign/" + campaignIdSanitized + "/user/add", null, new ObjectRequest<>(request), typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
@@ -310,7 +310,7 @@ public class PushServerClient {
             Map<String, Object> params = new HashMap<>();
             params.put("page", page);
             params.put("size", size);
-            return getObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
+            return prepareServerResponse("/push/campaign/" + campaignIdSanitized + "/user/list", params, null, typeReference);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
         }
@@ -321,16 +321,16 @@ public class PushServerClient {
      *
      * @param campaignId Identifier of campaign.
      * @param users List of users' Identifiers to delete.
-     * @return True if deletion was successful, false otherwise.
+     * @return True if deletion was successful.
      */
     public boolean deleteUsersFromCampaign(Long campaignId, List<String> users) throws PushServerClientException {
         try {
-            ListOfUsers listOfUsers = new ListOfUsers();
-            listOfUsers.addAll(users);
+            ListOfUsers request = new ListOfUsers();
+            request.addAll(users);
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
-            TypeReference<Response> typeReference = new TypeReference<Response>() {
+            TypeReference<ObjectResponse<DeleteCampaignResponse>> typeReference = new TypeReference<ObjectResponse<DeleteCampaignResponse>>() {
             };
-            ObjectResponse<?> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", listOfUsers, typeReference);
+            ObjectResponse<?> response = prepareServerResponse("/push/campaign/" + campaignIdSanitized + "/user/delete", null, new ObjectRequest<>(request), typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
@@ -347,11 +347,11 @@ public class PushServerClient {
     public boolean sendTestCampaign(Long campaignId, String userId) throws PushServerClientException {
         try {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
-            TestCampaignRequest testCampaignRequest = new TestCampaignRequest();
-            testCampaignRequest.setUserId(userId);
+            TestCampaignRequest request = new TestCampaignRequest();
+            request.setUserId(userId);
             TypeReference<Response> typeReference = new TypeReference<Response>() {
             };
-            ObjectResponse<?> response = postObjectImpl("/push/campaign/send/test/" + campaignIdSanitized, testCampaignRequest, typeReference);
+            ObjectResponse<?> response = prepareServerResponse("/push/campaign/send/test/" + campaignIdSanitized, null, new ObjectRequest<>(request), typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
@@ -369,61 +369,30 @@ public class PushServerClient {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
             TypeReference<Response> typeReference = new TypeReference<Response>() {
             };
-            ObjectResponse<?> response = postObjectImpl("/push/campaign/send/live/" + campaignIdSanitized, null, typeReference);
+            ObjectResponse<?> response = prepareServerResponse("/push/campaign/send/live/" + campaignIdSanitized, null,null, typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
         }
     }
 
-    private <T> ObjectResponse<T> getObjectImpl(String url, Map<String, Object> params, TypeReference typeReference) throws PushServerClientException {
-        try {
-            HttpResponse response = Unirest.get(serviceBaseUrl + url)
-                    .header("accept", "application/json")
-                    .header("Content-Type", "application/json")
-                    .queryString(params)
-                    .asString();
-            return checkStatus(typeReference, response);
-        } catch (UnirestException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
-        } catch (JsonParseException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
-        } catch (JsonMappingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
-        } catch (IOException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
-        }
-
-    }
-
-    private <T> ObjectResponse<T> postObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
-        try {
-            // Fetch post response from given URL and for provided request object
-            HttpResponse response = Unirest.post(serviceBaseUrl + url)
-                    .header("accept", "application/json")
-                    .header("Content-Type", "application/json")
-                    .body(request)
-                    .asString();
-            return checkStatus(typeReference, response);
-        } catch (UnirestException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
-        } catch (JsonParseException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
-        } catch (JsonMappingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
-        } catch (IOException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
-        }
-    }
-
-    private <T> ObjectResponse<T> putObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
+    /**
+     * Prepare server status response.
+     *
+     * @param url specific url of method
+     * @param body request body, optional
+     * @param params params to pass to url path, optional
+     * @param typeReference reference on type for parsing into JSON
+     */
+    private <T> ObjectResponse<T> prepareServerResponse(String url, Map<String, Object> params, Object body, TypeReference typeReference) throws PushServerClientException {
         try {
             HttpResponse response = Unirest.put(serviceBaseUrl + url)
                     .header("accept", "application/json")
                     .header("Content-Type", "application/json")
-                    .body(request)
+                    .queryString(params)
+                    .body(body)
                     .asString();
-            return checkStatus(typeReference, response);
+            return checkHttpResponseFormat(typeReference, response);
         } catch (UnirestException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
         } catch (JsonParseException e) {
@@ -435,14 +404,20 @@ public class PushServerClient {
         }
     }
 
-    private <T> ObjectResponse<T> checkStatus(TypeReference typeReference, HttpResponse response) throws IOException, PushServerClientException {
+    /**
+     * Checks if format of http response is valid
+     *
+     * @param typeReference reference on type of response body from which map into JSON
+     * @param response prepared http response
+     */
+    private <T> ObjectResponse<T> checkHttpResponseFormat(TypeReference typeReference, HttpResponse response) throws IOException, PushServerClientException {
         if (response.getStatus() == 200) {
             return jacksonObjectMapper.readValue(response.getRawBody(), typeReference);
         } else {
+            // map an error response
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             ErrorResponse errorResponse = mapper.readValue(response.getRawBody(), ErrorResponse.class);
             throw new PushServerClientException(response.getStatusText(), errorResponse.getResponseObject());
         }
     }
-
 }
