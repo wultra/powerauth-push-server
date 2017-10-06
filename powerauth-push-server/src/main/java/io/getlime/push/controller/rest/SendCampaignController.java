@@ -55,13 +55,22 @@ public class SendCampaignController {
     private final PushMessageSenderService pushMessageSenderService;
 
     @Autowired
-    public SendCampaignController(JobLauncher jobLauncher, Job job, PushCampaignRepository pushCampaignRepository, PushMessageSenderService pushMessageSenderService) {
-        this.job = job;
+    public SendCampaignController(JobLauncher jobLauncher,
+                                  Job job,
+                                  PushCampaignRepository pushCampaignRepository,
+                                  PushMessageSenderService pushMessageSenderService) {
         this.jobLauncher = jobLauncher;
+        this.job = job;
         this.pushCampaignRepository = pushCampaignRepository;
         this.pushMessageSenderService = pushMessageSenderService;
     }
 
+    /**
+     * Run sending job with campaignID and timestamp parameters.
+     *
+     * @param id Specific campaign ID.
+     * @return Response with status.
+     */
     @RequestMapping(value = "live/{id}", method = RequestMethod.POST)
     @ResponseBody
     public Response sendCampaign(@PathVariable(value = "id") Long id) throws PushServerException {
@@ -88,11 +97,11 @@ public class SendCampaignController {
     }
 
     /**
-     * Method for sending testing user on campaign
+     * Method for sending testing user on campaign through PushMessge sending.
      *
      * @param id Campaign ID
-     * @param request User ID
-     * @return Response status
+     * @param request Testing user ID
+     * @return Response with status
      */
     @RequestMapping(value = "test/{id}", method = RequestMethod.POST)
     @ResponseBody

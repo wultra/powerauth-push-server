@@ -62,7 +62,7 @@ public class PushCampaignController {
     /**
      * Create a campaign for specific app.
      *
-     * @param request id of specific app, body of specific messageBody
+     * @param request Id of specific app, body of specific messageBody
      * @return ID for created campaign.
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
@@ -90,7 +90,7 @@ public class PushCampaignController {
     /**
      * Removes a certain campaign along with users related to this campaign.
      *
-     * @param campaignId identifier for deleting a campaign
+     * @param campaignId Identifier for deleting a campaign
      * @return Remove campaign status response.
      */
     @RequestMapping(value = "{id}/delete", method = RequestMethod.POST)
@@ -164,7 +164,7 @@ public class PushCampaignController {
      * Add specific request to specific campaign
      *
      * @param campaignId ID of certain campaign
-     * @param request    list of IDs referred to request
+     * @param request List of IDs referred to request
      * @return Response status
      */
     @RequestMapping(value = "{id}/user/add", method = RequestMethod.PUT)
@@ -194,9 +194,9 @@ public class PushCampaignController {
     /**
      * Method for getting users from specific campaign in paged format
      *
-     * @param id       Campaign id
+     * @param id Campaign id
      * @param pageable Format for pagination (?page=x&size=y), where "x" is chosen page and "y" is size is number of elements per page, beginning from zero
-     * @return campaign id, list of users
+     * @return Campaign id, list of users
      */
     @RequestMapping(value = "{id}/user/list", method = RequestMethod.GET)
     @ResponseBody
@@ -218,7 +218,7 @@ public class PushCampaignController {
     /**
      * Removes campaign users identified by list of users userID and campaignID
      *
-     * @param id      Campaign ID
+     * @param id Campaign ID
      * @param request List of users to remove
      * @return Response status
      */
@@ -235,7 +235,7 @@ public class PushCampaignController {
     /**
      * Method used for checking exception about nullity of http request
      *
-     * @param request an object request to check the nullity
+     * @param request An object request to check the nullity
      * @throws PushServerException defined by certain message
      */
     private void checkRequestNullity(ObjectRequest request) throws PushServerException {
@@ -243,6 +243,4 @@ public class PushCampaignController {
             throw new PushServerException("Empty requestObject data");
         }
     }
-
-
 }

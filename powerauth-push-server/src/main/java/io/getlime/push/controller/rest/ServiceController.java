@@ -56,5 +56,4 @@ public class ServiceController {
         response.setTimestamp(new Date());
         return new ObjectResponse<>(response);
     }
-
 }

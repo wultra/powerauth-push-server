@@ -59,5 +59,4 @@ public interface PushSendingCallback {
      * @param result Result of the push message sending.
      */
     void didFinishSendingMessage(Result result, Map<String, Object> contextData);
-
 }

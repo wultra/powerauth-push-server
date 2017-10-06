@@ -30,17 +30,25 @@ public class FcmSendResponse {
     @JsonProperty(value = "multicast_id")
     private Long multicastId;
 
-    // number of sent messages
+    /**
+     * number of sent messages
+     */
     private int success;
 
-    //number of rejected messages
+    /**
+     * number of rejected messages
+     */
     private int failure;
 
-    //number of sent messages whose tokens have to be updated
+    /**
+     * number of sent messages whose tokens have to be updated
+     */
     @JsonProperty(value = "canonical_ids")
     private int canonicalIds;
 
-    //concrete results
+    /**
+     * concrete results
+     */
     @JsonProperty(value = "results")
     private List<FcmResult> fcmResults;
 

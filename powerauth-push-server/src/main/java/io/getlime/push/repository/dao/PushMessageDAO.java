@@ -23,12 +23,16 @@ import io.getlime.push.repository.PushMessageRepository;
 import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.util.Date;
 
+/**
+ * Data access object for PushMessage repo.
+ *
+ * @author Martin Tupy, martin.tupy.work@gmail.com
+ */
 @Repository
 @Transactional
 public class PushMessageDAO {
