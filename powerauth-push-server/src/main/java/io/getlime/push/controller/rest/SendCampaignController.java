@@ -21,6 +21,7 @@ import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.request.TestCampaignRequest;
+import io.getlime.push.model.validator.TestCampaignRequestValidator;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
@@ -107,8 +108,10 @@ public class SendCampaignController {
     @ResponseBody
     public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
         PushCampaignEntity campaign = pushCampaignRepository.findOne(id);
-        if (campaign == null) {
-            throw new PushServerException("Campaign with entered id does not exist");
+        TestCampaignRequest requestedObject = request.getRequestObject();
+        String errorMessage = TestCampaignRequestValidator.validate(requestedObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
         }
         PushMessage pushMessage = new PushMessage();
         pushMessage.setUserId(request.getRequestObject().getUserId());
