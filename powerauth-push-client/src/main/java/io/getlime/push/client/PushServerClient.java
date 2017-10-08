@@ -25,6 +25,7 @@ import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import io.getlime.core.rest.model.base.entity.Error;
+import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ErrorResponse;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
@@ -52,6 +53,7 @@ import java.util.Map;
 public class PushServerClient {
 
     private com.fasterxml.jackson.databind.ObjectMapper jacksonObjectMapper = null;
+    private String serviceBaseUrl;
 
     /**
      * Default constructor.
@@ -89,8 +91,6 @@ public class PushServerClient {
         this();
         this.serviceBaseUrl = serviceBaseUrl;
     }
-
-    private String serviceBaseUrl;
 
     /**
      * Set the service base URL.
@@ -141,7 +141,7 @@ public class PushServerClient {
         request.setActivationId(activationId);
         TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        ObjectResponse<?> response = postObjectImpl("/push/device/create", request, typeReference);
+        ObjectResponse<?> response = postObjectImpl("/push/device/create", new ObjectRequest<>(request), typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
@@ -156,10 +156,10 @@ public class PushServerClient {
         DeleteDeviceRequest request = new DeleteDeviceRequest();
         request.setAppId(appId);
         request.setToken(token);
-        TypeReference<DeleteCampaignResponse> typeReference = new TypeReference<DeleteCampaignResponse>() {
+        TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        ObjectResponse<DeleteCampaignResponse> response = postObjectImpl("/push/device/delete", request, typeReference);
-        return response.getResponseObject().isDeleted();
+        ObjectResponse<?> response = postObjectImpl("/push/device/delete", new ObjectRequest<>(request), typeReference);
+        return response.getStatus().equals(Response.Status.OK);
     }
 
     /**
@@ -173,7 +173,7 @@ public class PushServerClient {
         request.setActivationId(activationId);
         TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        ObjectResponse<?> response = postObjectImpl("/push/device/status/update", request, typeReference);
+        ObjectResponse<?> response = postObjectImpl("/push/device/status/update", new ObjectRequest<>(request), typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
@@ -190,7 +190,7 @@ public class PushServerClient {
         request.setMessage(pushMessage);
         TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {
         };
-        return postObjectImpl("/push/message/send", request, typeReference);
+        return postObjectImpl("/push/message/send", new ObjectRequest<>(request), typeReference);
     }
 
     /**
@@ -206,7 +206,7 @@ public class PushServerClient {
         request.setBatch(batch);
         TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {
         };
-        return postObjectImpl("/push/message/batch/send", request, typeReference);
+        return postObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), typeReference);
     }
 
     /**
@@ -219,9 +219,9 @@ public class PushServerClient {
         CreateCampaignRequest request = new CreateCampaignRequest();
         request.setAppId(appId);
         request.setMessage(message);
-        TypeReference<ObjectResponse<CreateCampaignRequest>> typeReference = new TypeReference<ObjectResponse<CreateCampaignRequest>>() {
+        TypeReference<ObjectResponse<CreateCampaignResponse>> typeReference = new TypeReference<ObjectResponse<CreateCampaignResponse>>() {
         };
-        return postObjectImpl("/push/campaign/create", request, typeReference);
+        return postObjectImpl("/push/campaign/create", new ObjectRequest<>(request), typeReference);
     }
 
     /**
@@ -286,7 +286,7 @@ public class PushServerClient {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
             TypeReference<Response> typeReference = new TypeReference<Response>() {
             };
-            ObjectResponse<?> response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", listOfUsers, typeReference);
+            ObjectResponse<?> response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", new ObjectRequest<>(listOfUsers), typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
@@ -329,7 +329,7 @@ public class PushServerClient {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
             TypeReference<Response> typeReference = new TypeReference<Response>() {
             };
-            ObjectResponse<?> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", listOfUsers, typeReference);
+            ObjectResponse<?> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", new ObjectRequest<>(listOfUsers), typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
@@ -350,7 +350,7 @@ public class PushServerClient {
             testCampaignRequest.setUserId(userId);
             TypeReference<Response> typeReference = new TypeReference<Response>() {
             };
-            ObjectResponse<?> response = postObjectImpl("/push/campaign/send/test/" + campaignIdSanitized, testCampaignRequest, typeReference);
+            ObjectResponse<?> response = postObjectImpl("/push/campaign/send/test/" + campaignIdSanitized, new ObjectRequest<>(testCampaignRequest), typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
@@ -389,7 +389,7 @@ public class PushServerClient {
                     .header("Content-Type", "application/json")
                     .queryString(params)
                     .asString();
-            return checkHttpResponseFormat(typeReference, response);
+            return checkHttpStatus(typeReference, response);
         } catch (UnirestException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
         } catch (JsonParseException e) {
@@ -417,7 +417,7 @@ public class PushServerClient {
                     .header("Content-Type", "application/json")
                     .body(request)
                     .asString();
-            return checkHttpResponseFormat(typeReference, response);
+            return checkHttpStatus(typeReference, response);
         } catch (UnirestException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
         } catch (JsonParseException e) {
@@ -443,7 +443,7 @@ public class PushServerClient {
                     .header("Content-Type", "application/json")
                     .body(request)
                     .asString();
-            return checkHttpResponseFormat(typeReference, response);
+            return checkHttpStatus(typeReference, response);
         } catch (UnirestException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
         } catch (JsonParseException e) {
@@ -456,12 +456,12 @@ public class PushServerClient {
     }
 
     /**
-     * Checks if format of http response is valid
+     * Checks response status
      *
      * @param typeReference reference on type of response body from which map into JSON
      * @param response prepared http response
      */
-    private <T> ObjectResponse<T> checkHttpResponseFormat(TypeReference typeReference, HttpResponse response) throws IOException, PushServerClientException {
+    private <T> ObjectResponse<T> checkHttpStatus(TypeReference typeReference, HttpResponse response) throws IOException, PushServerClientException {
         if (response.getStatus() == 200) {
             return jacksonObjectMapper.readValue(response.getRawBody(), typeReference);
         } else {

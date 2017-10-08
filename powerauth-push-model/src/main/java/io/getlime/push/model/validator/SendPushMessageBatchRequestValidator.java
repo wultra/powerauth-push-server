@@ -16,7 +16,6 @@
 
 package io.getlime.push.model.validator;
 
-import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.request.SendPushMessageBatchRequest;
 
 /**
@@ -30,16 +29,10 @@ public class SendPushMessageBatchRequestValidator {
             return "Empty request";
         } else if (pushMessageBatch.getAppId() == null) {
             return "Empty appId";
+        } else if (pushMessageBatch.getBatch() == null) {
+            return "No messages in batch";
         } else if (pushMessageBatch.getBatch().size() > 20) {
             return "Too many messages in batch - do no send more than 20 messages at once to avoid server congestion.";
-        } else {
-            for (PushMessage pushMessage : pushMessageBatch.getBatch()) {
-                if (pushMessage == null) {
-                    return "Empty message";
-                } else if (pushMessage.getBody() == null) {
-                    return "Empty body";
-                }
-            }
         }
         return null;
     }
