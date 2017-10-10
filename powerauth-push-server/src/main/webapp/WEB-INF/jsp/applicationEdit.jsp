@@ -4,7 +4,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <jsp:include page="header.jsp">
-    <jsp:param name="pageTitle" value="PowerAuth 2.0 Push Server - Push Credential Setup"/>
+    <jsp:param name="pageTitle" value="PowerAuth 2.0 Push Server - Push Credentials Setup"/>
 </jsp:include>
 
 <ol class="breadcrumb">

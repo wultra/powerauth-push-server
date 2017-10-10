@@ -25,8 +25,8 @@ import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.request.SendPushMessageRequest;
-import io.getlime.push.repository.AppCredentialRepository;
-import io.getlime.push.repository.model.AppCredentialEntity;
+import io.getlime.push.repository.AppCredentialsRepository;
+import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -56,12 +56,12 @@ import java.util.logging.Logger;
 @Controller
 public class WebAdminController {
 
-    private AppCredentialRepository appCredentialRepository;
+    private AppCredentialsRepository appCredentialsRepository;
     private PowerAuthServiceClient client;
 
     @Autowired
-    public WebAdminController(AppCredentialRepository appCredentialRepository) {
-        this.appCredentialRepository = appCredentialRepository;
+    public WebAdminController(AppCredentialsRepository appCredentialsRepository) {
+        this.appCredentialsRepository = appCredentialsRepository;
     }
 
     @Autowired
@@ -78,15 +78,15 @@ public class WebAdminController {
 
     @RequestMapping(value = "web/admin/app/list", method = RequestMethod.GET)
     public String listApplications(Map<String, Object> model) {
-        final Iterable<AppCredentialEntity> appCredentials = appCredentialRepository.findAll();
+        final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
         final List<PushServerApplication> appList = new ArrayList<>();
-        for (AppCredentialEntity appCredentialEntity : appCredentials) {
+        for (AppCredentialsEntity appCredentialsEntity : appCredentials) {
             PushServerApplication app = new PushServerApplication();
-            app.setId(appCredentialEntity.getId());
-            app.setAppId(appCredentialEntity.getAppId());
-            app.setAppName(client.getApplicationDetail(appCredentialEntity.getAppId()).getApplicationName());
-            app.setIos(appCredentialEntity.getIosPrivateKey() != null);
-            app.setAndroid(appCredentialEntity.getAndroidServerKey() != null);
+            app.setId(appCredentialsEntity.getId());
+            app.setAppId(appCredentialsEntity.getAppId());
+            app.setAppName(client.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
+            app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
+            app.setAndroid(appCredentialsEntity.getAndroidServerKey() != null);
             appList.add(app);
         }
         model.put("applications", appList);
@@ -99,11 +99,11 @@ public class WebAdminController {
         final List<GetApplicationListResponse.Applications> applicationList = client.getApplicationList();
 
         // Get all applications that are already set up
-        final Iterable<AppCredentialEntity> appCredentials = appCredentialRepository.findAll();
+        final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
 
         // Compute intersection by app ID
         Set<Long> identifiers = new HashSet<>();
-        for (AppCredentialEntity appCred: appCredentials) {
+        for (AppCredentialsEntity appCred: appCredentials) {
             identifiers.add(appCred.getAppId());
         }
         final List<GetApplicationListResponse.Applications> intersection = new ArrayList<>();
@@ -120,31 +120,31 @@ public class WebAdminController {
 
     @RequestMapping(value = "web/admin/app/{id}/edit", method = RequestMethod.GET)
     public String editApplication(@PathVariable Long id, Map<String, Object> model) {
-        final AppCredentialEntity appCredentialEntity = appCredentialRepository.findOne(id);
+        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
         PushServerApplication app = new PushServerApplication();
-        app.setId(appCredentialEntity.getId());
-        app.setAppId(appCredentialEntity.getAppId());
-        app.setIos(appCredentialEntity.getIosPrivateKey() != null);
-        app.setAndroid(appCredentialEntity.getAndroidServerKey() != null);
-        app.setAppName(client.getApplicationDetail(appCredentialEntity.getAppId()).getApplicationName());
+        app.setId(appCredentialsEntity.getId());
+        app.setAppId(appCredentialsEntity.getAppId());
+        app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
+        app.setAndroid(appCredentialsEntity.getAndroidServerKey() != null);
+        app.setAppName(client.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
         model.put("application", app);
         return "applicationEdit";
     }
 
     @RequestMapping(value = "web/admin/app/{id}/ios/upload")
     public String uploadIosCredentials(@PathVariable Long id, Map<String, Object> model) {
-        final AppCredentialEntity appCredentialEntity = appCredentialRepository.findOne(id);
+        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
         PushServerApplication app = new PushServerApplication();
-        app.setId(appCredentialEntity.getId());
-        app.setAppId(appCredentialEntity.getAppId());
-        app.setIos(appCredentialEntity.getIosPrivateKey() != null);
-        app.setAndroid(appCredentialEntity.getAndroidServerKey() != null);
-        app.setAppName(client.getApplicationDetail(appCredentialEntity.getAppId()).getApplicationName());
+        app.setId(appCredentialsEntity.getId());
+        app.setAppId(appCredentialsEntity.getAppId());
+        app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
+        app.setAndroid(appCredentialsEntity.getAndroidServerKey() != null);
+        app.setAppName(client.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
         UploadIosCredentialsForm form = (UploadIosCredentialsForm) model.get("form");
         if (form == null) {
-            model.put("bundle", appCredentialEntity.getIosBundle());
-            model.put("keyId", appCredentialEntity.getIosKeyId());
-            model.put("teamId", appCredentialEntity.getIosTeamId());
+            model.put("bundle", appCredentialsEntity.getIosBundle());
+            model.put("keyId", appCredentialsEntity.getIosKeyId());
+            model.put("teamId", appCredentialsEntity.getIosTeamId());
         } else {
             model.put("bundle", form.getBundle());
             model.put("keyId", form.getKeyId());
@@ -156,17 +156,17 @@ public class WebAdminController {
 
     @RequestMapping(value = "web/admin/app/{id}/android/upload")
     public String uploadAndroidCredentials(@PathVariable Long id, Map<String, Object> model) {
-        final AppCredentialEntity appCredentialEntity = appCredentialRepository.findOne(id);
+        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
         PushServerApplication app = new PushServerApplication();
-        app.setId(appCredentialEntity.getId());
-        app.setAppId(appCredentialEntity.getAppId());
-        app.setIos(appCredentialEntity.getIosPrivateKey() != null);
-        app.setAndroid(appCredentialEntity.getAndroidServerKey() != null);
-        app.setAppName(client.getApplicationDetail(appCredentialEntity.getAppId()).getApplicationName());
+        app.setId(appCredentialsEntity.getId());
+        app.setAppId(appCredentialsEntity.getAppId());
+        app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
+        app.setAndroid(appCredentialsEntity.getAndroidServerKey() != null);
+        app.setAppName(client.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
         UploadAndroidCredentialsForm form = (UploadAndroidCredentialsForm) model.get("form");
         if (form == null) {
-            model.put("bundle", appCredentialEntity.getAndroidBundle());
-            model.put("token", appCredentialEntity.getAndroidServerKey());
+            model.put("bundle", appCredentialsEntity.getAndroidBundle());
+            model.put("token", appCredentialsEntity.getAndroidServerKey());
         } else {
             model.put("bundle", form.getBundle());
             model.put("token", form.getToken());
@@ -177,13 +177,13 @@ public class WebAdminController {
 
     @RequestMapping(value = "web/admin/message/create", method = RequestMethod.GET)
     public String createPushMessage(Map<String, Object> model) {
-        final Iterable<AppCredentialEntity> appCredentials = appCredentialRepository.findAll();
+        final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
         final List<PushServerApplication> appList = new ArrayList<>();
-        for (AppCredentialEntity appCredentialEntity : appCredentials) {
+        for (AppCredentialsEntity appCredentialsEntity : appCredentials) {
             PushServerApplication app = new PushServerApplication();
-            app.setId(appCredentialEntity.getId());
-            app.setAppId(appCredentialEntity.getAppId());
-            app.setAppName(client.getApplicationDetail(appCredentialEntity.getAppId()).getApplicationName());
+            app.setId(appCredentialsEntity.getId());
+            app.setAppId(appCredentialsEntity.getAppId());
+            app.setAppName(client.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
             appList.add(app);
         }
         model.put("applications", appList);
@@ -197,10 +197,10 @@ public class WebAdminController {
         if (bindingResult.hasErrors()) {
             return "redirect:web/admin/app/create";
         }
-        AppCredentialEntity appCredentialEntity = new AppCredentialEntity();
-        appCredentialEntity.setAppId(form.getAppId());
-        AppCredentialEntity newAppCredentialEntity = appCredentialRepository.save(appCredentialEntity);
-        return "redirect:/web/admin/app/" + newAppCredentialEntity.getId() + "/edit";
+        AppCredentialsEntity appCredentialsEntity = new AppCredentialsEntity();
+        appCredentialsEntity.setAppId(form.getAppId());
+        AppCredentialsEntity newAppCredentialsEntity = appCredentialsRepository.save(appCredentialsEntity);
+        return "redirect:/web/admin/app/" + newAppCredentialsEntity.getId() + "/edit";
     }
 
     @RequestMapping(value = "web/admin/app/{id}/ios/upload/do.submit", method = RequestMethod.POST)
@@ -210,16 +210,16 @@ public class WebAdminController {
             attr.addFlashAttribute("form", form);
             return "redirect:/web/admin/app/" + id + "/ios/upload";
         }
-        final AppCredentialEntity appCredentialEntity = appCredentialRepository.findOne(id);
+        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
         try {
-            appCredentialEntity.setIosPrivateKey(form.getPrivateKey().getBytes());
+            appCredentialsEntity.setIosPrivateKey(form.getPrivateKey().getBytes());
         } catch (IOException e) {
             Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
         }
-        appCredentialEntity.setIosTeamId(form.getTeamId());
-        appCredentialEntity.setIosKeyId(form.getKeyId());
-        appCredentialEntity.setIosBundle(form.getBundle());
-        appCredentialRepository.save(appCredentialEntity);
+        appCredentialsEntity.setIosTeamId(form.getTeamId());
+        appCredentialsEntity.setIosKeyId(form.getKeyId());
+        appCredentialsEntity.setIosBundle(form.getBundle());
+        appCredentialsRepository.save(appCredentialsEntity);
         return "redirect:/web/admin/app/" + id + "/edit";
     }
 
@@ -228,13 +228,13 @@ public class WebAdminController {
         if (bindingResult.hasErrors() || (id == null || !id.equals(form.getId()))) {
             return "error";
         }
-        final AppCredentialEntity appCredentialEntity = appCredentialRepository.findOne(form.getId());
-        appCredentialEntity.setIosPrivateKey(null);
-        appCredentialEntity.setIosTeamId(null);
-        appCredentialEntity.setIosKeyId(null);
-        appCredentialEntity.setIosBundle(null);
-        AppCredentialEntity newAppCredentialEntity = appCredentialRepository.save(appCredentialEntity);
-        return "redirect:/web/admin/app/" + newAppCredentialEntity.getId()  + "/edit";
+        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(form.getId());
+        appCredentialsEntity.setIosPrivateKey(null);
+        appCredentialsEntity.setIosTeamId(null);
+        appCredentialsEntity.setIosKeyId(null);
+        appCredentialsEntity.setIosBundle(null);
+        AppCredentialsEntity newAppCredentialsEntity = appCredentialsRepository.save(appCredentialsEntity);
+        return "redirect:/web/admin/app/" + newAppCredentialsEntity.getId()  + "/edit";
     }
 
     @RequestMapping(value = "web/admin/app/{id}/android/upload/do.submit", method = RequestMethod.POST)
@@ -244,19 +244,19 @@ public class WebAdminController {
             attr.addFlashAttribute("form", form);
             return "redirect:/web/admin/app/" + id + "/android/upload";
         }
-        final AppCredentialEntity appCredentialEntity = appCredentialRepository.findOne(id);
-        appCredentialEntity.setAndroidServerKey(form.getToken());
-        appCredentialEntity.setAndroidBundle(form.getBundle());
-        appCredentialRepository.save(appCredentialEntity);
+        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
+        appCredentialsEntity.setAndroidServerKey(form.getToken());
+        appCredentialsEntity.setAndroidBundle(form.getBundle());
+        appCredentialsRepository.save(appCredentialsEntity);
         return "redirect:/web/admin/app/" + id + "/edit";
     }
 
     @RequestMapping(value = "web/admin/app/{id}/android/remove/do.submit", method = RequestMethod.POST)
     public String actionRemoveAndroidCredentials(@PathVariable Long id) {
-        final AppCredentialEntity appCredentialEntity = appCredentialRepository.findOne(id);
-        appCredentialEntity.setAndroidServerKey(null);
-        appCredentialEntity.setAndroidBundle(null);
-        appCredentialRepository.save(appCredentialEntity);
+        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
+        appCredentialsEntity.setAndroidServerKey(null);
+        appCredentialsEntity.setAndroidBundle(null);
+        appCredentialsRepository.save(appCredentialsEntity);
         return "redirect:/web/admin/app/" + id + "/edit";
     }
 

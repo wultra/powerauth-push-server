@@ -26,13 +26,13 @@ import java.io.Serializable;
  */
 @Entity
 @Table(name = "push_app_credentials")
-public class AppCredentialEntity implements Serializable {
+public class AppCredentialsEntity implements Serializable {
     private static final long serialVersionUID = -8904070389354612019L;
 
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_app_credential", sequenceName = "push_credential_seq")
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_app_credential")
+    @SequenceGenerator(name = "push_app_credentials", sequenceName = "push_credentials_seq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_app_credentials")
     private Long id;
 
     @Column(name = "app_id", nullable = false, updatable = false)
