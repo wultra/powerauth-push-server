@@ -54,15 +54,13 @@ public interface PushCampaignUserRepository extends PagingAndSortingRepository<P
     /**
      * Delete all users who are associated with given campaign.
      * @param campaignId Campaign ID.
-     * @return Number of deleted records.
      */
-    Long deleteByCampaignId(Long campaignId);
+    void deleteByCampaignId(Long campaignId);
 
     /**
      * Delete user with given ID from campaign with given ID.
      * @param campaignId Campaign ID.
      * @param userId User ID.
-     * @return Number of deleted records.
      */
-    Long deleteByCampaignIdAndUserId(Long campaignId, String userId);
+    void deleteByCampaignIdAndUserId(Long campaignId, String userId);
 }

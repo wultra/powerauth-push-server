@@ -24,6 +24,9 @@ import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.request.CreateDeviceRequest;
 import io.getlime.push.model.request.DeleteDeviceRequest;
 import io.getlime.push.model.request.UpdateDeviceStatusRequest;
+import io.getlime.push.model.validator.CreateDeviceRequestValidator;
+import io.getlime.push.model.validator.DeleteDeviceRequestValidator;
+import io.getlime.push.model.validator.UpdateDeviceStatusRequestValidator;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
@@ -66,13 +69,15 @@ public class PushDeviceController {
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
     public @ResponseBody Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
-        if (request.getRequestObject() == null) {
-            throw new PushServerException("Invalid or empty input data");
+        CreateDeviceRequest requestedObject = request.getRequestObject();
+        String errorMessage = CreateDeviceRequestValidator.validate(requestedObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
         }
-        Long appId = request.getRequestObject().getAppId();
-        String pushToken = request.getRequestObject().getToken();
-        String platform = request.getRequestObject().getPlatform();
-        String activationId = request.getRequestObject().getActivationId();
+        Long appId = requestedObject.getAppId();
+        String pushToken = requestedObject.getToken();
+        String platform = requestedObject.getPlatform();
+        String activationId = requestedObject.getActivationId();
         PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
         if (device == null) {
             device = new PushDeviceRegistrationEntity();
@@ -107,10 +112,12 @@ public class PushDeviceController {
      */
     @RequestMapping(value = "status/update", method = RequestMethod.POST)
     public @ResponseBody Response updateDeviceStatus(@RequestBody ObjectRequest<UpdateDeviceStatusRequest> request) throws PushServerException {
-        if (request.getRequestObject() == null) {
-            throw new PushServerException("Invalid or empty input data");
+        UpdateDeviceStatusRequest requestedObject = request.getRequestObject();
+        String errorMessage = UpdateDeviceStatusRequestValidator.validate(requestedObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
         }
-        String activationId = request.getRequestObject().getActivationId();
+        String activationId = requestedObject.getActivationId();
         List<PushDeviceRegistrationEntity> device = pushDeviceRepository.findByActivationId(activationId);
         if (device != null)  {
             ActivationStatus status = client.getActivationStatus(activationId).getActivationStatus();
@@ -129,11 +136,13 @@ public class PushDeviceController {
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST)
     public @ResponseBody Response deleteDevice(@RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
-        if (request.getRequestObject() == null) {
-            throw new PushServerException("Invalid or empty input data");
+        DeleteDeviceRequest requestedObject = request.getRequestObject();
+        String errorMessage = DeleteDeviceRequestValidator.validate(requestedObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
         }
-        Long appId = request.getRequestObject().getAppId();
-        String pushToken = request.getRequestObject().getToken();
+        Long appId = requestedObject.getAppId();
+        String pushToken = requestedObject.getToken();
         PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
         if (device != null)  {
             pushDeviceRepository.delete(device);

@@ -19,7 +19,7 @@ package io.getlime.push.service.fcm.model.base;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Results of sent messages
+ * Results from FCM server of sent messages
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
@@ -27,12 +27,21 @@ public class FcmResult {
 
     public static final String KEY_UPDATE_TOKEN = "updateToken";
 
+    /**
+     *  Identifier of sent message
+     */
     @JsonProperty(value = "message_id")
     private String messageId;
 
+    /**
+     * If FCM server sends registrationId along with messageId, the token of this device has to be changed into this registrationId.
+     */
     @JsonProperty(value = "registration_id")
     private String registrationId;
 
+    /**
+     * If error occurs Result come only with a certain error message.
+     */
     @JsonProperty(value = "error")
     private String fcmError;
 

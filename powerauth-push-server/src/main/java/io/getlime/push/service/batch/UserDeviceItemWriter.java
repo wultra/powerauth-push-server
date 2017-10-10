@@ -29,7 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
-
+/**
+ * Item writer that send notification to directed device and save message to database.
+ *
+ * @author Petr Dvorak, petr@lime-company.eu
+ */
 @Component
 @StepScope
 public class UserDeviceItemWriter implements ItemWriter<UserDevice> {

@@ -69,7 +69,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Class responsible for sending push notifications to APNs service.
+ * Class responsible for sending push notifications to devices based on platform.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
@@ -566,5 +566,4 @@ public class PushMessageSenderService {
         }
         return payloadBuilder.buildWithDefaultMaximumLength();
     }
-
 }
