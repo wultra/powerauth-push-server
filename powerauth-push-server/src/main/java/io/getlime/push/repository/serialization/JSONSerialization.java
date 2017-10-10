@@ -40,7 +40,7 @@ public class JSONSerialization {
      * @return PushMessageBody
      */
     public static PushMessageBody deserializePushMessageBody(String message) throws PushServerException {
-        PushMessageBody pushMessageBody = null;
+        PushMessageBody pushMessageBody;
         try {
             pushMessageBody = new ObjectMapper().readValue(message, PushMessageBody.class);
         } catch (IOException e) {
@@ -57,7 +57,7 @@ public class JSONSerialization {
      * @return JSON containing the message contents.
      */
     public static String serializePushMessageBody(PushMessageBody message) throws PushServerException {
-        String messageString = null;
+        String messageString;
         try {
             messageString = new ObjectMapper().writeValueAsString(message);
         } catch (JsonProcessingException e) {
@@ -66,5 +66,4 @@ public class JSONSerialization {
         }
         return messageString;
     }
-
 }

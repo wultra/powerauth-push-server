@@ -30,13 +30,25 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FcmSendRequest {
 
+    /**
+     * Device token that is going to get a notification.
+     */
     private String to;
 
+    /**
+     * Attribute of @link io.getlime.push.model.entity.PushMessageBody
+     */
     @JsonProperty(value = "collapse_key")
     private String collapseKey;
 
+    /**
+     * Attribute of @link io.getlime.push.model.entity.PushMessageBody as extras
+     */
     private Map<String, Object> data;
 
+    /**
+     * Attributes of @link io.getlime.push.model.entity.PushMessageBody
+     */
     private FcmNotification notification;
 
     public String getTo() {

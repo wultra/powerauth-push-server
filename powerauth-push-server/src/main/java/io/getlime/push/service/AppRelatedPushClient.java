@@ -20,6 +20,8 @@ import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.fcm.FcmClient;
 
 /**
+ * Class storing app credentials and clients
+ *
  * @author Petr Dvorak, petr@lime-company.eu
  */
 public class AppRelatedPushClient {

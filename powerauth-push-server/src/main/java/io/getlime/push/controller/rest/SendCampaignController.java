@@ -21,6 +21,7 @@ import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.request.TestCampaignRequest;
+import io.getlime.push.model.validator.TestCampaignRequestValidator;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
@@ -55,13 +56,22 @@ public class SendCampaignController {
     private final PushMessageSenderService pushMessageSenderService;
 
     @Autowired
-    public SendCampaignController(JobLauncher jobLauncher, Job job, PushCampaignRepository pushCampaignRepository, PushMessageSenderService pushMessageSenderService) {
-        this.job = job;
+    public SendCampaignController(JobLauncher jobLauncher,
+                                  Job job,
+                                  PushCampaignRepository pushCampaignRepository,
+                                  PushMessageSenderService pushMessageSenderService) {
         this.jobLauncher = jobLauncher;
+        this.job = job;
         this.pushCampaignRepository = pushCampaignRepository;
         this.pushMessageSenderService = pushMessageSenderService;
     }
 
+    /**
+     * Run sending job with campaignID and timestamp parameters.
+     *
+     * @param id Specific campaign ID.
+     * @return Response with status.
+     */
     @RequestMapping(value = "live/{id}", method = RequestMethod.POST)
     @ResponseBody
     public Response sendCampaign(@PathVariable(value = "id") Long id) throws PushServerException {
@@ -88,18 +98,20 @@ public class SendCampaignController {
     }
 
     /**
-     * Method for sending testing user on campaign
+     * Method for sending testing user on campaign through PushMessge sending.
      *
      * @param id Campaign ID
-     * @param request User ID
-     * @return Response status
+     * @param request Testing user ID
+     * @return Response with status
      */
     @RequestMapping(value = "test/{id}", method = RequestMethod.POST)
     @ResponseBody
     public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
         PushCampaignEntity campaign = pushCampaignRepository.findOne(id);
-        if (campaign == null) {
-            throw new PushServerException("Campaign with entered id does not exist");
+        TestCampaignRequest requestedObject = request.getRequestObject();
+        String errorMessage = TestCampaignRequestValidator.validate(requestedObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
         }
         PushMessage pushMessage = new PushMessage();
         pushMessage.setUserId(request.getRequestObject().getUserId());

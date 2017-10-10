@@ -50,6 +50,7 @@ CREATE TABLE push_campaign (
   `is_sent` int(1) DEFAULT 0,
   `timestamp_created` DATETIME NOT NULL,
   `timestamp_sent` DATETIME DEFAULT NULL,
+  `timestamp_completed` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 

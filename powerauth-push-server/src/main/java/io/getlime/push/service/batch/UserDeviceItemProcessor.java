@@ -47,5 +47,4 @@ public class UserDeviceItemProcessor implements ItemProcessor<UserDevice, UserDe
         itemStore.put(userDevice);
         return userDevice;
     }
-
 }

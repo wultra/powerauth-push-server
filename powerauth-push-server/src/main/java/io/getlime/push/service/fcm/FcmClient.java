@@ -32,6 +32,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
 /**
+ * FCM server client
+ *
  * @author Petr Dvorak, petr@lime-company.eu
  */
 public class FcmClient {
