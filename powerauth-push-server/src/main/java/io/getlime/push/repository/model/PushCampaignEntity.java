@@ -48,8 +48,11 @@ public class PushCampaignEntity implements Serializable {
     @Column(name = "timestamp_created", nullable = false, updatable = false)
     private Date timestampCreated;
 
-    @Column(name = "timestamp_sent", updatable = false)
+    @Column(name = "timestamp_sent")
     private Date timestampSent;
+
+    @Column(name = "timestamp_completed")
+    private Date timestampCompleted;
 
     public Long getId() {
         return id;
@@ -97,5 +100,13 @@ public class PushCampaignEntity implements Serializable {
 
     public void setTimestampSent(Date timestampSent) {
         this.timestampSent = timestampSent;
+    }
+
+    public Date getTimestampCompleted() {
+        return timestampCompleted;
+    }
+
+    public void setTimestampCompleted(Date timestampCompleted) {
+        this.timestampCompleted = timestampCompleted;
     }
 }

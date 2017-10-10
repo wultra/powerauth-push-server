@@ -17,6 +17,7 @@
 package io.getlime.push.configuration;
 
 import io.getlime.push.repository.model.aggregate.UserDevice;
+import io.getlime.push.service.batch.SendCampaignJobListener;
 import io.getlime.push.service.batch.UserDeviceItemProcessor;
 import io.getlime.push.service.batch.UserDeviceItemReader;
 import io.getlime.push.service.batch.UserDeviceItemWriter;
@@ -35,7 +36,6 @@ import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -60,6 +60,7 @@ public class BatchSendingConfiguration implements BatchConfigurer {
     private final UserDeviceItemReader userDeviceItemReader;
     private final UserDeviceItemProcessor userDeviceItemProcessor;
     private final UserDeviceItemWriter userDeviceItemWriter;
+    private final SendCampaignJobListener sendCampaignJobListener;
 
     private DataSource dataSource;
     private EntityManagerFactory entityManagerFactory;
@@ -75,6 +76,7 @@ public class BatchSendingConfiguration implements BatchConfigurer {
                                      UserDeviceItemReader userDeviceItemReader,
                                      UserDeviceItemProcessor userDeviceItemProcessor,
                                      UserDeviceItemWriter userDeviceItemWriter,
+                                     SendCampaignJobListener sendCampaignJobListener,
                                      EntityManagerFactory entityManagerFactory) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
@@ -82,6 +84,7 @@ public class BatchSendingConfiguration implements BatchConfigurer {
         this.userDeviceItemReader = userDeviceItemReader;
         this.userDeviceItemProcessor = userDeviceItemProcessor;
         this.userDeviceItemWriter = userDeviceItemWriter;
+        this.sendCampaignJobListener = sendCampaignJobListener;
         this.entityManagerFactory = entityManagerFactory;
     }
 
@@ -101,6 +104,7 @@ public class BatchSendingConfiguration implements BatchConfigurer {
                 .incrementer(new RunIdIncrementer())
                 .flow(step)
                 .end()
+                .listener(sendCampaignJobListener)
                 .build();
     }
 
