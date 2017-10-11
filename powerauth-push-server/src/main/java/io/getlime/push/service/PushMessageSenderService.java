@@ -362,6 +362,7 @@ public class PushMessageSenderService {
             FcmNotification notification = new FcmNotification();
             notification.setTitle(pushMessageBody.getTitle());
             notification.setBody(pushMessageBody.getBody());
+            notification.setIcon(pushMessageBody.getIcon());
             notification.setSound(pushMessageBody.getSound());
             notification.setTag(pushMessageBody.getCategory());
             request.setNotification(notification);

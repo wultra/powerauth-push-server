@@ -25,6 +25,7 @@ public class FcmNotification {
 
     private String title;
     private String body;
+    private String icon;
     private String sound;
     private String tag;
 
@@ -58,5 +59,13 @@ public class FcmNotification {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 }

@@ -27,6 +27,7 @@ public class PushMessageBody {
 
     private String title;
     private String body;
+    private String icon;
     private Integer badge;
     private String sound;
     private String category;
@@ -167,5 +168,13 @@ public class PushMessageBody {
      */
     public void setExtras(Map<String, Object> extras) {
         this.extras = extras;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 }
