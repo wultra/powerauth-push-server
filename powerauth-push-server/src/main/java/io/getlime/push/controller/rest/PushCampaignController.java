@@ -20,7 +20,7 @@ import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
-import io.getlime.push.model.base.PagedResponse;
+import io.getlime.push.model.response.ListOfUsersPagedResponse;
 import io.getlime.push.model.entity.ListOfUsers;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.request.CreateCampaignRequest;
@@ -200,19 +200,19 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/user/list", method = RequestMethod.GET)
     @ResponseBody
-    public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(@PathVariable(value = "id") Long id, Pageable pageable) {
+    public ListOfUsersPagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(@PathVariable(value = "id") Long id, Pageable pageable) {
         ListOfUsersFromCampaignResponse listOfUsersFromCampaignResponse = new ListOfUsersFromCampaignResponse();
         List<PushCampaignUserEntity> users = pushCampaignUserRepository.findAllByCampaignId(id, pageable);
         ListOfUsers listOfUsers = new ListOfUsers();
         for (PushCampaignUserEntity user : users) {
             listOfUsers.add(user.getUserId());
         }
-        listOfUsersFromCampaignResponse.setCampaingId(id);
+        listOfUsersFromCampaignResponse.setCampaignId(id);
         listOfUsersFromCampaignResponse.setUsers(listOfUsers);
-        PagedResponse<ListOfUsersFromCampaignResponse> pagedResponse = new PagedResponse<>(listOfUsersFromCampaignResponse);
-        pagedResponse.setPage(pageable.getPageNumber());
-        pagedResponse.setSize(pageable.getPageSize());
-        return pagedResponse;
+        ListOfUsersPagedResponse<ListOfUsersFromCampaignResponse> listOfUsersPagedResponse = new ListOfUsersPagedResponse<>(listOfUsersFromCampaignResponse);
+        listOfUsersPagedResponse.setPage(pageable.getPageNumber());
+        listOfUsersPagedResponse.setSize(pageable.getPageSize());
+        return listOfUsersPagedResponse;
     }
 
     /**

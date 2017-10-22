@@ -177,4 +177,22 @@ public class PushMessageBody {
     public void setIcon(String icon) {
         this.icon = icon;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PushMessageBody that = (PushMessageBody) o;
+
+        if (title != null ? !title.equals(that.title) : that.title != null) return false;
+        return body != null ? body.equals(that.body) : that.body == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = title != null ? title.hashCode() : 0;
+        result = 31 * result + (body != null ? body.hashCode() : 0);
+        return result;
+    }
 }

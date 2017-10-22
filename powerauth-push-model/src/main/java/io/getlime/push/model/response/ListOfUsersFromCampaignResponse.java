@@ -16,6 +16,8 @@
 
 package io.getlime.push.model.response;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.getlime.push.model.customization.CustomPagedListOfUsersDeserializer;
 import io.getlime.push.model.entity.ListOfUsers;
 
 /**
@@ -24,16 +26,17 @@ import io.getlime.push.model.entity.ListOfUsers;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 
+@JsonDeserialize(using = CustomPagedListOfUsersDeserializer.class)
 public class ListOfUsersFromCampaignResponse {
-    private Long campaingId;
+    private Long campaignId;
     private ListOfUsers users;
 
-    public Long getCampaingId() {
-        return campaingId;
+    public Long getCampaignId() {
+        return campaignId;
     }
 
-    public void setCampaingId(Long campaingId) {
-        this.campaingId = campaingId;
+    public void setCampaignId(Long campaignId) {
+        this.campaignId = campaignId;
     }
 
     public ListOfUsers getUsers() {
@@ -42,5 +45,23 @@ public class ListOfUsersFromCampaignResponse {
 
     public void setUsers(ListOfUsers users) {
         this.users = users;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ListOfUsersFromCampaignResponse that = (ListOfUsersFromCampaignResponse) o;
+
+        if (campaignId != null ? !campaignId.equals(that.campaignId) : that.campaignId != null) return false;
+        return users != null ? users.equals(that.users) : that.users == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = campaignId != null ? campaignId.hashCode() : 0;
+        result = 31 * result + (users != null ? users.hashCode() : 0);
+        return result;
     }
 }
