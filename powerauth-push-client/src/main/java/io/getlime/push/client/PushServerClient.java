@@ -29,7 +29,7 @@ import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ErrorResponse;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
-import io.getlime.push.model.response.ListOfUsersPagedResponse;
+import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.entity.ListOfUsers;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
@@ -139,9 +139,9 @@ public class PushServerClient {
         request.setToken(token);
         request.setPlatform(platform.value());
         request.setActivationId(activationId);
-        TypeReference<ObjectResponse> typeReference = new TypeReference<ObjectResponse>() {
+        TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        ObjectResponse<?> response = postObjectImpl("/push/device/create", new ObjectRequest<>(request), typeReference);
+        Response response = postObjectImpl("/push/device/create", new ObjectRequest<>(request), typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
@@ -156,9 +156,9 @@ public class PushServerClient {
         DeleteDeviceRequest request = new DeleteDeviceRequest();
         request.setAppId(appId);
         request.setToken(token);
-        TypeReference<ObjectResponse> typeReference = new TypeReference<ObjectResponse>() {
+        TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        ObjectResponse<?> response = postObjectImpl("/push/device/delete", new ObjectRequest<>(request), typeReference);
+        Response response = postObjectImpl("/push/device/delete", new ObjectRequest<>(request), typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
@@ -171,9 +171,9 @@ public class PushServerClient {
     public boolean updateDeviceStatus(String activationId) throws PushServerClientException {
         UpdateDeviceStatusRequest request = new UpdateDeviceStatusRequest();
         request.setActivationId(activationId);
-        TypeReference<ObjectResponse> typeReference = new TypeReference<ObjectResponse>() {
+        TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        ObjectResponse<?> response = postObjectImpl("/push/device/status/update", new ObjectRequest<>(request), typeReference);
+        Response response = postObjectImpl("/push/device/status/update", new ObjectRequest<>(request), typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
@@ -234,7 +234,7 @@ public class PushServerClient {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
             TypeReference<ObjectResponse<DeleteCampaignResponse>> typeReference = new TypeReference<ObjectResponse<DeleteCampaignResponse>>() {
             };
-            ObjectResponse<?> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, typeReference);
+            ObjectResponse<DeleteCampaignResponse> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
@@ -304,15 +304,15 @@ public class PushServerClient {
      * @return Page of users specified with params.
      */
     @SuppressWarnings("unchecked")
-    public ListOfUsersPagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(Long campaignId, int page, int size) throws PushServerClientException {
+    public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(Long campaignId, int page, int size) throws PushServerClientException {
         try {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
-            TypeReference<ListOfUsersPagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new TypeReference<ListOfUsersPagedResponse<ListOfUsersFromCampaignResponse>>() {
+            TypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new TypeReference<PagedResponse<ListOfUsersFromCampaignResponse>>() {
             };
             Map<String, Object> params = new HashMap<>();
             params.put("page", page);
             params.put("size", size);
-            return (ListOfUsersPagedResponse)getObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
+            return (PagedResponse)getObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
         }
@@ -330,9 +330,9 @@ public class PushServerClient {
             ListOfUsers listOfUsers = new ListOfUsers();
             listOfUsers.addAll(users);
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
-            TypeReference<ObjectResponse> typeReference = new TypeReference<ObjectResponse>() {
+            TypeReference<Response> typeReference = new TypeReference<Response>() {
             };
-            ObjectResponse<?> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", new ObjectRequest<>(listOfUsers), typeReference);
+            Response response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", new ObjectRequest<>(listOfUsers), typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
@@ -385,7 +385,7 @@ public class PushServerClient {
      * @param params params to pass to url path, optional
      * @param typeReference reference on type for parsing into JSON
      */
-    private <T> ObjectResponse<T> getObjectImpl(String url, Map<String, Object> params, TypeReference typeReference) throws PushServerClientException {
+    private <T> T getObjectImpl(String url, Map<String, Object> params, TypeReference typeReference) throws PushServerClientException {
         try {
             HttpResponse response = Unirest.get(serviceBaseUrl + url)
                     .header("accept", "application/json")
@@ -412,7 +412,7 @@ public class PushServerClient {
      * @param request request body
      * @param typeReference reference on type for parsing into JSON
      */
-    private <T> ObjectResponse<T> postObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
+    private <T> T postObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
         try {
             // Fetch post response from given URL and for provided request object
             HttpResponse response = Unirest.post(serviceBaseUrl + url)
@@ -439,7 +439,7 @@ public class PushServerClient {
      * @param request request body
      * @param typeReference reference on type for parsing into JSON
      */
-    private <T> ObjectResponse<T> putObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
+    private <T> T putObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
         try {
             HttpResponse response = Unirest.put(serviceBaseUrl + url)
                     .header("accept", "application/json")
@@ -464,7 +464,7 @@ public class PushServerClient {
      * @param typeReference reference on type of response body from which map into JSON
      * @param response prepared http response
      */
-    private <T> ObjectResponse<T> checkHttpStatus(TypeReference typeReference, HttpResponse response) throws IOException, PushServerClientException {
+    private <T> T checkHttpStatus(TypeReference typeReference, HttpResponse response) throws IOException, PushServerClientException {
         if (response.getStatus() == 200) {
             return jacksonObjectMapper.readValue(response.getRawBody(), typeReference);
         } else {

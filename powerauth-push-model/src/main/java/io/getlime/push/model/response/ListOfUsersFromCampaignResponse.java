@@ -16,8 +16,6 @@
 
 package io.getlime.push.model.response;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.getlime.push.model.customization.CustomPagedListOfUsersDeserializer;
 import io.getlime.push.model.entity.ListOfUsers;
 
 /**
@@ -26,10 +24,12 @@ import io.getlime.push.model.entity.ListOfUsers;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 
-@JsonDeserialize(using = CustomPagedListOfUsersDeserializer.class)
 public class ListOfUsersFromCampaignResponse {
     private Long campaignId;
     private ListOfUsers users;
+
+    public ListOfUsersFromCampaignResponse() {
+    }
 
     public Long getCampaignId() {
         return campaignId;
