@@ -207,12 +207,12 @@ public class PushCampaignController {
         for (PushCampaignUserEntity user : users) {
             listOfUsers.add(user.getUserId());
         }
-        listOfUsersFromCampaignResponse.setCampaingId(id);
+        listOfUsersFromCampaignResponse.setCampaignId(id);
         listOfUsersFromCampaignResponse.setUsers(listOfUsers);
-        PagedResponse<ListOfUsersFromCampaignResponse> pagedResponse = new PagedResponse<>(listOfUsersFromCampaignResponse);
-        pagedResponse.setPage(pageable.getPageNumber());
-        pagedResponse.setSize(pageable.getPageSize());
-        return pagedResponse;
+        PagedResponse<ListOfUsersFromCampaignResponse> listOfUsersPagedResponse = new PagedResponse<>(listOfUsersFromCampaignResponse);
+        listOfUsersPagedResponse.setPage(pageable.getPageNumber());
+        listOfUsersPagedResponse.setSize(pageable.getPageSize());
+        return listOfUsersPagedResponse;
     }
 
     /**

@@ -12,8 +12,6 @@ public class CreateDeviceRequestValidator {
             return "Unassigned platform";
         } else if (request.getToken() == null) {
             return "Empty token";
-        } else if (request.getActivationId() == null) {
-            return "Empty activation ID";
         }
         return null;
     }

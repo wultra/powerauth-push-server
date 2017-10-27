@@ -60,4 +60,22 @@ public class CampaignResponse {
     public void setMessage(PushMessageBody message) {
         this.message = message;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CampaignResponse that = (CampaignResponse) o;
+
+        if (sent != that.sent) return false;
+        if (!id.equals(that.id)) return false;
+        if (!appId.equals(that.appId)) return false;
+        return message.equals(that.message);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }
