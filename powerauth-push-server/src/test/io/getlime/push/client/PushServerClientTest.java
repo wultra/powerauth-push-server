@@ -26,7 +26,7 @@ import io.getlime.push.model.request.CreateCampaignRequest;
 import io.getlime.push.model.request.SendPushMessageBatchRequest;
 import io.getlime.push.model.request.SendPushMessageRequest;
 import io.getlime.push.model.response.*;
-import io.getlime.push.repository.AppCredentialRepository;
+import io.getlime.push.repository.AppCredentialsRepository;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.beans.HasPropertyWithValue;
 import org.junit.Before;
@@ -69,7 +69,7 @@ public class PushServerClientTest {
     public PushServerClient pushServerClient;
 
     @Autowired
-    public AppCredentialRepository appCredentialRepository;
+    public AppCredentialsRepository appCredentialsRepository;
 
     @LocalServerPort
     private int port;
@@ -124,7 +124,7 @@ public class PushServerClientTest {
     @Test
     @SuppressWarnings("unchecked") //known parameters of HashMap
     public void sendPushMessageTest() throws Exception {
-        if (appCredentialRepository.count() < 1) {
+        if (appCredentialsRepository.count() < 1) {
             exception.expect(PushServerClientException.class);
             exception.expect(HasPropertyWithValue.hasProperty("error", HasPropertyWithValue.hasProperty("message", CoreMatchers.is("Application not found"))));
         }
@@ -162,7 +162,7 @@ public class PushServerClientTest {
     @Test
     @SuppressWarnings("unchecked") //known parameters of HashMap
     public void sendPushMessageBatchTest() throws Exception {
-        if (appCredentialRepository.count() < 1) {
+        if (appCredentialsRepository.count() < 1) {
             exception.expect(PushServerClientException.class);
             exception.expect(HasPropertyWithValue.hasProperty("error", HasPropertyWithValue.hasProperty("message", CoreMatchers.is("Application not found"))));
         }
@@ -278,7 +278,7 @@ public class PushServerClientTest {
 
     @Test
     public void sendTestingCampaignTest() throws Exception {
-        if (appCredentialRepository.count() < 1) {
+        if (appCredentialsRepository.count() < 1) {
             exception.expect(PushServerClientException.class);
             exception.expect(HasPropertyWithValue.hasProperty("error", HasPropertyWithValue.hasProperty("message", CoreMatchers.is("Application not found"))));
         }
