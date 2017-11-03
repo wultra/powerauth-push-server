@@ -284,9 +284,9 @@ public class PushServerClient {
             ListOfUsers listOfUsers = new ListOfUsers();
             listOfUsers.addAll(users);
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
-            TypeReference<ObjectResponse> typeReference = new TypeReference<ObjectResponse>() {
+            TypeReference<Response> typeReference = new TypeReference<Response>() {
             };
-            ObjectResponse<?> response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", new ObjectRequest<>(listOfUsers), typeReference);
+            Response response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", new ObjectRequest<>(listOfUsers), typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
@@ -351,9 +351,9 @@ public class PushServerClient {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
             TestCampaignRequest testCampaignRequest = new TestCampaignRequest();
             testCampaignRequest.setUserId(userId);
-            TypeReference<ObjectResponse> typeReference = new TypeReference<ObjectResponse>() {
+            TypeReference<Response> typeReference = new TypeReference<Response>() {
             };
-            ObjectResponse<?> response = postObjectImpl("/push/campaign/send/test/" + campaignIdSanitized, new ObjectRequest<>(testCampaignRequest), typeReference);
+            Response response = postObjectImpl("/push/campaign/send/test/" + campaignIdSanitized, new ObjectRequest<>(testCampaignRequest), typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
@@ -369,9 +369,9 @@ public class PushServerClient {
     public boolean sendCampaign(Long campaignId) throws PushServerClientException {
         try {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "utf-8");
-            TypeReference<ObjectResponse> typeReference = new TypeReference<ObjectResponse>() {
+            TypeReference<Response> typeReference = new TypeReference<Response>() {
             };
-            ObjectResponse<?> response = postObjectImpl("/push/campaign/send/live/" + campaignIdSanitized, null, typeReference);
+            Response response = postObjectImpl("/push/campaign/send/live/" + campaignIdSanitized, null, typeReference);
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
