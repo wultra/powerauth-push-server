@@ -53,7 +53,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import javax.net.ssl.SSLException;
-import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -100,7 +99,6 @@ public class PushMessageSenderService {
      * @param pushMessageList List with push message objects.
      * @return Result of this batch sending.
      */
-    @Transactional
     public PushMessageSendResult sendPushMessage(final Long appId, List<PushMessage> pushMessageList) throws PushServerException {
         // Prepare clients
         AppRelatedPushClient pushClient = prepareClients(appId);
@@ -226,7 +224,6 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      *                             the error can be found in exception message.
      */
-    @Transactional
     public void sendCampaignMessage(Long appId, String platform, String token, PushMessageBody pushMessageBody, String userId, Long deviceId, String activationId) throws PushServerException {
         sendCampaignMessage(appId, platform, token, pushMessageBody, null, userId, deviceId, activationId);
     }
@@ -243,7 +240,6 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      * the error can be found in exception message.
      */
-    @Transactional
     public void sendCampaignMessage(final Long appId, String platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, String userId, Long deviceId, String activationId) throws PushServerException {
 
         final AppRelatedPushClient pushClient = prepareClients(appId);
