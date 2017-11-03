@@ -32,10 +32,10 @@ import io.getlime.push.model.entity.PushMessageAttributes;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.validator.PushMessageValidator;
-import io.getlime.push.repository.AppCredentialRepository;
+import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.dao.PushMessageDAO;
-import io.getlime.push.repository.model.AppCredentialEntity;
+import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
@@ -76,18 +76,18 @@ import java.util.logging.Logger;
 @Service
 public class PushMessageSenderService {
 
-    private AppCredentialRepository appCredentialRepository;
+    private AppCredentialsRepository appCredentialsRepository;
     private PushDeviceRepository pushDeviceRepository;
     private PushMessageDAO pushMessageDAO;
     private PushServiceConfiguration pushServiceConfiguration;
     private AppCredentialStorageMap appRelatedPushClientMap = new AppCredentialStorageMap();
 
     @Autowired
-    public PushMessageSenderService(AppCredentialRepository appCredentialRepository,
+    public PushMessageSenderService(AppCredentialsRepository appCredentialsRepository,
                                     PushDeviceRepository pushDeviceRepository,
                                     PushMessageDAO pushMessageDAO,
                                     PushServiceConfiguration pushServiceConfiguration) {
-        this.appCredentialRepository = appCredentialRepository;
+        this.appCredentialsRepository = appCredentialsRepository;
         this.pushDeviceRepository = pushDeviceRepository;
         this.pushMessageDAO = pushMessageDAO;
         this.pushServiceConfiguration = pushServiceConfiguration;
@@ -419,8 +419,8 @@ public class PushMessageSenderService {
     }
 
     // Lookup application credentials by appID and throw exception in case application is not found.
-    private AppCredentialEntity getAppCredentials(Long appId) throws PushServerException {
-        AppCredentialEntity credentials = appCredentialRepository.findFirstByAppId(appId);
+    private AppCredentialsEntity getAppCredentials(Long appId) {
+        AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(appId);
         if (credentials == null) {
             throw new PushServerException("Application not found");
         }
@@ -490,7 +490,7 @@ public class PushMessageSenderService {
         synchronized (this) {
             AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
             if (pushClient == null) {
-                final AppCredentialEntity credentials = getAppCredentials(appId);
+                final AppCredentialsEntity credentials = getAppCredentials(appId);
                 ApnsClient apnsClient = prepareApnsClient(credentials.getIosPrivateKey(), credentials.getIosTeamId(), credentials.getIosKeyId());
                 FcmClient fcmClient = prepareFcmClient(credentials.getAndroidServerKey());
                 pushClient = new AppRelatedPushClient();

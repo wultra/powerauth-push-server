@@ -16,7 +16,7 @@
 package io.getlime.push.service;
 
 import com.turo.pushy.apns.ApnsClient;
-import io.getlime.push.repository.model.AppCredentialEntity;
+import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.fcm.FcmClient;
 
 /**
@@ -26,15 +26,15 @@ import io.getlime.push.service.fcm.FcmClient;
  */
 public class AppRelatedPushClient {
 
-    private AppCredentialEntity appCredentials;
+    private AppCredentialsEntity appCredentials;
     private ApnsClient apnsClient;
     private FcmClient fcmClient;
 
-    public AppCredentialEntity getAppCredentials() {
+    public AppCredentialsEntity getAppCredentials() {
         return appCredentials;
     }
 
-    public void setAppCredentials(AppCredentialEntity appCredentials) {
+    public void setAppCredentials(AppCredentialsEntity appCredentials) {
         this.appCredentials = appCredentials;
     }
 
