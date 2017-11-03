@@ -119,4 +119,19 @@ public class AppCredentialsEntity implements Serializable {
     public void setAndroidBundle(String androidBundle) {
         this.androidBundle = androidBundle;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AppCredentialsEntity that = (AppCredentialsEntity) o;
+
+        return getAppId().equals(that.getAppId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getAppId().hashCode();
+    }
 }

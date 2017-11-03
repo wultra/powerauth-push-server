@@ -160,4 +160,24 @@ public class PushMessageEntity implements Serializable {
     public void setStatus(Status status) {
         this.status = status;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PushMessageEntity that = (PushMessageEntity) o;
+
+        if (!getDeviceId().equals(that.getDeviceId())) return false;
+        if (!getMessageBody().equals(that.getMessageBody())) return false;
+        return getTimestampCreated().equals(that.getTimestampCreated());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getDeviceId().hashCode();
+        result = 31 * result + getMessageBody().hashCode();
+        result = 31 * result + getTimestampCreated().hashCode();
+        return result;
+    }
 }

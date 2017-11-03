@@ -148,4 +148,22 @@ public class PushDeviceRegistrationEntity implements Serializable {
     public void setEncryptionKeyIndex(String encryptionKeyIndex) {
         this.encryptionKeyIndex = encryptionKeyIndex;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PushDeviceRegistrationEntity that = (PushDeviceRegistrationEntity) o;
+
+        if (!getPlatform().equals(that.getPlatform())) return false;
+        return getPushToken().equals(that.getPushToken());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getPlatform().hashCode();
+        result = 31 * result + getPushToken().hashCode();
+        return result;
+    }
 }

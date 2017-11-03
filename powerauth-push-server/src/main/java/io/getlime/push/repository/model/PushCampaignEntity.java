@@ -109,4 +109,22 @@ public class PushCampaignEntity implements Serializable {
     public void setTimestampCompleted(Date timestampCompleted) {
         this.timestampCompleted = timestampCompleted;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PushCampaignEntity entity = (PushCampaignEntity) o;
+
+        if (!getMessage().equals(entity.getMessage())) return false;
+        return getTimestampCreated().equals(entity.getTimestampCreated());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getMessage().hashCode();
+        result = 31 * result + getTimestampCreated().hashCode();
+        return result;
+    }
 }
