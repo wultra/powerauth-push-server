@@ -15,5 +15,5 @@ addons:
       description: Build submitted via Travis CI
     notification_email: petr@lime-company.eu
     build_command_prepend: mvn clean
-    build_command: mvn -DskipTests=true compile
+    build_command: mvn compile -DskipTests=true
     branch_pattern: master
