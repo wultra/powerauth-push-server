@@ -111,13 +111,12 @@ public class PushDeviceController {
      * @return Status update response.
      */
     @RequestMapping(value = "status/update", method = RequestMethod.POST)
-    public @ResponseBody Response updateDeviceStatus(@RequestBody ObjectRequest<UpdateDeviceStatusRequest> request) throws PushServerException {
-        UpdateDeviceStatusRequest requestedObject = request.getRequestObject();
-        String errorMessage = UpdateDeviceStatusRequestValidator.validate(requestedObject);
+    public @ResponseBody Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
+        String errorMessage = UpdateDeviceStatusRequestValidator.validate(request);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        String activationId = requestedObject.getActivationId();
+        String activationId = request.getActivationId();
         List<PushDeviceRegistrationEntity> device = pushDeviceRepository.findByActivationId(activationId);
         if (device != null)  {
             ActivationStatus status = client.getActivationStatus(activationId).getActivationStatus();
