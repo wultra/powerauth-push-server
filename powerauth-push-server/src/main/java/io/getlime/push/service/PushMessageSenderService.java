@@ -419,10 +419,10 @@ public class PushMessageSenderService {
     }
 
     // Lookup application credentials by appID and throw exception in case application is not found.
-    private AppCredentialEntity getAppCredentials(Long appId) {
+    private AppCredentialEntity getAppCredentials(Long appId) throws PushServerException {
         AppCredentialEntity credentials = appCredentialRepository.findFirstByAppId(appId);
         if (credentials == null) {
-            throw new IllegalArgumentException("Application not found");
+            throw new PushServerException("Application not found");
         }
         return credentials;
     }

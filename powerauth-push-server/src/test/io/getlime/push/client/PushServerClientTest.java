@@ -20,36 +20,37 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
-import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.model.base.PagedResponse;
-import io.getlime.push.model.entity.ListOfUsers;
-import io.getlime.push.model.entity.PushMessageBody;
+import io.getlime.push.model.entity.*;
 import io.getlime.push.model.request.CreateCampaignRequest;
-import io.getlime.push.model.request.CreateDeviceRequest;
-import io.getlime.push.model.request.UpdateDeviceStatusRequest;
+import io.getlime.push.model.request.SendPushMessageBatchRequest;
+import io.getlime.push.model.request.SendPushMessageRequest;
 import io.getlime.push.model.response.*;
+import io.getlime.push.repository.AppCredentialRepository;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.beans.HasPropertyWithValue;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Class used for testing client-server methods
+ * All tests cover each method from {@link PushServerClient}.
+ * Methods are named with suffix "Test" and are just compared with expected server responses.
+ * Using in memory H2 create/drop database.
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
@@ -67,6 +68,9 @@ public class PushServerClientTest {
     @MockBean
     public PushServerClient pushServerClient;
 
+    @Autowired
+    public AppCredentialRepository appCredentialRepository;
+
     @LocalServerPort
     private int port;
 
@@ -75,6 +79,9 @@ public class PushServerClientTest {
         pushServerClient = new PushServerClient("http://localhost:" + port);
         mapper = new ObjectMapper();
     }
+
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
     @Test
     public void getServiceStatusTest() throws Exception {
@@ -90,12 +97,14 @@ public class PushServerClientTest {
 
     @Test
     public void createDeviceTest() throws Exception {
-        CreateDeviceRequest createDeviceRequest = new CreateDeviceRequest();
-        createDeviceRequest.setAppId(10L);
-        createDeviceRequest.setToken("1234567890987654321234567890");
-        createDeviceRequest.setPlatform(MobilePlatform.iOS.value());
-        boolean actual1 = pushServerClient.createDevice(createDeviceRequest.getAppId(), createDeviceRequest.getToken(), MobilePlatform.iOS);
-        assertThat(actual1).isTrue();
+        boolean actual = pushServerClient.createDevice(10L, "1234567890987654321234567890", MobilePlatform.iOS);
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    public void createDeviceWithActivationIDTest() throws Exception {
+        boolean actual = pushServerClient.createDevice(10L, "1234567890987654321234567890", MobilePlatform.iOS, "49414e31-f3df-4cea-87e6-f214ca3b8412");
+        assertThat(actual).isTrue();
     }
 
     @Test
@@ -111,6 +120,83 @@ public class PushServerClientTest {
         assertThat(actual).isTrue();
     }
 
+
+    @Test
+    @SuppressWarnings("unchecked") //known parameters of HashMap
+    public void sendPushMessageTest() throws Exception {
+        if (appCredentialRepository.count() < 1) {
+            exception.expect(PushServerClientException.class);
+            exception.expect(HasPropertyWithValue.hasProperty("error", HasPropertyWithValue.hasProperty("message", CoreMatchers.is("Application not found"))));
+        }
+        SendPushMessageRequest request = new SendPushMessageRequest();
+        PushMessage pushMessage = new PushMessage();
+        PushMessageAttributes attributes = new PushMessageAttributes();
+        PushMessageBody pushMessageBody = new PushMessageBody();
+        pushMessageBody.setTitle("Balance update");
+        pushMessageBody.setBody("Your balance is now $745.00");
+        pushMessageBody.setBadge(3);
+        pushMessageBody.setSound("riff.wav");
+        pushMessageBody.setCategory("balance-update");
+        pushMessageBody.setCollapseKey("balance-update");
+        pushMessageBody.setValidUntil(new Date());
+        pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
+        attributes.setSilent(true);
+        attributes.setPersonal(true);
+        attributes.setEncrypted(false);
+        pushMessage.setUserId("123");
+        pushMessage.setActivationId("49414e31-f3df-4cea-87e6-f214ca3b8412");
+        pushMessage.setAttributes(attributes);
+        pushMessage.setBody(pushMessageBody);
+        pushMessage.setAttributes(attributes);
+        request.setAppId(2L);
+        request.setMessage(pushMessage);
+        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessage(2L, pushMessage);
+        String body = restTemplate.postForEntity("http://localhost:" + port + "/push/message/send", new ObjectRequest<>(request), String.class).getBody();
+        ObjectResponse<PushMessageSendResult> expected = mapper.readValue(body, new TypeReference<ObjectResponse<PushMessageSendResult>>() {
+        });
+        assertThat(actual.getStatus()).isEqualTo(expected.getStatus());
+        assertThat(actual.getResponseObject()).isEqualTo(expected.getResponseObject());
+    }
+
+
+    @Test
+    @SuppressWarnings("unchecked") //known parameters of HashMap
+    public void sendPushMessageBatchTest() throws Exception {
+        if (appCredentialRepository.count() < 1) {
+            exception.expect(PushServerClientException.class);
+            exception.expect(HasPropertyWithValue.hasProperty("error", HasPropertyWithValue.hasProperty("message", CoreMatchers.is("Application not found"))));
+        }
+        SendPushMessageBatchRequest request = new SendPushMessageBatchRequest();
+        List<PushMessage> batch = new ArrayList<>();
+        PushMessage pushMessage = new PushMessage();
+        PushMessageAttributes attributes = new PushMessageAttributes();
+        PushMessageBody pushMessageBody = new PushMessageBody();
+        pushMessageBody.setTitle("Balance update");
+        pushMessageBody.setBody("Your balance is now $745.00");
+        pushMessageBody.setBadge(3);
+        pushMessageBody.setSound("riff.wav");
+        pushMessageBody.setCategory("balance-update");
+        pushMessageBody.setCollapseKey("balance-update");
+        pushMessageBody.setValidUntil(new Date());
+        pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
+        attributes.setSilent(true);
+        attributes.setPersonal(true);
+        attributes.setEncrypted(false);
+        pushMessage.setUserId("123");
+        pushMessage.setActivationId("49414e31-f3df-4cea-87e6-f214ca3b8412");
+        pushMessage.setAttributes(attributes);
+        pushMessage.setBody(pushMessageBody);
+        pushMessage.setAttributes(attributes);
+        batch.add(pushMessage);
+        request.setAppId(2L);
+        request.setBatch(batch);
+        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessage(2L, pushMessage);
+        String body = restTemplate.postForEntity("http://localhost:" + port + "/push/message/send", new ObjectRequest<>(request), String.class).getBody();
+        ObjectResponse<PushMessageSendResult> expected = mapper.readValue(body, new TypeReference<ObjectResponse<PushMessageSendResult>>() {
+        });
+        assertThat(actual.getStatus()).isEqualTo(expected.getStatus());
+        assertThat(actual.getResponseObject()).isEqualTo(expected.getResponseObject());
+    }
 
     @Test
     @SuppressWarnings("unchecked") //known parameters of HashMap
@@ -190,4 +276,19 @@ public class PushServerClientTest {
         assertThat(actual).isTrue();
     }
 
+    @Test
+    public void sendTestingCampaignTest() throws Exception {
+        if (appCredentialRepository.count() < 1) {
+            exception.expect(PushServerClientException.class);
+            exception.expect(HasPropertyWithValue.hasProperty("error", HasPropertyWithValue.hasProperty("message", CoreMatchers.is("Application not found"))));
+        }
+        boolean actual = pushServerClient.sendTestCampaign(1L, "1234567890");
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    public void sendCampaignTest() throws Exception {
+        boolean actual = pushServerClient.sendCampaign(1L);
+        assertThat(actual).isTrue();
+    }
 }
