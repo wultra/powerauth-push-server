@@ -93,6 +93,28 @@ public class PushMessageSendResult {
         public void setTotal(int total) {
             this.total = total;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof iOS)) return false;
+
+            iOS iOS = (iOS) o;
+
+            if (getSent() != iOS.getSent()) return false;
+            if (getFailed() != iOS.getFailed()) return false;
+            if (getPending() != iOS.getPending()) return false;
+            return getTotal() == iOS.getTotal();
+        }
+
+        @Override
+        public int hashCode() {
+            int result = getTotal();
+            result = 31 * result + getFailed();
+            result = 31 * result + getPending();
+            result = 31 * result + getSent();
+            return result;
+        }
     }
 
     public static class Android {
@@ -165,6 +187,28 @@ public class PushMessageSendResult {
         public void setTotal(int total) {
             this.total = total;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Android)) return false;
+
+            Android android = (Android) o;
+
+            if (getSent() != android.getSent()) return false;
+            if (getFailed() != android.getFailed()) return false;
+            if (getPending() != android.getPending()) return false;
+            return getTotal() == android.getTotal();
+        }
+
+        @Override
+        public int hashCode() {
+            int result = getTotal();
+            result = 31 * result + getFailed();
+            result = 31 * result + getPending();
+            result = 31 * result + getSent();
+            return result;
+        }
     }
 
     private iOS ios;
@@ -189,4 +233,23 @@ public class PushMessageSendResult {
         return ios;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PushMessageSendResult)) return false;
+
+        PushMessageSendResult that = (PushMessageSendResult) o;
+
+        if (getIos() != null ? !getIos().equals(that.getIos()) : that.getIos() != null) return false;
+        return getAndroid() != null ? getAndroid().equals(that.getAndroid()) : that.getAndroid() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 1;
+        result = 31 * result + (getAndroid() != null ? getAndroid().hashCode() : 0);
+        result = 31 * result + (getIos() != null ? getIos().hashCode() : 0);
+        return result;
+    }
 }
