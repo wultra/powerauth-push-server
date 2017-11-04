@@ -65,6 +65,7 @@ public class PushCampaignController {
      *
      * @param request Id of specific app, body of specific messageBody
      * @return ID for created campaign.
+     * @throws PushServerException In case request is invalid.
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
     @ResponseBody
@@ -111,8 +112,9 @@ public class PushCampaignController {
      * Method used for getting a list of campaigns.
      *
      * @param all If true, method returns list of all campaigns. If false, it returns
-     *            only campaigns that were not sent yet.
+     * only campaigns that were not sent yet.
      * @return List of campaigns.
+     * @throws PushServerException In case campaign message cannot be deserialized.
      */
     @RequestMapping(value = "list", method = RequestMethod.GET)
     @ResponseBody
@@ -143,6 +145,7 @@ public class PushCampaignController {
      *
      * @param campaignId Id of specific campaign
      * @return Campaign Response
+     * @throws PushServerException In case campaign with provided ID does not exist.
      */
     @RequestMapping(value = "{id}/detail", method = RequestMethod.GET)
     @ResponseBody
@@ -166,6 +169,7 @@ public class PushCampaignController {
      * @param campaignId ID of certain campaign
      * @param request List of IDs referred to request
      * @return Response status
+     * @throws PushServerException In case campaign with given ID does not exist.
      */
     @RequestMapping(value = "{id}/user/add", method = RequestMethod.PUT)
     @ResponseBody
@@ -195,7 +199,7 @@ public class PushCampaignController {
      * Method for getting users from specific campaign in paged format
      *
      * @param id Campaign id
-     * @param pageable Format for pagination (?page=x&size=y), where "x" is chosen page and "y" is size is number of elements per page, beginning from zero
+     * @param pageable Format for pagination (?page=x&amp;size=y), where "x" is chosen page and "y" is size is number of elements per page, beginning from zero
      * @return Campaign id, list of users
      */
     @RequestMapping(value = "{id}/user/list", method = RequestMethod.GET)
@@ -236,7 +240,7 @@ public class PushCampaignController {
      * Method used for checking exception about nullity of http request
      *
      * @param request An object request to check the nullity
-     * @throws PushServerException defined by certain message
+     * @throws PushServerException In case request object is null.
      */
     private void checkRequestNullity(ObjectRequest request) throws PushServerException {
         if (request.getRequestObject() == null) {

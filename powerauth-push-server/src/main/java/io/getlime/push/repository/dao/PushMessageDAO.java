@@ -46,6 +46,11 @@ public class PushMessageDAO {
 
     /**
      * Stores a push message in the database table `push_message`.
+     *
+     * @param pushMessageBody Push message body to be stored.
+     * @param pushMessageAttributes Attributes of the push message.
+     * @param userId User ID.
+     * @param activationId Activation ID.
      * @param deviceId Device registration ID to be used for this message.
      * @return New database entity with push message information.
      * @throws PushServerException In case message body JSON serialization fails.

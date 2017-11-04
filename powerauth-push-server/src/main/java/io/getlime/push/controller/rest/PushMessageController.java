@@ -53,8 +53,10 @@ public class PushMessageController {
 
     /**
      * Send a single push message.
+     *
      * @param request Send push message request.
      * @return Response with message sending results.
+     * @throws PushServerException In case request object is invalid.
      */
     @RequestMapping(value = "send", method = RequestMethod.POST)
     public @ResponseBody ObjectResponse<PushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
@@ -73,8 +75,10 @@ public class PushMessageController {
 
     /**
      * Send a batch of push messages.
+     *
      * @param request Request with push message batch.
      * @return Response with message sending results.
+     * @throws PushServerException In case request object is invalid.
      */
     @RequestMapping(value = "batch/send", method = RequestMethod.POST)
     public @ResponseBody ObjectResponse<PushMessageSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {

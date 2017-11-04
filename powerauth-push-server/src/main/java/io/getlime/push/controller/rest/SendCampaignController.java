@@ -71,6 +71,7 @@ public class SendCampaignController {
      *
      * @param id Specific campaign ID.
      * @return Response with status.
+     * @throws PushServerException In case campaign with given ID is not found.
      */
     @RequestMapping(value = "live/{id}", method = RequestMethod.POST)
     @ResponseBody
@@ -103,6 +104,7 @@ public class SendCampaignController {
      * @param id Campaign ID
      * @param request Testing user ID
      * @return Response with status
+     * @throws PushServerException In case request object is invalid.
      */
     @RequestMapping(value = "test/{id}", method = RequestMethod.POST)
     @ResponseBody
