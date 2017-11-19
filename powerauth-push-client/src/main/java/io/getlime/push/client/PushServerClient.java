@@ -178,7 +178,9 @@ public class PushServerClient {
         request.setActivationId(activationId);
         TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        Response response = postObjectImpl("/push/device/status/update", new ObjectRequest<>(request), typeReference);
+        // Note that there is just plain 'request' in the request, not 'new ObjectRequest<>(request)'.
+        // This is due to the fact that standard PowerAuth Server callback format is used here.
+        Response response = postObjectImpl("/push/device/status/update", request, typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
