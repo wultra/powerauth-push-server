@@ -31,7 +31,7 @@ public class UploadIosCredentialsForm {
 
     @NotNull
     @Size(min = 2)
-    @Pattern(flags = { Pattern.Flag.CASE_INSENSITIVE },regexp = "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+[0-9a-z_]$")
+    @Pattern(flags = { Pattern.Flag.CASE_INSENSITIVE },regexp = "^[a-z][a-z0-9_-]*(\\.[a-z0-9_-]+)+[0-9a-z_-]$")
     private String bundle;
 
     @NotNull
