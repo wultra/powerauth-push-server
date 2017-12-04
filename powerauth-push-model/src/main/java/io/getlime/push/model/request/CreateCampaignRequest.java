@@ -17,7 +17,6 @@
 package io.getlime.push.model.request;
 
 import io.getlime.push.model.entity.PushMessageBody;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Request object used for creating a campaign.
@@ -28,7 +27,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class CreateCampaignRequest {
 
-    @ApiModelProperty(notes = "ADd asd a as as")
     private Long appId;
 
     private PushMessageBody message;
