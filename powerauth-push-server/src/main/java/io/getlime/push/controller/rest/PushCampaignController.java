@@ -31,6 +31,7 @@ import io.getlime.push.repository.PushCampaignUserRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.PushCampaignUserEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -69,6 +70,7 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
     @ResponseBody
+    @ApiOperation("Create a campaing")
     public ObjectResponse<CreateCampaignResponse> createCampaign(@RequestBody ObjectRequest<CreateCampaignRequest> request) throws PushServerException {
         CreateCampaignRequest requestObject = request.getRequestObject();
         String errorMessage = CreateCampaignRequestValidator.validate(requestObject);
@@ -96,6 +98,7 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/delete", method = RequestMethod.POST)
     @ResponseBody
+    @ApiOperation(value = "Delete a campaing", notes = "Specified with id")
     public ObjectResponse<DeleteCampaignResponse> deleteCampaign(@PathVariable(value = "id") Long campaignId) {
         DeleteCampaignResponse deleteCampaignResponse = new DeleteCampaignResponse();
         if (pushCampaignRepository.findOne(campaignId) == null) {
@@ -118,6 +121,7 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "list", method = RequestMethod.GET)
     @ResponseBody
+    @ApiOperation(value = "Return a detailed list of campaigns", notes = "Restricted with all param")
     public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(@RequestParam(value = "all", required = false) boolean all) throws PushServerException {
         // Fetch campaigns from the repository
         Iterable<PushCampaignEntity> campaignList;
@@ -149,6 +153,7 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/detail", method = RequestMethod.GET)
     @ResponseBody
+    @ApiOperation(value = "Return details about campaign", notes = "Specified with id")
     public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
         PushCampaignEntity campaign = pushCampaignRepository.findOne(campaignId);
         if (campaign == null) {
@@ -173,6 +178,7 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/user/add", method = RequestMethod.PUT)
     @ResponseBody
+    @ApiOperation(value = "Add user to campaign", notes = "Specified with id")
     public Response addUsersToCampaign(@PathVariable(value = "id") Long campaignId, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
         checkRequestNullity(request);
         final PushCampaignEntity campaignEntity = pushCampaignRepository.findOne(campaignId);
@@ -204,6 +210,7 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/user/list", method = RequestMethod.GET)
     @ResponseBody
+    @ApiOperation(value = "Return list of users", notes = "In paged format")
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(@PathVariable(value = "id") Long id, Pageable pageable) {
         ListOfUsersFromCampaignResponse listOfUsersFromCampaignResponse = new ListOfUsersFromCampaignResponse();
         List<PushCampaignUserEntity> users = pushCampaignUserRepository.findAllByCampaignId(id, pageable);
@@ -228,6 +235,7 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/user/delete", method = RequestMethod.POST)
     @ResponseBody
+    @ApiOperation(value = "Delete user from campaign", notes = "Campaign specified with id variable, user specified inside request body")
     public Response deleteUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
         ListOfUsers listOfUsers = request.getRequestObject();
         for (String user : listOfUsers) {
