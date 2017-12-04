@@ -7,13 +7,13 @@
     <artifactId>powerauth-push-model</artifactId>
     <description>PowerAuth 2.0 Push Server RESTful Model Classes</description>
     <groupId>io.getlime.security</groupId>
-    <version>0.17.0</version>
+    <version>0.18.0</version>
     <packaging>jar</packaging>
 
     <parent>
         <artifactId>powerauth-push-server-parent</artifactId>
         <groupId>io.getlime.security</groupId>
-        <version>0.17.0</version>
+        <version>0.18.0</version>
     </parent>
 
     <dependencies>
