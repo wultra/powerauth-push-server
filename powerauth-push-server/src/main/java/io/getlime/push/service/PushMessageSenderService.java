@@ -495,6 +495,7 @@ public class PushMessageSenderService {
                 pushClient.setApnsClient(apnsClient);
                 pushClient.setFcmClient(fcmClient);
                 appRelatedPushClientMap.put(appId, pushClient);
+                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Creating APNS and FCM clients for app " + appId);
             }
             return pushClient;
         }
