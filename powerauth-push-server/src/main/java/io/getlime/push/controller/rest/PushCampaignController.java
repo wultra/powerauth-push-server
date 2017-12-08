@@ -31,6 +31,7 @@ import io.getlime.push.repository.PushCampaignUserRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.PushCampaignUserEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -69,6 +70,9 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
     @ResponseBody
+    @ApiOperation(value = "Create a campaign",
+                  notes = "Creating a campaign requires in request body an application id to be related with " +
+                          "and a certain message that users will receive")
     public ObjectResponse<CreateCampaignResponse> createCampaign(@RequestBody ObjectRequest<CreateCampaignRequest> request) throws PushServerException {
         CreateCampaignRequest requestObject = request.getRequestObject();
         String errorMessage = CreateCampaignRequestValidator.validate(requestObject);
@@ -96,6 +100,8 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/delete", method = RequestMethod.POST)
     @ResponseBody
+    @ApiOperation(value = "Delete a campaign",
+                  notes = "Specified with id. Also users associated with this campaign are going to be deleted. If deletion was applied then deleted status is true. False if such campaign does not exist")
     public ObjectResponse<DeleteCampaignResponse> deleteCampaign(@PathVariable(value = "id") Long campaignId) {
         DeleteCampaignResponse deleteCampaignResponse = new DeleteCampaignResponse();
         if (pushCampaignRepository.findOne(campaignId) == null) {
@@ -109,6 +115,31 @@ public class PushCampaignController {
     }
 
     /**
+     * Method used for getting a specific campaign
+     *
+     * @param campaignId Id of specific campaign
+     * @return Campaign Response
+     * @throws PushServerException In case campaign with provided ID does not exist.
+     */
+    @RequestMapping(value = "{id}/detail", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Return details about campaign",
+                  notes = "Campaign specified by id. Details contain campaign id, application id, status if campaign was sent and message.")
+    public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
+        PushCampaignEntity campaign = pushCampaignRepository.findOne(campaignId);
+        if (campaign == null) {
+            throw new PushServerException("Campaign with entered ID does not exist");
+        }
+        CampaignResponse campaignResponse = new CampaignResponse();
+        campaignResponse.setId(campaign.getId());
+        campaignResponse.setSent(campaign.isSent());
+        campaignResponse.setAppId(campaign.getAppId());
+        PushMessageBody message = JSONSerialization.deserializePushMessageBody(campaign.getMessage());
+        campaignResponse.setMessage(message);
+        return new ObjectResponse<>(campaignResponse);
+    }
+
+    /**
      * Method used for getting a list of campaigns.
      *
      * @param all If true, method returns list of all campaigns. If false, it returns
@@ -118,6 +149,9 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "list", method = RequestMethod.GET)
     @ResponseBody
+    @ApiOperation(value = "Return a detailed list of campaigns",
+                  notes = "Restricted with all param. This parameter decides if return campaigns that are 'only sent'(statement false)" +
+                          " or return all registered campaigns (statement true). Details are same as in getCampaign method")
     public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(@RequestParam(value = "all", required = false) boolean all) throws PushServerException {
         // Fetch campaigns from the repository
         Iterable<PushCampaignEntity> campaignList;
@@ -140,28 +174,6 @@ public class PushCampaignController {
         return new ObjectResponse<>(listOfCampaignsResponse);
     }
 
-    /**
-     * Method used for getting a specific campaign
-     *
-     * @param campaignId Id of specific campaign
-     * @return Campaign Response
-     * @throws PushServerException In case campaign with provided ID does not exist.
-     */
-    @RequestMapping(value = "{id}/detail", method = RequestMethod.GET)
-    @ResponseBody
-    public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
-        PushCampaignEntity campaign = pushCampaignRepository.findOne(campaignId);
-        if (campaign == null) {
-            throw new PushServerException("Campaign with entered ID does not exist");
-        }
-        CampaignResponse campaignResponse = new CampaignResponse();
-        campaignResponse.setId(campaign.getId());
-        campaignResponse.setSent(campaign.isSent());
-        campaignResponse.setAppId(campaign.getAppId());
-        PushMessageBody message = JSONSerialization.deserializePushMessageBody(campaign.getMessage());
-        campaignResponse.setMessage(message);
-        return new ObjectResponse<>(campaignResponse);
-    }
 
     /**
      * Add specific request to specific campaign
@@ -173,6 +185,8 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/user/add", method = RequestMethod.PUT)
     @ResponseBody
+    @ApiOperation(value = "Associate users to campaign",
+                  notes = "Users are identified in request body as an array of strings in request body.")
     public Response addUsersToCampaign(@PathVariable(value = "id") Long campaignId, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
         checkRequestNullity(request);
         final PushCampaignEntity campaignEntity = pushCampaignRepository.findOne(campaignId);
@@ -204,6 +218,10 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/user/list", method = RequestMethod.GET)
     @ResponseBody
+    @ApiOperation(value = "Return list of users",
+                  notes = "Return all users' ids from campaign that is specified in URI {id} variable. " +
+                          "Users are shown in paginated format based on parameters assigned in URI. " +
+                          "Page param defines which page to show (start from 0) and size param which defines how many user ids to show per page")
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(@PathVariable(value = "id") Long id, Pageable pageable) {
         ListOfUsersFromCampaignResponse listOfUsersFromCampaignResponse = new ListOfUsersFromCampaignResponse();
         List<PushCampaignUserEntity> users = pushCampaignUserRepository.findAllByCampaignId(id, pageable);
@@ -228,6 +246,9 @@ public class PushCampaignController {
      */
     @RequestMapping(value = "{id}/user/delete", method = RequestMethod.POST)
     @ResponseBody
+    @ApiOperation(value = "Delete users from campaign",
+                  notes = "Delete users from certain campaign specified with {id} variable in URI." +
+                          "Users are described as list of their ids in Request object")
     public Response deleteUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
         ListOfUsers listOfUsers = request.getRequestObject();
         for (String user : listOfUsers) {
