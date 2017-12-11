@@ -16,7 +16,6 @@
 
 package io.getlime.push.model.validator;
 
-import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.push.model.request.SendPushMessageRequest;
 
 /**

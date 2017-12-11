@@ -30,6 +30,7 @@ import io.getlime.push.model.validator.UpdateDeviceStatusRequestValidator;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -69,6 +70,14 @@ public class PushDeviceController {
      * @throws PushServerException In case request object is invalid.
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
+    @ApiOperation(value = "Create a device",
+                  notes = "Create a new device push token (platform specific). Optionally, the call may include also activationId, so that the token is associated with given user." +
+                          "Request body should contain application ID, device token, device's platform and optionally an activation ID. " +
+                          "If such device already exist, date on last registration is updated and also platform might be changed\n" +
+                          "\n---" +
+                          "Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. " +
+                          "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activationId value," +
+                          " so that there are no incorrect bindings.")
     public @ResponseBody Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
         CreateDeviceRequest requestedObject = request.getRequestObject();
         String errorMessage = CreateDeviceRequestValidator.validate(requestedObject);
@@ -115,6 +124,9 @@ public class PushDeviceController {
     @RequestMapping(value = "status/update", method = RequestMethod.POST)
     public @ResponseBody Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
         String errorMessage = UpdateDeviceStatusRequestValidator.validate(request);
+    @ApiOperation(value = "Update device status",
+                  notes = "Update the status of given device registration based on the associated activation ID. " +
+                          "This can help assure that registration is in non-active state and cannot receive personal messages.")
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
@@ -137,6 +149,9 @@ public class PushDeviceController {
      * @throws PushServerException In case request object is invalid.
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST)
+    @ApiOperation(value = "Delete a device",
+                  notes = "Remove device identified by application ID and device token. " +
+                          "If device identifiers don't match, nothing happens")
     public @ResponseBody Response deleteDevice(@RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
         DeleteDeviceRequest requestedObject = request.getRequestObject();
         String errorMessage = DeleteDeviceRequestValidator.validate(requestedObject);

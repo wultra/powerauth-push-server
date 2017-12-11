@@ -248,7 +248,7 @@ public class PushCampaignController {
     @ResponseBody
     @ApiOperation(value = "Delete users from campaign",
                   notes = "Delete users from certain campaign specified with {id} variable in URI." +
-                          "Users are described as list of their ids in Request object")
+                          "Users are described as list of their ids in Request body")
     public Response deleteUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
         ListOfUsers listOfUsers = request.getRequestObject();
         for (String user : listOfUsers) {

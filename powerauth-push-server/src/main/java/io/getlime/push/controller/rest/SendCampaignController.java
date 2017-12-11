@@ -26,6 +26,7 @@ import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
 import io.getlime.push.service.PushMessageSenderService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -75,6 +76,10 @@ public class SendCampaignController {
      */
     @RequestMapping(value = "live/{id}", method = RequestMethod.POST)
     @ResponseBody
+    @ApiOperation(value = "Send a campaign",
+                  notes = "Send message from a specific campaign to devices belonged to users associated with that campaign. Whereas each device gets a campaign only once.\n" +
+                          "\n" +
+                          "If sending was successful then sent parameter is set on true and timestampSent is set on current time.")
     public Response sendCampaign(@PathVariable(value = "id") Long id) throws PushServerException {
         try {
             PushCampaignEntity campaign = pushCampaignRepository.findOne(id);
@@ -108,6 +113,8 @@ public class SendCampaignController {
      */
     @RequestMapping(value = "test/{id}", method = RequestMethod.POST)
     @ResponseBody
+    @ApiOperation(value = "Send a test campaign",
+                  notes = "Send message from a specific campaign on test user identified in request body, userId param, to check rightness of that campaign.")
     public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
         PushCampaignEntity campaign = pushCampaignRepository.findOne(id);
         TestCampaignRequest requestedObject = request.getRequestObject();
