@@ -19,6 +19,7 @@ package io.getlime.push.controller.rest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.model.response.ServiceStatusResponse;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +49,8 @@ public class ServiceController {
      * @return System status info.
      */
     @RequestMapping(value = "status", method = RequestMethod.GET)
+    @ApiOperation(value = "Service status",
+                  notes = "Send a system status response, with basic information about the running application.")
     public @ResponseBody ObjectResponse<ServiceStatusResponse> getServiceStatus() {
         ServiceStatusResponse response = new ServiceStatusResponse();
         response.setApplicationName(pushServiceConfiguration.getPushServerName());
