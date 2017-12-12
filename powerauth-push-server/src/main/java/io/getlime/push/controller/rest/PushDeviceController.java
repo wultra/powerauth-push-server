@@ -122,11 +122,11 @@ public class PushDeviceController {
      * @throws PushServerException In case request object is invalid.
      */
     @RequestMapping(value = "status/update", method = RequestMethod.POST)
-    public @ResponseBody Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
-        String errorMessage = UpdateDeviceStatusRequestValidator.validate(request);
     @ApiOperation(value = "Update device status",
                   notes = "Update the status of given device registration based on the associated activation ID. " +
                           "This can help assure that registration is in non-active state and cannot receive personal messages.")
+    public @ResponseBody Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
+        String errorMessage = UpdateDeviceStatusRequestValidator.validate(request);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
