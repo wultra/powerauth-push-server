@@ -8,7 +8,7 @@
 
 	<groupId>io.getlime.security</groupId>
 	<artifactId>powerauth-push-server-parent</artifactId>
-	<version>0.17.0</version>
+	<version>0.18.0</version>
 	<packaging>pom</packaging>
 
 	<parent>
@@ -132,15 +132,6 @@
                 </plugins>
             </build>
         </profile>
-		<profile>
-			<id>disable-java8-doclint</id>
-			<activation>
-				<jdk>[1.8,)</jdk>
-			</activation>
-			<properties>
-				<additionalparam>-Xdoclint:none</additionalparam>
-			</properties>
-		</profile>
 	</profiles>
 
 	<distributionManagement>

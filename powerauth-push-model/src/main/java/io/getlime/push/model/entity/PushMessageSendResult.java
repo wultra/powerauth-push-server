@@ -221,6 +221,7 @@ public class PushMessageSendResult {
 
     /**
      * Data associated with push messages sent to Android devices.
+     * @return Data related to FCM service.
      */
     public Android getAndroid() {
         return android;
@@ -228,6 +229,7 @@ public class PushMessageSendResult {
 
     /**
      * Data associated with push messages sent to iOS devices.
+     * @return Data related to APNS service.
      */
     public iOS getIos() {
         return ios;

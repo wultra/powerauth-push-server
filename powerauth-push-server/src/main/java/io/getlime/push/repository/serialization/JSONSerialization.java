@@ -38,6 +38,7 @@ public class JSONSerialization {
      *
      * @param message Message to parse
      * @return PushMessageBody
+     * @throws PushServerException In case object mapping fails.
      */
     public static PushMessageBody deserializePushMessageBody(String message) throws PushServerException {
         PushMessageBody pushMessageBody;
@@ -55,6 +56,7 @@ public class JSONSerialization {
      *
      * @param message string Message to be serialized.
      * @return JSON containing the message contents.
+     * @throws PushServerException In case object mapping fails.
      */
     public static String serializePushMessageBody(PushMessageBody message) throws PushServerException {
         String messageString;

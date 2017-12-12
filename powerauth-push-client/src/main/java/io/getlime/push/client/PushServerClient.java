@@ -105,6 +105,7 @@ public class PushServerClient {
      * Returns service information
      *
      * @return True if service is running.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<ServiceStatusResponse> getServiceStatus() throws PushServerClientException {
         TypeReference<ObjectResponse<ServiceStatusResponse>> typeReference = new TypeReference<ObjectResponse<ServiceStatusResponse>>() {
@@ -119,6 +120,7 @@ public class PushServerClient {
      * @param token Token received from the push service provider (APNs, FCM).
      * @param platform Mobile platform (iOS, Android).
      * @return True if device registration was successful, false otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean createDevice(Long appId, String token, MobilePlatform platform) throws PushServerClientException {
         return createDevice(appId, token, platform, null);
@@ -132,6 +134,7 @@ public class PushServerClient {
      * @param platform Mobile platform (iOS, Android).
      * @param activationId PowerAuth 2.0 activation ID.
      * @return True if device registration was successful, false otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean createDevice(Long appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
         CreateDeviceRequest request = new CreateDeviceRequest();
@@ -151,6 +154,7 @@ public class PushServerClient {
      * @param appId PowerAuth 2.0 application app ID.
      * @param token Token received from the push service provider.
      * @return True if device removal was successful, false otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean deleteDevice(Long appId, String token) throws PushServerClientException {
         DeleteDeviceRequest request = new DeleteDeviceRequest();
@@ -167,13 +171,16 @@ public class PushServerClient {
      *
      * @param activationId Identifier of activation
      * @return True if updating went successful, false otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean updateDeviceStatus(String activationId) throws PushServerClientException {
         UpdateDeviceStatusRequest request = new UpdateDeviceStatusRequest();
         request.setActivationId(activationId);
         TypeReference<Response> typeReference = new TypeReference<Response>() {
         };
-        Response response = postObjectImpl("/push/device/status/update", new ObjectRequest<>(request), typeReference);
+        // Note that there is just plain 'request' in the request, not 'new ObjectRequest<>(request)'.
+        // This is due to the fact that standard PowerAuth Server callback format is used here.
+        Response response = postObjectImpl("/push/device/status/update", request, typeReference);
         return response.getStatus().equals(Response.Status.OK);
     }
 
@@ -183,6 +190,7 @@ public class PushServerClient {
      * @param appId PowerAuth 2.0 application app ID.
      * @param pushMessage Push message to be sent.
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<PushMessageSendResult> sendPushMessage(Long appId, PushMessage pushMessage) throws PushServerClientException {
         SendPushMessageRequest request = new SendPushMessageRequest();
@@ -199,6 +207,7 @@ public class PushServerClient {
      * @param appId PowerAuth 2.0 application app ID.
      * @param batch Push message batch to be sent.
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(Long appId, List<PushMessage> batch) throws PushServerClientException {
         SendPushMessageBatchRequest request = new SendPushMessageBatchRequest();
@@ -212,8 +221,10 @@ public class PushServerClient {
     /**
      * Create a campaign.
      *
+     * @param appId Application ID.
      * @param message Message which attributes are defined in PushMessageBody.
      * @return ID of new created campaign.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<CreateCampaignResponse> createCampaign(Long appId, PushMessageBody message) throws PushServerClientException {
         CreateCampaignRequest request = new CreateCampaignRequest();
@@ -227,7 +238,9 @@ public class PushServerClient {
     /**
      * Delete a campaign specified with campaignId.
      *
+     * @param campaignId Campaign ID.
      * @return True if campaign is removed, false otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean deleteCampaign(Long campaignId) throws PushServerClientException {
         try {
@@ -246,6 +259,7 @@ public class PushServerClient {
      *
      * @param all true to get whole list, false to get campaigns that are only sent
      * @return List of campaigns.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(boolean all) throws PushServerClientException {
         TypeReference<ObjectResponse<ListOfCampaignsResponse>> typeReference = new TypeReference<ObjectResponse<ListOfCampaignsResponse>>() {
@@ -260,6 +274,7 @@ public class PushServerClient {
      *
      * @param campaignId ID of campaign to get.
      * @return Details of campaign, defined in CampaignResponse
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<CampaignResponse> getCampaign(Long campaignId) throws PushServerClientException {
         try {
@@ -278,6 +293,7 @@ public class PushServerClient {
      * @param campaignId Identifier of campaign.
      * @param users List of users to add.
      * @return True if adding was successful, false otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean addUsersToCampaign(Long campaignId, List<String> users) throws PushServerClientException {
         try {
@@ -302,6 +318,7 @@ public class PushServerClient {
      * @param page Page number.
      * @param size Size of elements per page.
      * @return Page of users specified with params.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     @SuppressWarnings("unchecked")
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(Long campaignId, int page, int size) throws PushServerClientException {
@@ -324,6 +341,7 @@ public class PushServerClient {
      * @param campaignId Identifier of campaign.
      * @param users List of users' Identifiers to delete.
      * @return True if deletion was successful, false otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean deleteUsersFromCampaign(Long campaignId, List<String> users) throws PushServerClientException {
         try {
@@ -345,6 +363,7 @@ public class PushServerClient {
      * @param campaignId Identifier of campaign.
      * @param userId Identifier of test user.
      * @return True if sent, else otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean sendTestCampaign(Long campaignId, String userId) throws PushServerClientException {
         try {
@@ -365,6 +384,7 @@ public class PushServerClient {
      *
      * @param campaignId Identifier of campaign.
      * @return True if sent, else otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean sendCampaign(Long campaignId) throws PushServerClientException {
         try {
@@ -381,9 +401,12 @@ public class PushServerClient {
     /**
      * Prepare GET object response.
      *
-     * @param url specific url of method
-     * @param params params to pass to url path, optional
-     * @param typeReference reference on type for parsing into JSON
+     * @param url specific url of method.
+     * @param params params to pass to url path, optional.
+     * @param typeReference reference on type for parsing into JSON.
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     *
      */
     private <T> T getObjectImpl(String url, Map<String, Object> params, TypeReference typeReference) throws PushServerClientException {
         try {
@@ -411,6 +434,8 @@ public class PushServerClient {
      * @param url specific url of method
      * @param request request body
      * @param typeReference reference on type for parsing into JSON
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     private <T> T postObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
         try {
@@ -438,6 +463,8 @@ public class PushServerClient {
      * @param url specific url of method
      * @param request request body
      * @param typeReference reference on type for parsing into JSON
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     private <T> T putObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
         try {
@@ -463,6 +490,10 @@ public class PushServerClient {
      *
      * @param typeReference reference on type of response body from which map into JSON
      * @param response prepared http response
+     * @return In case response code is 200, returns instance of expected response type. Otherwise, it attempts to
+     * reconstruct error response and returns the error response.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     * @throws IOException In case JSON processing fails.
      */
     private <T> T checkHttpStatus(TypeReference typeReference, HttpResponse response) throws IOException, PushServerClientException {
         if (response.getStatus() == 200) {

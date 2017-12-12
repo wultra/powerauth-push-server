@@ -63,13 +63,13 @@ public class PushServerClientTest {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    public ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @MockBean
-    public PushServerClient pushServerClient;
+    private PushServerClient pushServerClient;
 
     @Autowired
-    public AppCredentialsRepository appCredentialsRepository;
+    private AppCredentialsRepository appCredentialsRepository;
 
     @LocalServerPort
     private int port;

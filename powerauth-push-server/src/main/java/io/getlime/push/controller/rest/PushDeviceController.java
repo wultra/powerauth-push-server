@@ -66,6 +66,7 @@ public class PushDeviceController {
      * Create a new device registration.
      * @param request Device registration request.
      * @return Device registration status.
+     * @throws PushServerException In case request object is invalid.
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
     public @ResponseBody Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
@@ -109,15 +110,15 @@ public class PushDeviceController {
      * Update activation status for given device registration.
      * @param request Status update request.
      * @return Status update response.
+     * @throws PushServerException In case request object is invalid.
      */
     @RequestMapping(value = "status/update", method = RequestMethod.POST)
-    public @ResponseBody Response updateDeviceStatus(@RequestBody ObjectRequest<UpdateDeviceStatusRequest> request) throws PushServerException {
-        UpdateDeviceStatusRequest requestedObject = request.getRequestObject();
-        String errorMessage = UpdateDeviceStatusRequestValidator.validate(requestedObject);
+    public @ResponseBody Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
+        String errorMessage = UpdateDeviceStatusRequestValidator.validate(request);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        String activationId = requestedObject.getActivationId();
+        String activationId = request.getActivationId();
         List<PushDeviceRegistrationEntity> device = pushDeviceRepository.findByActivationId(activationId);
         if (device != null)  {
             ActivationStatus status = client.getActivationStatus(activationId).getActivationStatus();
@@ -133,6 +134,7 @@ public class PushDeviceController {
      * Remove device registration with given push token.
      * @param request Remove registration request.
      * @return Removal status response.
+     * @throws PushServerException In case request object is invalid.
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST)
     public @ResponseBody Response deleteDevice(@RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
