@@ -27,6 +27,7 @@ import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.request.SendPushMessageRequest;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
+import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
 import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -58,10 +59,13 @@ public class WebAdminController {
 
     private AppCredentialsRepository appCredentialsRepository;
     private PowerAuthServiceClient client;
+    private AppCredentialStorageMap appCredentialStorageMap;
 
     @Autowired
-    public WebAdminController(AppCredentialsRepository appCredentialsRepository) {
+    public WebAdminController(AppCredentialsRepository appCredentialsRepository,
+                              AppCredentialStorageMap appCredentialStorageMap) {
         this.appCredentialsRepository = appCredentialsRepository;
+        this.appCredentialStorageMap = appCredentialStorageMap;
     }
 
     @Autowired
@@ -220,6 +224,7 @@ public class WebAdminController {
         appCredentialsEntity.setIosKeyId(form.getKeyId());
         appCredentialsEntity.setIosBundle(form.getBundle());
         appCredentialsRepository.save(appCredentialsEntity);
+        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
         return "redirect:/web/admin/app/" + id + "/edit";
     }
 
@@ -234,6 +239,7 @@ public class WebAdminController {
         appCredentialsEntity.setIosKeyId(null);
         appCredentialsEntity.setIosBundle(null);
         AppCredentialsEntity newAppCredentialsEntity = appCredentialsRepository.save(appCredentialsEntity);
+        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
         return "redirect:/web/admin/app/" + newAppCredentialsEntity.getId()  + "/edit";
     }
 
@@ -248,6 +254,7 @@ public class WebAdminController {
         appCredentialsEntity.setAndroidServerKey(form.getToken());
         appCredentialsEntity.setAndroidBundle(form.getBundle());
         appCredentialsRepository.save(appCredentialsEntity);
+        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
         return "redirect:/web/admin/app/" + id + "/edit";
     }
 
@@ -257,6 +264,7 @@ public class WebAdminController {
         appCredentialsEntity.setAndroidServerKey(null);
         appCredentialsEntity.setAndroidBundle(null);
         appCredentialsRepository.save(appCredentialsEntity);
+        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
         return "redirect:/web/admin/app/" + id + "/edit";
     }
 

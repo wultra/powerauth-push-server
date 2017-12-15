@@ -79,17 +79,19 @@ public class PushMessageSenderService {
     private PushDeviceRepository pushDeviceRepository;
     private PushMessageDAO pushMessageDAO;
     private PushServiceConfiguration pushServiceConfiguration;
-    private AppCredentialStorageMap appRelatedPushClientMap = new AppCredentialStorageMap();
+    private AppCredentialStorageMap appRelatedPushClientMap;
 
     @Autowired
     public PushMessageSenderService(AppCredentialsRepository appCredentialsRepository,
                                     PushDeviceRepository pushDeviceRepository,
                                     PushMessageDAO pushMessageDAO,
-                                    PushServiceConfiguration pushServiceConfiguration) {
+                                    PushServiceConfiguration pushServiceConfiguration,
+                                    AppCredentialStorageMap appRelatedPushClientMap) {
         this.appCredentialsRepository = appCredentialsRepository;
         this.pushDeviceRepository = pushDeviceRepository;
         this.pushMessageDAO = pushMessageDAO;
         this.pushServiceConfiguration = pushServiceConfiguration;
+        this.appRelatedPushClientMap = appRelatedPushClientMap;
     }
 
     /**
@@ -494,7 +496,7 @@ public class PushMessageSenderService {
         return client;
     }
 
-    // Prepare and cached APNS and FCM clients for provided app
+    // Prepare and cache APNS and FCM clients for provided app
     private AppRelatedPushClient prepareClients(Long appId) throws PushServerException {
         synchronized (this) {
             AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
@@ -568,7 +570,7 @@ public class PushMessageSenderService {
         payloadBuilder.setCategoryName(push.getCategory());
         payloadBuilder.setSoundFileName(push.getSound());
         payloadBuilder.setContentAvailable(isSilent);
-        //payloadBuilder.setThreadId(push.getBody().getCollapseKey());
+        payloadBuilder.setThreadId(push.getCollapseKey());
         Map<String, Object> extras = push.getExtras();
         if (extras != null) {
             for (Map.Entry<String, Object> entry : extras.entrySet()) {
