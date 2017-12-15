@@ -357,7 +357,6 @@ public class PushMessageSenderService {
         request.setTo(pushToken);
         request.setData(pushMessageBody.getExtras());
         request.setCollapseKey(pushMessageBody.getCollapseKey());
-        request.setData(pushMessageBody.getExtras());
         if (pushServiceConfiguration.isFcmDataNotificationOnly()) { //notification only through data map
             FcmNotification notification = new FcmNotification();
             notification.setTitle(pushMessageBody.getTitle());
