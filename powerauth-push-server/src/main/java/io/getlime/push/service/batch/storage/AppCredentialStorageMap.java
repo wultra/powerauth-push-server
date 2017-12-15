@@ -44,4 +44,14 @@ public class AppCredentialStorageMap implements ItemStorageMap<Long, AppRelatedP
     public boolean contains(Long key) {
         return map.containsKey(key);
     }
+
+    @Override
+    public void cleanAll() {
+        map.clear();
+    }
+
+    @Override
+    public void cleanByKey(Long key) {
+        map.remove(key);
+    }
 }

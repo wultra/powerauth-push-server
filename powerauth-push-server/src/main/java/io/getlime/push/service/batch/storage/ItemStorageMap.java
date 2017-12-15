@@ -29,4 +29,8 @@ public interface ItemStorageMap<K,V> {
 
     boolean contains(K key);
 
+    void cleanAll();
+
+    void cleanByKey(K key);
+
 }
