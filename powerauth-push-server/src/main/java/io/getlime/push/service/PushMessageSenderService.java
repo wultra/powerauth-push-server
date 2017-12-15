@@ -79,17 +79,19 @@ public class PushMessageSenderService {
     private PushDeviceRepository pushDeviceRepository;
     private PushMessageDAO pushMessageDAO;
     private PushServiceConfiguration pushServiceConfiguration;
-    private AppCredentialStorageMap appRelatedPushClientMap = new AppCredentialStorageMap();
+    private AppCredentialStorageMap appRelatedPushClientMap;
 
     @Autowired
     public PushMessageSenderService(AppCredentialsRepository appCredentialsRepository,
                                     PushDeviceRepository pushDeviceRepository,
                                     PushMessageDAO pushMessageDAO,
-                                    PushServiceConfiguration pushServiceConfiguration) {
+                                    PushServiceConfiguration pushServiceConfiguration,
+                                    AppCredentialStorageMap appRelatedPushClientMap) {
         this.appCredentialsRepository = appCredentialsRepository;
         this.pushDeviceRepository = pushDeviceRepository;
         this.pushMessageDAO = pushMessageDAO;
         this.pushServiceConfiguration = pushServiceConfiguration;
+        this.appRelatedPushClientMap = appRelatedPushClientMap;
     }
 
     /**
@@ -482,7 +484,7 @@ public class PushMessageSenderService {
         return client;
     }
 
-    // Prepare and cached APNS and FCM clients for provided app
+    // Prepare and cache APNS and FCM clients for provided app
     private AppRelatedPushClient prepareClients(Long appId) throws PushServerException {
         synchronized (this) {
             AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
