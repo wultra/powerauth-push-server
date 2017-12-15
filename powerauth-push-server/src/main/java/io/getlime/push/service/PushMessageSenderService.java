@@ -357,7 +357,15 @@ public class PushMessageSenderService {
         request.setTo(pushToken);
         request.setData(pushMessageBody.getExtras());
         request.setCollapseKey(pushMessageBody.getCollapseKey());
-        if (attributes == null || !attributes.getSilent()) { // if there are no attributes, assume the message is not silent
+        if (pushServiceConfiguration.isFcmDataNotificationOnly()) { //notification only through data map
+            FcmNotification notification = new FcmNotification();
+            notification.setTitle(pushMessageBody.getTitle());
+            notification.setBody(pushMessageBody.getBody());
+            notification.setIcon(pushMessageBody.getIcon());
+            notification.setSound(pushMessageBody.getSound());
+            notification.setTag(pushMessageBody.getCategory());
+            request.getData().put("_notification", notification);
+        } else if (attributes == null || !attributes.getSilent()) { // if there are no attributes, assume the message is not silent
             FcmNotification notification = new FcmNotification();
             notification.setTitle(pushMessageBody.getTitle());
             notification.setBody(pushMessageBody.getBody());
@@ -366,6 +374,7 @@ public class PushMessageSenderService {
             notification.setTag(pushMessageBody.getCategory());
             request.setNotification(notification);
         }
+
         final ListenableFuture<ResponseEntity<FcmSendResponse>> future = fcmClient.exchange(request);
 
         future.addCallback(new ListenableFutureCallback<ResponseEntity<FcmSendResponse>>() {
