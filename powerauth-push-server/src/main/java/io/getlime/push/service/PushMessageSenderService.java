@@ -364,9 +364,7 @@ public class PushMessageSenderService {
             notification.setIcon(pushMessageBody.getIcon());
             notification.setSound(pushMessageBody.getSound());
             notification.setTag(pushMessageBody.getCategory());
-            Map<String, Object> data = request.getData();
-            data.put("_notification", notification);
-            request.setData(data);
+            request.getData().put("_notification", notification);
         } else if (attributes == null || !attributes.getSilent()) { // if there are no attributes, assume the message is not silent
             FcmNotification notification = new FcmNotification();
             notification.setTitle(pushMessageBody.getTitle());
