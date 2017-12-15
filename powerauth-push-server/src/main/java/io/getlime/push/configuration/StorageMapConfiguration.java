@@ -35,7 +35,6 @@ public class StorageMapConfiguration {
      * Bean definition for App credentials map
      */
     @Bean
-    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
     public AppCredentialStorageMap appCredentialStorageMap() {
         return new AppCredentialStorageMap();
     }
