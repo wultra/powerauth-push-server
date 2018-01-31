@@ -344,6 +344,7 @@ public class PushMessageSenderService {
                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING, null);
                     }
                 } catch (ExecutionException | InterruptedException e) {
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Push Message Sending Failed", e);
                     callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
                 }
             }
@@ -372,7 +373,7 @@ public class PushMessageSenderService {
 
             @Override
             public void onFailure(Throwable throwable) {
-                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway: " + throwable.getLocalizedMessage());
+                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway: " + throwable.getLocalizedMessage(), throwable);
                 callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
             }
 
@@ -454,13 +455,13 @@ public class PushMessageSenderService {
             ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);
             apnsClientBuilder.setSigningKey(key);
         } catch (InvalidKeyException | NoSuchAlgorithmException | IOException e) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage());
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage(), e);
             throw new PushServerException("Invalid private key");
         }
         try {
             return apnsClientBuilder.build();
         } catch (SSLException e) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage());
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage(), e);
             throw new PushServerException("SSL problem");
         }
     }
