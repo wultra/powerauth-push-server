@@ -20,14 +20,25 @@ import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.fcm.FcmClient;
 
 /**
- * Class storing app credentials and clients
+ * Class storing app credentials and clients.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
 public class AppRelatedPushClient {
 
+    /**
+     * Credentials related to application with given ID.
+     */
     private AppCredentialsEntity appCredentials;
+
+    /**
+     * APNS client instance, used for iOS applications.
+     */
     private ApnsClient apnsClient;
+
+    /**
+     * FCM client instance, used for Android applications.
+     */
     private FcmClient fcmClient;
 
     public AppCredentialsEntity getAppCredentials() {

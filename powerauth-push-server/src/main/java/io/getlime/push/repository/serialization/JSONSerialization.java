@@ -46,7 +46,7 @@ public class JSONSerialization {
             pushMessageBody = new ObjectMapper().readValue(message, PushMessageBody.class);
         } catch (IOException e) {
             Logger.getLogger(PushCampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-            throw new PushServerException("Failed parsing from JSON");
+            throw new PushServerException("Failed parsing from JSON", e);
         }
         return pushMessageBody;
     }
@@ -64,7 +64,7 @@ public class JSONSerialization {
             messageString = new ObjectMapper().writeValueAsString(message);
         } catch (JsonProcessingException e) {
             Logger.getLogger(PushCampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-            throw new PushServerException("Failed parsing into JSON");
+            throw new PushServerException("Failed parsing into JSON", e);
         }
         return messageString;
     }

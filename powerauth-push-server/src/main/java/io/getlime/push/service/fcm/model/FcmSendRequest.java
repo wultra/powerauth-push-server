@@ -36,20 +36,20 @@ public class FcmSendRequest {
     private String to;
 
     /**
-     * Attribute of @link io.getlime.push.model.entity.PushMessageBody
+     * Flag that allows messages to be collapsible.
      */
     @JsonProperty(value = "collapse_key")
     private String collapseKey;
 
     /**
-     * Attribute of @link io.getlime.push.model.entity.PushMessageBody as extras
-     */
-    private Map<String, Object> data;
-
-    /**
-     * Attributes of @link io.getlime.push.model.entity.PushMessageBody
+     * Notification payload for "FCM Notification Messages"
      */
     private FcmNotification notification;
+
+    /**
+     * Notification payload for "FCM Data Messages"
+     */
+    private Map<String, Object> data;
 
     public String getTo() {
         return to;

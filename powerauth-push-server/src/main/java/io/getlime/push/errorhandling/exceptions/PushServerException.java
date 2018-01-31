@@ -15,8 +15,10 @@
  */
 
 package io.getlime.push.errorhandling.exceptions;
+
 /**
- * General exception class thrown in specific push server methods, exception accompanied by specific message
+ * General exception class thrown in specific push server methods,
+ * accompanied by specific message.
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
@@ -24,5 +26,13 @@ public class PushServerException extends Exception {
 
     public PushServerException(String message) {
         super(message);
+    }
+
+    public PushServerException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public PushServerException(Throwable cause) {
+        super(cause);
     }
 }

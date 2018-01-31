@@ -93,13 +93,13 @@ public class SendCampaignController {
             jobLauncher.run(job, jobParameters);
             return new Response();
         } catch (JobExecutionAlreadyRunningException e) {
-            throw new PushServerException("Job execution already running");
+            throw new PushServerException("Job execution already running", e);
         } catch (JobRestartException e) {
-            throw new PushServerException("Job is restarted");
+            throw new PushServerException("Job is restarted", e);
         } catch (JobInstanceAlreadyCompleteException e) {
-            throw new PushServerException("Job instance already completed");
+            throw new PushServerException("Job instance already completed", e);
         } catch (JobParametersInvalidException e) {
-            throw new PushServerException("Job parameters are invalid");
+            throw new PushServerException("Job parameters are invalid", e);
         }
     }
 
