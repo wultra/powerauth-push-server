@@ -250,61 +250,55 @@ public class PushMessageSenderService {
         final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, activationId, deviceId);
 
         if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
-            sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), new PushSendingCallback() {
-                @Override
-                public void didFinishSendingMessage(Result result, Map<String, Object> contextData) {
-                    switch (result) {
-                        case OK: {
-                            pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                            pushMessageDAO.save(pushMessageObject);
-                            break;
-                        }
-                        case PENDING: {
-                            pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                            pushMessageDAO.save(pushMessageObject);
-                            break;
-                        }
-                        case FAILED: {
-                            pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                            pushMessageDAO.save(pushMessageObject);
-                            break;
-                        }
-                        case FAILED_DELETE: {
-                            pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                            pushMessageDAO.save(pushMessageObject);
-                            pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
-                            break;
-                        }
+            sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), (result, contextData) -> {
+                switch (result) {
+                    case OK: {
+                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
+                        pushMessageDAO.save(pushMessageObject);
+                        break;
+                    }
+                    case PENDING: {
+                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
+                        pushMessageDAO.save(pushMessageObject);
+                        break;
+                    }
+                    case FAILED: {
+                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                        pushMessageDAO.save(pushMessageObject);
+                        break;
+                    }
+                    case FAILED_DELETE: {
+                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                        pushMessageDAO.save(pushMessageObject);
+                        pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
+                        break;
                     }
                 }
             });
         } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
-            sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, new PushSendingCallback() {
-                @Override
-                public void didFinishSendingMessage(Result result, Map<String, Object> contextData) {
-                    switch (result) {
-                        case OK: {
-                            pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                            pushMessageDAO.save(pushMessageObject);
-                            updateFcmTokenIfNeeded(appId, token, contextData);
-                            break;
-                        }
-                        case PENDING: {
-                            pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                            pushMessageDAO.save(pushMessageObject);
-                            break;
-                        }
-                        case FAILED: {
-                            pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                            pushMessageDAO.save(pushMessageObject);
-                            break;
-                        }
-                        case FAILED_DELETE: {
-                            pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                            pushMessageDAO.save(pushMessageObject);
-                            pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
-                            break;
-                        }
+            sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, (result, contextData) -> {
+                switch (result) {
+                    case OK: {
+                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
+                        pushMessageDAO.save(pushMessageObject);
+                        updateFcmTokenIfNeeded(appId, token, contextData);
+                        break;
+                    }
+                    case PENDING: {
+                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
+                        pushMessageDAO.save(pushMessageObject);
+                        break;
+                    }
+                    case FAILED: {
+                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                        pushMessageDAO.save(pushMessageObject);
+                        break;
+                    }
+                    case FAILED_DELETE: {
+                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                        pushMessageDAO.save(pushMessageObject);
+                        pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
+                        break;
                     }
                 }
             });
@@ -312,7 +306,7 @@ public class PushMessageSenderService {
     }
 
     // Send message to iOS platform
-    private void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final String iosTopic, final PushSendingCallback callback) throws PushServerException {
+    private void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
         final String payload = buildApnsPayload(pushMessageBody, attributes == null ? false : attributes.getSilent()); // In case there are no attributes, the message is not silent
@@ -323,7 +317,7 @@ public class PushMessageSenderService {
         sendNotificationFuture.addListener(new GenericFutureListener<Future<PushNotificationResponse<SimpleApnsPushNotification>>>() {
 
             @Override
-            public void operationComplete(Future<PushNotificationResponse<SimpleApnsPushNotification>> future) throws Exception {
+            public void operationComplete(Future<PushNotificationResponse<SimpleApnsPushNotification>> future) {
                 try {
                     final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = future.get();
                     if (pushNotificationResponse != null) {
@@ -351,7 +345,7 @@ public class PushMessageSenderService {
     }
 
     // Send message to Android platform
-    private void sendMessageToAndroid(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final PushSendingCallback callback) throws PushServerException {
+    private void sendMessageToAndroid(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final PushSendingCallback callback) {
 
         FcmSendRequest request = new FcmSendRequest();
         request.setTo(pushToken);
@@ -463,14 +457,14 @@ public class PushMessageSenderService {
             ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);
             apnsClientBuilder.setSigningKey(key);
         } catch (InvalidKeyException | NoSuchAlgorithmException | IOException e) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage());
-            throw new PushServerException("Invalid private key");
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            throw new PushServerException("Invalid private key", e);
         }
         try {
             return apnsClientBuilder.build();
         } catch (SSLException e) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage());
-            throw new PushServerException("SSL problem");
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            throw new PushServerException("SSL problem", e);
         }
     }
 
