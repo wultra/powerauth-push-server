@@ -27,27 +27,32 @@ import java.util.List;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 public class FcmSendResponse {
+
+    /**
+     * Unique ID that identifies the multicast message.
+     * Note: This attribute is in general not relevant for our typical use-cases.
+     */
     @JsonProperty(value = "multicast_id")
     private Long multicastId;
 
     /**
-     * number of sent messages
+     * Number of sent messages.
      */
     private int success;
 
     /**
-     * number of rejected messages
+     * Number of rejected messages.
      */
     private int failure;
 
     /**
-     * number of sent messages whose tokens have to be updated
+     * Number of sent messages whose tokens have to be updated
      */
     @JsonProperty(value = "canonical_ids")
     private int canonicalIds;
 
     /**
-     * concrete results
+     * Array of objects representing the status of the messages processed.
      */
     @JsonProperty(value = "results")
     private List<FcmResult> fcmResults;

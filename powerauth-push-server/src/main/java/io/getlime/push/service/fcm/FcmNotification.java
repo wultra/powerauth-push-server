@@ -17,16 +17,38 @@
 package io.getlime.push.service.fcm;
 
 /**
- * Class representing the FCM notification payload.
+ * Class representing the FCM notification payload, used for "FCM Notification Messages".
+ *
+ * Note that {@link FcmClient} may send data payload alongside the {@link FcmNotification}
+ * payload. The data payload is then represented as a generic Map<String, Object>.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
 public class FcmNotification {
 
+    /**
+     * Notification title.
+     */
     private String title;
+
+    /**
+     * Notification text body.
+     */
     private String body;
+
+    /**
+     * Notification icon name.
+     */
     private String icon;
+
+    /**
+     * Notification sound name.
+     */
     private String sound;
+
+    /**
+     * Notification tag.
+     */
     private String tag;
 
     public String getTitle() {
