@@ -329,6 +329,8 @@ public class PushMessageSenderService {
                             } else if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
                                 Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "\t... and the token is invalid as of " + pushNotificationResponse.getTokenInvalidationTimestamp());
                                 callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
+                            } else {
+                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
                             }
                         } else {
                             callback.didFinishSendingMessage(PushSendingCallback.Result.OK, null);
