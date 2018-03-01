@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-package io.getlime.push.service.batch.storage;
+package io.getlime.push.configuration;
+
+import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 
 /**
- * Interface for generic item storage
- * @param <K> Key class for item storage.
- * @param <V> Value class for item storage.
+ * Configuration class for in memory maps
+ *
+ * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-public interface ItemStorageMap<K,V> {
+@Configuration
+public class StorageMapConfiguration {
 
-    V get(K key);
-
-    void put(K key, V value);
-
-    boolean contains(K key);
-
-    void cleanAll();
-
-    void cleanByKey(K key);
-
+    /**
+     * Bean definition for App credentials map
+     */
+    @Bean
+    public AppCredentialStorageMap appCredentialStorageMap() {
+        return new AppCredentialStorageMap();
+    }
 }

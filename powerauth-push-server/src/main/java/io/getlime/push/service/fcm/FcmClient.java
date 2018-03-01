@@ -68,10 +68,10 @@ public class FcmClient {
         clientBuilder.setProxy(new HttpHost(host, port));
 
         if (username != null) {
-            CredentialsProvider credsProvider = new BasicCredentialsProvider();
+            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             UsernamePasswordCredentials user = new UsernamePasswordCredentials(username, password);
-            credsProvider.setCredentials(new AuthScope(host, port), user);
-            clientBuilder.setDefaultCredentialsProvider(credsProvider);
+            credentialsProvider.setCredentials(new AuthScope(host, port), user);
+            clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
             clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
         }
 
