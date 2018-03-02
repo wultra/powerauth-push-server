@@ -115,16 +115,20 @@ public class PushCampaignEntity implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        PushCampaignEntity entity = (PushCampaignEntity) o;
+        PushCampaignEntity that = (PushCampaignEntity) o;
 
-        if (!getMessage().equals(entity.getMessage())) return false;
-        return getTimestampCreated().equals(entity.getTimestampCreated());
+        if (message == null || timestampCreated == null ||
+                that.message == null || that.timestampCreated == null) {
+            return false;
+        }
+        return message.equals(that.message) &&
+                timestampCreated.equals(that.timestampCreated);
     }
 
     @Override
     public int hashCode() {
-        int result = getMessage().hashCode();
-        result = 31 * result + getTimestampCreated().hashCode();
+        int result = message.hashCode();
+        result = 31 * result + timestampCreated.hashCode();
         return result;
     }
 }

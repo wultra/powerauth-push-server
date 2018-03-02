@@ -156,14 +156,18 @@ public class PushDeviceRegistrationEntity implements Serializable {
 
         PushDeviceRegistrationEntity that = (PushDeviceRegistrationEntity) o;
 
-        if (!getPlatform().equals(that.getPlatform())) return false;
-        return getPushToken().equals(that.getPushToken());
+        if (platform == null || pushToken == null ||
+                that.platform == null || that.pushToken == null) {
+            return false;
+        }
+        return platform.equals(that.platform) &&
+                pushToken.equals(that.pushToken);
     }
 
     @Override
     public int hashCode() {
-        int result = getPlatform().hashCode();
-        result = 31 * result + getPushToken().hashCode();
+        int result = platform.hashCode();
+        result = 31 * result + pushToken.hashCode();
         return result;
     }
 }

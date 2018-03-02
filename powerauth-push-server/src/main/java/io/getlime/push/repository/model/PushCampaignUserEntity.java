@@ -16,6 +16,7 @@
 package io.getlime.push.repository.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -94,16 +95,20 @@ public class PushCampaignUserEntity implements Serializable {
 
         PushCampaignUserEntity that = (PushCampaignUserEntity) o;
 
-        if (!getCampaignId().equals(that.getCampaignId())) return false;
-        if (!getUserId().equals(that.getUserId())) return false;
-        return getAppId().equals(that.getAppId());
+        if (campaignId == null || userId == null || appId == null ||
+                that.campaignId == null || that.userId == null || that.appId == null) {
+            return false;
+        }
+        return campaignId.equals(that.campaignId) &&
+                userId.equals(that.userId) &&
+                appId.equals(that.appId);
     }
 
     @Override
     public int hashCode() {
-        int result = getCampaignId().hashCode();
-        result = 31 * result + getUserId().hashCode();
-        result = 31 * result + getAppId().hashCode();
+        int result = campaignId.hashCode();
+        result = 31 * result + userId.hashCode();
+        result = 31 * result + appId.hashCode();
         return result;
     }
 }

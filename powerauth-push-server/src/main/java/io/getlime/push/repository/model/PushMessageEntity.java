@@ -168,16 +168,21 @@ public class PushMessageEntity implements Serializable {
 
         PushMessageEntity that = (PushMessageEntity) o;
 
-        if (!getDeviceId().equals(that.getDeviceId())) return false;
-        if (!getMessageBody().equals(that.getMessageBody())) return false;
-        return getTimestampCreated().equals(that.getTimestampCreated());
+        if  (deviceId == null || messageBody == null || timestampCreated == null ||
+                that.deviceId == null || that.messageBody == null || timestampCreated == null) {
+            return false;
+        }
+
+        return deviceId.equals(that.deviceId) &&
+                messageBody.equals(that.messageBody) &&
+                timestampCreated.equals(that.timestampCreated);
     }
 
     @Override
     public int hashCode() {
-        int result = getDeviceId().hashCode();
-        result = 31 * result + getMessageBody().hashCode();
-        result = 31 * result + getTimestampCreated().hashCode();
+        int result = deviceId.hashCode();
+        result = 31 * result + messageBody.hashCode();
+        result = 31 * result + timestampCreated.hashCode();
         return result;
     }
 }

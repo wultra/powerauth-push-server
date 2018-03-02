@@ -126,12 +126,15 @@ public class AppCredentialsEntity implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
 
         AppCredentialsEntity that = (AppCredentialsEntity) o;
-
-        return getAppId().equals(that.getAppId());
+        if (appId == null ||
+                that.appId == null) {
+            return false;
+        }
+        return appId.equals(that.appId);
     }
 
     @Override
     public int hashCode() {
-        return getAppId().hashCode();
+        return appId.hashCode();
     }
 }
