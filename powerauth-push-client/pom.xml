@@ -6,13 +6,13 @@
     <artifactId>powerauth-push-client</artifactId>
     <description>PowerAuth 2.0 Push Server RESTful Client</description>
     <groupId>io.getlime.security</groupId>
-    <version>0.17.0</version>
+    <version>0.18.0</version>
     <packaging>jar</packaging>
 
     <parent>
         <artifactId>powerauth-push-server-parent</artifactId>
         <groupId>io.getlime.security</groupId>
-        <version>0.17.0</version>
+        <version>0.18.0</version>
     </parent>
 
     <dependencies>
@@ -20,17 +20,17 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>23.0</version>
+            <version>24.1-jre</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.9.2</version>
+            <version>2.9.4</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.2</version>
+            <version>2.9.4</version>
         </dependency>
 
 
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-push-model</artifactId>
-            <version>0.17.0</version>
+            <version>0.18.0</version>
         </dependency>
 
     </dependencies>

@@ -71,6 +71,9 @@ public class PushServiceConfiguration {
     @Value("${powerauth.push.service.fcm.proxy.password}")
     private String fcmProxyPassword;
 
+    @Value("${powerauth.push.service.fcm.dataNotificationOnly}")
+    private boolean fcmDataNotificationOnly;
+
     // Campaign Configuration
     @Value("${powerauth.push.service.campaign.batchSize}")
     private int campaignBatchSize;
@@ -297,6 +300,22 @@ public class PushServiceConfiguration {
      */
     public void setFcmProxyPassword(String fcmProxyPassword) {
         this.fcmProxyPassword = fcmProxyPassword;
+    }
+
+    /**
+     * Get status if notification is set to be sent only through data map
+     * @return True in case FCM notification should always be a "data" notification, even for messages with title and message, false otherwise.
+     */
+    public boolean isFcmDataNotificationOnly() {
+        return fcmDataNotificationOnly;
+    }
+
+    /**
+     * Set if notification should be send only through data map
+     * @param fcmDataNotificationOnly True in case FCM notification should always be a "data" notification, even for messages with title and message, false otherwise.
+     */
+    public void setFcmDataNotificationOnly(boolean fcmDataNotificationOnly) {
+        this.fcmDataNotificationOnly = fcmDataNotificationOnly;
     }
 
     /**

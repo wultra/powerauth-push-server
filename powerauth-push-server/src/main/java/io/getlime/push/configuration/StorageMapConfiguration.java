@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package io.getlime.push.model.validator;
+package io.getlime.push.configuration;
 
-import io.getlime.push.model.request.SendPushMessageRequest;
+import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 
 /**
- * Validator class used in sending PushMessage
+ * Configuration class for in memory maps
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-public class SendPushMessageRequestValidator {
-    public static String validate(SendPushMessageRequest request) {
-        if (request == null) {
-            return "Empty request";
-        } else if (request.getMessage() == null) {
-            return "Empty message";
-        } else if (request.getMessage().getBody() == null) {
-            return "Empty body";
-        }
-        else if (request.getAppId() == null) {
-            return "Empty app ID";
-        }
-        return null;
+@Configuration
+public class StorageMapConfiguration {
+
+    /**
+     * Bean definition for app credentials map
+     * @return Bean with app credential storage map.
+     */
+    @Bean
+    public AppCredentialStorageMap appCredentialStorageMap() {
+        return new AppCredentialStorageMap();
     }
 }

@@ -21,6 +21,7 @@ import io.getlime.push.model.entity.PushMessageBody;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
  * Simple to use class for storing campaigns. Simple in-memory storage cache for app credentials. Uses {@link HashMap}
  * as an underlying storage.
@@ -44,5 +45,15 @@ public class CampaignMessageStorageMap implements ItemStorageMap<Long, PushMessa
     @Override
     public boolean contains(Long key) {
         return mapStorage.containsKey(key);
+    }
+
+    @Override
+    public void cleanAll() {
+        mapStorage.clear();
+    }
+
+    @Override
+    public void cleanByKey(Long key) {
+        mapStorage.remove(key);
     }
 }

@@ -40,18 +40,16 @@ public class DefaultExceptionHandler {
     @ExceptionHandler(Throwable.class)
     @ResponseBody
     public ErrorResponse handleConflict(Exception e) {
-        ErrorResponse response = new ErrorResponse(new Error(Error.Code.ERROR_GENERIC, e.getMessage()));
-        Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, null, e);
-        return response;
+        Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+        return new ErrorResponse(Error.Code.ERROR_GENERIC, e);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
     @ExceptionHandler(PushServerException.class)
     @ResponseBody
     public ErrorResponse handlePushException(Exception e) {
-        ErrorResponse response = new ErrorResponse(new Error(Error.Code.ERROR_GENERIC, e.getMessage()));
-        Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, null, e);
-        return response;
+        Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+        return new ErrorResponse(Error.Code.ERROR_GENERIC, e);
     }
 
 
@@ -59,8 +57,7 @@ public class DefaultExceptionHandler {
     @ExceptionHandler(EmptyResultDataAccessException.class)
     @ResponseBody
     public ErrorResponse handleDatabaseNotFound(Exception e) {
-        ErrorResponse response = new ErrorResponse(new Error(DatabaseError.Code.ERROR_DATABASE, e.getMessage()));
-        Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, null, e);
-        return response;
+        Logger.getLogger(DefaultExceptionHandler.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+        return new ErrorResponse(DatabaseError.Code.ERROR_DATABASE, e);
     }
 }
