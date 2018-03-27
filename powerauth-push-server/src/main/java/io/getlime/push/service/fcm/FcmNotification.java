@@ -20,7 +20,7 @@ package io.getlime.push.service.fcm;
  * Class representing the FCM notification payload, used for "FCM Notification Messages".
  *
  * Note that {@link FcmClient} may send data payload alongside the {@link FcmNotification}
- * payload. The data payload is then represented as a generic Map<String, Object>.
+ * payload. The data payload is then represented as a generic Map&lt;String, Object&gt;.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */

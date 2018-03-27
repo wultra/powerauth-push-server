@@ -30,7 +30,8 @@ import org.springframework.context.annotation.Configuration;
 public class StorageMapConfiguration {
 
     /**
-     * Bean definition for App credentials map
+     * Bean definition for app credentials map
+     * @return Bean with app credential storage map.
      */
     @Bean
     public AppCredentialStorageMap appCredentialStorageMap() {
