@@ -35,7 +35,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class SwaggerConfiguration {
 
     /**
-     * Bean definition for swagger
+     * Bean definition for Swagger documentation.
+     * @return Docklet with definition of API documentation.
      */
     @Bean
     public Docket api() {

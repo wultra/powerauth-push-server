@@ -304,6 +304,7 @@ public class PushServiceConfiguration {
 
     /**
      * Get status if notification is set to be sent only through data map
+     * @return True in case FCM notification should always be a "data" notification, even for messages with title and message, false otherwise.
      */
     public boolean isFcmDataNotificationOnly() {
         return fcmDataNotificationOnly;
@@ -311,6 +312,7 @@ public class PushServiceConfiguration {
 
     /**
      * Set if notification should be send only through data map
+     * @param fcmDataNotificationOnly True in case FCM notification should always be a "data" notification, even for messages with title and message, false otherwise.
      */
     public void setFcmDataNotificationOnly(boolean fcmDataNotificationOnly) {
         this.fcmDataNotificationOnly = fcmDataNotificationOnly;

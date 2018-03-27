@@ -57,7 +57,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>24.0-jre</version>
+			<version>24.1-jre</version>
 		</dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -96,7 +96,7 @@
         <dependency>
 			<groupId>io.getlime.security</groupId>
 			<artifactId>powerauth-java-client-spring</artifactId>
-			<version>0.17.0</version>
+			<version>0.18.0</version>
 		</dependency>
 
 		<dependency>
