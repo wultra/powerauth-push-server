@@ -30,6 +30,7 @@ import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.web.client.RestClientException;
 
 /**
  * FCM server client
@@ -87,8 +88,9 @@ public class FcmClient {
      * Send given FCM request to the server.
      * @param request FCM data request.
      * @return Listenable future for result callbacks.
+     * @throws RestClientException In case network error occurs.
      */
-    public ListenableFuture<ResponseEntity<FcmSendResponse>> exchange(FcmSendRequest request) {
+    public ListenableFuture<ResponseEntity<FcmSendResponse>> exchange(FcmSendRequest request) throws RestClientException {
         HttpEntity<FcmSendRequest> entity = new HttpEntity<>(request, headers);
         return restTemplate.exchange(fcm_url, HttpMethod.POST, entity, FcmSendResponse.class);
     }

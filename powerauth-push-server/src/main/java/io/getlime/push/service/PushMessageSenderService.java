@@ -51,6 +51,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.web.client.RestClientException;
 
 import javax.net.ssl.SSLException;
 import java.io.ByteArrayInputStream;
@@ -378,7 +379,14 @@ public class PushMessageSenderService {
             request.setNotification(notification);
         }
 
-        final ListenableFuture<ResponseEntity<FcmSendResponse>> future = fcmClient.exchange(request);
+        final ListenableFuture<ResponseEntity<FcmSendResponse>> future;
+        try {
+            future = fcmClient.exchange(request);
+        } catch (Throwable t) { // In case of some catastrophic error
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification sending failed: " + t.getLocalizedMessage(), t);
+            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
+            return;
+        }
 
         future.addCallback(new ListenableFutureCallback<ResponseEntity<FcmSendResponse>>() {
 
