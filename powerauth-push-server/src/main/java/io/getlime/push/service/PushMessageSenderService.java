@@ -138,69 +138,75 @@ public class PushMessageSenderService {
                     String platform = device.getPlatform();
                     if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
                         sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), (result, contextData) -> {
-                            switch (result) {
-                                case OK: {
-                                    sendResult.getIos().setSent(sendResult.getIos().getSent() + 1);
-                                    pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                                    pushMessageDAO.save(pushMessageObject);
-                                    break;
+                            try {
+                                switch (result) {
+                                    case OK: {
+                                        sendResult.getIos().setSent(sendResult.getIos().getSent() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
+                                        pushMessageDAO.save(pushMessageObject);
+                                        break;
+                                    }
+                                    case PENDING: {
+                                        sendResult.getIos().setPending(sendResult.getIos().getPending() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
+                                        pushMessageDAO.save(pushMessageObject);
+                                        break;
+                                    }
+                                    case FAILED: {
+                                        sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                                        pushMessageDAO.save(pushMessageObject);
+                                        break;
+                                    }
+                                    case FAILED_DELETE: {
+                                        sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                                        pushMessageDAO.save(pushMessageObject);
+                                        pushDeviceRepository.delete(device);
+                                        break;
+                                    }
                                 }
-                                case PENDING: {
-                                    sendResult.getIos().setPending(sendResult.getIos().getPending() + 1);
-                                    pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                                    pushMessageDAO.save(pushMessageObject);
-                                    break;
-                                }
-                                case FAILED: {
-                                    sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
-                                    pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                    pushMessageDAO.save(pushMessageObject);
-                                    break;
-                                }
-                                case FAILED_DELETE: {
-                                    sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
-                                    pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                    pushMessageDAO.save(pushMessageObject);
-                                    pushDeviceRepository.delete(device);
-                                    break;
-                                }
+                                sendResult.getIos().setTotal(sendResult.getIos().getTotal() + 1);
+                            } finally {
+                                phaser.arriveAndDeregister();
                             }
-                            sendResult.getIos().setTotal(sendResult.getIos().getTotal() + 1);
-                            phaser.arriveAndDeregister();
                         });
                     } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
                         final String token = device.getPushToken();
                         sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), token, (sendingResult, contextData) -> {
-                            switch (sendingResult) {
-                                case OK: {
-                                    sendResult.getAndroid().setSent(sendResult.getAndroid().getSent() + 1);
-                                    pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                                    pushMessageDAO.save(pushMessageObject);
-                                    updateFcmTokenIfNeeded(appId, token, contextData);
-                                    break;
+                            try {
+                                switch (sendingResult) {
+                                    case OK: {
+                                        sendResult.getAndroid().setSent(sendResult.getAndroid().getSent() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
+                                        pushMessageDAO.save(pushMessageObject);
+                                        updateFcmTokenIfNeeded(appId, token, contextData);
+                                        break;
+                                    }
+                                    case PENDING: {
+                                        sendResult.getAndroid().setPending(sendResult.getAndroid().getPending() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
+                                        pushMessageDAO.save(pushMessageObject);
+                                        break;
+                                    }
+                                    case FAILED: {
+                                        sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                                        pushMessageDAO.save(pushMessageObject);
+                                        break;
+                                    }
+                                    case FAILED_DELETE: {
+                                        sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
+                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
+                                        pushMessageDAO.save(pushMessageObject);
+                                        pushDeviceRepository.delete(device);
+                                        break;
+                                    }
                                 }
-                                case PENDING: {
-                                    sendResult.getAndroid().setPending(sendResult.getAndroid().getPending() + 1);
-                                    pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                                    pushMessageDAO.save(pushMessageObject);
-                                    break;
-                                }
-                                case FAILED: {
-                                    sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
-                                    pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                    pushMessageDAO.save(pushMessageObject);
-                                    break;
-                                }
-                                case FAILED_DELETE: {
-                                    sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
-                                    pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                    pushMessageDAO.save(pushMessageObject);
-                                    pushDeviceRepository.delete(device);
-                                    break;
-                                }
+                                sendResult.getAndroid().setTotal(sendResult.getAndroid().getTotal() + 1);
+                            } finally {
+                                phaser.arriveAndDeregister();
                             }
-                            sendResult.getAndroid().setTotal(sendResult.getAndroid().getTotal() + 1);
-                            phaser.arriveAndDeregister();
                         });
                     }
                 }
