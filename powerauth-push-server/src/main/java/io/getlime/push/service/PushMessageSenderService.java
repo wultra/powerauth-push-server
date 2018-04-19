@@ -387,7 +387,7 @@ public class PushMessageSenderService {
         try {
             future = fcmClient.exchange(request);
         } catch (Throwable t) { // In case of some catastrophic error
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification sending failed: " + t.getLocalizedMessage(), t);
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification sending failed: " + t.getMessage(), t);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
             return;
         }
@@ -396,7 +396,7 @@ public class PushMessageSenderService {
 
             @Override
             public void onFailure(Throwable throwable) {
-                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway: " + throwable.getLocalizedMessage(), throwable);
+                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway: " + throwable.getMessage(), throwable);
                 callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
             }
 
