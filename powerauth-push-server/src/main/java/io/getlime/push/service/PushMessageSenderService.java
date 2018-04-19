@@ -168,6 +168,8 @@ public class PushMessageSenderService {
                                     }
                                 }
                                 sendResult.getIos().setTotal(sendResult.getIos().getTotal() + 1);
+                            } catch (Throwable t) {
+                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "System error when sending notification: " + t.getMessage(), t);
                             } finally {
                                 phaser.arriveAndDeregister();
                             }
@@ -205,6 +207,8 @@ public class PushMessageSenderService {
                                     }
                                 }
                                 sendResult.getAndroid().setTotal(sendResult.getAndroid().getTotal() + 1);
+                            } catch (Throwable t) {
+                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "System error when sending notification: " + t.getMessage(), t);
                             } finally {
                                 phaser.arriveAndDeregister();
                             }
