@@ -26,13 +26,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Component
 @JobScope
 public class SendCampaignJobListener implements JobExecutionListener {
 
     private PushCampaignRepository pushCampaignRepository;
-    @Value("#{jobParameters['campaignId']}") Long campaignID;
+    @Value("#{jobParameters['campaignId']}") Long campaignId;
 
     @Autowired
     public SendCampaignJobListener(PushCampaignRepository pushCampaignRepository) {
@@ -41,17 +42,29 @@ public class SendCampaignJobListener implements JobExecutionListener {
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
-        PushCampaignEntity campaing = pushCampaignRepository.findOne(campaignID);
-
-        campaing.setTimestampSent(new Date());
-        pushCampaignRepository.save(campaing);
+        PushCampaignEntity campaign = findPushCampaignById(campaignId);
+        campaign.setTimestampSent(new Date());
+        pushCampaignRepository.save(campaign);
     }
 
     @Override
     public void afterJob(JobExecution jobExecution) {
-        PushCampaignEntity campaing = pushCampaignRepository.findOne(campaignID);
-        campaing.setTimestampCompleted(new Date());
-        campaing.setSent(true);
-        pushCampaignRepository.save(campaing);
+        PushCampaignEntity campaign = findPushCampaignById(campaignId);
+        campaign.setTimestampCompleted(new Date());
+        campaign.setSent(true);
+        pushCampaignRepository.save(campaign);
+    }
+
+    /**
+     * Find push campaign entity by ID.
+     * @param campaignId Campaign ID.
+     * @return Push campaign entity.
+     */
+    private PushCampaignEntity findPushCampaignById(Long campaignId) {
+        final Optional<PushCampaignEntity> pushCampaignEntityOptional = pushCampaignRepository.findById(campaignId);
+        if (!pushCampaignEntityOptional.isPresent()) {
+            throw new IllegalArgumentException("Campaign with entered ID does not exist");
+        }
+        return pushCampaignEntityOptional.get();
     }
 }
