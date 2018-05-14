@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -104,10 +105,11 @@ public class PushCampaignController {
                   notes = "Specified with id. Also users associated with this campaign are going to be deleted. If deletion was applied then deleted status is true. False if such campaign does not exist")
     public ObjectResponse<DeleteCampaignResponse> deleteCampaign(@PathVariable(value = "id") Long campaignId) {
         DeleteCampaignResponse deleteCampaignResponse = new DeleteCampaignResponse();
-        if (pushCampaignRepository.findOne(campaignId) == null) {
+        final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
+        if (!campaignEntityOptional.isPresent()) {
             deleteCampaignResponse.setDeleted(false);
         } else {
-            pushCampaignRepository.delete(campaignId);
+            pushCampaignRepository.delete(campaignEntityOptional.get());
             deleteCampaignResponse.setDeleted(true);
         }
         pushCampaignUserRepository.deleteByCampaignId(campaignId);
@@ -126,10 +128,7 @@ public class PushCampaignController {
     @ApiOperation(value = "Return details about campaign",
                   notes = "Campaign specified by id. Details contain campaign id, application id, status if campaign was sent and message.")
     public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
-        PushCampaignEntity campaign = pushCampaignRepository.findOne(campaignId);
-        if (campaign == null) {
-            throw new PushServerException("Campaign with entered ID does not exist");
-        }
+        final PushCampaignEntity campaign = findPushCampaignById(campaignId);
         CampaignResponse campaignResponse = new CampaignResponse();
         campaignResponse.setId(campaign.getId());
         campaignResponse.setSent(campaign.isSent());
@@ -189,10 +188,7 @@ public class PushCampaignController {
                   notes = "Users are identified in request body as an array of strings in request body.")
     public Response addUsersToCampaign(@PathVariable(value = "id") Long campaignId, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
         checkRequestNullity(request);
-        final PushCampaignEntity campaignEntity = pushCampaignRepository.findOne(campaignId);
-        if (campaignEntity == null) {
-            throw new PushServerException("Campaign with entered ID does not exist");
-        }
+        final PushCampaignEntity campaignEntity = findPushCampaignById(campaignId);
         ListOfUsers listOfUsers = request.getRequestObject();
         for (String user : listOfUsers) {
             if (pushCampaignUserRepository.findFirstByUserIdAndCampaignId(user, campaignId) == null) {
@@ -267,5 +263,19 @@ public class PushCampaignController {
         if (request.getRequestObject() == null) {
             throw new PushServerException("Empty requestObject data");
         }
+    }
+
+    /**
+     * Find push campaign entity by ID.
+     * @param campaignId Campaign ID.
+     * @return Push campaign entity.
+     * @throws PushServerException Thrown when campaign entity does not exists.
+     */
+    private PushCampaignEntity findPushCampaignById(Long campaignId) throws PushServerException {
+        final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
+        if (!campaignEntityOptional.isPresent()) {
+            throw new PushServerException("Campaign with entered ID does not exist");
+        }
+        return campaignEntityOptional.get();
     }
 }

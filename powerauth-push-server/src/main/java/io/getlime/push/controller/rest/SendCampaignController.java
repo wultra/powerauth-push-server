@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Controller class storing send campaign methods
@@ -82,9 +83,9 @@ public class SendCampaignController {
                           "If sending was successful then sent parameter is set on true and timestampSent is set on current time.")
     public Response sendCampaign(@PathVariable(value = "id") Long id) throws PushServerException {
         try {
-            PushCampaignEntity campaign = pushCampaignRepository.findOne(id);
-            if (campaign == null) {
-                throw new PushServerException("Campaign with entered id does not exist");
+            final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(id);
+            if (!campaignEntityOptional.isPresent()) {
+                throw new PushServerException("Campaign with entered ID does not exist");
             }
             JobParameters jobParameters = new JobParametersBuilder()
                     .addLong("campaignId", id)
@@ -116,7 +117,11 @@ public class SendCampaignController {
     @ApiOperation(value = "Send a test campaign",
                   notes = "Send message from a specific campaign on test user identified in request body, userId param, to check rightness of that campaign.")
     public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
-        PushCampaignEntity campaign = pushCampaignRepository.findOne(id);
+        final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(id);
+        if (!campaignEntityOptional.isPresent()) {
+            throw new PushServerException("Campaign with entered ID does not exist");
+        }
+        final PushCampaignEntity campaign = campaignEntityOptional.get();
         TestCampaignRequest requestedObject = request.getRequestObject();
         String errorMessage = TestCampaignRequestValidator.validate(requestedObject);
         if (errorMessage != null) {

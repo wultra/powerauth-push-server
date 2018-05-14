@@ -60,7 +60,7 @@ public class ServiceController {
         response.setApplicationDisplayName(pushServiceConfiguration.getPushServerDisplayName());
         response.setApplicationEnvironment(pushServiceConfiguration.getPushServerEnvironment());
         response.setVersion(buildProperties.getVersion());
-        response.setBuildTime(buildProperties.getTime());
+        response.setBuildTime(Date.from(buildProperties.getTime()));
         response.setTimestamp(new Date());
         return new ObjectResponse<>(response);
     }
