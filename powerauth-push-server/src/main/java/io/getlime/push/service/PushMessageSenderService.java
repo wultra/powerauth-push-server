@@ -22,7 +22,6 @@ import com.turo.pushy.apns.PushNotificationResponse;
 import com.turo.pushy.apns.util.ApnsPayloadBuilder;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.apns.util.TokenUtil;
-import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageAttributes;
@@ -59,7 +58,7 @@ import java.util.logging.Logger;
 @Service
 public class PushMessageSenderService {
 
-    private final PushSendingWorker pushSendingWorker;
+    private PushSendingWorker pushSendingWorker;
     private AppCredentialsRepository appCredentialsRepository;
     private PushDeviceRepository pushDeviceRepository;
     private PushMessageDAO pushMessageDAO;
@@ -69,12 +68,12 @@ public class PushMessageSenderService {
     public PushMessageSenderService(AppCredentialsRepository appCredentialsRepository,
                                     PushDeviceRepository pushDeviceRepository,
                                     PushMessageDAO pushMessageDAO,
-                                    PushServiceConfiguration pushServiceConfiguration,
+                                    PushSendingWorker pushSendingWorker,
                                     AppCredentialStorageMap appRelatedPushClientMap) {
         this.appCredentialsRepository = appCredentialsRepository;
         this.pushDeviceRepository = pushDeviceRepository;
         this.pushMessageDAO = pushMessageDAO;
-        this.pushSendingWorker = new PushSendingWorker(pushServiceConfiguration);
+        this.pushSendingWorker = pushSendingWorker;
         this.appRelatedPushClientMap = appRelatedPushClientMap;
     }
 
@@ -237,7 +236,7 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      * the error can be found in exception message.
      */
-    public void sendCampaignMessage(final Long appId, String platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, String userId, Long deviceId, String activationId) throws PushServerException {
+    private void sendCampaignMessage(final Long appId, String platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, String userId, Long deviceId, String activationId) throws PushServerException {
 
         final AppRelatedPushClient pushClient = prepareClients(appId);
 

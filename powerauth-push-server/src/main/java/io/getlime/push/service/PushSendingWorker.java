@@ -29,6 +29,7 @@ import io.getlime.push.service.fcm.FcmNotification;
 import io.getlime.push.service.fcm.model.FcmSendRequest;
 import io.getlime.push.service.fcm.model.FcmSendResponse;
 import io.getlime.push.service.fcm.model.base.FcmResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -44,9 +45,14 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PushSendingWorker {
-    PushServiceConfiguration pushServiceConfiguration;
+import org.springframework.stereotype.Service;
 
+
+@Service
+public class PushSendingWorker {
+    private PushServiceConfiguration pushServiceConfiguration;
+
+    @Autowired
     public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration) {
         this.pushServiceConfiguration = pushServiceConfiguration;
     }
@@ -178,7 +184,7 @@ public class PushSendingWorker {
     }
 
     // Prepare proxy settings for APNs
-    HttpProxyHandlerFactory apnsClientProxy() {
+    private HttpProxyHandlerFactory apnsClientProxy() {
         if (pushServiceConfiguration.isApnsProxyEnabled()) {
             String proxyUrl = pushServiceConfiguration.getApnsProxyUrl();
             int proxyPort = pushServiceConfiguration.getApnsProxyPort();
