@@ -44,10 +44,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class EnhancedPushConfiguration {
+public class PushSendingWorker {
     PushServiceConfiguration pushServiceConfiguration;
 
-    public EnhancedPushConfiguration(PushServiceConfiguration pushServiceConfiguration) {
+    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration) {
         this.pushServiceConfiguration = pushServiceConfiguration;
     }
 

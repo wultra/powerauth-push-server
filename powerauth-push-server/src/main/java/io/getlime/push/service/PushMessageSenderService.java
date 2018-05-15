@@ -19,7 +19,6 @@ package io.getlime.push.service;
 import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.PushNotificationResponse;
-import com.turo.pushy.apns.proxy.HttpProxyHandlerFactory;
 import com.turo.pushy.apns.util.ApnsPayloadBuilder;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.apns.util.TokenUtil;
@@ -60,7 +59,7 @@ import java.util.logging.Logger;
 @Service
 public class PushMessageSenderService {
 
-    private final EnhancedPushConfiguration enhancedPushConfiguration;
+    private final PushSendingWorker pushSendingWorker;
     private AppCredentialsRepository appCredentialsRepository;
     private PushDeviceRepository pushDeviceRepository;
     private PushMessageDAO pushMessageDAO;
@@ -75,7 +74,7 @@ public class PushMessageSenderService {
         this.appCredentialsRepository = appCredentialsRepository;
         this.pushDeviceRepository = pushDeviceRepository;
         this.pushMessageDAO = pushMessageDAO;
-        this.enhancedPushConfiguration = new EnhancedPushConfiguration(pushServiceConfiguration);
+        this.pushSendingWorker = new PushSendingWorker(pushServiceConfiguration);
         this.appRelatedPushClientMap = appRelatedPushClientMap;
     }
 
@@ -160,7 +159,7 @@ public class PushMessageSenderService {
                         });
                     } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
                         final String token = device.getPushToken();
-                        enhancedPushConfiguration.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), token, (sendingResult, contextData) -> {
+                        pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), token, (sendingResult, contextData) -> {
                             try {
                                 switch (sendingResult) {
                                     case OK: {
@@ -271,7 +270,7 @@ public class PushMessageSenderService {
                 }
             });
         } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
-            enhancedPushConfiguration.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, (result, contextData) -> {
+            pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, (result, contextData) -> {
                 switch (result) {
                     case OK: {
                         pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
@@ -372,8 +371,8 @@ public class PushMessageSenderService {
             AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
             if (pushClient == null) {
                 final AppCredentialsEntity credentials = getAppCredentials(appId);
-                ApnsClient apnsClient = enhancedPushConfiguration.prepareApnsClient(credentials.getIosPrivateKey(), credentials.getIosTeamId(), credentials.getIosKeyId());
-                FcmClient fcmClient = enhancedPushConfiguration.prepareFcmClient(credentials.getAndroidServerKey());
+                ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosPrivateKey(), credentials.getIosTeamId(), credentials.getIosKeyId());
+                FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidServerKey());
                 pushClient = new AppRelatedPushClient();
                 pushClient.setAppCredentials(credentials);
                 pushClient.setApnsClient(apnsClient);
