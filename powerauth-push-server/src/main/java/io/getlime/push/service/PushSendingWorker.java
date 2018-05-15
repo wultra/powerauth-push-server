@@ -18,8 +18,13 @@ package io.getlime.push.service;
 
 import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsClientBuilder;
+import com.turo.pushy.apns.DeliveryPriority;
+import com.turo.pushy.apns.PushNotificationResponse;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.proxy.HttpProxyHandlerFactory;
+import com.turo.pushy.apns.util.ApnsPayloadBuilder;
+import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import com.turo.pushy.apns.util.TokenUtil;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageAttributes;
@@ -29,6 +34,8 @@ import io.getlime.push.service.fcm.FcmNotification;
 import io.getlime.push.service.fcm.model.FcmSendRequest;
 import io.getlime.push.service.fcm.model.FcmSendResponse;
 import io.getlime.push.service.fcm.model.base.FcmResult;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -40,8 +47,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -199,5 +208,72 @@ public class PushSendingWorker {
             return new HttpProxyHandlerFactory(new InetSocketAddress(proxyUrl, proxyPort), proxyUsername, proxyPassword);
         }
         return null;
+    }
+
+    // Send message to iOS platform
+    void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
+
+        final String token = TokenUtil.sanitizeTokenString(pushToken);
+        final String payload = buildApnsPayload(pushMessageBody, attributes == null ? false : attributes.getSilent()); // In case there are no attributes, the message is not silent
+        Date validUntil = pushMessageBody.getValidUntil();
+        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushMessageBody.getCollapseKey());
+        final Future<PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
+
+        sendNotificationFuture.addListener(new GenericFutureListener<Future<PushNotificationResponse<SimpleApnsPushNotification>>>() {
+
+            @Override
+            public void operationComplete(Future<PushNotificationResponse<SimpleApnsPushNotification>> future) {
+                try {
+                    final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = future.get();
+                    if (pushNotificationResponse != null) {
+                        if (!pushNotificationResponse.isAccepted()) {
+                            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: " + pushNotificationResponse.getRejectionReason());
+                            if (pushNotificationResponse.getRejectionReason().equals("BadDeviceToken")) {
+                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "\t... due to bad device token value.");
+                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
+                            } else if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
+                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "\t... and the token is invalid as of " + pushNotificationResponse.getTokenInvalidationTimestamp());
+                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
+                            } else {
+                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
+                            }
+                        } else {
+                            callback.didFinishSendingMessage(PushSendingCallback.Result.OK, null);
+                        }
+                    } else {
+                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: unknown error, will retry");
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING, null);
+                    }
+                } catch (ExecutionException | InterruptedException e) {
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Push Message Sending Failed", e);
+                    callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
+                }
+            }
+        });
+    }
+
+    /**
+     * Method to build APNs message payload.
+     *
+     * @param push     Push message object with APNs data.
+     * @param isSilent Indicates if the message is silent or not.
+     * @return String with APNs JSON payload.
+     */
+    private String buildApnsPayload(PushMessageBody push, boolean isSilent) {
+        final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
+        payloadBuilder.setAlertTitle(push.getTitle());
+        payloadBuilder.setAlertBody(push.getBody());
+        payloadBuilder.setBadgeNumber(push.getBadge());
+        payloadBuilder.setCategoryName(push.getCategory());
+        payloadBuilder.setSoundFileName(push.getSound());
+        payloadBuilder.setContentAvailable(isSilent);
+        payloadBuilder.setThreadId(push.getCollapseKey());
+        Map<String, Object> extras = push.getExtras();
+        if (extras != null) {
+            for (Map.Entry<String, Object> entry : extras.entrySet()) {
+                payloadBuilder.addCustomProperty(entry.getKey(), entry.getValue());
+            }
+        }
+        return payloadBuilder.buildWithDefaultMaximumLength();
     }
 }
