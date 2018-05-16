@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2018 Lime - HighTech Solutions s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PushSendingWorker {
+
     private PushServiceConfiguration pushServiceConfiguration;
 
     @Autowired
@@ -66,14 +67,47 @@ public class PushSendingWorker {
         this.pushServiceConfiguration = pushServiceConfiguration;
     }
 
-    // Send message to Android platform
+    // Android related methods
+
+    /**
+     * Prepares an FCM service client with a provided server key.
+     *
+     * @param serverKey FCM server key.
+     * @return A new instance of FCM client.
+     */
+    FcmClient prepareFcmClient(String serverKey) {
+        FcmClient client = new FcmClient(serverKey);
+        if (pushServiceConfiguration.isFcmProxyEnabled()) {
+            String proxyUrl = pushServiceConfiguration.getFcmProxyUrl();
+            int proxyPort = pushServiceConfiguration.getFcmProxyPort();
+            String proxyUsername = pushServiceConfiguration.getFcmProxyUsername();
+            String proxyPassword = pushServiceConfiguration.getFcmProxyPassword();
+            if (proxyUsername != null && proxyUsername.isEmpty()) {
+                proxyUsername = null;
+            }
+            if (proxyPassword != null && proxyPassword.isEmpty()) {
+                proxyPassword = null;
+            }
+            client.setProxy(proxyUrl, proxyPort, proxyUsername, proxyPassword);
+        }
+        return client;
+    }
+
+    /**
+     * Send message to Android platform.
+     * @param fcmClient Instance of the FCM client used for sending the notifications.
+     * @param pushMessageBody Push message contents.
+     * @param attributes Push message attributes.
+     * @param pushToken Push token used to deliver the message.
+     * @param callback Callback that is called after the asynchronous executions is completed.
+     */
     void sendMessageToAndroid(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final PushSendingCallback callback) {
 
         FcmSendRequest request = new FcmSendRequest();
         request.setTo(pushToken);
         request.setData(pushMessageBody.getExtras());
         request.setCollapseKey(pushMessageBody.getCollapseKey());
-        if (pushServiceConfiguration.isFcmDataNotificationOnly()) { //notification only through data map
+        if (pushServiceConfiguration.isFcmDataNotificationOnly()) { // notification only through data map
             FcmNotification notification = new FcmNotification();
             notification.setTitle(pushMessageBody.getTitle());
             notification.setBody(pushMessageBody.getBody());
@@ -110,37 +144,40 @@ public class PushSendingWorker {
 
             @Override
             public void onSuccess(ResponseEntity<FcmSendResponse> response) {
-                for (FcmResult fcmResult : response.getBody().getFcmResults()) {
-                    if (fcmResult.getMessageId() != null) {
-                        // no issues, straight sending
-                        if (fcmResult.getRegistrationId() == null) {
-                            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent");
-                            callback.didFinishSendingMessage(PushSendingCallback.Result.OK, null);
+                final FcmSendResponse body = response.getBody();
+                if (body != null) {
+                    for (FcmResult fcmResult : body.getFcmResults()) {
+                        if (fcmResult.getMessageId() != null) {
+                            // no issues, straight sending
+                            if (fcmResult.getRegistrationId() == null) {
+                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent");
+                                callback.didFinishSendingMessage(PushSendingCallback.Result.OK, null);
+                            } else {
+                                // no issues, straight sending + update token (pass it via context)
+                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent and token has been updated");
+                                Map<String, Object> contextData = new HashMap<>();
+                                contextData.put(FcmResult.KEY_UPDATE_TOKEN, fcmResult.getRegistrationId());
+                                callback.didFinishSendingMessage(PushSendingCallback.Result.OK, contextData);
+                            }
                         } else {
-                            // no issues, straight sending + update token (pass it via context)
-                            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent and token has been updated");
-                            Map<String, Object> contextData = new HashMap<String, Object>();
-                            contextData.put(FcmResult.KEY_UPDATE_TOKEN, fcmResult.getRegistrationId());
-                            callback.didFinishSendingMessage(PushSendingCallback.Result.OK, contextData);
-                        }
-                    } else {
-                        if (fcmResult.getFcmError() != null) {
-                            switch (fcmResult.getFcmError().toLowerCase()) { // make sure to account for case issues
-                                // token doesn't exist, remove device registration
-                                case "notregistered":
-                                    Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, invalid token, will be deleted: ");
-                                    callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
-                                    break;
-                                // retry to send later
-                                case "unavailable":
-                                    Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, will retry to send: ");
-                                    callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING, null);
-                                    break;
-                                // non-recoverable error, remove device registration
-                                default:
-                                    Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, non-recoverable error, will be deleted: ");
-                                    callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
-                                    break;
+                            if (fcmResult.getFcmError() != null) {
+                                switch (fcmResult.getFcmError().toLowerCase()) { // make sure to account for case issues
+                                    // token doesn't exist, remove device registration
+                                    case "notregistered":
+                                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, invalid token, will be deleted: ");
+                                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
+                                        break;
+                                    // retry to send later
+                                    case "unavailable":
+                                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, will retry to send: ");
+                                        callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING, null);
+                                        break;
+                                    // non-recoverable error, remove device registration
+                                    default:
+                                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, non-recoverable error, will be deleted: ");
+                                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
+                                        break;
+                                }
                             }
                         }
                     }
@@ -149,7 +186,18 @@ public class PushSendingWorker {
         });
     }
 
-    // Prepare and connect APNS client.
+    // iOS related methods
+
+    /**
+     * Prepare and connect APNs client.
+     *
+     * @param apnsPrivateKey Bytes of the APNs private key (contents of the *.p8 file).
+     * @param teamId APNs team ID.
+     * @param keyId APNs key ID.
+     * @return New instance of APNs client.
+     * @throws PushServerException In case an error occurs (private key is invalid, unable to connect
+     *   to APNs service due to SSL issue, ...).
+     */
     ApnsClient prepareApnsClient(byte[] apnsPrivateKey, String teamId, String keyId) throws PushServerException {
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
         apnsClientBuilder.setProxyHandlerFactory(apnsClientProxy());
@@ -173,26 +221,11 @@ public class PushSendingWorker {
         }
     }
 
-    // Prepare and connect FCM client
-    FcmClient prepareFcmClient(String serverKey) {
-        FcmClient client = new FcmClient(serverKey);
-        if (pushServiceConfiguration.isFcmProxyEnabled()) {
-            String proxyUrl = pushServiceConfiguration.getFcmProxyUrl();
-            int proxyPort = pushServiceConfiguration.getFcmProxyPort();
-            String proxyUsername = pushServiceConfiguration.getFcmProxyUsername();
-            String proxyPassword = pushServiceConfiguration.getFcmProxyPassword();
-            if (proxyUsername != null && proxyUsername.isEmpty()) {
-                proxyUsername = null;
-            }
-            if (proxyPassword != null && proxyPassword.isEmpty()) {
-                proxyPassword = null;
-            }
-            client.setProxy(proxyUrl, proxyPort, proxyUsername, proxyPassword);
-        }
-        return client;
-    }
-
-    // Prepare proxy settings for APNs
+    /**
+     * Prepare proxy settings for APNs client.
+     *
+     * @return Proxy handler factory with correct configuration.
+     */
     private HttpProxyHandlerFactory apnsClientProxy() {
         if (pushServiceConfiguration.isApnsProxyEnabled()) {
             String proxyUrl = pushServiceConfiguration.getApnsProxyUrl();
@@ -210,7 +243,16 @@ public class PushSendingWorker {
         return null;
     }
 
-    // Send message to iOS platform
+    /**
+     * Send message to iOS platform.
+     *
+     * @param apnsClient APNs client used for sending the push message.
+     * @param pushMessageBody Push message content.
+     * @param attributes Push message attributes.
+     * @param pushToken Push token.
+     * @param iosTopic APNs topic, usually same as bundle ID.
+     * @param callback Callback that is called after the asynchronous executions is completed.
+     */
     void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);

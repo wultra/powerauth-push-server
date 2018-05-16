@@ -16,13 +16,13 @@
 package io.getlime.push.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ import java.util.List;
  * @author Petr Dvorak
  */
 @Configuration
-public class WebApplicationConfig extends WebMvcConfigurerAdapter {
+public class WebApplicationConfig implements WebMvcConfigurer {
 
     /**
      * Custom object mapper to make sure that dates and other values serialize
@@ -43,10 +43,12 @@ public class WebApplicationConfig extends WebMvcConfigurerAdapter {
     private ObjectMapper objectMapper() {
         Jackson2ObjectMapperFactoryBean bean = new Jackson2ObjectMapperFactoryBean();
         bean.setIndentOutput(true);
-        bean.setDateFormat(new ISO8601DateFormat());
+        bean.setDateFormat(new StdDateFormat());
         bean.afterPropertiesSet();
         ObjectMapper objectMapper = bean.getObject();
-        objectMapper.registerModule(new JodaModule());
+        if (objectMapper != null) {
+            objectMapper.registerModule(new JodaModule());
+        }
         return objectMapper;
     }
 
@@ -67,7 +69,6 @@ public class WebApplicationConfig extends WebMvcConfigurerAdapter {
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(mappingJackson2HttpMessageConverter());
-        super.configureMessageConverters(converters);
     }
 
 }
