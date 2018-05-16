@@ -60,6 +60,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class PushSendingWorker {
 
+    private static final String FCM_NOT_REGISTERED      = "notregistered";
+    private static final String FCM_UNAVAILABLE         = "unavailable";
+    private static final String FCM_NOTIFICATION_KEY    = "_notification";
+    private static final String APNS_BAD_DEVICE_TOKEN   = "BadDeviceToken";
+
     private PushServiceConfiguration pushServiceConfiguration;
 
     @Autowired
@@ -114,7 +119,7 @@ public class PushSendingWorker {
             notification.setIcon(pushMessageBody.getIcon());
             notification.setSound(pushMessageBody.getSound());
             notification.setTag(pushMessageBody.getCategory());
-            request.getData().put("_notification", notification);
+            request.getData().put(FCM_NOTIFICATION_KEY, notification);
         } else if (attributes == null || !attributes.getSilent()) { // if there are no attributes, assume the message is not silent
             FcmNotification notification = new FcmNotification();
             notification.setTitle(pushMessageBody.getTitle());
@@ -163,13 +168,13 @@ public class PushSendingWorker {
                             if (fcmResult.getFcmError() != null) {
                                 switch (fcmResult.getFcmError().toLowerCase()) { // make sure to account for case issues
                                     // token doesn't exist, remove device registration
-                                    case "notregistered": {
+                                    case FCM_NOT_REGISTERED: {
                                         Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, invalid token, will be deleted: ");
                                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
                                         break;
                                     }
                                     // retry to send later
-                                    case "unavailable": {
+                                    case FCM_UNAVAILABLE: {
                                         Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, will retry to send: ");
                                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING, null);
                                         break;
@@ -273,7 +278,7 @@ public class PushSendingWorker {
                     if (pushNotificationResponse != null) {
                         if (!pushNotificationResponse.isAccepted()) {
                             Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: " + pushNotificationResponse.getRejectionReason());
-                            if (pushNotificationResponse.getRejectionReason().equals("BadDeviceToken")) {
+                            if (pushNotificationResponse.getRejectionReason().equals(APNS_BAD_DEVICE_TOKEN)) {
                                 Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "\t... due to bad device token value.");
                                 callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
                             } else if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
