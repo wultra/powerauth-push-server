@@ -163,20 +163,23 @@ public class PushSendingWorker {
                             if (fcmResult.getFcmError() != null) {
                                 switch (fcmResult.getFcmError().toLowerCase()) { // make sure to account for case issues
                                     // token doesn't exist, remove device registration
-                                    case "notregistered":
+                                    case "notregistered": {
                                         Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, invalid token, will be deleted: ");
                                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
                                         break;
+                                    }
                                     // retry to send later
-                                    case "unavailable":
+                                    case "unavailable": {
                                         Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, will retry to send: ");
                                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING, null);
                                         break;
+                                    }
                                     // non-recoverable error, remove device registration
-                                    default:
+                                    default: {
                                         Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, non-recoverable error, will be deleted: ");
                                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
                                         break;
+                                    }
                                 }
                             }
                         }
