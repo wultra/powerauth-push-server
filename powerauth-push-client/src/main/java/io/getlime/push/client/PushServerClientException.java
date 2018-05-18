@@ -35,7 +35,7 @@ public class PushServerClientException extends Exception {
     }
 
     public PushServerClientException(Error error) {
-        super(error.getMessage());
+        super(error != null ? error.getMessage() : null);
         this.error = error;
     }
 
