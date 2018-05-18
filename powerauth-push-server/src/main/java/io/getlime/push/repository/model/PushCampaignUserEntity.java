@@ -90,4 +90,28 @@ public class PushCampaignUserEntity implements Serializable {
     public void setTimestampCreated(Date timestampCreated) {
         this.timestampCreated = timestampCreated;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PushCampaignUserEntity that = (PushCampaignUserEntity) o;
+
+        if (campaignId == null || userId == null || appId == null ||
+                that.campaignId == null || that.userId == null || that.appId == null) {
+            return false;
+        }
+        return campaignId.equals(that.campaignId) &&
+                userId.equals(that.userId) &&
+                appId.equals(that.appId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = campaignId.hashCode();
+        result = 31 * result + userId.hashCode();
+        result = 31 * result + appId.hashCode();
+        return result;
+    }
 }

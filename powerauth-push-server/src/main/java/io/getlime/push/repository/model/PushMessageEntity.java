@@ -163,4 +163,29 @@ public class PushMessageEntity implements Serializable {
     public void setStatus(Status status) {
         this.status = status;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PushMessageEntity that = (PushMessageEntity) o;
+
+        if  (deviceId == null || messageBody == null || timestampCreated == null ||
+                that.deviceId == null || that.messageBody == null || timestampCreated == null) {
+            return false;
+        }
+
+        return deviceId.equals(that.deviceId) &&
+                messageBody.equals(that.messageBody) &&
+                timestampCreated.equals(that.timestampCreated);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = deviceId.hashCode();
+        result = 31 * result + messageBody.hashCode();
+        result = 31 * result + timestampCreated.hashCode();
+        return result;
+    }
 }
