@@ -29,7 +29,13 @@ public class PushServerClientException extends Exception {
 
     private Error error;
 
+    public PushServerClientException(String message) {
+        super(message);
+        this.error = new PushServerClientError(message);
+    }
+
     public PushServerClientException(Error error) {
+        super(error.getMessage());
         this.error = error;
     }
 

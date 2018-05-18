@@ -23,7 +23,6 @@ import io.getlime.core.rest.model.base.response.ObjectResponse;
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-
 public class PagedResponse<T> extends ObjectResponse<T> {
 
     private int page;

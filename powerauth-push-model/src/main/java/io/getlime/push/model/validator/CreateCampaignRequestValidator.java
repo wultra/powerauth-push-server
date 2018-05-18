@@ -13,27 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.getlime.push.model.validator;
 
 import io.getlime.push.model.request.CreateCampaignRequest;
 
 /**
- * Validator class used in creating a campaign
+ * Validator class for campaign creating requests.
  *
+ * @author Petr Dvorak, petr@lime-company.eu
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 public class CreateCampaignRequestValidator {
+
+    /**
+     * Validate {@link CreateCampaignRequest} instance.
+     *
+     * @param request Request to be validated.
+     * @return Error message, or null in case of no error.
+     */
     public static String validate(CreateCampaignRequest request) {
         if (request == null) {
-            return "Empty request";
-        } else if (request.getAppId() == null || request.getAppId() < 1) {
-            return "Empty or invalid appId";
-        } else if (request.getMessage() == null) {
-            return "Empty message";
-        } else if (request.getMessage().getBody() == null) {
-            return "Empty body";
+            return "Request must not be null.";
+        }
+        if (request.getAppId() == null) {
+            return "App ID must not be null.";
+        }
+        if (request.getAppId() < 1) {
+            return "App ID must be a positive number.";
+        }
+        if (request.getMessage() == null) {
+            return "You must specify a push campaign message payload.";
         }
         return null;
     }
+
 }

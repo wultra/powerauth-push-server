@@ -39,11 +39,15 @@ import java.util.Date;
 public class ServiceController {
 
     private final PushServiceConfiguration pushServiceConfiguration;
-    private final BuildProperties buildProperties;
+    private BuildProperties buildProperties;
 
     @Autowired
-    public ServiceController(PushServiceConfiguration pushServiceConfiguration, BuildProperties buildProperties) {
+    public ServiceController(PushServiceConfiguration pushServiceConfiguration) {
         this.pushServiceConfiguration = pushServiceConfiguration;
+    }
+
+    @Autowired(required = false) // otherwise Unit tests will fail ...
+    public void setBuildProperties(BuildProperties buildProperties) {
         this.buildProperties = buildProperties;
     }
 
@@ -59,9 +63,11 @@ public class ServiceController {
         response.setApplicationName(pushServiceConfiguration.getPushServerName());
         response.setApplicationDisplayName(pushServiceConfiguration.getPushServerDisplayName());
         response.setApplicationEnvironment(pushServiceConfiguration.getPushServerEnvironment());
-        response.setVersion(buildProperties.getVersion());
-        response.setBuildTime(Date.from(buildProperties.getTime()));
         response.setTimestamp(new Date());
+        if (buildProperties != null) {
+            response.setVersion(buildProperties.getVersion());
+            response.setBuildTime(Date.from(buildProperties.getTime()));
+        }
         return new ObjectResponse<>(response);
     }
 }

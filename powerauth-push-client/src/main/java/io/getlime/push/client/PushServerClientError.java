@@ -13,30 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.model.validator;
+package io.getlime.push.client;
 
-import io.getlime.push.model.request.TestCampaignRequest;
+import io.getlime.core.rest.model.base.entity.Error;
 
 /**
- * Validator for the test campaign sending requests.
+ * Base error class for push client.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class TestCampaignRequestValidator {
+public class PushServerClientError extends Error {
 
-    /**
-     * Validate {@link TestCampaignRequest} instance.
-     * @param request Request to be validated.
-     * @return Error message, or null in case of no error.
-     */
-    public static String validate(TestCampaignRequest request) {
-        if (request == null) {
-            return "Request must not be null.";
-        }
-        if (request.getUserId() == null) {
-            return "Request must contain a user ID.";
-        }
-        return null;
+    private static String ERROR_VALIDATION = "ERROR_VALIDATION";
+
+
+    public PushServerClientError(String message) {
+        super(ERROR_VALIDATION , message);
     }
-
 }

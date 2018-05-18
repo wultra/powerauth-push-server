@@ -22,6 +22,8 @@ import java.util.Map;
 /**
  * Class representing a message body - the information that do not serve as a "message descriptor"
  * but rather as payload. This data package is a subject of end-to-end encryption.
+ *
+ * @author Petr Dvorak, petr@lime-company.eu
  */
 public class PushMessageBody {
 
