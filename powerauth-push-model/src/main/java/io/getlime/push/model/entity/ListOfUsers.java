@@ -17,13 +17,20 @@
 package io.getlime.push.model.entity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Request used for adding collection of users to campaign
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-
 public class ListOfUsers extends ArrayList<String> {
+
+    public ListOfUsers() {
+    }
+
+    public ListOfUsers(List<String> users) {
+        addAll(users);
+    }
 
 }

@@ -19,22 +19,30 @@ package io.getlime.push.model.validator;
 import io.getlime.push.model.request.SendPushMessageRequest;
 
 /**
- * Validator class used in sending PushMessage
+ * Validator class for push message sending requests.
  *
+ * @author Petr Dvorak, petr@lime-company.eu
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 public class SendPushMessageRequestValidator {
+
+    /**
+     * Validate {@link SendPushMessageRequest} instances.
+     *
+     * @param request Request to be validated.
+     * @return Error message, or null in case of no error.
+     */
     public static String validate(SendPushMessageRequest request) {
         if (request == null) {
-            return "Empty request";
-        } else if (request.getMessage() == null) {
-            return "Empty message";
-        } else if (request.getMessage().getBody() == null) {
-            return "Empty body";
+            return "Request must not be null.";
         }
-        else if (request.getAppId() == null) {
-            return "Empty app ID";
+        if (request.getAppId() == null) {
+            return "App ID must not be null.";
         }
-        return null;
+        if (request.getAppId() < 1) {
+            return "App ID must be a positive number.";
+        }
+        return PushMessageValidator.validatePushMessage(request.getMessage());
     }
+
 }
