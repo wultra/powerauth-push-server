@@ -25,6 +25,8 @@ import com.turo.pushy.apns.proxy.HttpProxyHandlerFactory;
 import com.turo.pushy.apns.util.ApnsPayloadBuilder;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.apns.util.TokenUtil;
+import com.turo.pushy.apns.util.concurrent.PushNotificationFuture;
+import com.turo.pushy.apns.util.concurrent.PushNotificationResponseListener;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageAttributes;
@@ -34,8 +36,6 @@ import io.getlime.push.service.fcm.FcmNotification;
 import io.getlime.push.service.fcm.model.FcmSendRequest;
 import io.getlime.push.service.fcm.model.FcmSendResponse;
 import io.getlime.push.service.fcm.model.base.FcmResult;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -267,14 +267,14 @@ public class PushSendingWorker {
         final String payload = buildApnsPayload(pushMessageBody, attributes == null ? false : attributes.getSilent()); // In case there are no attributes, the message is not silent
         Date validUntil = pushMessageBody.getValidUntil();
         final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushMessageBody.getCollapseKey());
-        final Future<PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
+        final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
-        sendNotificationFuture.addListener(new GenericFutureListener<Future<PushNotificationResponse<SimpleApnsPushNotification>>>() {
+        sendNotificationFuture.addListener(new PushNotificationResponseListener<SimpleApnsPushNotification>() {
 
             @Override
-            public void operationComplete(Future<PushNotificationResponse<SimpleApnsPushNotification>> future) {
-                try {
-                    final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = future.get();
+            public void operationComplete(final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> future) {
+                if (future.isSuccess()) {
+                    final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = future.getNow();
                     if (pushNotificationResponse != null) {
                         if (!pushNotificationResponse.isAccepted()) {
                             Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: " + pushNotificationResponse.getRejectionReason());
@@ -294,8 +294,8 @@ public class PushSendingWorker {
                         Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: unknown error, will retry");
                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING, null);
                     }
-                } catch (ExecutionException | InterruptedException e) {
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Push Message Sending Failed", e);
+                } else {
+                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Push Message Sending Failed", future.cause());
                     callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
                 }
             }
