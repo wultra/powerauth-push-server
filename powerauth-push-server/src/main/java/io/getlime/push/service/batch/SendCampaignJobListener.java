@@ -33,7 +33,9 @@ import java.util.Optional;
 public class SendCampaignJobListener implements JobExecutionListener {
 
     private PushCampaignRepository pushCampaignRepository;
-    @Value("#{jobParameters['campaignId']}") Long campaignId;
+
+    @Value("#{jobParameters['campaignId']}")
+    private Long campaignId;
 
     @Autowired
     public SendCampaignJobListener(PushCampaignRepository pushCampaignRepository) {
