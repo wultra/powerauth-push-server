@@ -41,8 +41,7 @@ import java.util.function.Consumer;
 @Service
 public class FcmClient {
 
-    // private static final String fcm_url = "https://fcm.googleapis.com/fcm/send";
-    private static final String fcm_url = "http://localhost:8080/powerauth-push-server/push/service/test";
+    private static final String fcm_url = "https://fcm.googleapis.com/fcm/send";
 
     private final PushServiceConfiguration configuration;
 
