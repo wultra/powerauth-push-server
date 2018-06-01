@@ -16,8 +16,11 @@
 
 package io.getlime.push.service.fcm;
 
+import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.service.fcm.model.FcmSendRequest;
 import io.getlime.push.service.fcm.model.FcmSendResponse;
+import io.netty.channel.ChannelOption;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -26,7 +29,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.ipc.netty.options.ClientProxyOptions;
 
-import java.time.Duration;
 import java.util.function.Consumer;
 
 /**
@@ -36,11 +38,16 @@ import java.util.function.Consumer;
  */
 public class FcmClient {
 
-    private static final long FCM_REQUEST_TIMEOUT_SECONDS = 600;
     private static final String fcm_url = "https://fcm.googleapis.com/fcm/send";
 
     private final String serverKey;
     private WebClient webClient;
+    private PushServiceConfiguration configuration;
+
+    @Autowired
+    public void setPushServiceConfiguration(PushServiceConfiguration configuration) {
+        this.configuration = configuration;
+    }
 
     /**
      * Create a new FCM service client.
@@ -48,19 +55,25 @@ public class FcmClient {
      */
     public FcmClient(String serverKey) {
         this.serverKey = serverKey;
-        webClient = WebClient.create();
+        ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options -> options
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, configuration.getFcmConnectTimeout())
+        );
+        webClient = WebClient.builder().clientConnector(clientHttpConnector).build();
     }
 
     /**
-     * Set information about proxy.
+     * Create a new FCM service client which connects via proxy.
+     * @param serverKey Server key to be used.
      * @param host Proxy host URL.
      * @param port Proxy port.
      * @param username Proxy username, use 'null' for proxy without authentication.
      * @param password Proxy user password, ignored in case username is 'null'
      */
-    public void setProxy(String host, int port, String username, String password) {
-        ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options ->
-                options.httpProxy((addressSpec -> {
+    public FcmClient(String serverKey, String host, int port, String username, String password) {
+        this.serverKey = serverKey;
+        ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options -> options
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, configuration.getFcmConnectTimeout())
+                .httpProxy((addressSpec -> {
                     ClientProxyOptions.Builder proxyOptionsBuilder = addressSpec.host(host).port(port);
                     if (username == null) {
                         return proxyOptionsBuilder;
@@ -87,6 +100,6 @@ public class FcmClient {
                 .bodyToMono(FcmSendResponse.class)
                 .doOnSuccess(onSuccess)
                 .doOnError(onError)
-                .block(Duration.ofSeconds(FCM_REQUEST_TIMEOUT_SECONDS));
+                .block();
     }
 }

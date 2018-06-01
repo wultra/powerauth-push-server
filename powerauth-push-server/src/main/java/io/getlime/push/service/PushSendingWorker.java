@@ -48,6 +48,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,7 +78,7 @@ public class PushSendingWorker {
      * @return A new instance of FCM client.
      */
     FcmClient prepareFcmClient(String serverKey) {
-        FcmClient client = new FcmClient(serverKey);
+        FcmClient client;
         if (pushServiceConfiguration.isFcmProxyEnabled()) {
             String proxyUrl = pushServiceConfiguration.getFcmProxyUrl();
             int proxyPort = pushServiceConfiguration.getFcmProxyPort();
@@ -89,7 +90,9 @@ public class PushSendingWorker {
             if (proxyPassword != null && proxyPassword.isEmpty()) {
                 proxyPassword = null;
             }
-            client.setProxy(proxyUrl, proxyPort, proxyUsername, proxyPassword);
+            client = new FcmClient(serverKey, proxyUrl, proxyPort, proxyUsername, proxyPassword);
+        } else {
+            client = new FcmClient(serverKey);
         }
         return client;
     }
@@ -193,6 +196,7 @@ public class PushSendingWorker {
     ApnsClient prepareApnsClient(byte[] apnsPrivateKey, String teamId, String keyId) throws PushServerException {
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
         apnsClientBuilder.setProxyHandlerFactory(apnsClientProxy());
+        apnsClientBuilder.setConnectionTimeout(pushServiceConfiguration.getApnsConnectTimeout(), TimeUnit.MILLISECONDS);
         if (pushServiceConfiguration.isApnsUseDevelopment()) {
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
         } else {
