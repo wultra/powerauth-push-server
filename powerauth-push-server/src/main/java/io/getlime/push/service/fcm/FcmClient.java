@@ -64,21 +64,21 @@ public class FcmClient {
     /**
      * Create a new FCM service client which connects via proxy.
      * @param serverKey Server key to be used.
-     * @param host Proxy host URL.
-     * @param port Proxy port.
-     * @param username Proxy username, use 'null' for proxy without authentication.
-     * @param password Proxy user password, ignored in case username is 'null'
+     * @param proxyHost Proxy host.
+     * @param proxyPort Proxy proxy.
+     * @param proxyUsername Proxy username, use 'null' for proxy without authentication.
+     * @param proxyPassword Proxy user password, ignored in case username is 'null'.
      */
-    public FcmClient(String serverKey, String host, int port, String username, String password) {
+    public FcmClient(String serverKey, String proxyHost, int proxyPort, String proxyUsername, String proxyPassword) {
         this.serverKey = serverKey;
         ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options -> options
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, configuration.getFcmConnectTimeout())
                 .httpProxy((addressSpec -> {
-                    ClientProxyOptions.Builder proxyOptionsBuilder = addressSpec.host(host).port(port);
-                    if (username == null) {
+                    ClientProxyOptions.Builder proxyOptionsBuilder = addressSpec.host(proxyHost).port(proxyPort);
+                    if (proxyUsername == null) {
                         return proxyOptionsBuilder;
                     } else {
-                        return proxyOptionsBuilder.username(username).password(s -> password);
+                        return proxyOptionsBuilder.username(proxyUsername).password(s -> proxyPassword);
                     }
                 })).build());
         webClient = WebClient.builder().clientConnector(clientHttpConnector).build();
