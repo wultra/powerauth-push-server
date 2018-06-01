@@ -87,6 +87,8 @@ public class FcmClient {
     /**
      * Send given FCM request to the server. The method is asynchronous to avoid blocking REST API response.
      * @param request FCM data request.
+     * @param onSuccess Callback called when request succeeds.
+     * @param onError Callback called when request fails.
      */
     @Async
     public void exchange(FcmSendRequest request, Consumer<FcmSendResponse> onSuccess, Consumer<Throwable> onError) {
