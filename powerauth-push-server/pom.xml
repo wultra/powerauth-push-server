@@ -45,6 +45,10 @@
             <artifactId>spring-ws-security</artifactId>
             <version>2.2.4.RELEASE</version> <!-- 2.3.0 seems a bit buggy, SWS-972 and SWS-972 -->
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
 
         <!-- Java Dependencies -->
         <dependency>
