@@ -25,8 +25,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.ipc.netty.http.client.HttpClientOptions;
 import reactor.ipc.netty.options.ClientProxyOptions;
 
 import java.util.function.Consumer;
@@ -36,53 +38,69 @@ import java.util.function.Consumer;
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
+@Service
 public class FcmClient {
 
-    private static final String fcm_url = "https://fcm.googleapis.com/fcm/send";
+    // private static final String fcm_url = "https://fcm.googleapis.com/fcm/send";
+    private static final String fcm_url = "http://localhost:8080/powerauth-push-server/push/service/test";
 
-    private final String serverKey;
+    private final PushServiceConfiguration configuration;
+
+    private String serverKey;
     private WebClient webClient;
-    private PushServiceConfiguration configuration;
+    private String proxyHost;
+    private int proxyPort;
+    private String proxyUsername;
+    private String proxyPassword;
 
     @Autowired
-    public void setPushServiceConfiguration(PushServiceConfiguration configuration) {
+    public FcmClient(PushServiceConfiguration configuration) {
         this.configuration = configuration;
     }
 
     /**
-     * Create a new FCM service client.
+     * Configure server key.
      * @param serverKey Server key to be used.
      */
-    public FcmClient(String serverKey) {
+    public void setServerKey(String serverKey) {
         this.serverKey = serverKey;
-        ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options -> options
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, configuration.getFcmConnectTimeout())
-        );
-        webClient = WebClient.builder().clientConnector(clientHttpConnector).build();
     }
 
     /**
-     * Create a new FCM service client which connects via proxy.
-     * @param serverKey Server key to be used.
+     * Configure proxy settings.
      * @param proxyHost Proxy host.
      * @param proxyPort Proxy proxy.
      * @param proxyUsername Proxy username, use 'null' for proxy without authentication.
      * @param proxyPassword Proxy user password, ignored in case username is 'null'.
      */
-    public FcmClient(String serverKey, String proxyHost, int proxyPort, String proxyUsername, String proxyPassword) {
-        this.serverKey = serverKey;
-        ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options -> options
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, configuration.getFcmConnectTimeout())
-                .httpProxy((addressSpec -> {
+    public void setProxySettings(String proxyHost, int proxyPort, String proxyUsername, String proxyPassword) {
+        this.proxyHost = proxyHost;
+        this.proxyPort = proxyPort;
+        this.proxyUsername = proxyUsername;
+        this.proxyPassword = proxyPassword;
+    }
+
+    /**
+     * Initialize the FCM client and create WebClient instance based on client configuration.
+     */
+    public void initialize() {
+        ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options -> {
+            HttpClientOptions.Builder optionsBuilder = options
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, configuration.getFcmConnectTimeout());
+            if (proxyHost != null) {
+                optionsBuilder.httpProxy((addressSpec -> {
                     ClientProxyOptions.Builder proxyOptionsBuilder = addressSpec.host(proxyHost).port(proxyPort);
                     if (proxyUsername == null) {
                         return proxyOptionsBuilder;
                     } else {
                         return proxyOptionsBuilder.username(proxyUsername).password(s -> proxyPassword);
                     }
-                })).build());
+                }));
+            }
+        });
         webClient = WebClient.builder().clientConnector(clientHttpConnector).build();
     }
+
 
     /**
      * Send given FCM request to the server. The method is asynchronous to avoid blocking REST API response.

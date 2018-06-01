@@ -62,11 +62,13 @@ public class PushSendingWorker {
     private static final String FCM_NOTIFICATION_KEY    = "_notification";
     private static final String APNS_BAD_DEVICE_TOKEN   = "BadDeviceToken";
 
-    private PushServiceConfiguration pushServiceConfiguration;
+    private final PushServiceConfiguration pushServiceConfiguration;
+    private final FcmClient fcmClient;
 
     @Autowired
-    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration) {
+    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmClient fcmClient) {
         this.pushServiceConfiguration = pushServiceConfiguration;
+        this.fcmClient = fcmClient;
     }
 
     // Android related methods
@@ -78,9 +80,9 @@ public class PushSendingWorker {
      * @return A new instance of FCM client.
      */
     FcmClient prepareFcmClient(String serverKey) {
-        FcmClient client;
+        fcmClient.setServerKey(serverKey);
         if (pushServiceConfiguration.isFcmProxyEnabled()) {
-            String proxyUrl = pushServiceConfiguration.getFcmProxyUrl();
+            String proxyHost = pushServiceConfiguration.getFcmProxyUrl();
             int proxyPort = pushServiceConfiguration.getFcmProxyPort();
             String proxyUsername = pushServiceConfiguration.getFcmProxyUsername();
             String proxyPassword = pushServiceConfiguration.getFcmProxyPassword();
@@ -90,11 +92,10 @@ public class PushSendingWorker {
             if (proxyPassword != null && proxyPassword.isEmpty()) {
                 proxyPassword = null;
             }
-            client = new FcmClient(serverKey, proxyUrl, proxyPort, proxyUsername, proxyPassword);
-        } else {
-            client = new FcmClient(serverKey);
+            fcmClient.setProxySettings(proxyHost, proxyPort, proxyUsername, proxyPassword);
         }
-        return client;
+        fcmClient.initialize();
+        return fcmClient;
     }
 
     /**
