@@ -79,24 +79,6 @@ public class PushServiceConfiguration {
     private int campaignBatchSize;
 
     /**
-     * Async task executor core pool size.
-     */
-    @Value("${powerauth.push.service.asyncExecutor.corePoolSize}")
-    private int corePoolSize;
-
-    /**
-     * Async task executor maximum pool size.
-     */
-    @Value("${powerauth.push.service.asyncExecutor.maxPoolSize}")
-    private int maxPoolSize;
-
-    /**
-     * Async task executor queue capacity.
-     */
-    @Value("${powerauth.push.service.asyncExecutor.queueCapacity}")
-    private int queueCapacity;
-
-    /**
      * FCM connect timeout in milliseconds.
      */
     @Value("${powerauth.push.service.fcm.connect.timeout}")
@@ -362,54 +344,6 @@ public class PushServiceConfiguration {
      */
     public void setCampaignBatchSize(int campaignBatchSize) {
         this.campaignBatchSize = campaignBatchSize;
-    }
-
-    /**
-     * Get async task executor core pool size.
-     * @return Core pool size.
-     */
-    public int getCorePoolSize() {
-        return corePoolSize;
-    }
-
-    /**
-     * Set async task executore core pool size.
-     * @param corePoolSize Core pool size.
-     */
-    public void setCorePoolSize(int corePoolSize) {
-        this.corePoolSize = corePoolSize;
-    }
-
-    /**
-     * Get async task executor maximum pool size.
-     * @return Maximum pool size.
-     */
-    public int getMaxPoolSize() {
-        return maxPoolSize;
-    }
-
-    /**
-     * Set async task executor maximum pool size.
-     * @param maxPoolSize Maximum pool size.
-     */
-    public void setMaxPoolSize(int maxPoolSize) {
-        this.maxPoolSize = maxPoolSize;
-    }
-
-    /**
-     * Get async task executor queue capacity.
-     * @return Async task executor queue capacity.
-     */
-    public int getQueueCapacity() {
-        return queueCapacity;
-    }
-
-    /**
-     * Set async task executor queue capacity.
-     * @param queueCapacity Async task executor queue capacity.
-     */
-    public void setQueueCapacity(int queueCapacity) {
-        this.queueCapacity = queueCapacity;
     }
 
     /**

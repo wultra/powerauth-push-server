@@ -63,12 +63,10 @@ public class PushSendingWorker {
     private static final String APNS_BAD_DEVICE_TOKEN   = "BadDeviceToken";
 
     private final PushServiceConfiguration pushServiceConfiguration;
-    private final FcmClient fcmClient;
 
     @Autowired
-    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmClient fcmClient) {
+    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration) {
         this.pushServiceConfiguration = pushServiceConfiguration;
-        this.fcmClient = fcmClient;
     }
 
     // Android related methods
@@ -80,7 +78,7 @@ public class PushSendingWorker {
      * @return A new instance of FCM client.
      */
     FcmClient prepareFcmClient(String serverKey) {
-        fcmClient.setServerKey(serverKey);
+        FcmClient fcmClient = new FcmClient(serverKey, pushServiceConfiguration);
         if (pushServiceConfiguration.isFcmProxyEnabled()) {
             String proxyHost = pushServiceConfiguration.getFcmProxyUrl();
             int proxyPort = pushServiceConfiguration.getFcmProxyPort();

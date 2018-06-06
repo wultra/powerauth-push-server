@@ -20,12 +20,9 @@ import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.service.fcm.model.FcmSendRequest;
 import io.getlime.push.service.fcm.model.FcmSendResponse;
 import io.netty.channel.ChannelOption;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.ipc.netty.http.client.HttpClientOptions;
@@ -38,31 +35,29 @@ import java.util.function.Consumer;
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-@Service
 public class FcmClient {
 
-    private static final String fcm_url = "https://fcm.googleapis.com/fcm/send";
+    // FCM URL for posting push messages
+    private static final String FCM_URL = "https://fcm.googleapis.com/fcm/send";
 
-    private final PushServiceConfiguration configuration;
+    // Android server key for push notifications
+    private final String serverKey;
 
-    private String serverKey;
+    // Push server configuration
+    private final PushServiceConfiguration pushServiceConfiguration;
+
+    // WebClient instance
     private WebClient webClient;
+
+    // Proxy settings
     private String proxyHost;
     private int proxyPort;
     private String proxyUsername;
     private String proxyPassword;
 
-    @Autowired
-    public FcmClient(PushServiceConfiguration configuration) {
-        this.configuration = configuration;
-    }
-
-    /**
-     * Configure server key.
-     * @param serverKey Server key to be used.
-     */
-    public void setServerKey(String serverKey) {
+    public FcmClient(String serverKey, PushServiceConfiguration pushServiceConfiguration) {
         this.serverKey = serverKey;
+        this.pushServiceConfiguration = pushServiceConfiguration;
     }
 
     /**
@@ -85,7 +80,7 @@ public class FcmClient {
     public void initialize() {
         ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options -> {
             HttpClientOptions.Builder optionsBuilder = options
-                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, configuration.getFcmConnectTimeout());
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, pushServiceConfiguration.getFcmConnectTimeout());
             if (proxyHost != null) {
                 optionsBuilder.httpProxy((addressSpec -> {
                     ClientProxyOptions.Builder proxyOptionsBuilder = addressSpec.host(proxyHost).port(proxyPort);
@@ -107,18 +102,18 @@ public class FcmClient {
      * @param onSuccess Callback called when request succeeds.
      * @param onError Callback called when request fails.
      */
-    @Async
     public void exchange(FcmSendRequest request, Consumer<FcmSendResponse> onSuccess, Consumer<Throwable> onError) {
+        if (webClient == null) {
+            throw new IllegalStateException("WebClient is not initialized");
+        }
         webClient
                 .post()
-                .uri(fcm_url)
+                .uri(FCM_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "key=" + serverKey)
                 .body(BodyInserters.fromObject(request))
                 .retrieve()
                 .bodyToMono(FcmSendResponse.class)
-                .doOnSuccess(onSuccess)
-                .doOnError(onError)
-                .block();
+                .subscribe(onSuccess, onError);
     }
 }
