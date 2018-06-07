@@ -16,21 +16,19 @@
 
 package io.getlime.push.service.fcm;
 
+import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.service.fcm.model.FcmSendRequest;
 import io.getlime.push.service.fcm.model.FcmSendResponse;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.ProxyAuthenticationStrategy;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
-import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.web.client.AsyncRestTemplate;
-import org.springframework.web.client.RestClientException;
+import io.netty.channel.ChannelOption;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.ipc.netty.http.client.HttpClientOptions;
+import reactor.ipc.netty.options.ClientProxyOptions;
+
+import java.util.function.Consumer;
 
 /**
  * FCM server client
@@ -39,59 +37,83 @@ import org.springframework.web.client.RestClientException;
  */
 public class FcmClient {
 
-    private static final String fcm_url = "https://fcm.googleapis.com/fcm/send";
+    // FCM URL for posting push messages
+    private static final String FCM_URL = "https://fcm.googleapis.com/fcm/send";
 
-    private final HttpHeaders headers;
-    private final AsyncRestTemplate restTemplate;
+    // Android server key for push notifications
+    private final String serverKey;
 
-    /**
-     * Create a new FCM service client.
-     * @param serverKey Server key tp be used.
-     */
-    public FcmClient(String serverKey) {
-        headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "key=" + serverKey);
-        restTemplate = new AsyncRestTemplate();
+    // Push server configuration
+    private final PushServiceConfiguration pushServiceConfiguration;
+
+    // WebClient instance
+    private WebClient webClient;
+
+    // Proxy settings
+    private String proxyHost;
+    private int proxyPort;
+    private String proxyUsername;
+    private String proxyPassword;
+
+    public FcmClient(String serverKey, PushServiceConfiguration pushServiceConfiguration) {
+        this.serverKey = serverKey;
+        this.pushServiceConfiguration = pushServiceConfiguration;
     }
 
     /**
-     * Set information about proxy.
-     * @param host Proxy host URL.
-     * @param port Proxy port.
-     * @param username Proxy username, use 'null' for proxy without authentication.
-     * @param password Proxy user password, ignored in case username is 'null'
+     * Configure proxy settings.
+     * @param proxyHost Proxy host.
+     * @param proxyPort Proxy proxy.
+     * @param proxyUsername Proxy username, use 'null' for proxy without authentication.
+     * @param proxyPassword Proxy user password, ignored in case username is 'null'.
      */
-    public void setProxy(String host, int port, String username, String password) {
-
-        HttpAsyncClientBuilder clientBuilder = HttpAsyncClientBuilder.create();
-        clientBuilder.useSystemProperties();
-        clientBuilder.setProxy(new HttpHost(host, port));
-
-        if (username != null) {
-            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials user = new UsernamePasswordCredentials(username, password);
-            credentialsProvider.setCredentials(new AuthScope(host, port), user);
-            clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-            clientBuilder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
-        }
-
-        CloseableHttpAsyncClient client = clientBuilder.build();
-
-        HttpComponentsAsyncClientHttpRequestFactory factory = new HttpComponentsAsyncClientHttpRequestFactory();
-        factory.setAsyncClient(client);
-
-        restTemplate.setAsyncRequestFactory(factory);
+    public void setProxySettings(String proxyHost, int proxyPort, String proxyUsername, String proxyPassword) {
+        this.proxyHost = proxyHost;
+        this.proxyPort = proxyPort;
+        this.proxyUsername = proxyUsername;
+        this.proxyPassword = proxyPassword;
     }
 
     /**
-     * Send given FCM request to the server.
+     * Initialize the FCM client and create WebClient instance based on client configuration.
+     */
+    public void initialize() {
+        ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options -> {
+            HttpClientOptions.Builder optionsBuilder = options
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, pushServiceConfiguration.getFcmConnectTimeout());
+            if (proxyHost != null) {
+                optionsBuilder.httpProxy((addressSpec -> {
+                    ClientProxyOptions.Builder proxyOptionsBuilder = addressSpec.host(proxyHost).port(proxyPort);
+                    if (proxyUsername == null) {
+                        return proxyOptionsBuilder;
+                    } else {
+                        return proxyOptionsBuilder.username(proxyUsername).password(s -> proxyPassword);
+                    }
+                }));
+            }
+        });
+        webClient = WebClient.builder().clientConnector(clientHttpConnector).build();
+    }
+
+
+    /**
+     * Send given FCM request to the server. The method is asynchronous to avoid blocking REST API response.
      * @param request FCM data request.
-     * @return Listenable future for result callbacks.
-     * @throws RestClientException In case network error occurs.
+     * @param onSuccess Callback called when request succeeds.
+     * @param onError Callback called when request fails.
      */
-    public ListenableFuture<ResponseEntity<FcmSendResponse>> exchange(FcmSendRequest request) throws RestClientException {
-        HttpEntity<FcmSendRequest> entity = new HttpEntity<>(request, headers);
-        return restTemplate.exchange(fcm_url, HttpMethod.POST, entity, FcmSendResponse.class);
+    public void exchange(FcmSendRequest request, Consumer<FcmSendResponse> onSuccess, Consumer<Throwable> onError) {
+        if (webClient == null) {
+            throw new IllegalStateException("WebClient is not initialized");
+        }
+        webClient
+                .post()
+                .uri(FCM_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "key=" + serverKey)
+                .body(BodyInserters.fromObject(request))
+                .retrieve()
+                .bodyToMono(FcmSendResponse.class)
+                .subscribe(onSuccess, onError);
     }
 }
