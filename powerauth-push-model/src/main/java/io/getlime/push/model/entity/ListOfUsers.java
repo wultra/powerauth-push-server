@@ -30,7 +30,7 @@ public class ListOfUsers extends ArrayList<String> {
     }
 
     public ListOfUsers(List<String> users) {
-        addAll(users);
+        super(users);
     }
 
 }
