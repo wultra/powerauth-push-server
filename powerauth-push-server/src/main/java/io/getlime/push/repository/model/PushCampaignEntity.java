@@ -16,8 +16,6 @@
 
 package io.getlime.push.repository.model;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -35,8 +33,6 @@ public class PushCampaignEntity implements Serializable {
     @Column(name = "id")
     @SequenceGenerator(name = "push_campaign", sequenceName = "push_campaign_seq")
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_campaign")
-    // Native strategy is set to support multiple databases. Default native generator for Oracle is SEQUENCE, for MySQL the default is AUTO_INCREMENT.
-    @GenericGenerator(name = "push_campaign", strategy = "native")
     private Long id;
 
     @Column(name = "app_id", nullable = false, updatable = false)

@@ -1,5 +1,5 @@
 CREATE TABLE `push_app_credentials` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `app_id` bigint(20) NOT NULL,
   `ios_private_key` blob DEFAULT NULL,
   `ios_team_id` varchar(255) DEFAULT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE `push_app_credentials` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `push_device_registration` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `activation_id` varchar(37) DEFAULT NULL,
   `user_id` varchar(255) DEFAULT NULL,
   `app_id` bigint(20) NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE `push_device_registration` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `push_message` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `device_registration_id` bigint(20) NOT NULL,
   `user_id` varchar(255) DEFAULT NULL,
   `activation_id` varchar(37) DEFAULT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE `push_message` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE push_campaign (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `app_id` bigint(20) NOT NULL,
   `message` text NOT NULL,
   `is_sent` int(1) DEFAULT 0,
@@ -55,10 +55,31 @@ CREATE TABLE push_campaign (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE push_campaign_user (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `campaign_id` bigint(20) NOT NULL,
   `user_id` varchar(255) NOT NULL,
   `timestamp_created` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+# Sequence tables for GenerationType.TABLE style id generators used by default in Hibernate 5 for MySQL
+CREATE TABLE push_credentials_seq (
+  next_val INTEGER NOT NULL
+);
+CREATE TABLE push_device_registration_seq (
+  next_val INTEGER NOT NULL
+);
+CREATE TABLE push_message_seq (
+  next_val INTEGER NOT NULL
+);
+CREATE TABLE push_campaign_seq (
+  next_val INTEGER NOT NULL
+);
+CREATE TABLE push_campaign_user_seq (
+  next_val INTEGER NOT NULL
+);
+INSERT INTO push_credentials_seq values (1);
+INSERT INTO push_device_registration_seq values (1);
+INSERT INTO push_message_seq values (1);
+INSERT INTO push_campaign_seq values (1);
+INSERT INTO push_campaign_user_seq values (1);
