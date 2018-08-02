@@ -15,8 +15,6 @@
  */
 package io.getlime.push.repository.model;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
