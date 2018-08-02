@@ -142,7 +142,6 @@ public class BatchSendingConfiguration implements BatchConfigurer {
             this.jobLauncher = createJobLauncher();
         } catch (Exception e) {
             Logger.getLogger(BatchSendingConfiguration.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-            e.printStackTrace();
         }
     }
 

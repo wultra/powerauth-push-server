@@ -61,4 +61,3 @@ CREATE TABLE push_campaign_user (
   `timestamp_created` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-

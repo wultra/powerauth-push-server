@@ -79,6 +79,18 @@ public class PushServiceConfiguration {
     private int campaignBatchSize;
 
     /**
+     * FCM connect timeout in milliseconds.
+     */
+    @Value("${powerauth.push.service.fcm.connect.timeout}")
+    private int fcmConnectTimeout;
+
+    /**
+     * APNS connect timeout in milliseconds.
+     */
+    @Value("${powerauth.push.service.apns.connect.timeout}")
+    private int apnsConnectTimeout;
+
+    /**
      * Get push server name.
      * @return Push server name.
      */
@@ -332,5 +344,37 @@ public class PushServiceConfiguration {
      */
     public void setCampaignBatchSize(int campaignBatchSize) {
         this.campaignBatchSize = campaignBatchSize;
+    }
+
+    /**
+     * Get FCM connect timeout in milliseconds.
+     * @return FCM connect timeout.
+     */
+    public int getFcmConnectTimeout() {
+        return fcmConnectTimeout;
+    }
+
+    /**
+     * Set FCM connect timeout in milliseconds.
+     * @param fcmConnectTimeout FCM connect timeout.
+     */
+    public void setFcmConnectTimeout(int fcmConnectTimeout) {
+        this.fcmConnectTimeout = fcmConnectTimeout;
+    }
+
+    /**
+     * Get APNS connect timeout in milliseconds.
+     * @return APNS connect timeout.
+     */
+    public int getApnsConnectTimeout() {
+        return apnsConnectTimeout;
+    }
+
+    /**
+     * Set APNS connect timeout in milliseconds.
+     * @param apnsConnectTimeout APNS connect timeout.
+     */
+    public void setApnsConnectTimeout(int apnsConnectTimeout) {
+        this.apnsConnectTimeout = apnsConnectTimeout;
     }
 }

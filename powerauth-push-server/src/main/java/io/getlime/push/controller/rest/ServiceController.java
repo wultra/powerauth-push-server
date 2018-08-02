@@ -21,6 +21,7 @@ import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.model.response.ServiceStatusResponse;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,10 +39,16 @@ import java.util.Date;
 public class ServiceController {
 
     private final PushServiceConfiguration pushServiceConfiguration;
+    private BuildProperties buildProperties;
 
     @Autowired
     public ServiceController(PushServiceConfiguration pushServiceConfiguration) {
         this.pushServiceConfiguration = pushServiceConfiguration;
+    }
+
+    @Autowired(required = false) // otherwise Unit tests will fail ...
+    public void setBuildProperties(BuildProperties buildProperties) {
+        this.buildProperties = buildProperties;
     }
 
     /**
@@ -57,6 +64,10 @@ public class ServiceController {
         response.setApplicationDisplayName(pushServiceConfiguration.getPushServerDisplayName());
         response.setApplicationEnvironment(pushServiceConfiguration.getPushServerEnvironment());
         response.setTimestamp(new Date());
+        if (buildProperties != null) {
+            response.setVersion(buildProperties.getVersion());
+            response.setBuildTime(Date.from(buildProperties.getTime()));
+        }
         return new ObjectResponse<>(response);
     }
 }

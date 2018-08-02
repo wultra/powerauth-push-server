@@ -28,6 +28,8 @@ public class ServiceStatusResponse {
     private String applicationName;
     private String applicationDisplayName;
     private String applicationEnvironment;
+    private String version;
+    private Date buildTime;
     private Date timestamp;
 
     /**
@@ -76,6 +78,38 @@ public class ServiceStatusResponse {
      */
     public void setApplicationEnvironment(String applicationEnvironment) {
         this.applicationEnvironment = applicationEnvironment;
+    }
+
+    /**
+     * Get version.
+     * @return version.
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * Set version.
+     * @param version Version.
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    /**
+     * Get build time.
+     * @return Build time.
+     */
+    public Date getBuildTime() {
+        return buildTime;
+    }
+
+    /**
+     * Set build time.
+     * @param buildTime Build time.
+     */
+    public void setBuildTime(Date buildTime) {
+        this.buildTime = buildTime;
     }
 
     /**

@@ -35,10 +35,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -58,6 +58,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:application-test.properties")
 public class PushServerClientTest {
+
+    private static final String MOCK_ACTIVATION_ID = "11111111-1111-1111-1111-111111111111";
+    private static final Long MOCK_APPLICATION_ID = 1L;
+    private static final String MOCK_PUSH_TOKEN = "1234567890987654321234567890";
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -97,26 +101,26 @@ public class PushServerClientTest {
 
     @Test
     public void createDeviceTest() throws Exception {
-        boolean actual = pushServerClient.createDevice(10L, "1234567890987654321234567890", MobilePlatform.iOS);
+        boolean actual = pushServerClient.createDevice(MOCK_APPLICATION_ID, MOCK_PUSH_TOKEN, MobilePlatform.iOS);
         assertThat(actual).isTrue();
     }
 
     @Test
     public void createDeviceWithActivationIDTest() throws Exception {
-        boolean actual = pushServerClient.createDevice(10L, "1234567890987654321234567890", MobilePlatform.iOS, "49414e31-f3df-4cea-87e6-f214ca3b8412");
+        boolean actual = pushServerClient.createDevice(MOCK_APPLICATION_ID, MOCK_PUSH_TOKEN, MobilePlatform.iOS, MOCK_ACTIVATION_ID);
         assertThat(actual).isTrue();
     }
 
     @Test
     public void deleteDeviceTest() throws Exception {
-        boolean actual = pushServerClient.deleteDevice(10L, "12456789098321234567890");
+        boolean actual = pushServerClient.deleteDevice(MOCK_APPLICATION_ID, MOCK_PUSH_TOKEN);
         assertThat(actual).isTrue();
     }
 
 
     @Test
     public void updateDeviceStatusTest() throws Exception {
-        boolean actual = pushServerClient.updateDeviceStatus("49414e31-f3df-4cea-87e6-f214ca3b8412");
+        boolean actual = pushServerClient.updateDeviceStatus(MOCK_ACTIVATION_ID);
         assertThat(actual).isTrue();
     }
 

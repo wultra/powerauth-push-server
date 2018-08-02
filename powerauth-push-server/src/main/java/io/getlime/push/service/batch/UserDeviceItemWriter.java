@@ -16,6 +16,7 @@
 
 package io.getlime.push.service.batch;
 
+import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
@@ -28,6 +29,7 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Item writer that send notification to directed device and save message to database.
@@ -65,7 +67,11 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
             // Load and cache campaign information
             PushMessageBody messageBody = campaignStorageMap.get(campaignId);
             if (messageBody == null) {
-                final PushCampaignEntity campaignEntity = pushCampaignRepository.findOne(campaignId);
+                final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
+                if (!campaignEntityOptional.isPresent()) {
+                    throw new PushServerException("Campaign with entered ID does not exist");
+                }
+                final PushCampaignEntity campaignEntity = campaignEntityOptional.get();
                 messageBody = JSONSerialization.deserializePushMessageBody(campaignEntity.getMessage());
                 campaignStorageMap.put(campaignId, messageBody);
             }

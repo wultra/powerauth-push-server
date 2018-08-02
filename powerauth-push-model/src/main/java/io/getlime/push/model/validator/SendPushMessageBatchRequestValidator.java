@@ -16,24 +16,52 @@
 
 package io.getlime.push.model.validator;
 
+import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.request.SendPushMessageBatchRequest;
 
 /**
- * Validator class used in sending batch PushMessages.
+ * Validator class for batch push message requests.
  *
+ * @author Petr Dvorak, petr@lime-company.eu
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 public class SendPushMessageBatchRequestValidator {
+
+    /**
+     * Validate {@link SendPushMessageBatchRequest} instance.
+     *
+     * @param pushMessageBatch Request to be validated.
+     * @return Error message, or null in case of no error.
+     */
     public static String validate(SendPushMessageBatchRequest pushMessageBatch) {
         if (pushMessageBatch == null) {
-            return "Empty request";
-        } else if (pushMessageBatch.getAppId() == null) {
-            return "Empty appId";
-        } else if (pushMessageBatch.getBatch() == null) {
-            return "No messages in batch";
-        } else if (pushMessageBatch.getBatch().size() > 20) {
+            return "Request must not be null.";
+        }
+        if (pushMessageBatch.getAppId() == null) {
+            return "App ID must not be null.";
+        }
+        if (pushMessageBatch.getAppId() < 1) {
+            return "App ID must be a positive number.";
+        }
+        if (pushMessageBatch.getBatch() == null) {
+            return "Batch with push messages must not be null.";
+        }
+        if (pushMessageBatch.getBatch().size() == 0) {
+            return "There are no push messages in the batch.";
+        }
+        if (pushMessageBatch.getBatch().size() > 20) {
             return "Too many messages in batch - do no send more than 20 messages at once to avoid server congestion.";
         }
+        int i = 0; // validate individual messages
+        for (PushMessage message: pushMessageBatch.getBatch()) {
+            String error = PushMessageValidator.validatePushMessage(message);
+            if (error != null) {
+                return "Push message at index: " + i + " is not valid. Nested error is: " + error;
+            }
+            i++;
+        }
+        
         return null;
     }
+
 }

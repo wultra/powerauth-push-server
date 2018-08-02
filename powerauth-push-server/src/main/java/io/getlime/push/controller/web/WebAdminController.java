@@ -21,6 +21,7 @@ import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.powerauth.soap.GetApplicationListResponse;
 import io.getlime.push.controller.web.model.form.*;
 import io.getlime.push.controller.web.model.view.PushServerApplication;
+import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.entity.PushMessageSendResult;
@@ -123,8 +124,8 @@ public class WebAdminController {
     }
 
     @RequestMapping(value = "web/admin/app/{id}/edit", method = RequestMethod.GET)
-    public String editApplication(@PathVariable Long id, Map<String, Object> model) {
-        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
+    public String editApplication(@PathVariable Long id, Map<String, Object> model) throws PushServerException {
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
         PushServerApplication app = new PushServerApplication();
         app.setId(appCredentialsEntity.getId());
         app.setAppId(appCredentialsEntity.getAppId());
@@ -136,8 +137,8 @@ public class WebAdminController {
     }
 
     @RequestMapping(value = "web/admin/app/{id}/ios/upload")
-    public String uploadIosCredentials(@PathVariable Long id, Map<String, Object> model) {
-        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
+    public String uploadIosCredentials(@PathVariable Long id, Map<String, Object> model) throws PushServerException {
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
         PushServerApplication app = new PushServerApplication();
         app.setId(appCredentialsEntity.getId());
         app.setAppId(appCredentialsEntity.getAppId());
@@ -159,8 +160,8 @@ public class WebAdminController {
     }
 
     @RequestMapping(value = "web/admin/app/{id}/android/upload")
-    public String uploadAndroidCredentials(@PathVariable Long id, Map<String, Object> model) {
-        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
+    public String uploadAndroidCredentials(@PathVariable Long id, Map<String, Object> model) throws PushServerException {
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
         PushServerApplication app = new PushServerApplication();
         app.setId(appCredentialsEntity.getId());
         app.setAppId(appCredentialsEntity.getAppId());
@@ -208,13 +209,13 @@ public class WebAdminController {
     }
 
     @RequestMapping(value = "web/admin/app/{id}/ios/upload/do.submit", method = RequestMethod.POST)
-    public String actionUploadIosCredentials(@PathVariable Long id, @Valid UploadIosCredentialsForm form, BindingResult bindingResult, RedirectAttributes attr) {
+    public String actionUploadIosCredentials(@PathVariable Long id, @Valid UploadIosCredentialsForm form, BindingResult bindingResult, RedirectAttributes attr) throws PushServerException {
         if (bindingResult.hasErrors()) {
             attr.addFlashAttribute("fields", bindingResult);
             attr.addFlashAttribute("form", form);
             return "redirect:/web/admin/app/" + id + "/ios/upload";
         }
-        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
         try {
             appCredentialsEntity.setIosPrivateKey(form.getPrivateKey().getBytes());
         } catch (IOException e) {
@@ -229,11 +230,11 @@ public class WebAdminController {
     }
 
     @RequestMapping(value = "web/admin/app/{id}/ios/remove/do.submit", method = RequestMethod.POST)
-    public String actionRemoveIosCredentials(@Valid RemoveIosCredentialsForm form, @PathVariable Long id, BindingResult bindingResult) {
+    public String actionRemoveIosCredentials(@Valid RemoveIosCredentialsForm form, @PathVariable Long id, BindingResult bindingResult) throws PushServerException {
         if (bindingResult.hasErrors() || (id == null || !id.equals(form.getId()))) {
             return "error";
         }
-        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(form.getId());
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
         appCredentialsEntity.setIosPrivateKey(null);
         appCredentialsEntity.setIosTeamId(null);
         appCredentialsEntity.setIosKeyId(null);
@@ -244,13 +245,13 @@ public class WebAdminController {
     }
 
     @RequestMapping(value = "web/admin/app/{id}/android/upload/do.submit", method = RequestMethod.POST)
-    public String actionUploadAndroidCredentials(@PathVariable Long id, @Valid UploadAndroidCredentialsForm form, BindingResult bindingResult, RedirectAttributes attr) {
+    public String actionUploadAndroidCredentials(@PathVariable Long id, @Valid UploadAndroidCredentialsForm form, BindingResult bindingResult, RedirectAttributes attr) throws PushServerException {
         if (bindingResult.hasErrors()) {
             attr.addFlashAttribute("fields", bindingResult);
             attr.addFlashAttribute("form", form);
             return "redirect:/web/admin/app/" + id + "/android/upload";
         }
-        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
         appCredentialsEntity.setAndroidServerKey(form.getToken());
         appCredentialsEntity.setAndroidBundle(form.getBundle());
         appCredentialsRepository.save(appCredentialsEntity);
@@ -259,8 +260,8 @@ public class WebAdminController {
     }
 
     @RequestMapping(value = "web/admin/app/{id}/android/remove/do.submit", method = RequestMethod.POST)
-    public String actionRemoveAndroidCredentials(@PathVariable Long id) {
-        final AppCredentialsEntity appCredentialsEntity = appCredentialsRepository.findOne(id);
+    public String actionRemoveAndroidCredentials(@PathVariable Long id) throws PushServerException {
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
         appCredentialsEntity.setAndroidServerKey(null);
         appCredentialsEntity.setAndroidBundle(null);
         appCredentialsRepository.save(appCredentialsEntity);
@@ -292,4 +293,17 @@ public class WebAdminController {
         return "redirect:/web/admin/message/create";
     }
 
+    /**
+     * Find app credentials entity by ID.
+     * @param id App credentials ID.
+     * @return App credentials entity.
+     * @throws PushServerException Thrown when app credentials entity does not exists.
+     */
+    private AppCredentialsEntity findAppCredentialsEntityById(Long id) throws PushServerException {
+        final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findById(id);
+        if (!appCredentialsEntityOptional.isPresent()) {
+            throw new PushServerException("Application credentials with entered ID does not exist");
+        }
+        return appCredentialsEntityOptional.get();
+    }
 }
