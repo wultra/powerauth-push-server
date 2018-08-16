@@ -16,36 +16,28 @@
 
 package io.getlime.push.controller.web;
 
-import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
-import io.getlime.powerauth.soap.GetApplicationListResponse;
+import io.getlime.push.client.PushServerClient;
+import io.getlime.push.client.PushServerClientException;
+import io.getlime.push.controller.rest.AdministrationController;
 import io.getlime.push.controller.web.model.form.*;
-import io.getlime.push.controller.web.model.view.PushServerApplication;
-import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
-import io.getlime.push.model.entity.PushMessageSendResult;
-import io.getlime.push.model.request.SendPushMessageRequest;
-import io.getlime.push.repository.AppCredentialsRepository;
-import io.getlime.push.repository.model.AppCredentialsEntity;
-import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
-import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
+import io.getlime.push.model.entity.PushServerApplication;
+import io.getlime.push.model.response.CreateApplicationResponse;
+import io.getlime.push.model.response.GetApplicationDetailResponse;
+import io.getlime.push.model.response.GetApplicationListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,252 +50,304 @@ import java.util.logging.Logger;
 @Controller
 public class WebAdminController {
 
-    private AppCredentialsRepository appCredentialsRepository;
-    private PowerAuthServiceClient client;
-    private AppCredentialStorageMap appCredentialStorageMap;
+    private final PushServerClient pushServerClient;
 
     @Autowired
-    public WebAdminController(AppCredentialsRepository appCredentialsRepository,
-                              AppCredentialStorageMap appCredentialStorageMap) {
-        this.appCredentialsRepository = appCredentialsRepository;
-        this.appCredentialStorageMap = appCredentialStorageMap;
-    }
-
-    @Autowired
-    void setClient(PowerAuthServiceClient client) {
-        this.client = client;
+    public WebAdminController(PushServerClient pushServerClient) {
+        this.pushServerClient = pushServerClient;
     }
 
     // Web Admin Screens
 
+    /**
+     * Redirect to application list.
+     * @return Redirect.
+     */
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String redirect() {
         return "redirect:/web/admin/app/list";
     }
 
+    /**
+     * List applications.
+     * @param model Page model.
+     * @return Applications page.
+     */
     @RequestMapping(value = "web/admin/app/list", method = RequestMethod.GET)
     public String listApplications(Map<String, Object> model) {
-        final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
-        final List<PushServerApplication> appList = new ArrayList<>();
-        for (AppCredentialsEntity appCredentialsEntity : appCredentials) {
-            PushServerApplication app = new PushServerApplication();
-            app.setId(appCredentialsEntity.getId());
-            app.setAppId(appCredentialsEntity.getAppId());
-            app.setAppName(client.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
-            app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-            app.setAndroid(appCredentialsEntity.getAndroidServerKey() != null);
-            appList.add(app);
+        try {
+            ObjectResponse<GetApplicationListResponse> appListResponse = pushServerClient.getApplicationList();
+            model.put("applications", appListResponse.getResponseObject().getApplicationList());
+            return "applications";
+        } catch (PushServerClientException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
         }
-        model.put("applications", appList);
-        return "applications";
     }
 
+    /**
+     * Prepare create application page.
+     * @param model Page model.
+     * @return Application create page.
+     */
     @RequestMapping(value = "web/admin/app/create", method = RequestMethod.GET)
     public String createApplication(Map<String, Object> model) {
-        // Get all applications in PA2.0 Server
-        final List<GetApplicationListResponse.Applications> applicationList = client.getApplicationList();
-
-        // Get all applications that are already set up
-        final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
-
-        // Compute intersection by app ID
-        Set<Long> identifiers = new HashSet<>();
-        for (AppCredentialsEntity appCred: appCredentials) {
-            identifiers.add(appCred.getAppId());
+        try {
+            ObjectResponse<GetApplicationListResponse> appListResponse = pushServerClient.getUnconfiguredApplicationList();
+            model.put("applications", appListResponse.getResponseObject().getApplicationList());
+            return "applicationCreate";
+        } catch (PushServerClientException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
         }
-        final List<GetApplicationListResponse.Applications> intersection = new ArrayList<>();
-        for (GetApplicationListResponse.Applications app : applicationList) {
-            if (!identifiers.contains(app.getId())) {
-                intersection.add(app);
-            }
-        }
-
-        // Pass data to the model
-        model.put("applications", intersection);
-        return "applicationCreate";
     }
 
+    /**
+     * Prepare edit application page.
+     * @param id Application credentials entity ID.
+     * @param model Page model.
+     * @return Application edit page.
+     */
     @RequestMapping(value = "web/admin/app/{id}/edit", method = RequestMethod.GET)
-    public String editApplication(@PathVariable Long id, Map<String, Object> model) throws PushServerException {
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
-        PushServerApplication app = new PushServerApplication();
-        app.setId(appCredentialsEntity.getId());
-        app.setAppId(appCredentialsEntity.getAppId());
-        app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-        app.setAndroid(appCredentialsEntity.getAndroidServerKey() != null);
-        app.setAppName(client.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
-        model.put("application", app);
-        return "applicationEdit";
+    public String editApplication(@PathVariable Long id, Map<String, Object> model) {
+        try {
+            ObjectResponse<GetApplicationDetailResponse> appResponse = pushServerClient.getApplicationDetail(id, false, false);
+            model.put("application", appResponse.getResponseObject().getApplication());
+            return "applicationEdit";
+        } catch (PushServerClientException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
+        }
     }
 
+    /**
+     * Prepare upload of iOS configuration.
+     * @param id Application credentials entity ID.
+     * @param model Page model.
+     * @return The iOS upload page.
+     */
     @RequestMapping(value = "web/admin/app/{id}/ios/upload")
-    public String uploadIosCredentials(@PathVariable Long id, Map<String, Object> model) throws PushServerException {
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
-        PushServerApplication app = new PushServerApplication();
-        app.setId(appCredentialsEntity.getId());
-        app.setAppId(appCredentialsEntity.getAppId());
-        app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-        app.setAndroid(appCredentialsEntity.getAndroidServerKey() != null);
-        app.setAppName(client.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
-        UploadIosCredentialsForm form = (UploadIosCredentialsForm) model.get("form");
-        if (form == null) {
-            model.put("bundle", appCredentialsEntity.getIosBundle());
-            model.put("keyId", appCredentialsEntity.getIosKeyId());
-            model.put("teamId", appCredentialsEntity.getIosTeamId());
-        } else {
-            model.put("bundle", form.getBundle());
-            model.put("keyId", form.getKeyId());
-            model.put("teamId", form.getTeamId());
+    public String uploadIosCredentials(@PathVariable Long id, Map<String, Object> model) {
+        try {
+            ObjectResponse<GetApplicationDetailResponse> appResponse = pushServerClient.getApplicationDetail(id, true, false);
+            GetApplicationDetailResponse objectResponse = appResponse.getResponseObject();
+            PushServerApplication app = objectResponse.getApplication();
+            UploadIosCredentialsForm form = (UploadIosCredentialsForm) model.get("form");
+            if (form == null) {
+                model.put("bundle", objectResponse.getIosBundle());
+                model.put("keyId", objectResponse.getIosKeyId());
+                model.put("teamId", objectResponse.getIosTeamId());
+            } else {
+                model.put("bundle", form.getBundle());
+                model.put("keyId", form.getKeyId());
+                model.put("teamId", form.getTeamId());
+            }
+            model.put("application", app);
+            return "applicationIosUpload";
+        } catch (PushServerClientException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
         }
-        model.put("application", app);
-        return "applicationIosUpload";
     }
 
+    /**
+     * Prepare upload of Android configuration.
+     * @param id Application credentials entity ID.
+     * @param model Page model.
+     * @return The Android upload page.
+     */
     @RequestMapping(value = "web/admin/app/{id}/android/upload")
-    public String uploadAndroidCredentials(@PathVariable Long id, Map<String, Object> model) throws PushServerException {
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
-        PushServerApplication app = new PushServerApplication();
-        app.setId(appCredentialsEntity.getId());
-        app.setAppId(appCredentialsEntity.getAppId());
-        app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-        app.setAndroid(appCredentialsEntity.getAndroidServerKey() != null);
-        app.setAppName(client.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
-        UploadAndroidCredentialsForm form = (UploadAndroidCredentialsForm) model.get("form");
-        if (form == null) {
-            model.put("bundle", appCredentialsEntity.getAndroidBundle());
-            model.put("token", appCredentialsEntity.getAndroidServerKey());
-        } else {
-            model.put("bundle", form.getBundle());
-            model.put("token", form.getToken());
+    public String uploadAndroidCredentials(@PathVariable Long id, Map<String, Object> model) {
+        try {
+            ObjectResponse<GetApplicationDetailResponse> appResponse = pushServerClient.getApplicationDetail(id, false, true);
+            GetApplicationDetailResponse objectResponse = appResponse.getResponseObject();
+            PushServerApplication app = objectResponse.getApplication();
+            UploadAndroidCredentialsForm form = (UploadAndroidCredentialsForm) model.get("form");
+            if (form == null) {
+                model.put("bundle", objectResponse.getAndroidBundle());
+                model.put("token", objectResponse.getAndroidToken());
+            } else {
+                model.put("bundle", form.getBundle());
+                model.put("token", form.getToken());
+            }
+            model.put("application", app);
+            return "applicationAndroidUpload";
+        } catch (PushServerClientException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
         }
-        model.put("application", app);
-        return "applicationAndroidUpload";
     }
 
+    /**
+     * Prepare create push message.
+     * @param model Page model.
+     * @return Create push message page.
+     */
     @RequestMapping(value = "web/admin/message/create", method = RequestMethod.GET)
     public String createPushMessage(Map<String, Object> model) {
-        final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
-        final List<PushServerApplication> appList = new ArrayList<>();
-        for (AppCredentialsEntity appCredentialsEntity : appCredentials) {
-            PushServerApplication app = new PushServerApplication();
-            app.setId(appCredentialsEntity.getId());
-            app.setAppId(appCredentialsEntity.getAppId());
-            app.setAppName(client.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
-            appList.add(app);
+        try {
+            ObjectResponse<GetApplicationListResponse> appListResponse = pushServerClient.getApplicationList();
+            model.put("applications", appListResponse.getResponseObject().getApplicationList());
+            return "pushMessageCreate";
+        } catch (PushServerClientException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
         }
-        model.put("applications", appList);
-        return "pushMessageCreate";
     }
 
     // Action Handlers
 
+    /**
+     * Create application.
+     * @param form Application create form.
+     * @param model Page model.
+     * @param bindingResult Validation result.
+     * @return Page with details.
+     */
     @RequestMapping(value = "web/admin/app/create/do.submit", method = RequestMethod.POST)
-    public String actionCreateApplication(@Valid AppCreateForm form, BindingResult bindingResult) {
+    public String actionCreateApplication(@Valid AppCreateForm form, Map<String, Object> model, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "redirect:web/admin/app/create";
         }
-        AppCredentialsEntity appCredentialsEntity = new AppCredentialsEntity();
-        appCredentialsEntity.setAppId(form.getAppId());
-        AppCredentialsEntity newAppCredentialsEntity = appCredentialsRepository.save(appCredentialsEntity);
-        return "redirect:/web/admin/app/" + newAppCredentialsEntity.getId() + "/edit";
+        try {
+            ObjectResponse<CreateApplicationResponse> createAppResponse = pushServerClient.createApplication(form.getAppId());
+            return "redirect:/web/admin/app/" + createAppResponse.getResponseObject().getId() + "/edit";
+        } catch (PushServerClientException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
+        }
     }
 
+    /**
+     * Update iOS configuration.
+     * @param id Application credentials entity ID.
+     * @param form Upload iOS credentials form.
+     * @param model Page model.
+     * @param bindingResult Validation result.
+     * @param attr Redirect attributes.
+     * @return Details page.
+     */
     @RequestMapping(value = "web/admin/app/{id}/ios/upload/do.submit", method = RequestMethod.POST)
-    public String actionUploadIosCredentials(@PathVariable Long id, @Valid UploadIosCredentialsForm form, BindingResult bindingResult, RedirectAttributes attr) throws PushServerException {
+    public String actionUploadIosCredentials(@PathVariable Long id, @Valid UploadIosCredentialsForm form, Map<String, Object> model, BindingResult bindingResult, RedirectAttributes attr) {
         if (bindingResult.hasErrors()) {
             attr.addFlashAttribute("fields", bindingResult);
             attr.addFlashAttribute("form", form);
             return "redirect:/web/admin/app/" + id + "/ios/upload";
         }
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
         try {
-            appCredentialsEntity.setIosPrivateKey(form.getPrivateKey().getBytes());
-        } catch (IOException e) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, e.getMessage(), e);
+            pushServerClient.updateIos(id, form.getBundle(), form.getKeyId(), form.getTeamId(), form.getPrivateKey().getBytes());
+            return "redirect:/web/admin/app/" + id + "/edit";
+        } catch (PushServerClientException | IOException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
         }
-        appCredentialsEntity.setIosTeamId(form.getTeamId());
-        appCredentialsEntity.setIosKeyId(form.getKeyId());
-        appCredentialsEntity.setIosBundle(form.getBundle());
-        appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        return "redirect:/web/admin/app/" + id + "/edit";
     }
 
+    /**
+     * Remove iOS configuration.
+     * @param form Remove iOS credentials form.
+     * @param id Application credentials entity ID.
+     * @param model Page model.
+     * @param bindingResult Validation result.
+     * @return Details page.
+     */
     @RequestMapping(value = "web/admin/app/{id}/ios/remove/do.submit", method = RequestMethod.POST)
-    public String actionRemoveIosCredentials(@Valid RemoveIosCredentialsForm form, @PathVariable Long id, BindingResult bindingResult) throws PushServerException {
+    public String actionRemoveIosCredentials(@Valid RemoveIosCredentialsForm form, @PathVariable Long id, Map<String, Object> model, BindingResult bindingResult) {
         if (bindingResult.hasErrors() || (id == null || !id.equals(form.getId()))) {
             return "error";
         }
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
-        appCredentialsEntity.setIosPrivateKey(null);
-        appCredentialsEntity.setIosTeamId(null);
-        appCredentialsEntity.setIosKeyId(null);
-        appCredentialsEntity.setIosBundle(null);
-        AppCredentialsEntity newAppCredentialsEntity = appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        return "redirect:/web/admin/app/" + newAppCredentialsEntity.getId()  + "/edit";
+        try {
+            pushServerClient.removeIos(id);
+            return "redirect:/web/admin/app/" + id  + "/edit";
+        } catch (PushServerClientException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
+        }
     }
 
+    /**
+     * Upload Android configuration.
+     * @param id Application credentials entity ID.
+     * @param form Upload Android credentials form.
+     * @param model Page model.
+     * @param bindingResult Validation result.
+     * @param attr Redirect attributes.
+     * @return Details page.
+     */
     @RequestMapping(value = "web/admin/app/{id}/android/upload/do.submit", method = RequestMethod.POST)
-    public String actionUploadAndroidCredentials(@PathVariable Long id, @Valid UploadAndroidCredentialsForm form, BindingResult bindingResult, RedirectAttributes attr) throws PushServerException {
+    public String actionUploadAndroidCredentials(@PathVariable Long id, @Valid UploadAndroidCredentialsForm form, Map<String, Object> model, BindingResult bindingResult, RedirectAttributes attr) {
         if (bindingResult.hasErrors()) {
             attr.addFlashAttribute("fields", bindingResult);
             attr.addFlashAttribute("form", form);
             return "redirect:/web/admin/app/" + id + "/android/upload";
         }
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
-        appCredentialsEntity.setAndroidServerKey(form.getToken());
-        appCredentialsEntity.setAndroidBundle(form.getBundle());
-        appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        return "redirect:/web/admin/app/" + id + "/edit";
+        try {
+            pushServerClient.updateAndroid(id, form.getBundle(), form.getToken());
+            return "redirect:/web/admin/app/" + id + "/edit";
+        } catch (PushServerClientException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
+        }
     }
 
+    /**
+     * Remove Android configuration.
+     * @param id Application credentials entity ID.
+     * @param model Page model.
+     * @return Details page.
+     */
     @RequestMapping(value = "web/admin/app/{id}/android/remove/do.submit", method = RequestMethod.POST)
-    public String actionRemoveAndroidCredentials(@PathVariable Long id) throws PushServerException {
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(id);
-        appCredentialsEntity.setAndroidServerKey(null);
-        appCredentialsEntity.setAndroidBundle(null);
-        appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        return "redirect:/web/admin/app/" + id + "/edit";
+    public String actionRemoveAndroidCredentials(@PathVariable Long id, Map<String, Object> model) {
+        try {
+            pushServerClient.removeAndroid(id);
+            return "redirect:/web/admin/app/" + id + "/edit";
+        } catch (PushServerClientException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
+        }
     }
 
+    /**
+     * Create push message.
+     * @param form Compose push message form.
+     * @param model Page model.
+     * @param bindingResult Validation result.
+     * @param attr Redirect attributes.
+     * @return Create push message page.
+     */
     @RequestMapping(value = "web/admin/message/create/do.submit", method = RequestMethod.POST)
-    public String actionCreatePushMessage(@Valid ComposePushMessageForm form, BindingResult bindingResult, RedirectAttributes attr, HttpServletRequest httpRequest) {
+    public String actionCreatePushMessage(@Valid ComposePushMessageForm form, Map<String, Object> model, BindingResult bindingResult, RedirectAttributes attr) {
         if (bindingResult.hasErrors()) {
             attr.addFlashAttribute("fields", bindingResult);
             attr.addFlashAttribute("form", form);
             return "redirect:/web/admin/message/create";
         }
-        SendPushMessageRequest request = new SendPushMessageRequest();
-        request.setAppId(form.getAppId());
-        PushMessage message = new PushMessage();
-        message.setUserId(form.getUserId());
-        PushMessageBody body = new PushMessageBody();
-        body.setTitle(form.getTitle());
-        body.setBody(form.getBody());
-        body.setSound(form.isSound() ? "default" : null);
-        message.setBody(body);
-        request.setMessage(message);
-        HttpEntity<ObjectRequest<SendPushMessageRequest>> requestEntity = new HttpEntity<>(new ObjectRequest<>(request));
-        RestTemplate template = new RestTemplate();
-        String baseUrl = String.format("%s://%s:%d/%s",httpRequest.getScheme(),  httpRequest.getServerName(), httpRequest.getServerPort(), httpRequest.getContextPath());
-        template.exchange(baseUrl + "/push/message/send", HttpMethod.POST, requestEntity, new ParameterizedTypeReference<ObjectResponse<PushMessageSendResult>>() {});
-        return "redirect:/web/admin/message/create";
+        try {
+            final PushMessage message = new PushMessage();
+            message.setUserId(form.getUserId());
+            final PushMessageBody messageBody = new PushMessageBody();
+            messageBody.setTitle(form.getTitle());
+            messageBody.setBody(form.getBody());
+            messageBody.setSound(form.isSound() ? "default" : null);
+            message.setBody(messageBody);
+            pushServerClient.sendPushMessage(form.getAppId(), message);
+            return "redirect:/web/admin/message/create";
+        } catch (PushServerClientException ex) {
+            model.put("message", ex.getMessage());
+            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return "error";
+        }
     }
 
-    /**
-     * Find app credentials entity by ID.
-     * @param id App credentials ID.
-     * @return App credentials entity.
-     * @throws PushServerException Thrown when app credentials entity does not exists.
-     */
-    private AppCredentialsEntity findAppCredentialsEntityById(Long id) throws PushServerException {
-        final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findById(id);
-        if (!appCredentialsEntityOptional.isPresent()) {
-            throw new PushServerException("Application credentials with entered ID does not exist");
-        }
-        return appCredentialsEntityOptional.get();
-    }
 }

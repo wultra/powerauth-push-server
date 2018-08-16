@@ -5,7 +5,7 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <jsp:include page="header.jsp">
-    <jsp:param name="pageTitle" value="PowerAuth 2.0 Push Server - Error"/>
+    <jsp:param name="pageTitle" value="PowerAuth Push Server - Error"/>
 </jsp:include>
 
 <div class="panel panel-danger">
@@ -15,10 +15,17 @@
     </div>
 
     <div class="panel-body">
-        <p>An unknown error occurred.</p>
-        <div class="code">
-            ${stacktrace}
-        </div>
+        <p>
+            <c:choose>
+                <c:when test="${not empty message}">${message}</c:when>
+                <c:otherwise>An unknown error occurred.</c:otherwise>
+            </c:choose>
+        </p>
+        <c:if test="${not empty stacktrace}">
+            <div class="code">
+                ${stacktrace}
+            </div>
+        </c:if>
     </div>
 
 </div>

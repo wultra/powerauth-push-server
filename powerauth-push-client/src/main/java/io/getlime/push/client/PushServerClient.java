@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.common.io.BaseEncoding;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
@@ -488,6 +489,127 @@ public class PushServerClient {
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
         }
+    }
+
+    /**
+     * Get list of application credentials entities.
+     * @return Application credentials entity list.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public ObjectResponse<GetApplicationListResponse> getApplicationList() throws PushServerClientException {
+        final TypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new TypeReference<ObjectResponse<GetApplicationListResponse>>() {};
+        log("Calling push server to retrieve list of applications - start");
+        final ObjectResponse<GetApplicationListResponse> response = postObjectImpl("/admin/app/list", null, typeReference);
+        log("Calling push server to retrieve list of applications - finish");
+        return response;
+    }
+
+    /**
+     * Get list of applications which are not yet configured in Push Server but exist in PowerAuth server.
+     * @return List of applications which are not configured.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public ObjectResponse<GetApplicationListResponse> getUnconfiguredApplicationList() throws PushServerClientException {
+        final TypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new TypeReference<ObjectResponse<GetApplicationListResponse>>() {};
+        log("Calling push server to retrieve list of unconfigured applications - start");
+        final ObjectResponse<GetApplicationListResponse> response = postObjectImpl("/admin/app/unconfigured/list", null, typeReference);
+        log("Calling push server to retrieve list of unconfigured applications - finish");
+        return response;
+    }
+
+    /**
+     * Get detail for an application credentials entity.
+     * @param id Application credentials entity ID.
+     * @param includeIos Whether to include iOS details.
+     * @param includeAndroid Whether to include Android details.
+     * @return Application credentials entity detail.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(Long id, boolean includeIos, boolean includeAndroid) throws PushServerClientException {
+        final TypeReference<ObjectResponse<GetApplicationDetailResponse>> typeReference = new TypeReference<ObjectResponse<GetApplicationDetailResponse>>() {};
+        GetApplicationDetailRequest request = new GetApplicationDetailRequest(id, includeIos, includeAndroid);
+        log("Calling push server to retrieve application detail, ID: {0} - start", new String[] { String.valueOf(id) });
+        final ObjectResponse<GetApplicationDetailResponse> response = postObjectImpl("/admin/app/detail", new ObjectRequest<>(request), typeReference);
+        log("Calling push server to retrieve application detail, ID: {0} - finish", new String[] { String.valueOf(id) });
+        return response;
+    }
+
+    /**
+     * Create application credentials entity.
+     * @param appId PowerAuth application ID.
+     * @return Response with ID of created application credentials entity.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public ObjectResponse<CreateApplicationResponse> createApplication(Long appId) throws PushServerClientException {
+        final TypeReference<ObjectResponse<CreateApplicationResponse>> typeReference = new TypeReference<ObjectResponse<CreateApplicationResponse>>() {};
+        final CreateApplicationRequest request = new CreateApplicationRequest(appId);
+        log("Calling push server to create application, app ID: {0} - start", new String[] { String.valueOf(appId) });
+        final ObjectResponse<CreateApplicationResponse> response = postObjectImpl("/admin/app/create", new ObjectRequest<>(request), typeReference);
+        log("Calling push server to create application, app ID: {0} - finish", new String[] { String.valueOf(appId) });
+        return response;
+    }
+
+    /**
+     * Update iOS details for an application credentials entity.
+     * @param id ID of application credentials entity.
+     * @param bundle The iOS bundle record.
+     * @param keyId The iOS key record.
+     * @param teamId The iOS team ID record.
+     * @param privateKey The iOS private key bytes.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response updateIos(Long id, String bundle, String keyId, String teamId, byte[] privateKey) throws PushServerClientException {
+        final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
+        final UpdateIosRequest request = new UpdateIosRequest(id, bundle, keyId, teamId, privateKeyBase64);
+        log("Calling push server to update iOS, ID: {0} - start", new String[] { String.valueOf(id) });
+        final Response response = postObjectImpl("/admin/app/ios/update", new ObjectRequest<>(request));
+        log("Calling push server to update iOS, ID: {0} - finish", new String[] { String.valueOf(id) });
+        return response;
+    }
+
+    /**
+     * Remove iOS record from an application credentials entity.
+     * @param id Application credentials entity ID.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response removeIos(Long id) throws PushServerClientException {
+        final RemoveIosRequest request = new RemoveIosRequest(id);
+        log("Calling push server to remove iOS, ID: {0} - start", new String[] { String.valueOf(id) });
+        final Response response = postObjectImpl("/admin/app/ios/remove", new ObjectRequest<>(request));
+        log("Calling push server to remove iOS, ID: {0} - finish", new String[] { String.valueOf(id) });
+        return response;
+    }
+
+    /**
+     * Update Android details for an application credentials entity.
+     * @param id Application credentials entity ID.
+     * @param bundle The Android bundle record.
+     * @param token The Android token (server key).
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response updateAndroid(Long id, String bundle, String token) throws PushServerClientException {
+        final UpdateAndroidRequest request = new UpdateAndroidRequest(id, bundle, token);
+        log("Calling push server to update android, ID: {0} - start", new String[] { String.valueOf(id) });
+        final Response response = postObjectImpl("/admin/app/android/update", new ObjectRequest<>(request));
+        log("Calling push server to update android, ID: {0} - finish", new String[] { String.valueOf(id) });
+        return response;
+    }
+
+    /**
+     * Remove Android record from an application credentials entity.
+     * @param id Application credentials entity ID.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response removeAndroid(Long id) throws PushServerClientException {
+        final RemoveAndroidRequest request = new RemoveAndroidRequest(id);
+        log("Calling push server to remove android, ID: {0} - start", new String[] { String.valueOf(id) });
+        final Response response = postObjectImpl("/admin/app/android/remove", new ObjectRequest<>(request));
+        log("Calling push server to remove android, ID: {0} - finish", new String[] { String.valueOf(id) });
+        return response;
     }
 
     // Generic HTTP client methods
