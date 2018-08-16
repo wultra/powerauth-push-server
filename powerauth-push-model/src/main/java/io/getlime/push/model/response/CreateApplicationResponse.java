@@ -16,7 +16,7 @@
 package io.getlime.push.model.response;
 
 /**
- * Create application response.
+ * Response after creating Push Server application credentials entity based on existing PowerAuth server application.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */

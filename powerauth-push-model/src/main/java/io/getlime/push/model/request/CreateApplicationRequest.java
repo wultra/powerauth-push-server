@@ -16,7 +16,7 @@
 package io.getlime.push.model.request;
 
 /**
- * Create application request.
+ * Request to create Push Server application credentials entity based on existing PowerAuth server application.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
@@ -31,24 +31,24 @@ public class CreateApplicationRequest {
     }
 
     /**
-     * Constructor with application ID.
-     * @param appId Application ID.
+     * Constructor with PowerAuth server application ID.
+     * @param appId  PowerAuth server application ID.
      */
     public CreateApplicationRequest(Long appId) {
         this.appId = appId;
     }
 
     /**
-     * Get application ID.
-     * @return Application ID.
+     * Get PowerAuth server application ID.
+     * @return PowerAuth server application ID.
      */
     public Long getAppId() {
         return appId;
     }
 
     /**
-     * Set application ID.
-     * @param appId Application ID.
+     * Set PowerAuth server application ID.
+     * @param appId PowerAuth server application ID.
      */
     public void setAppId(Long appId) {
         this.appId = appId;
