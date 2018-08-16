@@ -42,7 +42,7 @@
                         <select name="appId" class="form-control" style="width: 200px;">
                             <c:forEach items="${applications}" var="item">
                                 <option value="<c:out value="${item.id}"/>">
-                                    <c:out value="${item.applicationName}"/>
+                                    <c:out value="${item.appName}"/>
                                 </option>
                             </c:forEach>
                         </select>

@@ -96,7 +96,12 @@
         <dependency>
             <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-push-model</artifactId>
-            <version>0.21.0</version>
+            <version>${powerauth.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.getlime.security</groupId>
+            <artifactId>powerauth-push-client</artifactId>
+            <version>${powerauth.version}</version>
         </dependency>
         <dependency>
             <groupId>io.getlime.security</groupId>
@@ -127,12 +132,6 @@
                     <artifactId>android-json</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.getlime.security</groupId>
-            <artifactId>powerauth-push-client</artifactId>
-            <version>${powerauth.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
