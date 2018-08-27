@@ -22,7 +22,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 /**
- * Form sent when uploading iOS credentials for the application.
+ * Form sent when uploading FCM credentials for the application.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
