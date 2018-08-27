@@ -36,6 +36,7 @@ import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageAttributes;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.service.fcm.FcmClient;
+import io.getlime.push.service.fcm.FcmModelConverter;
 import io.getlime.push.service.fcm.model.FcmErrorResponse;
 import io.getlime.push.service.fcm.model.FcmSuccessResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,22 +62,21 @@ import java.util.logging.Logger;
 public class PushSendingWorker {
 
     // FCM data only notification keys
-    private static final String FCM_NOTIFICATION_KEY_TITLE      = "_notification.title";
-    private static final String FCM_NOTIFICATION_KEY_BODY      = "_notification.body";
-    private static final String FCM_NOTIFICATION_KEY_ICON      = "_notification.icon";
-    private static final String FCM_NOTIFICATION_KEY_SOUND      = "_notification.sound";
-    private static final String FCM_NOTIFICATION_KEY_TAG      = "_notification.tag";
-
-    private static final String APNS_BAD_DEVICE_TOKEN     = "BadDeviceToken";
+    private static final String FCM_NOTIFICATION_KEY      = "_notification";
 
     // Expected response String from FCM
     private static final String FCM_RESPONSE_VALID_REGEXP = "projects/.+/messages/.+";
 
+    // APNS bad device token String
+    private static final String APNS_BAD_DEVICE_TOKEN     = "BadDeviceToken";
+
     private final PushServiceConfiguration pushServiceConfiguration;
+    private final FcmModelConverter fcmConverter;
 
     @Autowired
-    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration) {
+    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter) {
         this.pushServiceConfiguration = pushServiceConfiguration;
+        this.fcmConverter = fcmConverter;
     }
 
     // Android related methods
@@ -89,7 +89,7 @@ public class PushSendingWorker {
      * @return A new instance of FCM client.
      */
     FcmClient prepareFcmClient(byte[] privateKey, String projectId) throws PushServerException {
-        FcmClient fcmClient = new FcmClient(privateKey, projectId, pushServiceConfiguration);
+        FcmClient fcmClient = new FcmClient(privateKey, projectId, pushServiceConfiguration, fcmConverter);
         if (pushServiceConfiguration.isFcmProxyEnabled()) {
             String proxyHost = pushServiceConfiguration.getFcmProxyUrl();
             int proxyPort = pushServiceConfiguration.getFcmProxyPort();
@@ -136,7 +136,7 @@ public class PushSendingWorker {
         // Callback when FCM request fails
         Consumer<Throwable> onError = t -> {
             if (t instanceof WebClientResponseException) {
-                String errorCode = fcmClient.convertErrorToCode((WebClientResponseException) t);
+                String errorCode = fcmConverter.convertExceptionToErrorCode((WebClientResponseException) t);
                 switch (errorCode) {
                     case FcmErrorResponse.REGISTRATION_TOKEN_NOT_REGISTERED:
                         Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Push message rejected by FCM gateway, device registration will be removed. Error: " + errorCode);
@@ -201,20 +201,17 @@ public class PushSendingWorker {
         AndroidConfig.Builder androidConfigBuilder = AndroidConfig.builder()
                 .setCollapseKey(pushMessageBody.getCollapseKey());
 
+        AndroidNotification notification = AndroidNotification.builder()
+                .setTitle(pushMessageBody.getTitle())
+                .setBody(pushMessageBody.getBody())
+                .setIcon(pushMessageBody.getIcon())
+                .setSound(pushMessageBody.getSound())
+                .setTag(pushMessageBody.getCategory())
+                .build();
+
         if (pushServiceConfiguration.isFcmDataNotificationOnly()) { // notification only through data map
-            data.put(FCM_NOTIFICATION_KEY_TITLE, pushMessageBody.getTitle());
-            data.put(FCM_NOTIFICATION_KEY_BODY, pushMessageBody.getBody());
-            data.put(FCM_NOTIFICATION_KEY_ICON, pushMessageBody.getIcon());
-            data.put(FCM_NOTIFICATION_KEY_SOUND, pushMessageBody.getSound());
-            data.put(FCM_NOTIFICATION_KEY_TAG, pushMessageBody.getCategory());
+            data.put(FCM_NOTIFICATION_KEY, fcmConverter.convertNotificationToString(notification));
         } else if (attributes == null || !attributes.getSilent()) { // if there are no attributes, assume the message is not silent
-            AndroidNotification notification = AndroidNotification.builder()
-                    .setTitle(pushMessageBody.getTitle())
-                    .setBody(pushMessageBody.getBody())
-                    .setIcon(pushMessageBody.getIcon())
-                    .setSound(pushMessageBody.getSound())
-                    .setTag(pushMessageBody.getCategory())
-                    .build();
             androidConfigBuilder.setNotification(notification);
         }
 
