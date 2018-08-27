@@ -60,7 +60,13 @@ import java.util.logging.Logger;
 @Service
 public class PushSendingWorker {
 
-    private static final String FCM_NOTIFICATION_KEY      = "_notification";
+    // FCM data only notification keys
+    private static final String FCM_NOTIFICATION_KEY_TITLE      = "_notification.title";
+    private static final String FCM_NOTIFICATION_KEY_BODY      = "_notification.body";
+    private static final String FCM_NOTIFICATION_KEY_ICON      = "_notification.icon";
+    private static final String FCM_NOTIFICATION_KEY_SOUND      = "_notification.sound";
+    private static final String FCM_NOTIFICATION_KEY_TAG      = "_notification.tag";
+
     private static final String APNS_BAD_DEVICE_TOKEN     = "BadDeviceToken";
 
     // Expected response String from FCM
@@ -196,12 +202,11 @@ public class PushSendingWorker {
                 .setCollapseKey(pushMessageBody.getCollapseKey());
 
         if (pushServiceConfiguration.isFcmDataNotificationOnly()) { // notification only through data map
-            String notificationString = pushMessageBody.getTitle()
-                    + "." + pushMessageBody.getBody()
-                    + "." + pushMessageBody.getIcon()
-                    + "." + pushMessageBody.getSound()
-                    + "." + pushMessageBody.getCategory();
-            data.put(FCM_NOTIFICATION_KEY, notificationString);
+            data.put(FCM_NOTIFICATION_KEY_TITLE, pushMessageBody.getTitle());
+            data.put(FCM_NOTIFICATION_KEY_BODY, pushMessageBody.getBody());
+            data.put(FCM_NOTIFICATION_KEY_ICON, pushMessageBody.getIcon());
+            data.put(FCM_NOTIFICATION_KEY_SOUND, pushMessageBody.getSound());
+            data.put(FCM_NOTIFICATION_KEY_TAG, pushMessageBody.getCategory());
         } else if (attributes == null || !attributes.getSilent()) { // if there are no attributes, assume the message is not silent
             AndroidNotification notification = AndroidNotification.builder()
                     .setTitle(pushMessageBody.getTitle())
