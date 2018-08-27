@@ -79,7 +79,7 @@ public class UploadIosCredentialsForm {
     public String toString() {
         return "UploadIosCredentialsForm{" +
                 "bundle='" + bundle + '\'' +
-                ", privateKey=" + privateKey +
+                ", privateKey=******" + '\'' +
                 ", teamId='" + teamId + '\'' +
                 ", keyId='" + keyId + '\'' +
                 '}';

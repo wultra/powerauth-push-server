@@ -16,6 +16,9 @@
 
 package io.getlime.push.service;
 
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.Message;
 import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsClientBuilder;
 import com.turo.pushy.apns.DeliveryPriority;
@@ -28,16 +31,16 @@ import com.turo.pushy.apns.util.TokenUtil;
 import com.turo.pushy.apns.util.concurrent.PushNotificationFuture;
 import com.turo.pushy.apns.util.concurrent.PushNotificationResponseListener;
 import io.getlime.push.configuration.PushServiceConfiguration;
+import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageAttributes;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.service.fcm.FcmClient;
-import io.getlime.push.service.fcm.FcmNotification;
-import io.getlime.push.service.fcm.model.FcmSendRequest;
-import io.getlime.push.service.fcm.model.FcmSendResponse;
-import io.getlime.push.service.fcm.model.base.FcmResult;
+import io.getlime.push.service.fcm.model.FcmErrorResponse;
+import io.getlime.push.service.fcm.model.FcmSuccessResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import javax.net.ssl.SSLException;
 import java.io.ByteArrayInputStream;
@@ -46,7 +49,7 @@ import java.net.InetSocketAddress;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -57,10 +60,11 @@ import java.util.logging.Logger;
 @Service
 public class PushSendingWorker {
 
-    private static final String FCM_NOT_REGISTERED      = "notregistered";
-    private static final String FCM_UNAVAILABLE         = "unavailable";
-    private static final String FCM_NOTIFICATION_KEY    = "_notification";
-    private static final String APNS_BAD_DEVICE_TOKEN   = "BadDeviceToken";
+    private static final String FCM_NOTIFICATION_KEY      = "_notification";
+    private static final String APNS_BAD_DEVICE_TOKEN     = "BadDeviceToken";
+
+    // Expected response String from FCM
+    private static final String FCM_RESPONSE_VALID_REGEXP = "projects/.+/messages/.+";
 
     private final PushServiceConfiguration pushServiceConfiguration;
 
@@ -74,11 +78,12 @@ public class PushSendingWorker {
     /**
      * Prepares an FCM service client with a provided server key.
      *
-     * @param serverKey FCM server key.
+     * @param privateKey FCM private key.
+     * @param projectId FCM project ID.
      * @return A new instance of FCM client.
      */
-    FcmClient prepareFcmClient(String serverKey) {
-        FcmClient fcmClient = new FcmClient(serverKey, pushServiceConfiguration);
+    FcmClient prepareFcmClient(byte[] privateKey, String projectId) throws PushServerException {
+        FcmClient fcmClient = new FcmClient(privateKey, projectId, pushServiceConfiguration);
         if (pushServiceConfiguration.isFcmProxyEnabled()) {
             String proxyHost = pushServiceConfiguration.getFcmProxyUrl();
             int proxyPort = pushServiceConfiguration.getFcmProxyPort();
@@ -92,7 +97,8 @@ public class PushSendingWorker {
             }
             fcmClient.setProxySettings(proxyHost, proxyPort, proxyUsername, proxyPassword);
         }
-        fcmClient.initialize();
+        fcmClient.initializeWebClient();
+        fcmClient.initializeGoogleCredential();
         return fcmClient;
     }
 
@@ -106,78 +112,112 @@ public class PushSendingWorker {
      */
     void sendMessageToAndroid(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final PushSendingCallback callback) {
 
-        FcmSendRequest request = new FcmSendRequest();
-        request.setTo(pushToken);
-        request.setData(pushMessageBody.getExtras());
-        request.setCollapseKey(pushMessageBody.getCollapseKey());
-        if (pushServiceConfiguration.isFcmDataNotificationOnly()) { // notification only through data map
-            FcmNotification notification = new FcmNotification();
-            notification.setTitle(pushMessageBody.getTitle());
-            notification.setBody(pushMessageBody.getBody());
-            notification.setIcon(pushMessageBody.getIcon());
-            notification.setSound(pushMessageBody.getSound());
-            notification.setTag(pushMessageBody.getCategory());
-            request.getData().put(FCM_NOTIFICATION_KEY, notification);
-        } else if (attributes == null || !attributes.getSilent()) { // if there are no attributes, assume the message is not silent
-            FcmNotification notification = new FcmNotification();
-            notification.setTitle(pushMessageBody.getTitle());
-            notification.setBody(pushMessageBody.getBody());
-            notification.setIcon(pushMessageBody.getIcon());
-            notification.setSound(pushMessageBody.getSound());
-            notification.setTag(pushMessageBody.getCategory());
-            request.setNotification(notification);
-        }
+        // Build Android message
+        Message message = buildAndroidMessage(pushMessageBody, attributes, pushToken);
 
         // Callback when FCM request succeeds
-        Consumer<FcmSendResponse> onSuccess = body -> {
-            for (FcmResult fcmResult : body.getFcmResults()) {
-                if (fcmResult.getMessageId() != null) {
-                    // no issues, straight sending
-                    if (fcmResult.getRegistrationId() == null) {
-                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent");
-                        callback.didFinishSendingMessage(PushSendingCallback.Result.OK, null);
-                    } else {
-                        // no issues, straight sending + update token (pass it via context)
-                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent and token has been updated");
-                        Map<String, Object> contextData = new HashMap<>();
-                        contextData.put(FcmResult.KEY_UPDATE_TOKEN, fcmResult.getRegistrationId());
-                        callback.didFinishSendingMessage(PushSendingCallback.Result.OK, contextData);
-                    }
-                } else {
-                    if (fcmResult.getFcmError() != null) {
-                        switch (fcmResult.getFcmError().toLowerCase()) { // make sure to account for case issues
-                            // token doesn't exist, remove device registration
-                            case FCM_NOT_REGISTERED: {
-                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, invalid token, will be deleted: ");
-                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
-                                break;
-                            }
-                            // retry to send later
-                            case FCM_UNAVAILABLE: {
-                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, will retry to send: ");
-                                callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING, null);
-                                break;
-                            }
-                            // non-recoverable error, remove device registration
-                            default: {
-                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the FCM gateway, non-recoverable error, will be deleted: ");
-                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
-                                break;
-                            }
-                        }
-                    }
-                }
+        Consumer<FcmSuccessResponse> onSuccess = body -> {
+            if (body.getName() != null && body.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
+                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent, response: " + body.getName());
+                callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
+                return;
             }
+            // This state should not happen, only in case when response from server is invalid
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Invalid response received from FCM, notification sending failed");
+            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         };
 
         // Callback when FCM request fails
         Consumer<Throwable> onError = t -> {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification sending failed: " + t.getMessage(), t);
-            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
+            if (t instanceof WebClientResponseException) {
+                String errorCode = fcmClient.convertErrorToCode((WebClientResponseException) t);
+                switch (errorCode) {
+                    case FcmErrorResponse.REGISTRATION_TOKEN_NOT_REGISTERED:
+                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Push message rejected by FCM gateway, device registration will be removed. Error: " + errorCode);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
+                        return;
+
+                    case FcmErrorResponse.SERVER_UNAVAILABLE:
+                    case FcmErrorResponse.INTERNAL_ERROR:
+                    case FcmErrorResponse.MESSAGE_RATE_EXCEEDED:
+                        // TODO - implement throttling of messages, see:
+                        // https://firebase.google.com/docs/cloud-messaging/admin/errors
+                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Push message rejected by FCM gateway, message status set to PENDING. Error: " + errorCode);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
+                        return;
+
+                    case FcmErrorResponse.MISMATCHED_CREDENTIAL:
+                    case FcmErrorResponse.INVALID_APNS_CREDENTIALS:
+                    case FcmErrorResponse.INVALID_ARGUMENT:
+                    case FcmErrorResponse.UNKNOWN_ERROR:
+                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Push message rejected by FCM gateway, error: " + errorCode);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
+                        return;
+
+                    default:
+                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Unexpected error code received from FCM gateway: " + errorCode);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
+                        return;
+                }
+            }
+
+            // Unexepected errors
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Unexpected error occurred while sending push message: " + t.getMessage(), t);
+            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         };
 
         // Perform request to FCM asynchronously, either of the consumers is called in case of success or error
-        fcmClient.exchange(request, onSuccess, onError);
+        try {
+            fcmClient.exchange(message, false, onSuccess, onError);
+        } catch (FcmMissingTokenException ex) {
+            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
+        }
+    }
+
+    /**
+     * Build Android Message object from Push message body.
+     * @param pushMessageBody Push message body.
+     * @param attributes Push message attributes.
+     * @param pushToken Push token.
+     * @return Android Message object.
+     */
+    private Message buildAndroidMessage(final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken) {
+        // convert data from Map<String, Object> to Map<String, String>
+        Map<String, Object> extras = pushMessageBody.getExtras();
+        Map<String, String> data = new LinkedHashMap<>();
+        if (extras != null) {
+            for (Map.Entry<String, Object> entry : extras.entrySet()) {
+                data.put(entry.getKey(), entry.getValue().toString());
+            }
+        }
+
+        AndroidConfig.Builder androidConfigBuilder = AndroidConfig.builder()
+                .setCollapseKey(pushMessageBody.getCollapseKey());
+
+        if (pushServiceConfiguration.isFcmDataNotificationOnly()) { // notification only through data map
+            String notificationString = pushMessageBody.getTitle()
+                    + "." + pushMessageBody.getBody()
+                    + "." + pushMessageBody.getIcon()
+                    + "." + pushMessageBody.getSound()
+                    + "." + pushMessageBody.getCategory();
+            data.put(FCM_NOTIFICATION_KEY, notificationString);
+        } else if (attributes == null || !attributes.getSilent()) { // if there are no attributes, assume the message is not silent
+            AndroidNotification notification = AndroidNotification.builder()
+                    .setTitle(pushMessageBody.getTitle())
+                    .setBody(pushMessageBody.getBody())
+                    .setIcon(pushMessageBody.getIcon())
+                    .setSound(pushMessageBody.getSound())
+                    .setTag(pushMessageBody.getCategory())
+                    .build();
+            androidConfigBuilder.setNotification(notification);
+        }
+
+        return Message.builder()
+                .setToken(pushToken)
+                .putAllData(data)
+                .setAndroidConfig(androidConfigBuilder.build())
+                .build();
     }
 
     // iOS related methods
@@ -267,23 +307,23 @@ public class PushSendingWorker {
                             Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: " + pushNotificationResponse.getRejectionReason());
                             if (pushNotificationResponse.getRejectionReason().equals(APNS_BAD_DEVICE_TOKEN)) {
                                 Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "\t... due to bad device token value.");
-                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
+                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                             } else if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
                                 Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "\t... and the token is invalid as of " + pushNotificationResponse.getTokenInvalidationTimestamp());
-                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE, null);
+                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                             } else {
-                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
+                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                             }
                         } else {
-                            callback.didFinishSendingMessage(PushSendingCallback.Result.OK, null);
+                            callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                         }
                     } else {
                         Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: unknown error, will retry");
-                        callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING, null);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
                     }
                 } else {
                     Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Push Message Sending Failed", future.cause());
-                    callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED, null);
+                    callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                 }
             }
         });
@@ -302,7 +342,7 @@ public class PushSendingWorker {
         payloadBuilder.setAlertBody(push.getBody());
         payloadBuilder.setBadgeNumber(push.getBadge());
         payloadBuilder.setCategoryName(push.getCategory());
-        payloadBuilder.setSoundFileName(push.getSound());
+        payloadBuilder.setSound(push.getSound());
         payloadBuilder.setContentAvailable(isSilent);
         payloadBuilder.setThreadId(push.getCollapseKey());
         Map<String, Object> extras = push.getExtras();

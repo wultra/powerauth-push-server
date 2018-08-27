@@ -16,8 +16,6 @@
 
 package io.getlime.push.service;
 
-import java.util.Map;
-
 /**
  * Interface used for handling result of the push message sending attempt.
  *
@@ -54,9 +52,7 @@ public interface PushSendingCallback {
     /**
      * Called after the push message sending attempt is made.
      *
-     * @param contextData Map for passing params to method declarations, or null in case no parameters need to be
-     *                    passed (make sure to null check).
      * @param result Result of the push message sending.
      */
-    void didFinishSendingMessage(Result result, Map<String, Object> contextData);
+    void didFinishSendingMessage(Result result);
 }

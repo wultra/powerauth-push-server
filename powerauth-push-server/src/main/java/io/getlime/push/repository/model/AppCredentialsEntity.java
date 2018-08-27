@@ -50,11 +50,11 @@ public class AppCredentialsEntity implements Serializable {
     @Column(name = "ios_bundle")
     private String iosBundle;
 
-    @Column(name = "android_server_key")
-    private String androidServerKey;
+    @Column(name = "android_private_key")
+    private byte[] androidPrivateKey;
 
-    @Column(name = "android_bundle")
-    private String androidBundle;
+    @Column(name = "android_project_id")
+    private String androidProjectId;
 
     public Long getId() {
         return id;
@@ -104,19 +104,19 @@ public class AppCredentialsEntity implements Serializable {
         this.iosKeyId = iosKeyId;
     }
 
-    public String getAndroidServerKey() {
-        return androidServerKey;
+    public byte[] getAndroidPrivateKey() {
+        return androidPrivateKey;
     }
 
-    public void setAndroidServerKey(String androidServerKey) {
-        this.androidServerKey = androidServerKey;
+    public void setAndroidPrivateKey(byte[] androidPrivateKey) {
+        this.androidPrivateKey = androidPrivateKey;
     }
 
-    public String getAndroidBundle() {
-        return androidBundle;
+    public String getAndroidProjectId() {
+        return androidProjectId;
     }
 
-    public void setAndroidBundle(String androidBundle) {
-        this.androidBundle = androidBundle;
+    public void setAndroidProjectId(String androidProjectId) {
+        this.androidProjectId = androidProjectId;
     }
 }

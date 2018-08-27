@@ -31,12 +31,10 @@ import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
 import io.getlime.push.service.fcm.FcmClient;
-import io.getlime.push.service.fcm.model.base.FcmResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Phaser;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,7 +109,12 @@ public class PushMessageSenderService {
                     // Decide if the device is iOS or Android and send message accordingly
                     String platform = device.getPlatform();
                     if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
-                        pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), (result, contextData) -> {
+                        if (pushClient.getApnsClient() == null) {
+                            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Push message cannot be sent to APNS because APNS is not configured in push server.");
+                            phaser.arriveAndDeregister();
+                            continue;
+                        }
+                        pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), (result) -> {
                             try {
                                 switch (result) {
                                     case OK: {
@@ -148,15 +151,19 @@ public class PushMessageSenderService {
                             }
                         });
                     } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
+                        if (pushClient.getFcmClient() == null) {
+                            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Push message cannot be sent to FCM because FCM is not configured in push server.");
+                            phaser.arriveAndDeregister();
+                            continue;
+                        }
                         final String token = device.getPushToken();
-                        pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), token, (sendingResult, contextData) -> {
+                        pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), token, (sendingResult) -> {
                             try {
                                 switch (sendingResult) {
                                     case OK: {
                                         sendResult.getAndroid().setSent(sendResult.getAndroid().getSent() + 1);
                                         pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
                                         pushMessageDAO.save(pushMessageObject);
-                                        updateFcmTokenIfNeeded(appId, token, contextData);
                                         break;
                                     }
                                     case PENDING: {
@@ -234,7 +241,7 @@ public class PushMessageSenderService {
         final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, activationId, deviceId);
 
         if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
-            pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), (result, contextData) -> {
+            pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), (result) -> {
                 switch (result) {
                     case OK: {
                         pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
@@ -260,12 +267,11 @@ public class PushMessageSenderService {
                 }
             });
         } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
-            pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, (result, contextData) -> {
+            pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, (result) -> {
                 switch (result) {
                     case OK: {
                         pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
                         pushMessageDAO.save(pushMessageObject);
-                        updateFcmTokenIfNeeded(appId, token, contextData);
                         break;
                     }
                     case PENDING: {
@@ -319,12 +325,16 @@ public class PushMessageSenderService {
             AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
             if (pushClient == null) {
                 final AppCredentialsEntity credentials = getAppCredentials(appId);
-                ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosPrivateKey(), credentials.getIosTeamId(), credentials.getIosKeyId());
-                FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidServerKey());
                 pushClient = new AppRelatedPushClient();
+                if (credentials.getIosPrivateKey() != null) {
+                    ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosPrivateKey(), credentials.getIosTeamId(), credentials.getIosKeyId());
+                    pushClient.setApnsClient(apnsClient);
+                }
+                if (credentials.getAndroidPrivateKey() != null) {
+                    FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidPrivateKey(), credentials.getAndroidProjectId());
+                    pushClient.setFcmClient(fcmClient);
+                }
                 pushClient.setAppCredentials(credentials);
-                pushClient.setApnsClient(apnsClient);
-                pushClient.setFcmClient(fcmClient);
                 appRelatedPushClientMap.put(appId, pushClient);
                 Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Creating APNS and FCM clients for app " + appId);
             }
@@ -339,18 +349,6 @@ public class PushMessageSenderService {
         if (error != null) {
             Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.WARNING, error);
             throw new PushServerException(error);
-        }
-    }
-
-    // Update FCM token based on context data
-    private void updateFcmTokenIfNeeded(Long appId, String token, Map<String, Object> contextData) {
-        if (contextData != null) {
-            String updatedToken = (String) contextData.get(FcmResult.KEY_UPDATE_TOKEN);
-            if (updatedToken != null) {
-                PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token);
-                device.setPushToken(updatedToken);
-                pushDeviceRepository.save(device);
-            }
         }
     }
 

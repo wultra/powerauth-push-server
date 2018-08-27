@@ -585,13 +585,14 @@ public class PushServerClient {
     /**
      * Update Android details for an application credentials entity.
      * @param id Application credentials entity ID.
-     * @param bundle The Android bundle record.
-     * @param token The Android token (server key).
+     * @param projectId The Android project ID record.
+     * @param privateKey The Android private key bytes.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public Response updateAndroid(Long id, String bundle, String token) throws PushServerClientException {
-        final UpdateAndroidRequest request = new UpdateAndroidRequest(id, bundle, token);
+    public Response updateAndroid(Long id, String projectId, byte[] privateKey) throws PushServerClientException {
+        final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
+        final UpdateAndroidRequest request = new UpdateAndroidRequest(id, projectId, privateKeyBase64);
         log("Calling push server to update android, ID: {0} - start", new String[] { String.valueOf(id) });
         final Response response = postObjectImpl("/admin/app/android/update", new ObjectRequest<>(request));
         log("Calling push server to update android, ID: {0} - finish", new String[] { String.valueOf(id) });
