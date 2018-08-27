@@ -327,11 +327,11 @@ public class PushMessageSenderService {
                 final AppCredentialsEntity credentials = getAppCredentials(appId);
                 pushClient = new AppRelatedPushClient();
                 if (credentials.getIosPrivateKey() != null) {
-                    ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosPrivateKey(), credentials.getIosTeamId(), credentials.getIosKeyId());
+                    ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosTeamId(), credentials.getIosKeyId(), credentials.getIosPrivateKey());
                     pushClient.setApnsClient(apnsClient);
                 }
                 if (credentials.getAndroidPrivateKey() != null) {
-                    FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidPrivateKey(), credentials.getAndroidProjectId());
+                    FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
                     pushClient.setFcmClient(fcmClient);
                 }
                 pushClient.setAppCredentials(credentials);

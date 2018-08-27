@@ -51,11 +51,11 @@ public class FcmClient {
     // FCM URL parts for posting push messages
     private static final String FCM_URL = "https://fcm.googleapis.com/v1/projects/%s/messages:send";
 
-    // FCM private key for communication with Google backends
-    private final byte[] privateKey;
-
     // FCM project ID
     private final String projectId;
+
+    // FCM private key for communication with Google backends
+    private final byte[] privateKey;
 
     // FCM send message URL
     private final String fcmSendMessageUrl;
@@ -78,9 +78,9 @@ public class FcmClient {
     private String proxyUsername;
     private String proxyPassword;
 
-    public FcmClient(byte[] privateKey, String projectId, PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter) {
-        this.privateKey = privateKey;
+    public FcmClient(String projectId, byte[] privateKey, PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter) {
         this.projectId = projectId;
+        this.privateKey = privateKey;
         this.pushServiceConfiguration = pushServiceConfiguration;
         this.fcmSendMessageUrl = String.format(FCM_URL, projectId);
         this.fcmConverter = fcmConverter;

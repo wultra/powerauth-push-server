@@ -84,12 +84,12 @@ public class PushSendingWorker {
     /**
      * Prepares an FCM service client with a provided server key.
      *
-     * @param privateKey FCM private key.
      * @param projectId FCM project ID.
+     * @param privateKey FCM private key.
      * @return A new instance of FCM client.
      */
-    FcmClient prepareFcmClient(byte[] privateKey, String projectId) throws PushServerException {
-        FcmClient fcmClient = new FcmClient(privateKey, projectId, pushServiceConfiguration, fcmConverter);
+    FcmClient prepareFcmClient(String projectId, byte[] privateKey) throws PushServerException {
+        FcmClient fcmClient = new FcmClient(projectId, privateKey, pushServiceConfiguration, fcmConverter);
         if (pushServiceConfiguration.isFcmProxyEnabled()) {
             String proxyHost = pushServiceConfiguration.getFcmProxyUrl();
             int proxyPort = pushServiceConfiguration.getFcmProxyPort();
@@ -227,14 +227,14 @@ public class PushSendingWorker {
     /**
      * Prepare and connect APNs client.
      *
-     * @param apnsPrivateKey Bytes of the APNs private key (contents of the *.p8 file).
      * @param teamId APNs team ID.
      * @param keyId APNs key ID.
+     * @param apnsPrivateKey Bytes of the APNs private key (contents of the *.p8 file).
      * @return New instance of APNs client.
      * @throws PushServerException In case an error occurs (private key is invalid, unable to connect
      *   to APNs service due to SSL issue, ...).
      */
-    ApnsClient prepareApnsClient(byte[] apnsPrivateKey, String teamId, String keyId) throws PushServerException {
+    ApnsClient prepareApnsClient(String teamId, String keyId, byte[] apnsPrivateKey) throws PushServerException {
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
         apnsClientBuilder.setProxyHandlerFactory(apnsClientProxy());
         apnsClientBuilder.setConnectionTimeout(pushServiceConfiguration.getApnsConnectTimeout(), TimeUnit.MILLISECONDS);
