@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  */
 public class FcmClient {
 
-    // FCM URL parts for posting push messages
+    // FCM URL for posting push messages
     private static final String FCM_URL = "https://fcm.googleapis.com/v1/projects/%s/messages:send";
 
     // FCM project ID
