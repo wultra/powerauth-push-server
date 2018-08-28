@@ -23,8 +23,8 @@ package io.getlime.push.model.request;
 public class UpdateAndroidRequest {
 
     private Long id;
-    private String bundle;
-    private String token;
+    private String projectId;
+    private String privateKeyBase64;
 
     /**
      * Default constructor.
@@ -35,13 +35,13 @@ public class UpdateAndroidRequest {
     /**
      * Constructor with details.
      * @param id Application credentials entity ID.
-     * @param bundle Android bundle record.
-     * @param token Android token record (server key).
+     * @param projectId Android project ID record.
+     * @param privateKeyBase64 Base 64 encoded Android private key.
      */
-    public UpdateAndroidRequest(Long id, String bundle, String token) {
+    public UpdateAndroidRequest(Long id, String projectId, String privateKeyBase64) {
         this.id = id;
-        this.bundle = bundle;
-        this.token = token;
+        this.projectId = projectId;
+        this.privateKeyBase64 = privateKeyBase64;
     }
 
     /**
@@ -61,34 +61,35 @@ public class UpdateAndroidRequest {
     }
 
     /**
-     * Get the Android bundle record.
-     * @return The Android bundle record.
+     * Get the Android project ID record.
+     * @return The Android project ID record.
      */
-    public String getBundle() {
-        return bundle;
+    public String getProjectId() {
+        return projectId;
     }
 
     /**
-     * Set the Android bundle record.
-     * @param bundle The Android bundle record.
+     * Set the Android project ID record.
+     * @param projectId The Android project ID record.
      */
-    public void setBundle(String bundle) {
-        this.bundle = bundle;
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
     }
 
     /**
-     * Get the Android token record.
-     * @return The Android token record.
+     * Get the base64 encoded Android private key.
+     * @return The base64 encoded Android private key.
      */
-    public String getToken() {
-        return token;
+    public String getPrivateKeyBase64() {
+        return privateKeyBase64;
     }
 
     /**
-     * Set the Android token record.
-     * @param token The Android token record.
+     * Set the base64 encoded Android private key.
+     * @param privateKeyBase64 The base64 encoded Android private key.
      */
-    public void setToken(String token) {
-        this.token = token;
+    public void setPrivateKeyBase64(String privateKeyBase64) {
+        this.privateKeyBase64 = privateKeyBase64;
     }
+
 }

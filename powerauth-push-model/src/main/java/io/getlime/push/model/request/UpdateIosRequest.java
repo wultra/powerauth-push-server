@@ -26,7 +26,7 @@ public class UpdateIosRequest {
     private String bundle;
     private String keyId;
     private String teamId;
-    private String privateKeyBytesBase64;
+    private String privateKeyBase64;
 
     /**
      * Default constructor.
@@ -40,14 +40,14 @@ public class UpdateIosRequest {
      * @param bundle The iOS bundle record.
      * @param keyId The iOS key ID record.
      * @param teamId The iOS team ID record.
-     * @param privateKeyBytesBase64 Base64 encoded private key.
+     * @param privateKeyBase64 Base64 encoded private key.
      */
-    public UpdateIosRequest(Long id, String bundle, String keyId, String teamId, String privateKeyBytesBase64) {
+    public UpdateIosRequest(Long id, String bundle, String keyId, String teamId, String privateKeyBase64) {
         this.id = id;
         this.bundle = bundle;
         this.keyId = keyId;
         this.teamId = teamId;
-        this.privateKeyBytesBase64 = privateKeyBytesBase64;
+        this.privateKeyBase64 = privateKeyBase64;
     }
 
     /**
@@ -118,15 +118,15 @@ public class UpdateIosRequest {
      * Get base64 encoded private key.
      * @return Base 64 encoded private key.
      */
-    public String getPrivateKeyBytesBase64() {
-        return privateKeyBytesBase64;
+    public String getPrivateKeyBase64() {
+        return privateKeyBase64;
     }
 
     /**
      * Set base64 encoded private key.
-     * @param privateKeyBytesBase64 Base 64 encoded private key.
+     * @param privateKeyBase64 Base 64 encoded private key.
      */
-    public void setPrivateKeyBytesBase64(String privateKeyBytesBase64) {
-        this.privateKeyBytesBase64 = privateKeyBytesBase64;
+    public void setPrivateKeyBase64(String privateKeyBase64) {
+        this.privateKeyBase64 = privateKeyBase64;
     }
 }

@@ -77,7 +77,7 @@ public class AdministrationController {
             app.setAppId(appCredentialsEntity.getAppId());
             app.setAppName(powerAuthClient.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
             app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-            app.setAndroid(appCredentialsEntity.getAndroidServerKey() != null);
+            app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
             appList.add(app);
         }
         response.setApplicationList(appList);
@@ -128,7 +128,7 @@ public class AdministrationController {
         app.setId(appCredentialsEntity.getId());
         app.setAppId(appCredentialsEntity.getAppId());
         app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-        app.setAndroid(appCredentialsEntity.getAndroidServerKey() != null);
+        app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
         app.setAppName(powerAuthClient.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
         response.setApplication(app);
         if (request.getRequestObject().includeIos()) {
@@ -137,8 +137,7 @@ public class AdministrationController {
             response.setIosTeamId(appCredentialsEntity.getIosTeamId());
         }
         if (request.getRequestObject().includeAndroid()) {
-            response.setAndroidBundle(appCredentialsEntity.getAndroidBundle());
-            response.setAndroidToken(appCredentialsEntity.getAndroidServerKey());
+            response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
         }
         return new ObjectResponse<>(response);
     }
@@ -167,7 +166,7 @@ public class AdministrationController {
     public @ResponseBody Response updateIos(@RequestBody ObjectRequest<UpdateIosRequest> request) throws PushServerException {
         final UpdateIosRequest requestObject = request.getRequestObject();
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
-        byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBytesBase64());
+        byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
         appCredentialsEntity.setIosPrivateKey(privateKeyBytes);
         appCredentialsEntity.setIosTeamId(requestObject.getTeamId());
         appCredentialsEntity.setIosKeyId(requestObject.getKeyId());
@@ -206,8 +205,9 @@ public class AdministrationController {
     public @ResponseBody Response updateAndroid(@RequestBody ObjectRequest<UpdateAndroidRequest> request) throws PushServerException {
         final UpdateAndroidRequest requestObject = request.getRequestObject();
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
-        appCredentialsEntity.setAndroidBundle(requestObject.getBundle());
-        appCredentialsEntity.setAndroidServerKey(requestObject.getToken());
+        byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
+        appCredentialsEntity.setAndroidPrivateKey(privateKeyBytes);
+        appCredentialsEntity.setAndroidProjectId(requestObject.getProjectId());
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
         return new Response();
@@ -223,8 +223,8 @@ public class AdministrationController {
     public @ResponseBody Response removeAndroid(@RequestBody ObjectRequest<RemoveAndroidRequest> request) throws PushServerException {
         final RemoveAndroidRequest requestObject = request.getRequestObject();
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
-        appCredentialsEntity.setAndroidBundle(null);
-        appCredentialsEntity.setAndroidServerKey(null);
+        appCredentialsEntity.setAndroidPrivateKey(null);
+        appCredentialsEntity.setAndroidProjectId(null);
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(requestObject.getId());
         return new Response();

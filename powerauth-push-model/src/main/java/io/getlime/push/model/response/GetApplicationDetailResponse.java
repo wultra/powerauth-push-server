@@ -28,8 +28,7 @@ public class GetApplicationDetailResponse {
     private String iosBundle;
     private String iosKeyId;
     private String iosTeamId;
-    private String androidBundle;
-    private String androidToken;
+    private String androidProjectId;
 
     /**
      * Default constructor.
@@ -102,34 +101,18 @@ public class GetApplicationDetailResponse {
     }
 
     /**
-     * Get the Android bundle record.
-     * @return The Android bundle record.
+     * Get the Android project ID record.
+     * @return The Android project ID record.
      */
-    public String getAndroidBundle() {
-        return androidBundle;
+    public String getAndroidProjectId() {
+        return androidProjectId;
     }
 
     /**
-     * Set the Android bundle record.
-     * @param androidBundle The Android bundle record.
+     * Set the Android project ID record.
+     * @param androidProjectId The Android project ID record.
      */
-    public void setAndroidBundle(String androidBundle) {
-        this.androidBundle = androidBundle;
-    }
-
-    /**
-     * Get the Android token (server key) record.
-     * @return The Android token (server key) record.
-     */
-    public String getAndroidToken() {
-        return androidToken;
-    }
-
-    /**
-     * Set the Android token (server key) record.
-     * @param androidToken The Android token (server key) record.
-     */
-    public void setAndroidToken(String androidToken) {
-        this.androidToken = androidToken;
+    public void setAndroidProjectId(String androidProjectId) {
+        this.androidProjectId = androidProjectId;
     }
 }

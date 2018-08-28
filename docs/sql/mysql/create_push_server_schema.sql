@@ -5,8 +5,8 @@ CREATE TABLE `push_app_credentials` (
   `ios_team_id` varchar(255) DEFAULT NULL,
   `ios_key_id` varchar(255) DEFAULT NULL,
   `ios_bundle` varchar(255) DEFAULT NULL,
-  `android_server_key` text DEFAULT NULL,
-  `android_bundle` varchar(255) DEFAULT NULL,
+  `android_private_key` blob DEFAULT NULL,
+  `android_project_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `app_id_index` (`app_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

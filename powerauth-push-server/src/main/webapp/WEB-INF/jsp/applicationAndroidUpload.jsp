@@ -20,23 +20,23 @@
     </div>
 
     <div class="panel-body">
-        <form action="${pageContext.request.contextPath}/web/admin/app/${application.id}/android/upload/do.submit" method="POST">
+        <form action="${pageContext.request.contextPath}/web/admin/app/${application.id}/android/upload/do.submit" method="POST" enctype="multipart/form-data">
             <div class="row padder10">
                 <div class="col-sm-6">
-                    <c:if test="${fields.hasFieldErrors('bundle')}">
-                        <div class="red">Please enter a valid Android package name (for example "io.getlime.app.MyApp").</div>
+                    <c:if test="${fields.hasFieldErrors('projectId')}">
+                        <div class="red">Please enter a valid FCM project ID.</div>
                     </c:if>
-                    Package name
+                    Firebase Cloud Messaging Project ID
                     <br/>
-                    <input type="text" name="bundle" value="${bundle}" class="form-control"/>
+                    <input type="text" name="projectId" value="${projectId}" class="form-control"/>
                 </div>
                 <div class="col-sm-6">
-                    <c:if test="${fields.hasFieldErrors('token')}">
-                        <div class="red">Please enter a correct FCM token value.</div>
+                    <c:if test="${fields.hasFieldErrors('privateKey')}">
+                        <div class="red">Please enter a correct FCM private key.</div>
                     </c:if>
-                    Firebase Cloud Messaging Token
+                    Firebase Cloud Messaging Private Key
                     <br/>
-                    <textarea name="token" rows="4" class="form-control">${token}</textarea>
+                    <input type="file" name="privateKey" class="form-control"/>
                 </div>
             </div>
             <div class="row padder10">

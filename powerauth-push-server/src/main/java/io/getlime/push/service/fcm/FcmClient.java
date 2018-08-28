@@ -16,35 +16,61 @@
 
 package io.getlime.push.service.fcm;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.firebase.messaging.Message;
 import io.getlime.push.configuration.PushServiceConfiguration;
-import io.getlime.push.service.fcm.model.FcmSendRequest;
-import io.getlime.push.service.fcm.model.FcmSendResponse;
+import io.getlime.push.errorhandling.exceptions.FcmInitializationFailedException;
+import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
+import io.getlime.push.service.fcm.model.FcmSuccessResponse;
 import io.netty.channel.ChannelOption;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.ipc.netty.http.client.HttpClientOptions;
 import reactor.ipc.netty.options.ClientProxyOptions;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * FCM server client
+ * FCM server client.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Roman Strobl, roman.strobl@wultra.com
  */
 public class FcmClient {
 
     // FCM URL for posting push messages
-    private static final String FCM_URL = "https://fcm.googleapis.com/fcm/send";
+    private static final String FCM_URL = "https://fcm.googleapis.com/v1/projects/%s/messages:send";
 
-    // Android server key for push notifications
-    private final String serverKey;
+    // Time buffer for refresh access tokens
+    private static final long REFRESH_TOKEN_TIME_BUFFER_SECONDS = 60L;
+
+    // FCM project ID
+    private final String projectId;
+
+    // FCM private key for communication with Google backends
+    private final byte[] privateKey;
+
+    // FCM send message URL
+    private final String fcmSendMessageUrl;
+
+    // Google Credential instance for obtaining access tokens
+    private GoogleCredential googleCredential;
 
     // Push server configuration
     private final PushServiceConfiguration pushServiceConfiguration;
+
+    // FCM converter for model classes
+    private final FcmModelConverter fcmConverter;
 
     // WebClient instance
     private WebClient webClient;
@@ -55,10 +81,14 @@ public class FcmClient {
     private String proxyUsername;
     private String proxyPassword;
 
-    public FcmClient(String serverKey, PushServiceConfiguration pushServiceConfiguration) {
-        this.serverKey = serverKey;
+    public FcmClient(String projectId, byte[] privateKey, PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter) {
+        this.projectId = projectId;
+        this.privateKey = privateKey;
         this.pushServiceConfiguration = pushServiceConfiguration;
+        this.fcmSendMessageUrl = String.format(FCM_URL, projectId);
+        this.fcmConverter = fcmConverter;
     }
+
 
     /**
      * Configure proxy settings.
@@ -75,9 +105,9 @@ public class FcmClient {
     }
 
     /**
-     * Initialize the FCM client and create WebClient instance based on client configuration.
+     * Initialize WebClient instance and configure it based on client configuration.
      */
-    public void initialize() {
+    public void initializeWebClient() {
         ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options -> {
             HttpClientOptions.Builder optionsBuilder = options
                     .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, pushServiceConfiguration.getFcmConnectTimeout());
@@ -95,25 +125,81 @@ public class FcmClient {
         webClient = WebClient.builder().clientConnector(clientHttpConnector).build();
     }
 
+    /**
+     * Initialize Google Credential based on FCM private key.
+     * @throws FcmInitializationFailedException In case initialization of Google Credential fails.
+     */
+    public void initializeGoogleCredential() throws FcmInitializationFailedException {
+        try {
+            InputStream is = new ByteArrayInputStream(privateKey);
+            googleCredential = GoogleCredential
+                    .fromStream(is)
+                    .createScoped(Collections.singletonList("https://www.googleapis.com/auth/firebase.messaging"));
+        } catch (IOException ex) {
+            throw new FcmInitializationFailedException("Error occurred while initializing Google Credential using FCM private key: " + ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * Refresh and retrieve access token for FCM.
+     * @return FCM access token.
+     * @throws FcmMissingTokenException In case FCM access token cannot be retrieved.
+     */
+    private String getAccessToken() throws FcmMissingTokenException {
+        if (googleCredential == null) {
+            // In case FCM registration failed, access token is not available
+            throw new FcmMissingTokenException("FCM access token is not available because Google Credential initialization failed");
+        }
+        try {
+            String accessToken = googleCredential.getAccessToken();
+            Long expiresIn = googleCredential.getExpiresInSeconds();
+            if (accessToken != null && expiresIn != null && expiresIn > REFRESH_TOKEN_TIME_BUFFER_SECONDS) {
+                // return existing access token, it is still valid
+                return accessToken;
+            }
+            // refresh access token, it either does not exist or it is expired
+            googleCredential.refreshToken();
+            return googleCredential.getAccessToken();
+        } catch (IOException ex) {
+            throw new FcmMissingTokenException("Error occurred while refreshing FCM access token: " + ex.getMessage(), ex);
+        }
+    }
 
     /**
      * Send given FCM request to the server. The method is asynchronous to avoid blocking REST API response.
-     * @param request FCM data request.
+     * @param message FCM message.
+     * @param validationOnly Whether to perform only validation.
      * @param onSuccess Callback called when request succeeds.
      * @param onError Callback called when request fails.
+     * @throws FcmMissingTokenException Thrown when FCM is not configured.
      */
-    public void exchange(FcmSendRequest request, Consumer<FcmSendResponse> onSuccess, Consumer<Throwable> onError) {
+    public void exchange(Message message, boolean validationOnly, Consumer<FcmSuccessResponse> onSuccess, Consumer<Throwable> onError) throws FcmMissingTokenException {
         if (webClient == null) {
-            throw new IllegalStateException("WebClient is not initialized");
+            Logger.getLogger(FcmClient.class.getName()).log(Level.SEVERE, "Push message delivery failed because WebClient is not initialized.");
+            return;
         }
+        if (projectId == null) {
+            Logger.getLogger(FcmClient.class.getName()).log(Level.SEVERE, "Push message delivery failed because FCM project ID is not configured.");
+            return;
+        }
+
+        String accessToken = getAccessToken();
+
+        Flux<DataBuffer> body = fcmConverter.convertMessageToFlux(message, validationOnly);
+        if (body == null) {
+            Logger.getLogger(FcmClient.class.getName()).log(Level.SEVERE, "Push message delivery failed because message is invalid.");
+            return;
+        }
+
         webClient
                 .post()
-                .uri(FCM_URL)
+                .uri(fcmSendMessageUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "key=" + serverKey)
-                .body(BodyInserters.fromObject(request))
+                .header("Authorization", "Bearer " + accessToken)
+                .body(BodyInserters.fromDataBuffers(body))
                 .retrieve()
-                .bodyToMono(FcmSendResponse.class)
+                .bodyToMono(FcmSuccessResponse.class)
                 .subscribe(onSuccess, onError);
     }
+
 }

@@ -168,11 +168,10 @@ public class WebAdminController {
             PushServerApplication app = objectResponse.getApplication();
             UploadAndroidCredentialsForm form = (UploadAndroidCredentialsForm) model.get("form");
             if (form == null) {
-                model.put("bundle", objectResponse.getAndroidBundle());
-                model.put("token", objectResponse.getAndroidToken());
+                model.put("projectId", objectResponse.getAndroidProjectId());
             } else {
-                model.put("bundle", form.getBundle());
-                model.put("token", form.getToken());
+                model.put("projectId", form.getProjectId());
+                model.put("privateKey", form.getPrivateKey());
             }
             model.put("application", app);
             return "applicationAndroidUpload";
@@ -291,9 +290,9 @@ public class WebAdminController {
             return "redirect:/web/admin/app/" + id + "/android/upload";
         }
         try {
-            pushServerClient.updateAndroid(id, form.getBundle(), form.getToken());
+            pushServerClient.updateAndroid(id, form.getProjectId(), form.getPrivateKey().getBytes());
             return "redirect:/web/admin/app/" + id + "/edit";
-        } catch (PushServerClientException ex) {
+        } catch (PushServerClientException | IOException ex) {
             model.put("message", ex.getMessage());
             Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
             return "error";
