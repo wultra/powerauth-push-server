@@ -51,6 +51,9 @@ public class FcmClient {
     // FCM URL for posting push messages
     private static final String FCM_URL = "https://fcm.googleapis.com/v1/projects/%s/messages:send";
 
+    // Time buffer for refresh access tokens
+    private static final long REFRESH_TOKEN_TIME_BUFFER_SECONDS = 60L;
+
     // FCM project ID
     private final String projectId;
 
@@ -148,6 +151,13 @@ public class FcmClient {
             throw new FcmMissingTokenException("FCM access token is not available because Google Credential initialization failed");
         }
         try {
+            String accessToken = googleCredential.getAccessToken();
+            Long expiresIn = googleCredential.getExpiresInSeconds();
+            if (accessToken != null && expiresIn != null && expiresIn > REFRESH_TOKEN_TIME_BUFFER_SECONDS) {
+                // return existing access token, it is still valid
+                return accessToken;
+            }
+            // refresh access token, it either does not exist or it is expired
             googleCredential.refreshToken();
             return googleCredential.getAccessToken();
         } catch (IOException ex) {
