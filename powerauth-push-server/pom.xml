@@ -95,13 +95,14 @@
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
-            <version>1.24.1</version>
+            <version>${google-api-client.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.firebase</groupId>
             <artifactId>firebase-admin</artifactId>
-            <version>6.4.0</version>
+            <version>${firebase-admin.version}</version>
         </dependency>
+        
         <!-- Optional Native Cryptographic Provider -->
         <dependency>
             <groupId>io.netty</groupId>
