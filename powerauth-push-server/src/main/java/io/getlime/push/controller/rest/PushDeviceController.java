@@ -17,9 +17,9 @@ package io.getlime.push.controller.rest;
 
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.Response;
-import io.getlime.powerauth.soap.ActivationStatus;
-import io.getlime.powerauth.soap.GetActivationStatusResponse;
-import io.getlime.powerauth.soap.GetPersonalizedEncryptionKeyResponse;
+import io.getlime.powerauth.soap.v2.GetPersonalizedEncryptionKeyResponse;
+import io.getlime.powerauth.soap.v3.ActivationStatus;
+import io.getlime.powerauth.soap.v3.GetActivationStatusResponse;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.request.CreateDeviceRequest;
 import io.getlime.push.model.request.DeleteDeviceRequest;
@@ -103,7 +103,7 @@ public class PushDeviceController {
                 device.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
                 device.setUserId(activation.getUserId());
                 if (activation.getActivationStatus().equals(ActivationStatus.ACTIVE)) {
-                    final GetPersonalizedEncryptionKeyResponse encryptionKeyResponse = client.generatePersonalizedE2EEncryptionKey(activationId, null);
+                    final GetPersonalizedEncryptionKeyResponse encryptionKeyResponse = client.v2().generatePersonalizedE2EEncryptionKey(activationId, null);
                     if (encryptionKeyResponse != null) {
                         device.setEncryptionKey(encryptionKeyResponse.getEncryptionKey());
                         device.setEncryptionKeyIndex(encryptionKeyResponse.getEncryptionKeyIndex());

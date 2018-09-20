@@ -92,7 +92,7 @@ public class AdministrationController {
     public @ResponseBody ObjectResponse<GetApplicationListResponse> createApplication() {
         GetApplicationListResponse response = new GetApplicationListResponse();
         // Get all applications in PA Server
-        final List<io.getlime.powerauth.soap.GetApplicationListResponse.Applications> applicationList = powerAuthClient.getApplicationList();
+        final List<io.getlime.powerauth.soap.v3.GetApplicationListResponse.Applications> applicationList = powerAuthClient.getApplicationList();
 
         // Get all applications that are already set up
         final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
@@ -102,7 +102,7 @@ public class AdministrationController {
         for (AppCredentialsEntity appCred: appCredentials) {
             identifiers.add(appCred.getAppId());
         }
-        for (io.getlime.powerauth.soap.GetApplicationListResponse.Applications app : applicationList) {
+        for (io.getlime.powerauth.soap.v3.GetApplicationListResponse.Applications app : applicationList) {
             if (!identifiers.contains(app.getId())) {
                 PushServerApplication applicationToAdd = new PushServerApplication();
                 applicationToAdd.setId(app.getId());
