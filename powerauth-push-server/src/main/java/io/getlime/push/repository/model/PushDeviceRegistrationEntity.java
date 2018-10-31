@@ -63,12 +63,6 @@ public class PushDeviceRegistrationEntity implements Serializable {
     @Column(name = "is_active")
     private Boolean active;
 
-    @Column(name = "encryption_key")
-    private String encryptionKey;
-
-    @Column(name = "encryption_key_index")
-    private String encryptionKeyIndex;
-
     public Long getId() {
         return id;
     }
@@ -133,19 +127,4 @@ public class PushDeviceRegistrationEntity implements Serializable {
         this.active = active;
     }
 
-    public String getEncryptionKey() {
-        return encryptionKey;
-    }
-
-    public void setEncryptionKey(String encryptionKey) {
-        this.encryptionKey = encryptionKey;
-    }
-
-    public String getEncryptionKeyIndex() {
-        return encryptionKeyIndex;
-    }
-
-    public void setEncryptionKeyIndex(String encryptionKeyIndex) {
-        this.encryptionKeyIndex = encryptionKeyIndex;
-    }
 }

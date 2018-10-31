@@ -20,8 +20,6 @@ CREATE TABLE `push_device_registration` (
   `push_token` varchar(255) NOT NULL,
   `timestamp_last_registered` DATETIME NOT NULL,
   `is_active` int(1) DEFAULT 0,
-  `encryption_key` text DEFAULT NULL,
-  `encryption_key_index` text DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `activation_id_index` (`activation_id`),
   KEY `user_id_index` (`user_id`),
