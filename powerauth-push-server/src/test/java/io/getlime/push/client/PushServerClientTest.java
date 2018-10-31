@@ -146,7 +146,6 @@ public class PushServerClientTest {
         pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
         attributes.setSilent(true);
         attributes.setPersonal(true);
-        attributes.setEncrypted(false);
         pushMessage.setUserId("123");
         pushMessage.setActivationId("49414e31-f3df-4cea-87e6-f214ca3b8412");
         pushMessage.setAttributes(attributes);
@@ -185,7 +184,6 @@ public class PushServerClientTest {
         pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
         attributes.setSilent(true);
         attributes.setPersonal(true);
-        attributes.setEncrypted(false);
         pushMessage.setUserId("123");
         pushMessage.setActivationId("49414e31-f3df-4cea-87e6-f214ca3b8412");
         pushMessage.setAttributes(attributes);

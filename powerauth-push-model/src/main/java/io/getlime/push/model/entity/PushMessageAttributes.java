@@ -24,7 +24,6 @@ public class PushMessageAttributes {
 
     private Boolean silent = false;
     private Boolean personal = false;
-    private Boolean encrypted = false;
 
     /**
      * Specifies if the message should be silent - it does not play any sound and trigger any displayable message.
@@ -63,24 +62,5 @@ public class PushMessageAttributes {
     public void setPersonal(Boolean personal) {
         this.personal = personal;
     }
-
-    /**
-     * Specifies if the message data payload ('extras') should be encrypted using PowerAuth 2.0 end-to-end
-     * encryption. Default value if false.
-     * @return True if the message should be encrypted, false otherwise. Default value if false.
-     */
-    public Boolean getEncrypted() {
-        return encrypted;
-    }
-
-    /**
-     * Sets if the message data payload ('extras') should be encrypted using PowerAuth 2.0 end-to-end
-     * encryption. Default value if false.
-     * @param encrypted True if the message should be encrypted, false otherwise. Default value if false.
-     */
-    public void setEncrypted(Boolean encrypted) {
-        this.encrypted = encrypted;
-    }
-
 
 }

@@ -33,7 +33,6 @@ CREATE TABLE `push_message` (
   `activation_id` varchar(37) DEFAULT NULL,
   `is_silent` int(1) DEFAULT 0,
   `is_personal` int(1) DEFAULT 0,
-  `is_encrypted` int(1) DEFAULT 0,
   `message_body` text NOT NULL,
   `timestamp_created` DATETIME NOT NULL,
   `status` int(1) NOT NULL,

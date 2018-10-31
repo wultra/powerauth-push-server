@@ -61,11 +61,9 @@ public class PushMessageDAO {
         entity.setUserId(userId);
         entity.setActivationId(activationId);
         if (pushMessageAttributes != null) {
-            entity.setEncrypted(pushMessageAttributes.getEncrypted());
             entity.setPersonal(pushMessageAttributes.getPersonal());
             entity.setSilent(pushMessageAttributes.getSilent());
         } else {
-            entity.setEncrypted(false);
             entity.setPersonal(false);
             entity.setSilent(false);
         }
