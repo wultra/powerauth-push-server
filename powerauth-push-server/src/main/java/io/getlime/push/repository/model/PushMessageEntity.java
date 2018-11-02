@@ -68,9 +68,6 @@ public class PushMessageEntity implements Serializable {
     @Column(name = "is_personal", updatable = false)
     private Boolean personal;
 
-    @Column(name = "is_encrypted", updatable = false)
-    private Boolean encrypted;
-
     @Column(name = "message_body", nullable = false, updatable = false)
     private String messageBody;
 
@@ -127,14 +124,6 @@ public class PushMessageEntity implements Serializable {
 
     public void setPersonal(Boolean personal) {
         this.personal = personal;
-    }
-
-    public Boolean getEncrypted() {
-        return encrypted;
-    }
-
-    public void setEncrypted(Boolean encrypted) {
-        this.encrypted = encrypted;
     }
 
     public String getMessageBody() {

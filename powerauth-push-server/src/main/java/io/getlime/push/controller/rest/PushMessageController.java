@@ -65,7 +65,7 @@ public class PushMessageController {
                           " using given application ID \n \n" +
                           "Message contains attributes and body\n" +
                           "Attributes describe whether message has to be " +
-                          "encrypted, silent (If true, no system UI is displayed), personal (If true and activation is not in ACTIVE state the message is not sent)\n" +
+                          "silent (If true, no system UI is displayed), personal (If true and activation is not in ACTIVE state the message is not sent)\n" +
                           "Body consist of body (message), and notification parameters")
     public @ResponseBody ObjectResponse<PushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
         SendPushMessageRequest requestObject = request.getRequestObject();
