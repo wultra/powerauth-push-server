@@ -9,7 +9,7 @@ CREATE TABLE `push_app_credentials` (
   `android_project_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `app_id_index` (`app_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE `push_device_registration` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -24,7 +24,7 @@ CREATE TABLE `push_device_registration` (
   KEY `activation_id_index` (`activation_id`),
   KEY `user_id_index` (`user_id`),
   KEY `app_id_index` (`app_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE `push_message` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -38,7 +38,7 @@ CREATE TABLE `push_message` (
   `status` int(1) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id_index` (`user_id`,`activation_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE push_campaign (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -49,7 +49,7 @@ CREATE TABLE push_campaign (
   `timestamp_sent` DATETIME DEFAULT NULL,
   `timestamp_completed` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE push_campaign_user (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -57,4 +57,4 @@ CREATE TABLE push_campaign_user (
   `user_id` varchar(255) NOT NULL,
   `timestamp_created` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
