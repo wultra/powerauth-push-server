@@ -190,7 +190,7 @@ public class PushMessageSenderService {
                                 }
                                 sendResult.getAndroid().setTotal(sendResult.getAndroid().getTotal() + 1);
                             } catch (Throwable t) {
-                                logger.error("System error when sending notification: ", t.getMessage(), t);
+                                logger.error("System error when sending notification: {}", t.getMessage(), t);
                             } finally {
                                 phaser.arriveAndDeregister();
                             }
