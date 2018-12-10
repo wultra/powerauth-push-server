@@ -159,7 +159,7 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start",  appId, token, platform.value());
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, token, platform.value());
         Response response = postObjectImpl("/push/device/create", new ObjectRequest<>(request));
         logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, token, platform.value());
 
