@@ -31,7 +31,9 @@ import io.getlime.push.repository.PushCampaignUserRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.PushCampaignUserEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
-import io.swagger.annotations.*;
+import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -40,8 +42,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Controller for push campaign related methods
@@ -52,6 +52,9 @@ import java.util.logging.Logger;
 @Controller
 @RequestMapping(value = "push/campaign")
 public class PushCampaignController {
+
+    private static final Logger logger = LoggerFactory.getLogger(PushCampaignController.class);
+
     private PushCampaignRepository pushCampaignRepository;
     private PushCampaignUserRepository pushCampaignUserRepository;
 
@@ -199,7 +202,7 @@ public class PushCampaignController {
                 pushCampaignUserEntity.setTimestampCreated(new Date());
                 pushCampaignUserRepository.save(pushCampaignUserEntity);
             } else {
-                Logger.getLogger(PushCampaignController.class.getName()).log(Level.WARNING, "Duplicate user entry for push campaign: " + user);
+                logger.warn("Duplicate user entry for push campaign: {}", user);
             }
         }
         return new Response();

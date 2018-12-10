@@ -38,6 +38,8 @@ import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.request.*;
 import io.getlime.push.model.response.*;
 import io.getlime.push.model.validator.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -45,8 +47,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Simple class for interacting with the push server RESTful API.
@@ -56,7 +56,9 @@ import java.util.logging.Logger;
  */
 public class PushServerClient {
 
-    private com.fasterxml.jackson.databind.ObjectMapper jacksonObjectMapper = null;
+    private Logger logger = LoggerFactory.getLogger(PushServerClient.class);
+
+    private com.fasterxml.jackson.databind.ObjectMapper jacksonObjectMapper;
     private String serviceBaseUrl;
 
     /**
@@ -114,9 +116,9 @@ public class PushServerClient {
     public ObjectResponse<ServiceStatusResponse> getServiceStatus() throws PushServerClientException {
         TypeReference<ObjectResponse<ServiceStatusResponse>> typeReference = new TypeReference<ObjectResponse<ServiceStatusResponse>>() {};
 
-        log("Calling push server status service - start");
+        logger.info("Calling push server status service - start");
         final ObjectResponse<ServiceStatusResponse> result = getObjectImpl("/push/service/status", null, typeReference);
-        log("Calling push server status service - finish");
+        logger.info("Calling push server status service - finish");
 
         return result;
     }
@@ -157,9 +159,9 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        log("Calling create device service, appId: {0}, token: {1}, platform: {2} - start", new String[] { String.valueOf(appId), token, platform.value() });
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start",  appId, token, platform.value());
         Response response = postObjectImpl("/push/device/create", new ObjectRequest<>(request));
-        log("Calling create device service, appId: {0}, token: {1}, platform: {2} - finish", new String[] { String.valueOf(appId), token, platform.value() });
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, token, platform.value());
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -183,9 +185,9 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        log("Calling push server delete device service, appId: {0}, token: {1} - start", new String[] { String.valueOf(appId), token });
+        logger.info("Calling push server delete device service, appId: {}, token: {} - start", appId, token);
         Response response = postObjectImpl("/push/device/delete", new ObjectRequest<>(request));
-        log("Calling push server delete device service, appId: {0}, token: {1} - finish", new String[] { String.valueOf(appId), token });
+        logger.info("Calling push server delete device service, appId: {}, token: {} - finish", appId, token);
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -207,11 +209,11 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        log("Calling push server update device status, activation ID: {0} - start", new String[] { activationId });
+        logger.info("Calling push server update device status, activation ID: {} - start", activationId);
         // Note that there is just plain 'request' in the request, not 'new ObjectRequest<>(request)'.
         // This is due to the fact that standard PowerAuth Server callback format is used here.
         Response response = postObjectImpl("/push/device/status/update", request);
-        log("Calling push server update device status, activation ID: {0} - finish", new String[] { activationId });
+        logger.info("Calling push server update device status, activation ID: {} - finish", activationId);
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -237,9 +239,9 @@ public class PushServerClient {
 
         TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {};
 
-        log("Calling push server to send a push message, app ID: {0}, user ID: {1} - start", new String[] { String.valueOf(appId), pushMessage.getUserId() });
+        logger.info("Calling push server to send a push message, app ID: {}, user ID: {} - start", appId, pushMessage.getUserId());
         final ObjectResponse<PushMessageSendResult> result = postObjectImpl("/push/message/send", new ObjectRequest<>(request), typeReference);
-        log("Calling push server to send a push message, app ID: {0}, user ID: {1} - finish", new String[] { String.valueOf(appId), pushMessage.getUserId() });
+        logger.info("Calling push server to send a push message, app ID: {}, user ID: {} - finish", appId, pushMessage.getUserId());
 
         return result;
     }
@@ -265,9 +267,9 @@ public class PushServerClient {
 
         TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {};
 
-        log("Calling push server to send a push message batch, app ID: {0} - start", new String[] { String.valueOf(appId) });
+        logger.info("Calling push server to send a push message batch, app ID: {} - start", String.valueOf(appId));
         final ObjectResponse<PushMessageSendResult> result = postObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), typeReference);
-        log("Calling push server to send a push message batch, app ID: {0} - finish", new String[] { String.valueOf(appId) });
+        logger.info("Calling push server to send a push message batch, app ID: {} - finish", String.valueOf(appId));
 
         return result;
     }
@@ -293,9 +295,9 @@ public class PushServerClient {
 
         TypeReference<ObjectResponse<CreateCampaignResponse>> typeReference = new TypeReference<ObjectResponse<CreateCampaignResponse>>() {};
 
-        log("Calling push server to create a push campaign, app ID: {0} - start", new String[] { String.valueOf(appId) });
+        logger.info("Calling push server to create a push campaign, app ID: {} - start", appId);
         final ObjectResponse<CreateCampaignResponse> result = postObjectImpl("/push/campaign/create", new ObjectRequest<>(request), typeReference);
-        log("Calling push server to create a push campaign, app ID: {0} - finish", new String[] { String.valueOf(appId) });
+        logger.info("Calling push server to create a push campaign, app ID: {} - finish", appId);
 
         return result;
     }
@@ -313,9 +315,9 @@ public class PushServerClient {
 
             TypeReference<ObjectResponse<DeleteCampaignResponse>> typeReference = new TypeReference<ObjectResponse<DeleteCampaignResponse>>() {};
 
-            log("Calling push server to delete a push campaign, campaign ID: {0} - start", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to delete a push campaign, campaign ID: {} - start", campaignId);
             ObjectResponse<DeleteCampaignResponse> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, typeReference);
-            log("Calling push server to delete a push campaign, campaign ID: {0} - finish", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to delete a push campaign, campaign ID: {} - finish", campaignId);
 
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
@@ -336,9 +338,9 @@ public class PushServerClient {
 
         TypeReference<ObjectResponse<ListOfCampaignsResponse>> typeReference = new TypeReference<ObjectResponse<ListOfCampaignsResponse>>() {};
 
-        log("Calling push server to obtain a push campaign list - start");
+        logger.info("Calling push server to obtain a push campaign list - start");
         final ObjectResponse<ListOfCampaignsResponse> result = getObjectImpl("/push/campaign/list", params, typeReference);
-        log("Calling push server to obtain a push campaign list - finish");
+        logger.info("Calling push server to obtain a push campaign list - finish");
 
         return result;
     }
@@ -356,9 +358,9 @@ public class PushServerClient {
 
             TypeReference<ObjectResponse<CampaignResponse>> typeReference = new TypeReference<ObjectResponse<CampaignResponse>>() {};
 
-            log("Calling push server to obtain a push campaign detail, campaign ID: {0} - start", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - start", campaignId);
             final ObjectResponse<CampaignResponse> result = getObjectImpl("/push/campaign/" + campaignIdSanitized + "/detail", null, typeReference);
-            log("Calling push server to obtain a push campaign detail, campaign ID: {0} - finish", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - finish", campaignId);
 
             return result;
         } catch (UnsupportedEncodingException e) {
@@ -379,9 +381,9 @@ public class PushServerClient {
             ListOfUsers listOfUsers = new ListOfUsers(users);
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
 
-            log("Calling push server to add users to campaign, campaign ID: {0} - start", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to add users to campaign, campaign ID: {} - start", campaignId);
             Response response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", new ObjectRequest<>(listOfUsers));
-            log("Calling push server to add users to campaign, campaign ID: {0} - finish", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to add users to campaign, campaign ID: {} - finish", campaignId);
 
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
@@ -407,9 +409,9 @@ public class PushServerClient {
 
             TypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new TypeReference<PagedResponse<ListOfUsersFromCampaignResponse>>() {};
 
-            log("Calling push server to get users from the campaign, campaign ID: {0} - start", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to get users from the campaign, campaign ID: {} - start", campaignId);
             final PagedResponse<ListOfUsersFromCampaignResponse> result = getObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
-            log("Calling push server to get users from the campaign, campaign ID: {0} - finish", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to get users from the campaign, campaign ID: {} - finish", campaignId);
 
             return result;
         } catch (UnsupportedEncodingException e) {
@@ -430,9 +432,9 @@ public class PushServerClient {
             ListOfUsers listOfUsers = new ListOfUsers(users);
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
 
-            log("Calling push server to remove users from the campaign, campaign ID: {0} - start", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to remove users from the campaign, campaign ID: {} - start", campaignId);
             Response response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", new ObjectRequest<>(listOfUsers));
-            log("Calling push server to remove users from the campaign, campaign ID: {0} - finish", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to remove users from the campaign, campaign ID: {} - finish", campaignId);
 
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
@@ -460,9 +462,9 @@ public class PushServerClient {
                 throw new PushServerClientException(error);
             }
 
-            log("Calling push server to send test campaign, campaign ID: {0}, user ID: {1} - start", new String[] { String.valueOf(campaignId), userId });
+            logger.info("Calling push server to send test campaign, campaign ID: {}, user ID: {} - start", campaignId, userId);
             Response response = postObjectImpl("/push/campaign/send/test/" + campaignIdSanitized, new ObjectRequest<>(request));
-            log("Calling push server to send test campaign, campaign ID: {0}, user ID: {1} - finish", new String[] { String.valueOf(campaignId), userId });
+            logger.info("Calling push server to send test campaign, campaign ID: {}, user ID: {} - finish", campaignId, userId);
 
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
@@ -481,9 +483,9 @@ public class PushServerClient {
         try {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
 
-            log("Calling push server to send a production campaign, campaign ID: {0} - start", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to send a production campaign, campaign ID: {} - start", campaignId);
             Response response = postObjectImpl("/push/campaign/send/live/" + campaignIdSanitized, null);
-            log("Calling push server to send a production campaign, campaign ID: {0} - finish", new String[] { String.valueOf(campaignId) });
+            logger.info("Calling push server to send a production campaign, campaign ID: {} - finish", campaignId);
 
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
@@ -498,9 +500,9 @@ public class PushServerClient {
      */
     public ObjectResponse<GetApplicationListResponse> getApplicationList() throws PushServerClientException {
         final TypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new TypeReference<ObjectResponse<GetApplicationListResponse>>() {};
-        log("Calling push server to retrieve list of applications - start");
+        logger.info("Calling push server to retrieve list of applications - start");
         final ObjectResponse<GetApplicationListResponse> response = postObjectImpl("/admin/app/list", null, typeReference);
-        log("Calling push server to retrieve list of applications - finish");
+        logger.info("Calling push server to retrieve list of applications - finish");
         return response;
     }
 
@@ -511,9 +513,9 @@ public class PushServerClient {
      */
     public ObjectResponse<GetApplicationListResponse> getUnconfiguredApplicationList() throws PushServerClientException {
         final TypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new TypeReference<ObjectResponse<GetApplicationListResponse>>() {};
-        log("Calling push server to retrieve list of unconfigured applications - start");
+        logger.info("Calling push server to retrieve list of unconfigured applications - start");
         final ObjectResponse<GetApplicationListResponse> response = postObjectImpl("/admin/app/unconfigured/list", null, typeReference);
-        log("Calling push server to retrieve list of unconfigured applications - finish");
+        logger.info("Calling push server to retrieve list of unconfigured applications - finish");
         return response;
     }
 
@@ -528,9 +530,9 @@ public class PushServerClient {
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(Long id, boolean includeIos, boolean includeAndroid) throws PushServerClientException {
         final TypeReference<ObjectResponse<GetApplicationDetailResponse>> typeReference = new TypeReference<ObjectResponse<GetApplicationDetailResponse>>() {};
         GetApplicationDetailRequest request = new GetApplicationDetailRequest(id, includeIos, includeAndroid);
-        log("Calling push server to retrieve application detail, ID: {0} - start", new String[] { String.valueOf(id) });
+        logger.info("Calling push server to retrieve application detail, ID: {} - start", id);
         final ObjectResponse<GetApplicationDetailResponse> response = postObjectImpl("/admin/app/detail", new ObjectRequest<>(request), typeReference);
-        log("Calling push server to retrieve application detail, ID: {0} - finish", new String[] { String.valueOf(id) });
+        logger.info("Calling push server to retrieve application detail, ID: {} - finish", id);
         return response;
     }
 
@@ -543,9 +545,9 @@ public class PushServerClient {
     public ObjectResponse<CreateApplicationResponse> createApplication(Long appId) throws PushServerClientException {
         final TypeReference<ObjectResponse<CreateApplicationResponse>> typeReference = new TypeReference<ObjectResponse<CreateApplicationResponse>>() {};
         final CreateApplicationRequest request = new CreateApplicationRequest(appId);
-        log("Calling push server to create application, app ID: {0} - start", new String[] { String.valueOf(appId) });
+        logger.info("Calling push server to create application, app ID: {} - start", appId);
         final ObjectResponse<CreateApplicationResponse> response = postObjectImpl("/admin/app/create", new ObjectRequest<>(request), typeReference);
-        log("Calling push server to create application, app ID: {0} - finish", new String[] { String.valueOf(appId) });
+        logger.info("Calling push server to create application, app ID: {} - finish", appId);
         return response;
     }
 
@@ -562,9 +564,9 @@ public class PushServerClient {
     public Response updateIos(Long id, String bundle, String keyId, String teamId, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
         final UpdateIosRequest request = new UpdateIosRequest(id, bundle, keyId, teamId, privateKeyBase64);
-        log("Calling push server to update iOS, ID: {0} - start", new String[] { String.valueOf(id) });
+        logger.info("Calling push server to update iOS, ID: {} - start", id);
         final Response response = postObjectImpl("/admin/app/ios/update", new ObjectRequest<>(request));
-        log("Calling push server to update iOS, ID: {0} - finish", new String[] { String.valueOf(id) });
+        logger.info("Calling push server to update iOS, ID: {} - finish", id);
         return response;
     }
 
@@ -576,9 +578,9 @@ public class PushServerClient {
      */
     public Response removeIos(Long id) throws PushServerClientException {
         final RemoveIosRequest request = new RemoveIosRequest(id);
-        log("Calling push server to remove iOS, ID: {0} - start", new String[] { String.valueOf(id) });
+        logger.info("Calling push server to remove iOS, ID: {} - start", id);
         final Response response = postObjectImpl("/admin/app/ios/remove", new ObjectRequest<>(request));
-        log("Calling push server to remove iOS, ID: {0} - finish", new String[] { String.valueOf(id) });
+        logger.info("Calling push server to remove iOS, ID: {} - finish", id);
         return response;
     }
 
@@ -593,9 +595,9 @@ public class PushServerClient {
     public Response updateAndroid(Long id, String projectId, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
         final UpdateAndroidRequest request = new UpdateAndroidRequest(id, projectId, privateKeyBase64);
-        log("Calling push server to update android, ID: {0} - start", new String[] { String.valueOf(id) });
+        logger.info("Calling push server to update android, ID: {} - start", id);
         final Response response = postObjectImpl("/admin/app/android/update", new ObjectRequest<>(request));
-        log("Calling push server to update android, ID: {0} - finish", new String[] { String.valueOf(id) });
+        logger.info("Calling push server to update android, ID: {} - finish", id);
         return response;
     }
 
@@ -607,9 +609,9 @@ public class PushServerClient {
      */
     public Response removeAndroid(Long id) throws PushServerClientException {
         final RemoveAndroidRequest request = new RemoveAndroidRequest(id);
-        log("Calling push server to remove android, ID: {0} - start", new String[] { String.valueOf(id) });
+        logger.info("Calling push server to remove android, ID: {} - start", id);
         final Response response = postObjectImpl("/admin/app/android/remove", new ObjectRequest<>(request));
-        log("Calling push server to remove android, ID: {0} - finish", new String[] { String.valueOf(id) });
+        logger.info("Calling push server to remove android, ID: {} - finish", id);
         return response;
     }
 
@@ -647,13 +649,17 @@ public class PushServerClient {
                     .asString();
             return checkHttpStatus(typeReference, response);
         } catch (UnirestException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
         } catch (JsonParseException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
         } catch (JsonMappingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
         } catch (IOException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
         }
 
     }
@@ -689,13 +695,17 @@ public class PushServerClient {
                     .asString();
             return checkHttpStatus(typeReference, response);
         } catch (UnirestException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
         } catch (JsonParseException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
         } catch (JsonMappingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
         } catch (IOException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
         }
     }
 
@@ -729,13 +739,17 @@ public class PushServerClient {
                     .asString();
             return checkHttpStatus(typeReference, response);
         } catch (UnirestException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
         } catch (JsonParseException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
         } catch (JsonMappingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
         } catch (IOException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
+            logger.warn(e.getMessage(), e);
+            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
         }
     }
 
@@ -758,25 +772,5 @@ public class PushServerClient {
             throw new PushServerClientException(response.getStatusText(), errorResponse.getResponseObject());
         }
     }
-
-    // Logging helpers
-
-    /**
-     * Log a provided message.
-     * @param msg Message.
-     */
-    private void log(String msg) {
-        Logger.getLogger(PushServerClient.class.getName()).log(Level.INFO, msg);
-    }
-
-    /**
-     * Log a provided message and substitute parameters.
-     * @param msg Message.
-     * @param params Message parameters.
-     */
-    private void log(String msg, String[] params) {
-        Logger.getLogger(PushServerClient.class.getName()).log(Level.INFO, msg, params);
-    }
-
 
 }

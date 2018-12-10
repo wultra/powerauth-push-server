@@ -31,13 +31,13 @@ import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
 import io.getlime.push.service.fcm.FcmClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.Phaser;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class responsible for sending push notifications to devices based on platform.
@@ -46,6 +46,8 @@ import java.util.logging.Logger;
  */
 @Service
 public class PushMessageSenderService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PushMessageSenderService.class);
 
     private PushSendingWorker pushSendingWorker;
     private AppCredentialsRepository appCredentialsRepository;
@@ -110,7 +112,7 @@ public class PushMessageSenderService {
                     String platform = device.getPlatform();
                     if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
                         if (pushClient.getApnsClient() == null) {
-                            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Push message cannot be sent to APNS because APNS is not configured in push server.");
+                            logger.error("Push message cannot be sent to APNS because APNS is not configured in push server.");
                             phaser.arriveAndDeregister();
                             continue;
                         }
@@ -145,14 +147,14 @@ public class PushMessageSenderService {
                                 }
                                 sendResult.getIos().setTotal(sendResult.getIos().getTotal() + 1);
                             } catch (Throwable t) {
-                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "System error when sending notification: " + t.getMessage(), t);
+                                logger.error("System error when sending notification: {}", t.getMessage(), t);
                             } finally {
                                 phaser.arriveAndDeregister();
                             }
                         });
                     } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
                         if (pushClient.getFcmClient() == null) {
-                            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Push message cannot be sent to FCM because FCM is not configured in push server.");
+                            logger.error("Push message cannot be sent to FCM because FCM is not configured in push server.");
                             phaser.arriveAndDeregister();
                             continue;
                         }
@@ -188,7 +190,7 @@ public class PushMessageSenderService {
                                 }
                                 sendResult.getAndroid().setTotal(sendResult.getAndroid().getTotal() + 1);
                             } catch (Throwable t) {
-                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "System error when sending notification: " + t.getMessage(), t);
+                                logger.error("System error when sending notification: ", t.getMessage(), t);
                             } finally {
                                 phaser.arriveAndDeregister();
                             }
@@ -307,7 +309,7 @@ public class PushMessageSenderService {
     // Return list of devices related to given user or activation ID (if present). List of devices is related to particular application as well.
     private List<PushDeviceRegistrationEntity> getPushDevices(Long appId, String userId, String activationId) throws PushServerException {
         if (userId == null || userId.isEmpty()) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "No userId was specified");
+            logger.error("No userId was specified");
             throw new PushServerException("No userId was specified");
         }
         List<PushDeviceRegistrationEntity> devices;
@@ -336,7 +338,7 @@ public class PushMessageSenderService {
                 }
                 pushClient.setAppCredentials(credentials);
                 appRelatedPushClientMap.put(appId, pushClient);
-                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Creating APNS and FCM clients for app " + appId);
+                logger.info("Creating APNS and FCM clients for app {}", appId);
             }
             return pushClient;
         }
@@ -347,7 +349,7 @@ public class PushMessageSenderService {
     private void validatePushMessage(PushMessage pushMessage) throws PushServerException {
         String error = PushMessageValidator.validatePushMessage(pushMessage);
         if (error != null) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.WARNING, error);
+            logger.warn(error);
             throw new PushServerException(error);
         }
     }

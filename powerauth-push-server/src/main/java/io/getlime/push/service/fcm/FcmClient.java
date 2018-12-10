@@ -23,6 +23,8 @@ import io.getlime.push.errorhandling.exceptions.FcmInitializationFailedException
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
 import io.getlime.push.service.fcm.model.FcmSuccessResponse;
 import io.netty.channel.ChannelOption;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -38,8 +40,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * FCM server client.
@@ -47,6 +47,8 @@ import java.util.logging.Logger;
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 public class FcmClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(FcmClient.class);
 
     // FCM URL for posting push messages
     private static final String FCM_URL = "https://fcm.googleapis.com/v1/projects/%s/messages:send";
@@ -175,11 +177,11 @@ public class FcmClient {
      */
     public void exchange(Message message, boolean validationOnly, Consumer<FcmSuccessResponse> onSuccess, Consumer<Throwable> onError) throws FcmMissingTokenException {
         if (webClient == null) {
-            Logger.getLogger(FcmClient.class.getName()).log(Level.SEVERE, "Push message delivery failed because WebClient is not initialized.");
+            logger.error("Push message delivery failed because WebClient is not initialized.");
             return;
         }
         if (projectId == null) {
-            Logger.getLogger(FcmClient.class.getName()).log(Level.SEVERE, "Push message delivery failed because FCM project ID is not configured.");
+            logger.error("Push message delivery failed because FCM project ID is not configured.");
             return;
         }
 
@@ -187,7 +189,7 @@ public class FcmClient {
 
         Flux<DataBuffer> body = fcmConverter.convertMessageToFlux(message, validationOnly);
         if (body == null) {
-            Logger.getLogger(FcmClient.class.getName()).log(Level.SEVERE, "Push message delivery failed because message is invalid.");
+            logger.error("Push message delivery failed because message is invalid.");
             return;
         }
 

@@ -18,13 +18,12 @@ package io.getlime.push.repository.serialization;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.getlime.push.controller.rest.PushCampaignController;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Helper class for data serialization and deserialization.
@@ -32,6 +31,8 @@ import java.util.logging.Logger;
  * @author Petr Dvorak, petr@lime-company.eu
  */
 public class JSONSerialization {
+
+    private static final Logger logger = LoggerFactory.getLogger(JSONSerialization.class);
 
     /**
      * Parsing message from JSON to PushMessageBody object.
@@ -45,7 +46,7 @@ public class JSONSerialization {
         try {
             pushMessageBody = new ObjectMapper().readValue(message, PushMessageBody.class);
         } catch (IOException e) {
-            Logger.getLogger(PushCampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new PushServerException("Failed parsing from JSON", e);
         }
         return pushMessageBody;
@@ -63,7 +64,7 @@ public class JSONSerialization {
         try {
             messageString = new ObjectMapper().writeValueAsString(message);
         } catch (JsonProcessingException e) {
-            Logger.getLogger(PushCampaignController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new PushServerException("Failed parsing into JSON", e);
         }
         return messageString;
