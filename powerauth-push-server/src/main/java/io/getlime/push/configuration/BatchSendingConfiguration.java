@@ -21,6 +21,8 @@ import io.getlime.push.service.batch.SendCampaignJobListener;
 import io.getlime.push.service.batch.UserDeviceItemProcessor;
 import io.getlime.push.service.batch.UserDeviceItemReader;
 import io.getlime.push.service.batch.UserDeviceItemWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -42,8 +44,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Configuration class for job used in batch sending campaign
@@ -53,6 +53,8 @@ import java.util.logging.Logger;
  */
 @Configuration
 public class BatchSendingConfiguration implements BatchConfigurer {
+
+    private static final Logger logger = LoggerFactory.getLogger(BatchSendingConfiguration.class);
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
@@ -141,7 +143,7 @@ public class BatchSendingConfiguration implements BatchConfigurer {
             this.jobExplorer = createJobExplorer();
             this.jobLauncher = createJobLauncher();
         } catch (Exception e) {
-            Logger.getLogger(BatchSendingConfiguration.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
     }
 

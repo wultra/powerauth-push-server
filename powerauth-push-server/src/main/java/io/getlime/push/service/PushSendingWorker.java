@@ -39,6 +39,8 @@ import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmModelConverter;
 import io.getlime.push.service.fcm.model.FcmErrorResponse;
 import io.getlime.push.service.fcm.model.FcmSuccessResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -54,12 +56,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 @Service
 public class PushSendingWorker {
+
+    private static final Logger logger = LoggerFactory.getLogger(PushSendingWorker.class);
 
     // FCM data only notification keys
     private static final String FCM_NOTIFICATION_KEY      = "_notification";
@@ -124,12 +126,12 @@ public class PushSendingWorker {
         // Callback when FCM request succeeds
         Consumer<FcmSuccessResponse> onSuccess = body -> {
             if (body.getName() != null && body.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
-                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.INFO, "Notification sent, response: " + body.getName());
+                logger.info("Notification sent, response: {}", body.getName());
                 callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                 return;
             }
             // This state should not happen, only in case when response from server is invalid
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Invalid response received from FCM, notification sending failed");
+            logger.error("Invalid response received from FCM, notification sending failed");
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         };
 
@@ -139,7 +141,7 @@ public class PushSendingWorker {
                 String errorCode = fcmConverter.convertExceptionToErrorCode((WebClientResponseException) t);
                 switch (errorCode) {
                     case FcmErrorResponse.REGISTRATION_TOKEN_NOT_REGISTERED:
-                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Push message rejected by FCM gateway, device registration will be removed. Error: " + errorCode);
+                        logger.error("Push message rejected by FCM gateway, device registration will be removed. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                         return;
 
@@ -148,7 +150,7 @@ public class PushSendingWorker {
                     case FcmErrorResponse.MESSAGE_RATE_EXCEEDED:
                         // TODO - implement throttling of messages, see:
                         // https://firebase.google.com/docs/cloud-messaging/admin/errors
-                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Push message rejected by FCM gateway, message status set to PENDING. Error: " + errorCode);
+                        logger.error("Push message rejected by FCM gateway, message status set to PENDING. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
                         return;
 
@@ -156,19 +158,19 @@ public class PushSendingWorker {
                     case FcmErrorResponse.INVALID_APNS_CREDENTIALS:
                     case FcmErrorResponse.INVALID_ARGUMENT:
                     case FcmErrorResponse.UNKNOWN_ERROR:
-                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Push message rejected by FCM gateway, error: " + errorCode);
+                        logger.error("Push message rejected by FCM gateway, error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         return;
 
                     default:
-                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Unexpected error code received from FCM gateway: " + errorCode);
+                        logger.error("Unexpected error code received from FCM gateway: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         return;
                 }
             }
 
             // Unexepected errors
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Unexpected error occurred while sending push message: " + t.getMessage(), t);
+            logger.error("Unexpected error occurred while sending push message: {}", t.getMessage(), t);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         };
 
@@ -176,7 +178,7 @@ public class PushSendingWorker {
         try {
             fcmClient.exchange(message, false, onSuccess, onError);
         } catch (FcmMissingTokenException ex) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            logger.error(ex.getMessage(), ex);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         }
     }
@@ -247,13 +249,13 @@ public class PushSendingWorker {
             ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);
             apnsClientBuilder.setSigningKey(key);
         } catch (InvalidKeyException | NoSuchAlgorithmException | IOException e) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new PushServerException("Invalid private key", e);
         }
         try {
             return apnsClientBuilder.build();
         } catch (SSLException e) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             throw new PushServerException("SSL problem", e);
         }
     }
@@ -298,35 +300,31 @@ public class PushSendingWorker {
         final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushMessageBody.getCollapseKey());
         final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
-        sendNotificationFuture.addListener(new PushNotificationResponseListener<SimpleApnsPushNotification>() {
-
-            @Override
-            public void operationComplete(final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> future) {
-                if (future.isSuccess()) {
-                    final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = future.getNow();
-                    if (pushNotificationResponse != null) {
-                        if (!pushNotificationResponse.isAccepted()) {
-                            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: " + pushNotificationResponse.getRejectionReason());
-                            if (pushNotificationResponse.getRejectionReason().equals(APNS_BAD_DEVICE_TOKEN)) {
-                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "\t... due to bad device token value.");
-                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
-                            } else if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
-                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "\t... and the token is invalid as of " + pushNotificationResponse.getTokenInvalidationTimestamp());
-                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
-                            } else {
-                                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
-                            }
+        sendNotificationFuture.addListener((PushNotificationResponseListener<SimpleApnsPushNotification>) future -> {
+            if (future.isSuccess()) {
+                final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = future.getNow();
+                if (pushNotificationResponse != null) {
+                    if (!pushNotificationResponse.isAccepted()) {
+                        logger.error("Notification rejected by the APNs gateway: {}", pushNotificationResponse.getRejectionReason());
+                        if (pushNotificationResponse.getRejectionReason().equals(APNS_BAD_DEVICE_TOKEN)) {
+                            logger.error("\t... due to bad device token value.");
+                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
+                        } else if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
+                            logger.error("\t... and the token is invalid as of " + pushNotificationResponse.getTokenInvalidationTimestamp());
+                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                         } else {
-                            callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
+                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         }
                     } else {
-                        Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Notification rejected by the APNs gateway: unknown error, will retry");
-                        callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                     }
                 } else {
-                    Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Push Message Sending Failed", future.cause());
-                    callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
+                    logger.error("Notification rejected by the APNs gateway: unknown error, will retry");
+                    callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
                 }
+            } else {
+                logger.error("Push Message Sending Failed", future.cause());
+                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
             }
         });
     }

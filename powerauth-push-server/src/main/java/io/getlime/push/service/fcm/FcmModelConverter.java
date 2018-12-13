@@ -23,8 +23,9 @@ import com.google.api.client.json.JsonParser;
 import com.google.common.collect.ImmutableMap;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
-import io.getlime.push.service.PushMessageSenderService;
 import io.getlime.push.service.fcm.model.FcmErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -37,8 +38,6 @@ import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Service for converting FCM model classes.
@@ -47,6 +46,8 @@ import java.util.logging.Logger;
  */
 @Service
 public class FcmModelConverter {
+
+    private static final Logger logger = LoggerFactory.getLogger(FcmModelConverter.class);
 
     // See class com.google.firebase.messaging.FirebaseMessaging
     private static final Map<String, String> FCM_ERROR_CODES = ImmutableMap.<String, String>builder()
@@ -87,7 +88,7 @@ public class FcmModelConverter {
                 code = FcmErrorResponse.UNKNOWN_ERROR;
             }
         } catch (IOException ex) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "Error occurred while parsing error response: " + ex.getMessage(), ex);
+            logger.error("Error occurred while parsing error response: {}", ex.getMessage(), ex);
             code = FcmErrorResponse.UNKNOWN_ERROR;
         }
         return code;
@@ -110,7 +111,7 @@ public class FcmModelConverter {
             gen.close();
             return writer.toString();
         } catch (IOException ex) {
-            Logger.getLogger(FcmModelConverter.class.getName()).log(Level.SEVERE, "Json serialization failed: " + ex.getMessage(), ex);
+            logger.error("Json serialization failed: {}", ex.getMessage(), ex);
             return null;
         }
     }
@@ -136,7 +137,7 @@ public class FcmModelConverter {
             gen.close();
             convertedMessage = writer.toString();
         } catch (IOException ex) {
-            Logger.getLogger(FcmModelConverter.class.getName()).log(Level.SEVERE, "Json serialization failed: " + ex.getMessage(), ex);
+            logger.error("Json serialization failed: {}", ex.getMessage(), ex);
             return null;
         }
         DefaultDataBufferFactory factory = new DefaultDataBufferFactory();

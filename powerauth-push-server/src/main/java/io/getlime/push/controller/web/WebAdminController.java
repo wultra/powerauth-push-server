@@ -19,7 +19,6 @@ package io.getlime.push.controller.web;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.push.client.PushServerClient;
 import io.getlime.push.client.PushServerClientException;
-import io.getlime.push.controller.rest.AdministrationController;
 import io.getlime.push.controller.web.model.form.*;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
@@ -27,6 +26,8 @@ import io.getlime.push.model.entity.PushServerApplication;
 import io.getlime.push.model.response.CreateApplicationResponse;
 import io.getlime.push.model.response.GetApplicationDetailResponse;
 import io.getlime.push.model.response.GetApplicationListResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -38,8 +39,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class representing web admin interface for push server. Web interface allows listing
@@ -49,6 +48,8 @@ import java.util.logging.Logger;
  */
 @Controller
 public class WebAdminController {
+
+    private static final Logger logger = LoggerFactory.getLogger(WebAdminController.class);
 
     private final PushServerClient pushServerClient;
 
@@ -81,7 +82,7 @@ public class WebAdminController {
             return "applications";
         } catch (PushServerClientException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
@@ -99,7 +100,7 @@ public class WebAdminController {
             return "applicationCreate";
         } catch (PushServerClientException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
@@ -118,7 +119,7 @@ public class WebAdminController {
             return "applicationEdit";
         } catch (PushServerClientException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
@@ -149,7 +150,7 @@ public class WebAdminController {
             return "applicationIosUpload";
         } catch (PushServerClientException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
@@ -177,7 +178,7 @@ public class WebAdminController {
             return "applicationAndroidUpload";
         } catch (PushServerClientException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
@@ -195,7 +196,7 @@ public class WebAdminController {
             return "pushMessageCreate";
         } catch (PushServerClientException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
@@ -219,7 +220,7 @@ public class WebAdminController {
             return "redirect:/web/admin/app/" + createAppResponse.getResponseObject().getId() + "/edit";
         } catch (PushServerClientException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
@@ -245,7 +246,7 @@ public class WebAdminController {
             return "redirect:/web/admin/app/" + id + "/edit";
         } catch (PushServerClientException | IOException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
@@ -268,7 +269,7 @@ public class WebAdminController {
             return "redirect:/web/admin/app/" + id  + "/edit";
         } catch (PushServerClientException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
@@ -294,7 +295,7 @@ public class WebAdminController {
             return "redirect:/web/admin/app/" + id + "/edit";
         } catch (PushServerClientException | IOException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
@@ -312,7 +313,7 @@ public class WebAdminController {
             return "redirect:/web/admin/app/" + id + "/edit";
         } catch (PushServerClientException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
@@ -344,7 +345,7 @@ public class WebAdminController {
             return "redirect:/web/admin/message/create";
         } catch (PushServerClientException ex) {
             model.put("message", ex.getMessage());
-            Logger.getLogger(AdministrationController.class.getName()).log(Level.SEVERE, ex.getMessage());
+            logger.error(ex.getMessage());
             return "error";
         }
     }
