@@ -22,8 +22,8 @@
     <url>http://powerauth.com/</url>
 
     <organization>
-        <name>Lime - HighTech Solutions Inc.</name>
-        <url>http://getlime.io/</url>
+        <name>Wultra s.r.o.</name>
+        <url>https://wultra.com/</url>
     </organization>
 
     <licenses>
@@ -36,7 +36,14 @@
     <developers>
         <developer>
             <name>Petr Dvorak</name>
-            <email>petr@lime-company.eu</email>
+            <email>petr@wultra.com</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Roman Strobl</name>
+            <email>roman.strobl@wultra.com</email>
             <roles>
                 <role>developer</role>
             </roles>
@@ -44,14 +51,14 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/lime-company/lime-security-powerauth-push.git</connection>
-        <developerConnection>scm:git:https://github.com/lime-company/lime-security-powerauth-push.git</developerConnection>
-        <url>https://github.com/lime-company/lime-security-powerauth-push</url>
+        <connection>scm:git:https://github.com/wultra/powerauth-push-server.git</connection>
+        <developerConnection>scm:git:https://github.com/wultra/powerauth-push-server.git</developerConnection>
+        <url>https://github.com/wultra/powerauth-push-server</url>
     </scm>
 
     <issueManagement>
         <system>Github</system>
-        <url>https://github.com/lime-company/lime-security-powerauth-push/issues</url>
+        <url>https://github.com/wultra/powerauth-push-server/issues</url>
     </issueManagement>
 
     <modules>
@@ -75,7 +82,7 @@
         <jsp-api.version>2.0</jsp-api.version>
         <lime.rest.version>1.1.0</lime.rest.version>
         <powerauth.version>0.21.0</powerauth.version>
-        <pushy.version>0.13.6</pushy.version>
+        <pushy.version>0.13.7</pushy.version>
         <tcnative.version>2.0.20.Final</tcnative.version>
         <swagger.version>2.9.2</swagger.version>
         <unirest.version>1.4.9</unirest.version>
