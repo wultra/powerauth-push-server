@@ -26,12 +26,14 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
 
+import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.Query;
 import javax.net.ssl.*;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Set;
 
 /**
@@ -161,7 +163,7 @@ public class PowerAuthWebServiceConfiguration {
             ObjectName objectName = objectNames.iterator().next();
             port = (Integer) beanServer.getAttribute(objectName, "localPort");
             scheme = (String) beanServer.getAttribute(objectName, "scheme");
-        } catch (Exception e) {
+        } catch (JMException | UnknownHostException ex) {
             host = "127.0.0.1";
             port = 8080;
             scheme = "http";
