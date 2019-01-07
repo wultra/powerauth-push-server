@@ -17,8 +17,8 @@ package io.getlime.push.service.batch.storage;
 
 import io.getlime.push.service.AppRelatedPushClient;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Simple in-memory storage cache for app credentials and push service clients.
@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AppCredentialStorageMap implements ItemStorageMap<Long, AppRelatedPushClient> {
 
-    private Map<Long, AppRelatedPushClient> map = new ConcurrentHashMap<>();
+    private ConcurrentMap<Long, AppRelatedPushClient> map = new ConcurrentHashMap<>();
 
     @Override
     public AppRelatedPushClient get(Long key) {

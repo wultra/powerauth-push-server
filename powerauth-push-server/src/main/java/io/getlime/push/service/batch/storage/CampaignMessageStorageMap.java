@@ -18,8 +18,8 @@ package io.getlime.push.service.batch.storage;
 
 import io.getlime.push.model.entity.PushMessageBody;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 /**
@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CampaignMessageStorageMap implements ItemStorageMap<Long, PushMessageBody> {
 
-    private Map<Long, PushMessageBody> mapStorage = new ConcurrentHashMap<>();
+    private ConcurrentMap<Long, PushMessageBody> mapStorage = new ConcurrentHashMap<>();
 
     @Override
     public PushMessageBody get(Long key) {

@@ -172,10 +172,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosKeyId(requestObject.getKeyId());
         appCredentialsEntity.setIosBundle(requestObject.getBundle());
         appCredentialsRepository.save(appCredentialsEntity);
-        // Fix of issue reported by Coverity 'Concurrent data access violations (SINGLETON_RACE)'
-        synchronized (appCredentialStorageMap) {
-            appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        }
+        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
         return new Response();
     }
 
@@ -194,10 +191,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosKeyId(null);
         appCredentialsEntity.setIosBundle(null);
         appCredentialsRepository.save(appCredentialsEntity);
-        // Fix of issue reported by Coverity 'Concurrent data access violations (SINGLETON_RACE)'
-        synchronized (appCredentialStorageMap) {
-            appCredentialStorageMap.cleanByKey(requestObject.getId());
-        }
+        appCredentialStorageMap.cleanByKey(requestObject.getId());
         return new Response();
     }
 
@@ -215,10 +209,7 @@ public class AdministrationController {
         appCredentialsEntity.setAndroidPrivateKey(privateKeyBytes);
         appCredentialsEntity.setAndroidProjectId(requestObject.getProjectId());
         appCredentialsRepository.save(appCredentialsEntity);
-        // Fix of issue reported by Coverity 'Concurrent data access violations (SINGLETON_RACE)'
-        synchronized (appCredentialStorageMap) {
-            appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        }
+        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
         return new Response();
     }
 
@@ -235,10 +226,7 @@ public class AdministrationController {
         appCredentialsEntity.setAndroidPrivateKey(null);
         appCredentialsEntity.setAndroidProjectId(null);
         appCredentialsRepository.save(appCredentialsEntity);
-        // Fix of issue reported by Coverity 'Concurrent data access violations (SINGLETON_RACE)'
-        synchronized (appCredentialStorageMap) {
-            appCredentialStorageMap.cleanByKey(requestObject.getId());
-        }
+        appCredentialStorageMap.cleanByKey(requestObject.getId());
         return new Response();
     }
 
