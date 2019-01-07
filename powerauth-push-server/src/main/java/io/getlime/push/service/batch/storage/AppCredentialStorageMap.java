@@ -31,27 +31,27 @@ public class AppCredentialStorageMap implements ItemStorageMap<Long, AppRelatedP
     private Map<Long, AppRelatedPushClient> map = new HashMap<>();
 
     @Override
-    public AppRelatedPushClient get(Long key) {
+    public synchronized AppRelatedPushClient get(Long key) {
         return map.get(key);
     }
 
     @Override
-    public void put(Long key, AppRelatedPushClient value) {
+    public synchronized void put(Long key, AppRelatedPushClient value) {
         map.put(key, value);
     }
 
     @Override
-    public boolean contains(Long key) {
+    public synchronized boolean contains(Long key) {
         return map.containsKey(key);
     }
 
     @Override
-    public void cleanAll() {
+    public synchronized void cleanAll() {
         map.clear();
     }
 
     @Override
-    public void cleanByKey(Long key) {
+    public synchronized void cleanByKey(Long key) {
         map.remove(key);
     }
 }

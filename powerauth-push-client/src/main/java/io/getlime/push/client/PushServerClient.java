@@ -385,6 +385,10 @@ public class PushServerClient {
             Response response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", new ObjectRequest<>(listOfUsers));
             logger.info("Calling push server to add users to campaign, campaign ID: {} - finish", campaignId);
 
+            if (response == null) {
+                throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
+            }
+
             return response.getStatus().equals(Response.Status.OK);
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
@@ -616,19 +620,6 @@ public class PushServerClient {
     }
 
     // Generic HTTP client methods
-
-    /**
-     * Prepare GET object response. Uses default {@link Response} type reference for response.
-     *
-     * @param url specific url of method.
-     * @param params params to pass to url path, optional.
-     * @return Object obtained after processing the response JSON.
-     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
-     *
-     */
-    private <T> T getObjectImpl(String url, Map<String, Object> params) throws PushServerClientException {
-        return getObjectImpl(url, params, new TypeReference<Response>() {});
-    }
 
     /**
      * Prepare GET object response.

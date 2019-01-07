@@ -17,12 +17,16 @@ package io.getlime.push.client;
 
 import io.getlime.core.rest.model.base.entity.Error;
 
+import java.io.Serializable;
+
 /**
  * Base error class for push client.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class PushServerClientError extends Error {
+public class PushServerClientError extends Error implements Serializable {
+
+    private static final long serialVersionUID = -3063064667769595550L;
 
     private static String ERROR_VALIDATION = "ERROR_VALIDATION";
 
