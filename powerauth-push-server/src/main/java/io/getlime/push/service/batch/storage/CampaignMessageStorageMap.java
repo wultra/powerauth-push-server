@@ -18,19 +18,19 @@ package io.getlime.push.service.batch.storage;
 
 import io.getlime.push.model.entity.PushMessageBody;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * Simple to use class for storing campaigns. Simple in-memory storage cache for app credentials. Uses {@link HashMap}
+ * Simple to use class for storing campaigns. Simple in-memory storage cache for app credentials. Uses {@link ConcurrentHashMap}
  * as an underlying storage.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
 public class CampaignMessageStorageMap implements ItemStorageMap<Long, PushMessageBody> {
 
-    private Map<Long, PushMessageBody> mapStorage = new HashMap<>();
+    private Map<Long, PushMessageBody> mapStorage = new ConcurrentHashMap<>();
 
     @Override
     public PushMessageBody get(Long key) {
