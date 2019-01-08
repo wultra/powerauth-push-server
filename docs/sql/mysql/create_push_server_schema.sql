@@ -7,8 +7,7 @@ CREATE TABLE `push_app_credentials` (
   `ios_bundle` varchar(255) DEFAULT NULL,
   `android_private_key` blob DEFAULT NULL,
   `android_project_id` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `app_id_index` (`app_id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE `push_device_registration` (
@@ -20,10 +19,7 @@ CREATE TABLE `push_device_registration` (
   `push_token` varchar(255) NOT NULL,
   `timestamp_last_registered` DATETIME NOT NULL,
   `is_active` int(1) DEFAULT 0,
-  PRIMARY KEY (`id`),
-  KEY `activation_id_index` (`activation_id`),
-  KEY `user_id_index` (`user_id`),
-  KEY `app_id_index` (`app_id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE `push_message` (
@@ -36,8 +32,7 @@ CREATE TABLE `push_message` (
   `message_body` text NOT NULL,
   `timestamp_created` DATETIME NOT NULL,
   `status` int(1) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `user_id_index` (`user_id`,`activation_id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE push_campaign (
@@ -58,3 +53,20 @@ CREATE TABLE push_campaign_user (
   `timestamp_created` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+---
+--- Indexes for better performance.
+---
+
+CREATE UNIQUE INDEX PUSH_APP_CRED_APP ON PUSH_APP_CREDENTIALS(APP_ID);
+
+CREATE INDEX PUSH_DEVICE_APP_TOKEN ON PUSH_DEVICE_REGISTRATION(APP_ID, PUSH_TOKEN);
+CREATE INDEX PUSH_DEVICE_USER_APP ON PUSH_DEVICE_REGISTRATION(USER_ID, APP_ID);
+CREATE INDEX PUSH_DEVICE_ACTIVATION ON PUSH_DEVICE_REGISTRATION(ACTIVATION_ID);
+
+CREATE INDEX PUSH_MESSAGE_STATUS ON PUSH_MESSAGE(STATUS);
+
+CREATE INDEX PUSH_CAMPAIGN_SENT ON PUSH_CAMPAIGN(IS_SENT);
+
+CREATE INDEX PUSH_CAMPAIGN_USER_CAMPAIGN ON PUSH_CAMPAIGN_USER(CAMPAIGN_ID, USER_ID);
+CREATE INDEX PUSH_CAMPAIGN_USER_DETAIL ON PUSH_CAMPAIGN_USER(USER_ID);
