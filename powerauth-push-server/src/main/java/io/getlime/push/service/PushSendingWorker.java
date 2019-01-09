@@ -64,13 +64,19 @@ public class PushSendingWorker {
     private static final Logger logger = LoggerFactory.getLogger(PushSendingWorker.class);
 
     // FCM data only notification keys
-    private static final String FCM_NOTIFICATION_KEY      = "_notification";
+    private static final String FCM_NOTIFICATION_KEY            = "_notification";
 
     // Expected response String from FCM
-    private static final String FCM_RESPONSE_VALID_REGEXP = "projects/.+/messages/.+";
+    private static final String FCM_RESPONSE_VALID_REGEXP       = "projects/.+/messages/.+";
 
     // APNS bad device token String
-    private static final String APNS_BAD_DEVICE_TOKEN     = "BadDeviceToken";
+    private static final String APNS_BAD_DEVICE_TOKEN           = "BadDeviceToken";
+
+    // APNS device token not for topic String
+    private static final String APNS_DEVICE_TOKEN_NOT_FOR_TOPIC = "DeviceTokenNotForTopic";
+
+    // APNS topic disallowed String
+    private static final String APNS_TOPIC_DISALLOWED           = "TopicDisallowed";
 
     private final PushServiceConfiguration pushServiceConfiguration;
     private final FcmModelConverter fcmConverter;
@@ -308,6 +314,12 @@ public class PushSendingWorker {
                         logger.error("Notification rejected by the APNs gateway: {}", pushNotificationResponse.getRejectionReason());
                         if (pushNotificationResponse.getRejectionReason().equals(APNS_BAD_DEVICE_TOKEN)) {
                             logger.error("\t... due to bad device token value.");
+                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
+                        } else if (pushNotificationResponse.getRejectionReason().equals(APNS_DEVICE_TOKEN_NOT_FOR_TOPIC)) {
+                            logger.error("\t... due to device token not for topic error.");
+                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
+                        } else if (pushNotificationResponse.getRejectionReason().equals(APNS_TOPIC_DISALLOWED)) {
+                            logger.error("\t... due to topic disallowed error.");
                             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                         } else if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
                             logger.error("\t... and the token is invalid as of " + pushNotificationResponse.getTokenInvalidationTimestamp());
