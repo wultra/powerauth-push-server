@@ -78,6 +78,10 @@ public class PushServiceConfiguration {
     @Value("${powerauth.push.service.campaign.batchSize}")
     private int campaignBatchSize;
 
+    // Whether to store messages
+    @Value("{powerauth.push.service.message.storage.enabled}")
+    private boolean messageStorageEnabled;
+
     /**
      * FCM connect timeout in milliseconds.
      */
@@ -344,6 +348,22 @@ public class PushServiceConfiguration {
      */
     public void setCampaignBatchSize(int campaignBatchSize) {
         this.campaignBatchSize = campaignBatchSize;
+    }
+
+    /**
+     * Get whether persistent message storage is enabled.
+     * @return Whether persistent message storage is enabled.
+     */
+    public boolean isMessageStorageEnabled() {
+        return messageStorageEnabled;
+    }
+
+    /**
+     * Set whether persistent message storage is enabled.
+     * @param messageStorageEnabled Whether persistent message storage is enabled.
+     */
+    public void setMessageStorageEnabled(boolean messageStorageEnabled) {
+        this.messageStorageEnabled = messageStorageEnabled;
     }
 
     /**
