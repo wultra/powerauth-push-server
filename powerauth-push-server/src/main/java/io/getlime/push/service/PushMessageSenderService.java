@@ -17,6 +17,7 @@
 package io.getlime.push.service;
 
 import com.turo.pushy.apns.ApnsClient;
+import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageAttributes;
@@ -49,23 +50,25 @@ public class PushMessageSenderService {
 
     private static final Logger logger = LoggerFactory.getLogger(PushMessageSenderService.class);
 
-    private PushSendingWorker pushSendingWorker;
-    private AppCredentialsRepository appCredentialsRepository;
-    private PushDeviceRepository pushDeviceRepository;
-    private PushMessageDAO pushMessageDAO;
-    private AppCredentialStorageMap appRelatedPushClientMap;
+    private final PushSendingWorker pushSendingWorker;
+    private final AppCredentialsRepository appCredentialsRepository;
+    private final PushDeviceRepository pushDeviceRepository;
+    private final PushMessageDAO pushMessageDAO;
+    private final AppCredentialStorageMap appRelatedPushClientMap;
+    private final PushServiceConfiguration configuration;
 
     @Autowired
     public PushMessageSenderService(AppCredentialsRepository appCredentialsRepository,
                                     PushDeviceRepository pushDeviceRepository,
                                     PushMessageDAO pushMessageDAO,
                                     PushSendingWorker pushSendingWorker,
-                                    AppCredentialStorageMap appRelatedPushClientMap) {
+                                    AppCredentialStorageMap appRelatedPushClientMap, PushServiceConfiguration configuration) {
         this.appCredentialsRepository = appCredentialsRepository;
         this.pushDeviceRepository = pushDeviceRepository;
         this.pushMessageDAO = pushMessageDAO;
         this.pushSendingWorker = pushSendingWorker;
         this.appRelatedPushClientMap = appRelatedPushClientMap;
+        this.configuration = configuration;
     }
 
     /**
@@ -97,7 +100,12 @@ public class PushMessageSenderService {
 
             // Iterate over all devices for given user
             for (final PushDeviceRegistrationEntity device : devices) {
-                final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getUserId(), pushMessage.getActivationId(), device.getId());
+                final PushMessageEntity pushMessageObject;
+                if (configuration.isMessageStorageEnabled()) {
+                    pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getUserId(), pushMessage.getActivationId(), device.getId());
+                } else {
+                    pushMessageObject = null;
+                }
 
                 // Check if given push is not personal, or if it is, that device is in active state.
                 // This avoids sending personal notifications to devices that are blocked or removed.
@@ -121,26 +129,22 @@ public class PushMessageSenderService {
                                 switch (result) {
                                     case OK: {
                                         sendResult.getIos().setSent(sendResult.getIos().getSent() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
                                         break;
                                     }
                                     case PENDING: {
                                         sendResult.getIos().setPending(sendResult.getIos().getPending() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
                                         break;
                                     }
                                     case FAILED: {
                                         sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                                         break;
                                     }
                                     case FAILED_DELETE: {
                                         sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                                         pushDeviceRepository.delete(device);
                                         break;
                                     }
@@ -164,26 +168,22 @@ public class PushMessageSenderService {
                                 switch (sendingResult) {
                                     case OK: {
                                         sendResult.getAndroid().setSent(sendResult.getAndroid().getSent() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
                                         break;
                                     }
                                     case PENDING: {
                                         sendResult.getAndroid().setPending(sendResult.getAndroid().getPending() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
                                         break;
                                     }
                                     case FAILED: {
                                         sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                                         break;
                                     }
                                     case FAILED_DELETE: {
                                         sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                                         pushDeviceRepository.delete(device);
                                         break;
                                     }
@@ -246,23 +246,19 @@ public class PushMessageSenderService {
             pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), (result) -> {
                 switch (result) {
                     case OK: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
                         break;
                     }
                     case PENDING: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
                         break;
                     }
                     case FAILED: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                         break;
                     }
                     case FAILED_DELETE: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                         pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
                         break;
                     }
@@ -272,23 +268,19 @@ public class PushMessageSenderService {
             pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, (result) -> {
                 switch (result) {
                     case OK: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
                         break;
                     }
                     case PENDING: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
                         break;
                     }
                     case FAILED: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                         break;
                     }
                     case FAILED_DELETE: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                         pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
                         break;
                     }
@@ -351,6 +343,14 @@ public class PushMessageSenderService {
         if (error != null) {
             logger.warn(error);
             throw new PushServerException(error);
+        }
+    }
+
+    // Update push message status and persist it in case it is available
+    private void updateStatusAndPersist(PushMessageEntity pushMessageObject, PushMessageEntity.Status status) {
+        if (pushMessageObject != null) {
+            pushMessageObject.setStatus(status);
+            pushMessageDAO.save(pushMessageObject);
         }
     }
 
