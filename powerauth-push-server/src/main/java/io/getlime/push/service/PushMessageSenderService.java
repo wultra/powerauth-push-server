@@ -100,12 +100,8 @@ public class PushMessageSenderService {
 
             // Iterate over all devices for given user
             for (final PushDeviceRegistrationEntity device : devices) {
-                final PushMessageEntity pushMessageObject;
-                if (configuration.isMessageStorageEnabled()) {
-                    pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getUserId(), pushMessage.getActivationId(), device.getId());
-                } else {
-                    pushMessageObject = null;
-                }
+                // Store push message, in case storing of messages is disabled null value is returned
+                final PushMessageEntity pushMessageObject = storePushMessage(pushMessage, device);
 
                 // Check if given push is not personal, or if it is, that device is in active state.
                 // This avoids sending personal notifications to devices that are blocked or removed.
@@ -346,7 +342,15 @@ public class PushMessageSenderService {
         }
     }
 
-    // Update push message status and persist it in case it is available
+    // Store push message in case storing of push messages is enabled
+    private PushMessageEntity storePushMessage(PushMessage pushMessage, PushDeviceRegistrationEntity device) throws PushServerException {
+        if (configuration.isMessageStorageEnabled()) {
+            return pushMessageDAO.storePushMessageObject(pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getUserId(), pushMessage.getActivationId(), device.getId());
+        }
+        return null;
+    }
+
+    // Update push message status and persist it in case entity is not null
     private void updateStatusAndPersist(PushMessageEntity pushMessageObject, PushMessageEntity.Status status) {
         if (pushMessageObject != null) {
             pushMessageObject.setStatus(status);
