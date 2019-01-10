@@ -26,15 +26,7 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
 
-import javax.management.JMException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.management.Query;
 import javax.net.ssl.*;
-import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Set;
 
 /**
  * Default PowerAuth Service configuration.
@@ -47,6 +39,9 @@ public class PowerAuthWebServiceConfiguration {
 
     @Value("${powerauth.service.url}")
     private String powerAuthServiceUrl;
+
+    @Value("${powerauth.push.service.url}")
+    private String pushServiceUrl;
 
     @Value("${powerauth.service.ssl.acceptInvalidSslCertificate}")
     private boolean acceptInvalidSslCertificate;
@@ -151,24 +146,7 @@ public class PowerAuthWebServiceConfiguration {
      */
     @Bean
     public PushServerClient pushServerClient() {
-        // TODO - this code will be obsoleted by universal PA admin in release 2018.12, the resolution of service URI is only temporary
-        String host;
-        Integer port;
-        String scheme;
-        try {
-            MBeanServer beanServer = ManagementFactory.getPlatformMBeanServer();
-            Set<ObjectName> objectNames = beanServer.queryNames(new ObjectName("*:type=Connector,*"),
-                    Query.match(Query.attr("protocol"), Query.value("HTTP/1.1")));
-            host = InetAddress.getLocalHost().getHostAddress();
-            ObjectName objectName = objectNames.iterator().next();
-            port = (Integer) beanServer.getAttribute(objectName, "localPort");
-            scheme = (String) beanServer.getAttribute(objectName, "scheme");
-        } catch (JMException | UnknownHostException ex) {
-            host = "127.0.0.1";
-            port = 8080;
-            scheme = "http";
-        }
-        return new PushServerClient(scheme + "://" + host + ":" + port + "/powerauth-push-server");
+        return new PushServerClient(pushServiceUrl);
     }
 
 }
