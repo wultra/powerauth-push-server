@@ -79,7 +79,7 @@ public class PushServiceConfiguration {
     private int campaignBatchSize;
 
     // Whether to store messages
-    @Value("{powerauth.push.service.message.storage.enabled}")
+    @Value("${powerauth.push.service.message.storage.enabled}")
     private boolean messageStorageEnabled;
 
     /**
