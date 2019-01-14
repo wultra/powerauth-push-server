@@ -77,7 +77,7 @@
         <h2.version>1.4.197</h2.version>
         <httpclient.version>4.5.6</httpclient.version>
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
-        <jackson.version>2.9.7</jackson.version>
+        <jackson.version>2.9.8</jackson.version>
         <javax.interceptor-api.version>1.2.2</javax.interceptor-api.version>
         <jsp-api.version>2.0</jsp-api.version>
         <lime.rest.version>1.1.0</lime.rest.version>
