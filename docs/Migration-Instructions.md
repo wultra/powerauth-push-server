@@ -1,7 +1,4 @@
----
-layout: page
-title: Migration Instructions
----
+# Migration Instructions
 
 This page contains PowerAuth Push Server migration instructions.
 

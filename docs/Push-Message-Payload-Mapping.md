@@ -1,7 +1,4 @@
----
-layout: page
-title: Push Message Payload Mapping
----
+# Push Message Payload Mapping
 
 The push server provides a convenient wrapper on top of the push messages sent to various platforms (APNS, FCM). This chapter describes what fields of the abstract push message are mapped to particular fields of APNS or FCM payload.
 

@@ -1,7 +1,4 @@
----
-layout: page
-title: Push Server Database
----
+# Push Server Database
 
 PowerAuth Push Server requires several new database tables in order to work.
 

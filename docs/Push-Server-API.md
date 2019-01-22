@@ -1,7 +1,4 @@
----
-layout: page
-title: Push Server API
----
+# Push Server API
 
 Push Server provides a simple to use RESTful API for the 3rd party integration purposes. The API contains methods related with:
 

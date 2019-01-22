@@ -1,7 +1,4 @@
----
-layout: page
-title: Deploying Push Server
----
+# Deploying Push Server
 
 Push Server is a Java EE application (packaged as an executable WAR file) that can be used to send push notifications to iOS or Android devices. This chapter explains what steps need to be taken in order to deploy PowerAuth Push Server.
 

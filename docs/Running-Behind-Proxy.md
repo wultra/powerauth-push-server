@@ -1,7 +1,4 @@
----
-layout: page
-title: Running Behind Proxy
----
+# Running Behind Proxy
 
 In case you would like to run push server behind a proxy, you need to configure following properties, otherwise service clients will not be able to resolve DNS records for APNS / FCM services:
 

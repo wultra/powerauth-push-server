@@ -1,7 +1,4 @@
----
-layout: page
-title: Integration with Push Server
----
+# Integration with Push Server
 
 In order to register devices and send push notifications, the Push Server needs to be integrated with server applications. The first application that must communicate with the Push Server is a mobile API application (the one that publishes service specific API for mobile application).
 

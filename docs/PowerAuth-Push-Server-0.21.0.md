@@ -1,7 +1,4 @@
----
-layout: page
-title: Migration from 0.19.0 to 0.21.0
----
+# Migration from 0.19.0 to 0.21.0
 
 This guide contains instructions for migration from PowerAuth Push Server version 0.19.0 to version 0.21.0.
 
