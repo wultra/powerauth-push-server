@@ -7,19 +7,19 @@ PowerAuth Push Server is an optional application that facilitates sending APNs /
 
 ## Deployment tutorials
 
-- [Deploy PowerAuth Push Server](Deploying-Push-Server.md)
+- [Deploy PowerAuth Push Server](./Deploying-Push-Server.md)
 - [Migration Instructions](./Migration-Instructions.md)
 
 ## Integration tutorials
 
-- [Integrate Your Applications With PowerAuth Push Server](Push-Server-Integration.md)
+- [Integrate Your Applications With PowerAuth Push Server](./Push-Server-Integration.md)
 
 ## Reference manual
 
-- [PowerAuth Push Server RESTful API](Push-Server-API.md)
-- [PowerAuth Push Server Database Structure](Push-Server-Database.md)
+- [PowerAuth Push Server RESTful API](./Push-Server-API.md)
+- [PowerAuth Push Server Database Structure](./Push-Server-Database.md)
 
-**Technical Topics**
+##Technical Topics
 
 - [Mapping Abstract Payload to APNS/FCM](./Push-Message-Payload-Mapping.md)
 - [Running Behind Proxy](./Running-Behind-Proxy.md)
