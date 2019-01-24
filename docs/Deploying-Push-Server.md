@@ -104,7 +104,7 @@ powerauth.service.ssl.acceptInvalidSslCertificate=true
 
 ### Setting Up Credentials
 
-_(optional)_ In case PowerAuth Server uses a [restricted access flag in the server configuration](https://github.com/wultra/powerauth-server/docs/Deploying-PowerAuth-Server.md#enabling-powerauth-server-security), you need to configure credentials for the PowerAuth Push Server so that it can connect to the SOAP service:
+_(optional)_ In case PowerAuth Server uses a [restricted access flag in the server configuration](https://github.com/wultra/powerauth-server/blob/develop/docs/Deploying-PowerAuth-Server.md#enabling-powerauth-server-security), you need to configure credentials for the PowerAuth Push Server so that it can connect to the SOAP service:
 
 ```sh
 powerauth.service.security.clientToken=

@@ -2,7 +2,7 @@
 
 PowerAuth Push Server requires several new database tables in order to work.
 
-Here are the [bootstrap schemes for MySQL and Oracle](https://github.com/wultra/powerauth-push-server/blob/master/docs/sql).
+Here are the [bootstrap schemes for MySQL and Oracle](./sql).
 
 ## Tables
 
