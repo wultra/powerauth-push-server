@@ -75,7 +75,7 @@ public class PowerAuthWebServiceConfiguration {
     @Bean
     public Jaxb2Marshaller marshaller() {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPaths("io.getlime.powerauth.soap.v2", "io.getlime.powerauth.soap.v3");
+        marshaller.setContextPaths("io.getlime.powerauth.soap.v3");
         return marshaller;
     }
 
