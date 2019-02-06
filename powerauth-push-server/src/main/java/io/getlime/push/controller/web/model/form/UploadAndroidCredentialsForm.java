@@ -18,9 +18,6 @@ package io.getlime.push.controller.web.model.form;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 /**
  * Form sent when uploading FCM credentials for the application.
  *
@@ -28,11 +25,8 @@ import javax.validation.constraints.Size;
  */
 public class UploadAndroidCredentialsForm {
 
-    @NotNull
-    @Size(min = 5)
     private String projectId;
 
-    @NotNull
     private MultipartFile privateKey;
 
     /**
