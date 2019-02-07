@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentMap;
  * Simple to use class for storing campaigns. Simple in-memory storage cache for app credentials. Uses {@link ConcurrentHashMap}
  * as an underlying storage.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  */
 public class CampaignMessageStorageMap implements ItemStorageMap<Long, PushMessageBody> {
 

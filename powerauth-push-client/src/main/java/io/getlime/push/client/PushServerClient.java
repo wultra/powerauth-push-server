@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import java.util.Map;
 /**
  * Simple class for interacting with the push server RESTful API.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 public class PushServerClient {
@@ -505,7 +505,7 @@ public class PushServerClient {
     public ObjectResponse<GetApplicationListResponse> getApplicationList() throws PushServerClientException {
         final TypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new TypeReference<ObjectResponse<GetApplicationListResponse>>() {};
         logger.info("Calling push server to retrieve list of applications - start");
-        final ObjectResponse<GetApplicationListResponse> response = postObjectImpl("/admin/app/list", null, typeReference);
+        final ObjectResponse<GetApplicationListResponse> response = getObjectImpl("/admin/app/list", null, typeReference);
         logger.info("Calling push server to retrieve list of applications - finish");
         return response;
     }
@@ -518,7 +518,7 @@ public class PushServerClient {
     public ObjectResponse<GetApplicationListResponse> getUnconfiguredApplicationList() throws PushServerClientException {
         final TypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new TypeReference<ObjectResponse<GetApplicationListResponse>>() {};
         logger.info("Calling push server to retrieve list of unconfigured applications - start");
-        final ObjectResponse<GetApplicationListResponse> response = postObjectImpl("/admin/app/unconfigured/list", null, typeReference);
+        final ObjectResponse<GetApplicationListResponse> response = getObjectImpl("/admin/app/unconfigured/list", null, typeReference);
         logger.info("Calling push server to retrieve list of unconfigured applications - finish");
         return response;
     }
@@ -569,7 +569,7 @@ public class PushServerClient {
         final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
         final UpdateIosRequest request = new UpdateIosRequest(id, bundle, keyId, teamId, privateKeyBase64);
         logger.info("Calling push server to update iOS, ID: {} - start", id);
-        final Response response = postObjectImpl("/admin/app/ios/update", new ObjectRequest<>(request));
+        final Response response = putObjectImpl("/admin/app/ios/update", new ObjectRequest<>(request));
         logger.info("Calling push server to update iOS, ID: {} - finish", id);
         return response;
     }
@@ -600,7 +600,7 @@ public class PushServerClient {
         final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
         final UpdateAndroidRequest request = new UpdateAndroidRequest(id, projectId, privateKeyBase64);
         logger.info("Calling push server to update android, ID: {} - start", id);
-        final Response response = postObjectImpl("/admin/app/android/update", new ObjectRequest<>(request));
+        final Response response = putObjectImpl("/admin/app/android/update", new ObjectRequest<>(request));
         logger.info("Calling push server to update android, ID: {} - finish", id);
         return response;
     }

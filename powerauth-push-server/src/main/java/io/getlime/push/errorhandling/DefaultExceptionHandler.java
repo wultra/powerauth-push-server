@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * Implementation of a default exception handler for the push server service.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  */
 @ControllerAdvice(basePackages = { "io.getlime.push.controller.rest" })
 public class DefaultExceptionHandler {

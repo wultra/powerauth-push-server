@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Lime - HighTech Solutions s.r.o.
+ * Copyright 2018 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class AdministrationController {
      * List applications configured in Push Server.
      * @return Application list response.
      */
-    @RequestMapping(value = "list", method = RequestMethod.POST)
+    @RequestMapping(value = "list", method = RequestMethod.GET)
     public @ResponseBody ObjectResponse<GetApplicationListResponse> listApplications() {
         final GetApplicationListResponse response = new GetApplicationListResponse();
         final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
@@ -89,8 +89,8 @@ public class AdministrationController {
      * List applications which are not yet configured in Push Server.
      * @return Application list response.
      */
-    @RequestMapping(value = "unconfigured/list", method = RequestMethod.POST)
-    public @ResponseBody ObjectResponse<GetApplicationListResponse> createApplication() {
+    @RequestMapping(value = "unconfigured/list", method = RequestMethod.GET)
+    public @ResponseBody ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() {
         GetApplicationListResponse response = new GetApplicationListResponse();
         // Get all applications in PA Server
         final List<io.getlime.powerauth.soap.v3.GetApplicationListResponse.Applications> applicationList = powerAuthClient.getApplicationList();
@@ -137,12 +137,12 @@ public class AdministrationController {
         app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
         app.setAppName(powerAuthClient.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
         response.setApplication(app);
-        if (requestObject.includeIos()) {
+        if (requestObject.getIncludeIos()) {
             response.setIosBundle(appCredentialsEntity.getIosBundle());
             response.setIosKeyId(appCredentialsEntity.getIosKeyId());
             response.setIosTeamId(appCredentialsEntity.getIosTeamId());
         }
-        if (requestObject.includeAndroid()) {
+        if (requestObject.getIncludeAndroid()) {
             response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
         }
         return new ObjectResponse<>(response);
@@ -173,7 +173,7 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found.
      */
-    @RequestMapping(value = "ios/update", method = RequestMethod.POST)
+    @RequestMapping(value = "ios/update", method = RequestMethod.PUT)
     public @ResponseBody Response updateIos(@RequestBody ObjectRequest<UpdateIosRequest> request) throws PushServerException {
         final UpdateIosRequest requestObject = request.getRequestObject();
         String errorMessage = UpdateIosRequestValidator.validate(requestObject);
@@ -220,7 +220,7 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found.
      */
-    @RequestMapping(value = "android/update", method = RequestMethod.POST)
+    @RequestMapping(value = "android/update", method = RequestMethod.PUT)
     public @ResponseBody Response updateAndroid(@RequestBody ObjectRequest<UpdateAndroidRequest> request) throws PushServerException {
         final UpdateAndroidRequest requestObject = request.getRequestObject();
         String errorMessage = UpdateAndroidRequestValidator.validate(requestObject);
