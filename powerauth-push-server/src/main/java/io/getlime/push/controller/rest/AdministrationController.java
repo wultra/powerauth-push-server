@@ -119,7 +119,7 @@ public class AdministrationController {
      * Get application credentials entity details.
      * @param request Application detail request.
      * @return Application detail response.
-     * @throws PushServerException Thrown when application credentials entity could not be found.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "detail", method = RequestMethod.POST)
     public @ResponseBody ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(@RequestBody ObjectRequest<GetApplicationDetailRequest> request) throws PushServerException {
@@ -152,6 +152,7 @@ public class AdministrationController {
      * Create application.
      * @param request Create application request.
      * @return Create application response.
+     * @throws PushServerException Thrown when request validation fails.
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
     public @ResponseBody ObjectResponse<CreateApplicationResponse> createApplication(@RequestBody ObjectRequest<CreateApplicationRequest> request) throws PushServerException {
@@ -171,7 +172,7 @@ public class AdministrationController {
      * Update iOS configuration.
      * @param request Update iOS configuration request.
      * @return Response.
-     * @throws PushServerException Thrown when application credentials entity could not be found.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "ios/update", method = RequestMethod.PUT)
     public @ResponseBody Response updateIos(@RequestBody ObjectRequest<UpdateIosRequest> request) throws PushServerException {
@@ -195,7 +196,7 @@ public class AdministrationController {
      * Remove iOS configuration.
      * @param request Remove iOS configuration request.
      * @return Response.
-     * @throws PushServerException Thrown when application credentials entity could not be found.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "ios/remove", method = RequestMethod.POST)
     public @ResponseBody Response removeIos(@RequestBody ObjectRequest<RemoveIosRequest> request) throws PushServerException {
@@ -218,7 +219,7 @@ public class AdministrationController {
      * Update Android configuration.
      * @param request Update Android configuration request.
      * @return Response.
-     * @throws PushServerException Thrown when application credentials entity could not be found.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "android/update", method = RequestMethod.PUT)
     public @ResponseBody Response updateAndroid(@RequestBody ObjectRequest<UpdateAndroidRequest> request) throws PushServerException {
@@ -240,7 +241,7 @@ public class AdministrationController {
      * Remove Android configuration.
      * @param request Remove Android configuration request.
      * @return Response.
-     * @throws PushServerException Thrown when application credentials entity could not be found.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "android/remove", method = RequestMethod.POST)
     public @ResponseBody Response removeAndroid(@RequestBody ObjectRequest<RemoveAndroidRequest> request) throws PushServerException {

@@ -375,6 +375,8 @@ public class WebAdminController {
 
     /**
      * Remove Android configuration.
+     * @param removeCredentialsForm Remove credentials form.
+     * @param bindingResult Form validation result.
      * @param id Application credentials entity ID.
      * @param model Page model.
      * @return Details page.
