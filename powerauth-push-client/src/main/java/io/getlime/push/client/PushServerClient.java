@@ -44,11 +44,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
  * Simple class for interacting with the push server RESTful API.
@@ -760,21 +758,16 @@ public class PushServerClient {
         if (response.getStatus() == 200) {
             return jacksonObjectMapper.readValue(response.getRawBody(), typeReference);
         } else {
-            String responseBody = null;
-            try (Scanner scanner = new Scanner(response.getRawBody(), StandardCharsets.UTF_8.name()).useDelimiter("\\A")) {
-                if (scanner.hasNext()) {
-                    responseBody = scanner.next();
-                }
-            }
-            if (responseBody != null && !responseBody.isEmpty()) {
+            try {
                 // Response body contains data, return Exception with status code and error response
                 com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                ErrorResponse errorResponse = mapper.readValue(responseBody, ErrorResponse.class);
+                ErrorResponse errorResponse = mapper.readValue(response.getRawBody(), ErrorResponse.class);
                 throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus(), errorResponse.getResponseObject());
+            } catch (IOException ex) {
+                logger.warn(ex.getMessage(), ex);
+                throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus());
             }
         }
-        // Response body contains no data, return Exception only with status code
-        throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus());
     }
 
 }
