@@ -25,6 +25,7 @@ import io.getlime.push.model.request.*;
 import io.getlime.push.model.response.CreateApplicationResponse;
 import io.getlime.push.model.response.GetApplicationDetailResponse;
 import io.getlime.push.model.response.GetApplicationListResponse;
+import io.getlime.push.model.validator.*;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
@@ -122,8 +123,13 @@ public class AdministrationController {
      */
     @RequestMapping(value = "detail", method = RequestMethod.POST)
     public @ResponseBody ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(@RequestBody ObjectRequest<GetApplicationDetailRequest> request) throws PushServerException {
+        final GetApplicationDetailRequest requestObject = request.getRequestObject();
+        String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
+        }
         final GetApplicationDetailResponse response = new GetApplicationDetailResponse();
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(request.getRequestObject().getId());
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
         final PushServerApplication app = new PushServerApplication();
         app.setId(appCredentialsEntity.getId());
         app.setAppId(appCredentialsEntity.getAppId());
@@ -131,12 +137,12 @@ public class AdministrationController {
         app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
         app.setAppName(powerAuthClient.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
         response.setApplication(app);
-        if (request.getRequestObject().includeIos()) {
+        if (requestObject.includeIos()) {
             response.setIosBundle(appCredentialsEntity.getIosBundle());
             response.setIosKeyId(appCredentialsEntity.getIosKeyId());
             response.setIosTeamId(appCredentialsEntity.getIosTeamId());
         }
-        if (request.getRequestObject().includeAndroid()) {
+        if (requestObject.includeAndroid()) {
             response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
         }
         return new ObjectResponse<>(response);
@@ -148,9 +154,14 @@ public class AdministrationController {
      * @return Create application response.
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
-    public @ResponseBody ObjectResponse<CreateApplicationResponse> createApplication(@RequestBody ObjectRequest<CreateApplicationRequest> request) {
+    public @ResponseBody ObjectResponse<CreateApplicationResponse> createApplication(@RequestBody ObjectRequest<CreateApplicationRequest> request) throws PushServerException {
+        final CreateApplicationRequest requestObject = request.getRequestObject();
+        String errorMessage = CreateApplicationRequestValidator.validate(requestObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
+        }
         final AppCredentialsEntity appCredentialsEntity = new AppCredentialsEntity();
-        appCredentialsEntity.setAppId(request.getRequestObject().getAppId());
+        appCredentialsEntity.setAppId(requestObject.getAppId());
         AppCredentialsEntity newAppCredentialsEntity = appCredentialsRepository.save(appCredentialsEntity);
         final CreateApplicationResponse response = new CreateApplicationResponse(newAppCredentialsEntity.getId());
         return new ObjectResponse<>(response);
@@ -165,6 +176,10 @@ public class AdministrationController {
     @RequestMapping(value = "ios/update", method = RequestMethod.POST)
     public @ResponseBody Response updateIos(@RequestBody ObjectRequest<UpdateIosRequest> request) throws PushServerException {
         final UpdateIosRequest requestObject = request.getRequestObject();
+        String errorMessage = UpdateIosRequestValidator.validate(requestObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
+        }
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
         byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
         appCredentialsEntity.setIosPrivateKey(privateKeyBytes);
@@ -183,8 +198,12 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found.
      */
     @RequestMapping(value = "ios/remove", method = RequestMethod.POST)
-    public @ResponseBody Response removeIos(@RequestBody ObjectRequest<UpdateIosRequest> request) throws PushServerException {
-        final UpdateIosRequest requestObject = request.getRequestObject();
+    public @ResponseBody Response removeIos(@RequestBody ObjectRequest<RemoveIosRequest> request) throws PushServerException {
+        final RemoveIosRequest requestObject = request.getRequestObject();
+        String errorMessage = RemoveIosRequestValidator.validate(requestObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
+        }
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
         appCredentialsEntity.setIosPrivateKey(null);
         appCredentialsEntity.setIosTeamId(null);
@@ -204,6 +223,10 @@ public class AdministrationController {
     @RequestMapping(value = "android/update", method = RequestMethod.POST)
     public @ResponseBody Response updateAndroid(@RequestBody ObjectRequest<UpdateAndroidRequest> request) throws PushServerException {
         final UpdateAndroidRequest requestObject = request.getRequestObject();
+        String errorMessage = UpdateAndroidRequestValidator.validate(requestObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
+        }
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
         byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
         appCredentialsEntity.setAndroidPrivateKey(privateKeyBytes);
@@ -222,6 +245,10 @@ public class AdministrationController {
     @RequestMapping(value = "android/remove", method = RequestMethod.POST)
     public @ResponseBody Response removeAndroid(@RequestBody ObjectRequest<RemoveAndroidRequest> request) throws PushServerException {
         final RemoveAndroidRequest requestObject = request.getRequestObject();
+        String errorMessage = RemoveAndroidRequestValidator.validate(requestObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
+        }
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
         appCredentialsEntity.setAndroidPrivateKey(null);
         appCredentialsEntity.setAndroidProjectId(null);

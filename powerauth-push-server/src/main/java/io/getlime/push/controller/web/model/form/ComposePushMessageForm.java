@@ -16,9 +16,6 @@
 
 package io.getlime.push.controller.web.model.form;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 /**
  * Form sent when sending a test push message.
  *
@@ -26,22 +23,14 @@ import javax.validation.constraints.Size;
  */
 public class ComposePushMessageForm {
 
-    @NotNull
     private Long appId;
 
-    @NotNull
-    @Size(min = 1)
     private String userId;
 
-    @NotNull
-    @Size(min = 1)
     private String title;
 
-    @NotNull
-    @Size(min = 1)
     private String body;
 
-    @NotNull
     private boolean sound;
 
     public Long getAppId() {

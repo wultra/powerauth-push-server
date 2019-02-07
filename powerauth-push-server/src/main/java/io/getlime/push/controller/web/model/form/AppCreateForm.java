@@ -16,8 +16,6 @@
 
 package io.getlime.push.controller.web.model.form;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * Form sent when creating the application.
  *
@@ -25,7 +23,6 @@ import javax.validation.constraints.NotNull;
  */
 public class AppCreateForm {
 
-    @NotNull
     private Long appId;
 
     public Long getAppId() {

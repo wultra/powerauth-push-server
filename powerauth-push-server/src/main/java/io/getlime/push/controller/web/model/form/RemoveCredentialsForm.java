@@ -16,16 +16,13 @@
 
 package io.getlime.push.controller.web.model.form;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * Form sent when removing iOS / APNs credentials from the application.
  *
  * @author Petr Dvorak, petr@lime-company.eu
  */
-public class RemoveIosCredentialsForm {
+public class RemoveCredentialsForm {
 
-    @NotNull
     private Long id;
 
     public Long getId() {
@@ -37,7 +34,7 @@ public class RemoveIosCredentialsForm {
     }
 
     @Override public String toString() {
-        return "RemoveIosCredentialsForm{" +
+        return "RemoveCredentialsForm{" +
                 "id=" + id +
                 '}';
     }

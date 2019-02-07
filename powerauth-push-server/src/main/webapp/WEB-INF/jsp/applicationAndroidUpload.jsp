@@ -32,7 +32,7 @@
                 </div>
                 <div class="col-sm-6">
                     <c:if test="${fields.hasFieldErrors('privateKey')}">
-                        <div class="red">Please enter a correct FCM private key.</div>
+                        <div class="red">You need to upload a valid private key.</div>
                     </c:if>
                     Firebase Cloud Messaging Private Key
                     <br/>
