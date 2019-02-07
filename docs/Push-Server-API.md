@@ -6,6 +6,7 @@ Push Server provides a simple to use RESTful API for the 3rd party integration p
 - [Device](#device)
 - [Message](#message)
 - [Campaign](#campaign)
+- [Administration](#administration)
 
 Following endpoints are published in PowerAuth 2.0 Push Server RESTful API:
 
@@ -20,7 +21,7 @@ Following endpoints are published in PowerAuth 2.0 Push Server RESTful API:
 - Status Code: `200`
 - Headers:
     - `Content-Type: application/json`
-- extensive details stored in `responsetObject`
+- extensive details stored in `responseObject`
 
 #### Device Management
 
@@ -47,6 +48,17 @@ Following endpoints are published in PowerAuth 2.0 Push Server RESTful API:
 - `GET` [/push/campaign/${ID}/detail](#get-campaign) - Return specific campaign
 - `GET` [/push/campaign/list/?all={true|false}](#get-list-of-campaigns) - Return actual list of campaigns
 - `GET` [/push/campaign/${ID}/user/list?page=${PAGE}&size=${SIZE}](#get-users-from-campaign) - Return paged list of users from specific campaign
+
+#### Administration of Push Server
+
+- `GET` [/admin/app/list](#list-applications) - List applications
+- `GET` [/admin/app/unconfigured/list](#list-unconfigured-applications) - List unconfigured applications
+- `POST` [/admin/app/detail](#application-detail) - Get application detail
+- `POST` [/admin/app/create](#create-application) - Create application
+- `PUT` [/admin/ios/update](#update-ios-configuration) - Update iOS configuration
+- `POST` [/admin/ios/remove](#remove-ios-configuration) - Remove iOS configuration
+- `PUT` [/admin/android/update](#update-android-configuration) - Update Android configuration
+- `POST` [/admin/android/remove](#remove-android-configuration) - Remove Android configuration
 
 #### Service Status
 
@@ -836,5 +848,299 @@ If sending was successful then `sent` parameter is set on _true_ and `timestampS
 ```json
 {
     "status": "OK"
+}
+```
+
+## Administration
+
+### List Applications
+
+Get list of all applications.
+
+#### **Request**
+
+<table>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Resource URI</td>
+<td>/admin/app/list</td>
+</tr>
+</table>
+
+#### **Response**
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "applicationList": [
+      {
+        "id": 1,
+        "appId": 1,
+        "appName": "app1",
+        "ios": true,
+        "android": true
+      }
+    ]
+  }
+}
+```
+
+### List Unconfigured Applications
+
+Get list of applications which have not been configured yet.
+
+#### **Request**
+
+<table>
+<tr>
+<td>Method</td>
+<td><code>GET</code></td>
+</tr>
+<tr>
+<td>Resource URI</td>
+<td>/admin/app/unconfigured/list</td>
+</tr>
+</table>
+
+#### **Response**
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "applicationList": [
+      {
+        "id": 2,
+        "appId": null,
+        "appName": "app2",
+        "ios": null,
+        "android": null
+      }
+    ]
+  }
+}
+```
+
+### Application Detail
+
+Get detail of an application.
+
+#### **Request**
+
+<table>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>Resource URI</td>
+<td>/admin/app/detail</td>
+</tr>
+</table>
+
+```json
+{
+  "requestObject": {
+    "id": 1,
+    "includeIos": true,
+    "includeAndroid": true
+  }
+}
+```
+
+#### **Response**
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "application": {
+      "id": 1,
+      "appId": 1,
+      "appName": "app1",
+      "ios": true,
+      "android": true
+    },
+    "iosBundle": "some.bundle.id",
+    "iosKeyId": "KEYID123456",
+    "iosTeamId": "TEAMID123456",
+    "androidProjectId": "PROJECTID123"
+  }
+}
+```
+
+### Create Application
+
+Create a new supported application.
+
+#### **Request**
+
+<table>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>Resource URI</td>
+<td>/admin/app/create</td>
+</tr>
+</table>
+
+```json
+{
+  "requestObject": {
+    "appId": 4
+  }
+}
+```
+
+#### **Response**
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "id": 5
+  }
+}
+```
+
+### Update iOS Configuration
+
+Update an iOS configuration.
+
+#### **Request**
+
+<table>
+<tr>
+<td>Method</td>
+<td><code>PUT</code></td>
+</tr>
+<tr>
+<td>Resource URI</td>
+<td>/admin/app/ios/update</td>
+</tr>
+</table>
+
+```json
+{
+  "requestObject": {
+    "id": 1,
+    "bundle": "some.bundle.id",
+    "keyId": "KEYID123456",
+    "teamId": "TEAMID123456",
+    "privateKeyBase64": "LS0tLS1CRUdJT..."
+  }
+}
+```
+
+#### **Response**
+
+```json
+{
+  "status": "OK"
+}
+```
+
+### Remove iOS Configuration
+
+Remove an iOS configuration.
+
+#### **Request**
+
+<table>
+<tr>
+<td>Method</td>
+<td><code>PUT</code></td>
+</tr>
+<tr>
+<td>Resource URI</td>
+<td>/admin/app/ios/remove</td>
+</tr>
+</table>
+
+```json
+{
+  "requestObject": {
+    "id": 5
+  }
+}
+```
+
+#### **Response**
+
+```json
+{
+  "status": "OK"
+}
+```
+
+### Update Android Configuration
+
+Update an Android configuration.
+
+#### **Request**
+
+<table>
+<tr>
+<td>Method</td>
+<td><code>PUT</code></td>
+</tr>
+<tr>
+<td>Resource URI</td>
+<td>/admin/app/android/update</td>
+</tr>
+</table>
+
+```json
+{
+  "requestObject": {
+    "id": 5,
+    "projectId": "PROJECTID123",
+    "privateKeyBase64": "ewogICJ0eXBlIjog..."
+  }
+}
+```
+
+#### **Response**
+
+```json
+{
+  "status": "OK"
+}
+```
+
+### Remove Android Configuration
+
+#### **Request**
+
+<table>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>Resource URI</td>
+<td>/admin/app/android/remove</td>
+</tr>
+</table>
+
+```json
+{
+  "requestObject": {
+    "id": 5
+  }
+}
+```
+
+#### **Response**
+
+```json
+{
+  "status": "OK"
 }
 ```
