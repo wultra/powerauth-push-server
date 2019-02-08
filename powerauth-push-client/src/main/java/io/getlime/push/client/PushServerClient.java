@@ -267,9 +267,9 @@ public class PushServerClient {
 
         TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {};
 
-        logger.info("Calling push server to send a push message batch, app ID: {} - start", String.valueOf(appId));
+        logger.info("Calling push server to send a push message batch, app ID: {} - start", appId);
         final ObjectResponse<PushMessageSendResult> result = postObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), typeReference);
-        logger.info("Calling push server to send a push message batch, app ID: {} - finish", String.valueOf(appId));
+        logger.info("Calling push server to send a push message batch, app ID: {} - finish", appId);
 
         return result;
     }
@@ -758,9 +758,15 @@ public class PushServerClient {
         if (response.getStatus() == 200) {
             return jacksonObjectMapper.readValue(response.getRawBody(), typeReference);
         } else {
-            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            ErrorResponse errorResponse = mapper.readValue(response.getRawBody(), ErrorResponse.class);
-            throw new PushServerClientException(response.getStatusText(), errorResponse.getResponseObject());
+            try {
+                // Response body contains data, return Exception with status code and error response
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                ErrorResponse errorResponse = mapper.readValue(response.getRawBody(), ErrorResponse.class);
+                throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus(), errorResponse.getResponseObject());
+            } catch (IOException ex) {
+                logger.warn(ex.getMessage(), ex);
+                throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus());
+            }
         }
     }
 
