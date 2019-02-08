@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@ package io.getlime.push.controller.rest;
 
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.Response;
-import io.getlime.powerauth.soap.ActivationStatus;
-import io.getlime.powerauth.soap.GetActivationStatusResponse;
-import io.getlime.powerauth.soap.GetPersonalizedEncryptionKeyResponse;
+import io.getlime.powerauth.soap.v3.ActivationStatus;
+import io.getlime.powerauth.soap.v3.GetActivationStatusResponse;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.request.CreateDeviceRequest;
 import io.getlime.push.model.request.DeleteDeviceRequest;
@@ -44,7 +43,7 @@ import java.util.List;
 /**
  * Controller responsible for device registration related business processes.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  */
 @Controller
 @RequestMapping(value = "push/device")
@@ -102,13 +101,6 @@ public class PushDeviceController {
                 device.setActivationId(activationId);
                 device.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
                 device.setUserId(activation.getUserId());
-                if (activation.getActivationStatus().equals(ActivationStatus.ACTIVE)) {
-                    final GetPersonalizedEncryptionKeyResponse encryptionKeyResponse = client.generatePersonalizedE2EEncryptionKey(activationId, null);
-                    if (encryptionKeyResponse != null) {
-                        device.setEncryptionKey(encryptionKeyResponse.getEncryptionKey());
-                        device.setEncryptionKeyIndex(encryptionKeyResponse.getEncryptionKeyIndex());
-                    }
-                }
             }
         }
         pushDeviceRepository.save(device);

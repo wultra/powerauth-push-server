@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,13 @@
 
 package io.getlime.push.controller.web.model.form;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * Form sent when creating the application.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  */
 public class AppCreateForm {
 
-    @NotNull
     private Long appId;
 
     public Long getAppId() {

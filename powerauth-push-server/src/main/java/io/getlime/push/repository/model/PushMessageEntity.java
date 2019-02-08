@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.Date;
 /**
  * Class representing a database record for a stored push message.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  */
 @Entity
 @Table(name = "push_message")
@@ -67,9 +67,6 @@ public class PushMessageEntity implements Serializable {
 
     @Column(name = "is_personal", updatable = false)
     private Boolean personal;
-
-    @Column(name = "is_encrypted", updatable = false)
-    private Boolean encrypted;
 
     @Column(name = "message_body", nullable = false, updatable = false)
     private String messageBody;
@@ -127,14 +124,6 @@ public class PushMessageEntity implements Serializable {
 
     public void setPersonal(Boolean personal) {
         this.personal = personal;
-    }
-
-    public Boolean getEncrypted() {
-        return encrypted;
-    }
-
-    public void setEncrypted(Boolean encrypted) {
-        this.encrypted = encrypted;
     }
 
     public String getMessageBody() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Date;
 /**
  * Class representing the PowerAuth 2.0 Push Server Device Registration object.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  */
 @Entity
 @Table(name = "push_device_registration")
@@ -62,12 +62,6 @@ public class PushDeviceRegistrationEntity implements Serializable {
 
     @Column(name = "is_active")
     private Boolean active;
-
-    @Column(name = "encryption_key")
-    private String encryptionKey;
-
-    @Column(name = "encryption_key_index")
-    private String encryptionKeyIndex;
 
     public Long getId() {
         return id;
@@ -133,19 +127,4 @@ public class PushDeviceRegistrationEntity implements Serializable {
         this.active = active;
     }
 
-    public String getEncryptionKey() {
-        return encryptionKey;
-    }
-
-    public void setEncryptionKey(String encryptionKey) {
-        this.encryptionKey = encryptionKey;
-    }
-
-    public String getEncryptionKeyIndex() {
-        return encryptionKeyIndex;
-    }
-
-    public void setEncryptionKeyIndex(String encryptionKeyIndex) {
-        this.encryptionKeyIndex = encryptionKeyIndex;
-    }
 }

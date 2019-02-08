@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,18 @@ package io.getlime.push.service.batch.storage;
 
 import io.getlime.push.service.AppRelatedPushClient;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Simple in-memory storage cache for app credentials and push service clients.
- * Uses {@link HashMap} as an underlying storage.
+ * Uses {@link ConcurrentHashMap} as an underlying storage.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  */
 public class AppCredentialStorageMap implements ItemStorageMap<Long, AppRelatedPushClient> {
 
-    private Map<Long, AppRelatedPushClient> map = new HashMap<>();
+    private ConcurrentMap<Long, AppRelatedPushClient> map = new ConcurrentHashMap<>();
 
     @Override
     public AppRelatedPushClient get(Long key) {

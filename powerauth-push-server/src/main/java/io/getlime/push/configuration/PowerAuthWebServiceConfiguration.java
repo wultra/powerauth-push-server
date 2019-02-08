@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,16 @@
  */
 package io.getlime.push.configuration;
 
+import io.getlime.push.client.PushServerClient;
 import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
-import org.apache.ws.security.WSConstants;
+import org.apache.wss4j.dom.WSConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.support.interceptor.ClientInterceptor;
-import org.springframework.ws.soap.security.wss4j.Wss4jSecurityInterceptor;
+import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
 
 import javax.net.ssl.*;
 
@@ -38,6 +39,9 @@ public class PowerAuthWebServiceConfiguration {
 
     @Value("${powerauth.service.url}")
     private String powerAuthServiceUrl;
+
+    @Value("${powerauth.push.service.url}")
+    private String pushServiceUrl;
 
     @Value("${powerauth.service.ssl.acceptInvalidSslCertificate}")
     private boolean acceptInvalidSslCertificate;
@@ -71,7 +75,7 @@ public class PowerAuthWebServiceConfiguration {
     @Bean
     public Jaxb2Marshaller marshaller() {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPath("io.getlime.powerauth.soap");
+        marshaller.setContextPaths("io.getlime.powerauth.soap.v3");
         return marshaller;
     }
 
@@ -133,6 +137,16 @@ public class PowerAuthWebServiceConfiguration {
             client.setInterceptors(interceptors);
         }
         return client;
+    }
+
+
+    /**
+     * Initialize PowerAuth 2.0 Push server client.
+     * @return Push server client.
+     */
+    @Bean
+    public PushServerClient pushServerClient() {
+        return new PushServerClient(pushServiceUrl);
     }
 
 }

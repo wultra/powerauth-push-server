@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2018 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +16,56 @@
 
 package io.getlime.push.controller.web.model.form;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Form sent when uploading iOS / APNs credentials for the application.
+ * Form sent when uploading FCM credentials for the application.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Roman Strobl, roman.strobl@wultra.com
  */
 public class UploadAndroidCredentialsForm {
 
-    @NotNull
-    @Size(min = 2)
-    @Pattern(flags = { Pattern.Flag.CASE_INSENSITIVE }, regexp = "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+[0-9a-z_]$")
-    private String bundle;
+    private String projectId;
 
-    @NotNull
-    @Size(min = 1)
-    private String token;
+    private MultipartFile privateKey;
 
-    public String getBundle() {
-        return bundle;
+    /**
+     * Get Android project ID record.
+     * @return Android project ID record.
+     */
+    public String getProjectId() {
+        return projectId;
     }
 
-    public void setBundle(String bundle) {
-        this.bundle = bundle;
+    /**
+     * Set Android project ID record.
+     * @param projectId Android project ID record.
+     */
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
     }
 
-    public String getToken() {
-        return token;
+    /**
+     * Get Android private key.
+     * @return Android Private key.
+     */
+    public MultipartFile getPrivateKey() {
+        return privateKey;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    /**
+     * Set Android private key.
+     * @param privateKey Android private key.
+     */
+    public void setPrivateKey(MultipartFile privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    @Override
+    public String toString() {
+        return "UploadAndroidCredentialsForm{" +
+                "projectId='" + projectId + '\'' +
+                ", privateKey=******" + '\'' +
+                '}';
     }
 }

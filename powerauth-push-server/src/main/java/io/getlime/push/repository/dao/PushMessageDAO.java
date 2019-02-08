@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,11 +61,9 @@ public class PushMessageDAO {
         entity.setUserId(userId);
         entity.setActivationId(activationId);
         if (pushMessageAttributes != null) {
-            entity.setEncrypted(pushMessageAttributes.getEncrypted());
             entity.setPersonal(pushMessageAttributes.getPersonal());
             entity.setSilent(pushMessageAttributes.getSilent());
         } else {
-            entity.setEncrypted(false);
             entity.setPersonal(false);
             entity.setSilent(false);
         }

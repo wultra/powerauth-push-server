@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,21 @@
 
 package io.getlime.push.controller.web.model.form;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 /**
  * Form sent when sending a test push message.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  */
 public class ComposePushMessageForm {
 
-    @NotNull
     private Long appId;
 
-    @NotNull
-    @Size(min = 1)
     private String userId;
 
-    @NotNull
-    @Size(min = 1)
     private String title;
 
-    @NotNull
-    @Size(min = 1)
     private String body;
 
-    @NotNull
     private boolean sound;
 
     public Long getAppId() {

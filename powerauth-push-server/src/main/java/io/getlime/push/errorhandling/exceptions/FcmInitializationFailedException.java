@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2018 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,24 @@
  * limitations under the License.
  */
 
-package io.getlime.push.controller.web.model.form;
-
-import javax.validation.constraints.NotNull;
+package io.getlime.push.errorhandling.exceptions;
 
 /**
- * Form sent when removing iOS / APNs credentials from the application.
+ * Exception for case when FCM initialization fails.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Roman Strobl, roman.strobl@wultra.com
  */
-public class RemoveIosCredentialsForm {
+public class FcmInitializationFailedException extends PushServerException {
 
-    @NotNull
-    private Long id;
-
-    public Long getId() {
-        return id;
+    public FcmInitializationFailedException(String message) {
+        super(message);
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public FcmInitializationFailedException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    @Override public String toString() {
-        return "RemoveIosCredentialsForm{" +
-                "id=" + id +
-                '}';
+    public FcmInitializationFailedException(Throwable cause) {
+        super(cause);
     }
 }

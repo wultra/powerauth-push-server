@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.io.Serializable;
 /**
  * Class representing application tokens used to authenticate against APNs or FCM services.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  */
 @Entity
 @Table(name = "push_app_credentials")
@@ -50,11 +50,11 @@ public class AppCredentialsEntity implements Serializable {
     @Column(name = "ios_bundle")
     private String iosBundle;
 
-    @Column(name = "android_server_key")
-    private String androidServerKey;
+    @Column(name = "android_private_key")
+    private byte[] androidPrivateKey;
 
-    @Column(name = "android_bundle")
-    private String androidBundle;
+    @Column(name = "android_project_id")
+    private String androidProjectId;
 
     public Long getId() {
         return id;
@@ -104,19 +104,19 @@ public class AppCredentialsEntity implements Serializable {
         this.iosKeyId = iosKeyId;
     }
 
-    public String getAndroidServerKey() {
-        return androidServerKey;
+    public byte[] getAndroidPrivateKey() {
+        return androidPrivateKey;
     }
 
-    public void setAndroidServerKey(String androidServerKey) {
-        this.androidServerKey = androidServerKey;
+    public void setAndroidPrivateKey(byte[] androidPrivateKey) {
+        this.androidPrivateKey = androidPrivateKey;
     }
 
-    public String getAndroidBundle() {
-        return androidBundle;
+    public String getAndroidProjectId() {
+        return androidProjectId;
     }
 
-    public void setAndroidBundle(String androidBundle) {
-        this.androidBundle = androidBundle;
+    public void setAndroidProjectId(String androidProjectId) {
+        this.androidProjectId = androidProjectId;
     }
 }

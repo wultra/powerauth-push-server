@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Lime - HighTech Solutions s.r.o.
+ * Copyright 2017 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  */
 @Configuration
 public class PushServiceConfiguration {
@@ -77,6 +77,10 @@ public class PushServiceConfiguration {
     // Campaign Configuration
     @Value("${powerauth.push.service.campaign.batchSize}")
     private int campaignBatchSize;
+
+    // Whether to store messages
+    @Value("${powerauth.push.service.message.storage.enabled}")
+    private boolean messageStorageEnabled;
 
     /**
      * FCM connect timeout in milliseconds.
@@ -344,6 +348,22 @@ public class PushServiceConfiguration {
      */
     public void setCampaignBatchSize(int campaignBatchSize) {
         this.campaignBatchSize = campaignBatchSize;
+    }
+
+    /**
+     * Get whether persistent message storage is enabled.
+     * @return Whether persistent message storage is enabled.
+     */
+    public boolean isMessageStorageEnabled() {
+        return messageStorageEnabled;
+    }
+
+    /**
+     * Set whether persistent message storage is enabled.
+     * @param messageStorageEnabled Whether persistent message storage is enabled.
+     */
+    public void setMessageStorageEnabled(boolean messageStorageEnabled) {
+        this.messageStorageEnabled = messageStorageEnabled;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package io.getlime.push.service;
 
 import com.turo.pushy.apns.ApnsClient;
+import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageAttributes;
@@ -31,41 +32,43 @@ import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
 import io.getlime.push.service.fcm.FcmClient;
-import io.getlime.push.service.fcm.model.base.FcmResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Phaser;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class responsible for sending push notifications to devices based on platform.
  *
- * @author Petr Dvorak, petr@lime-company.eu
+ * @author Petr Dvorak, petr@wultra.com
  */
 @Service
 public class PushMessageSenderService {
 
-    private PushSendingWorker pushSendingWorker;
-    private AppCredentialsRepository appCredentialsRepository;
-    private PushDeviceRepository pushDeviceRepository;
-    private PushMessageDAO pushMessageDAO;
-    private AppCredentialStorageMap appRelatedPushClientMap;
+    private static final Logger logger = LoggerFactory.getLogger(PushMessageSenderService.class);
+
+    private final PushSendingWorker pushSendingWorker;
+    private final AppCredentialsRepository appCredentialsRepository;
+    private final PushDeviceRepository pushDeviceRepository;
+    private final PushMessageDAO pushMessageDAO;
+    private final AppCredentialStorageMap appRelatedPushClientMap;
+    private final PushServiceConfiguration configuration;
 
     @Autowired
     public PushMessageSenderService(AppCredentialsRepository appCredentialsRepository,
                                     PushDeviceRepository pushDeviceRepository,
                                     PushMessageDAO pushMessageDAO,
                                     PushSendingWorker pushSendingWorker,
-                                    AppCredentialStorageMap appRelatedPushClientMap) {
+                                    AppCredentialStorageMap appRelatedPushClientMap, PushServiceConfiguration configuration) {
         this.appCredentialsRepository = appCredentialsRepository;
         this.pushDeviceRepository = pushDeviceRepository;
         this.pushMessageDAO = pushMessageDAO;
         this.pushSendingWorker = pushSendingWorker;
         this.appRelatedPushClientMap = appRelatedPushClientMap;
+        this.configuration = configuration;
     }
 
     /**
@@ -97,7 +100,8 @@ public class PushMessageSenderService {
 
             // Iterate over all devices for given user
             for (final PushDeviceRegistrationEntity device : devices) {
-                final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getUserId(), pushMessage.getActivationId(), device.getId());
+                // Store push message, in case storing of messages is disabled null value is returned
+                final PushMessageEntity pushMessageObject = storePushMessage(pushMessage, device);
 
                 // Check if given push is not personal, or if it is, that device is in active state.
                 // This avoids sending personal notifications to devices that are blocked or removed.
@@ -111,77 +115,78 @@ public class PushMessageSenderService {
                     // Decide if the device is iOS or Android and send message accordingly
                     String platform = device.getPlatform();
                     if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
-                        pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), (result, contextData) -> {
+                        if (pushClient.getApnsClient() == null) {
+                            logger.error("Push message cannot be sent to APNS because APNS is not configured in push server.");
+                            phaser.arriveAndDeregister();
+                            continue;
+                        }
+                        pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), (result) -> {
                             try {
                                 switch (result) {
                                     case OK: {
                                         sendResult.getIos().setSent(sendResult.getIos().getSent() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
                                         break;
                                     }
                                     case PENDING: {
                                         sendResult.getIos().setPending(sendResult.getIos().getPending() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
                                         break;
                                     }
                                     case FAILED: {
                                         sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                                         break;
                                     }
                                     case FAILED_DELETE: {
                                         sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                                         pushDeviceRepository.delete(device);
                                         break;
                                     }
                                 }
                                 sendResult.getIos().setTotal(sendResult.getIos().getTotal() + 1);
                             } catch (Throwable t) {
-                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "System error when sending notification: " + t.getMessage(), t);
+                                logger.error("System error when sending notification: {}", t.getMessage(), t);
                             } finally {
                                 phaser.arriveAndDeregister();
                             }
                         });
                     } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
+                        if (pushClient.getFcmClient() == null) {
+                            logger.error("Push message cannot be sent to FCM because FCM is not configured in push server.");
+                            phaser.arriveAndDeregister();
+                            continue;
+                        }
                         final String token = device.getPushToken();
-                        pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), token, (sendingResult, contextData) -> {
+                        pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), token, (sendingResult) -> {
                             try {
                                 switch (sendingResult) {
                                     case OK: {
                                         sendResult.getAndroid().setSent(sendResult.getAndroid().getSent() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                                        pushMessageDAO.save(pushMessageObject);
-                                        updateFcmTokenIfNeeded(appId, token, contextData);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
                                         break;
                                     }
                                     case PENDING: {
                                         sendResult.getAndroid().setPending(sendResult.getAndroid().getPending() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
                                         break;
                                     }
                                     case FAILED: {
                                         sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                                         break;
                                     }
                                     case FAILED_DELETE: {
                                         sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
-                                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                                        pushMessageDAO.save(pushMessageObject);
+                                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                                         pushDeviceRepository.delete(device);
                                         break;
                                     }
                                 }
                                 sendResult.getAndroid().setTotal(sendResult.getAndroid().getTotal() + 1);
                             } catch (Throwable t) {
-                                Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "System error when sending notification: " + t.getMessage(), t);
+                                logger.error("System error when sending notification: {}", t.getMessage(), t);
                             } finally {
                                 phaser.arriveAndDeregister();
                             }
@@ -234,53 +239,44 @@ public class PushMessageSenderService {
         final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, activationId, deviceId);
 
         if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
-            pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), (result, contextData) -> {
+            pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), (result) -> {
                 switch (result) {
                     case OK: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
                         break;
                     }
                     case PENDING: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
                         break;
                     }
                     case FAILED: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                         break;
                     }
                     case FAILED_DELETE: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                         pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
                         break;
                     }
                 }
             });
         } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
-            pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, (result, contextData) -> {
+            pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, (result) -> {
                 switch (result) {
                     case OK: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.SENT);
-                        pushMessageDAO.save(pushMessageObject);
-                        updateFcmTokenIfNeeded(appId, token, contextData);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
                         break;
                     }
                     case PENDING: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.PENDING);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
                         break;
                     }
                     case FAILED: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                         break;
                     }
                     case FAILED_DELETE: {
-                        pushMessageObject.setStatus(PushMessageEntity.Status.FAILED);
-                        pushMessageDAO.save(pushMessageObject);
+                        updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                         pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
                         break;
                     }
@@ -301,7 +297,7 @@ public class PushMessageSenderService {
     // Return list of devices related to given user or activation ID (if present). List of devices is related to particular application as well.
     private List<PushDeviceRegistrationEntity> getPushDevices(Long appId, String userId, String activationId) throws PushServerException {
         if (userId == null || userId.isEmpty()) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.SEVERE, "No userId was specified");
+            logger.error("No userId was specified");
             throw new PushServerException("No userId was specified");
         }
         List<PushDeviceRegistrationEntity> devices;
@@ -319,14 +315,18 @@ public class PushMessageSenderService {
             AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
             if (pushClient == null) {
                 final AppCredentialsEntity credentials = getAppCredentials(appId);
-                ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosPrivateKey(), credentials.getIosTeamId(), credentials.getIosKeyId());
-                FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidServerKey());
                 pushClient = new AppRelatedPushClient();
+                if (credentials.getIosPrivateKey() != null) {
+                    ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosTeamId(), credentials.getIosKeyId(), credentials.getIosPrivateKey());
+                    pushClient.setApnsClient(apnsClient);
+                }
+                if (credentials.getAndroidPrivateKey() != null) {
+                    FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
+                    pushClient.setFcmClient(fcmClient);
+                }
                 pushClient.setAppCredentials(credentials);
-                pushClient.setApnsClient(apnsClient);
-                pushClient.setFcmClient(fcmClient);
                 appRelatedPushClientMap.put(appId, pushClient);
-                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Creating APNS and FCM clients for app " + appId);
+                logger.info("Creating APNS and FCM clients for app {}", appId);
             }
             return pushClient;
         }
@@ -337,20 +337,24 @@ public class PushMessageSenderService {
     private void validatePushMessage(PushMessage pushMessage) throws PushServerException {
         String error = PushMessageValidator.validatePushMessage(pushMessage);
         if (error != null) {
-            Logger.getLogger(PushMessageSenderService.class.getName()).log(Level.WARNING, error);
+            logger.warn(error);
             throw new PushServerException(error);
         }
     }
 
-    // Update FCM token based on context data
-    private void updateFcmTokenIfNeeded(Long appId, String token, Map<String, Object> contextData) {
-        if (contextData != null) {
-            String updatedToken = (String) contextData.get(FcmResult.KEY_UPDATE_TOKEN);
-            if (updatedToken != null) {
-                PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token);
-                device.setPushToken(updatedToken);
-                pushDeviceRepository.save(device);
-            }
+    // Store push message in case storing of push messages is enabled
+    private PushMessageEntity storePushMessage(PushMessage pushMessage, PushDeviceRegistrationEntity device) throws PushServerException {
+        if (configuration.isMessageStorageEnabled()) {
+            return pushMessageDAO.storePushMessageObject(pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getUserId(), pushMessage.getActivationId(), device.getId());
+        }
+        return null;
+    }
+
+    // Update push message status and persist it in case entity is not null
+    private void updateStatusAndPersist(PushMessageEntity pushMessageObject, PushMessageEntity.Status status) {
+        if (pushMessageObject != null) {
+            pushMessageObject.setStatus(status);
+            pushMessageDAO.save(pushMessageObject);
         }
     }
 

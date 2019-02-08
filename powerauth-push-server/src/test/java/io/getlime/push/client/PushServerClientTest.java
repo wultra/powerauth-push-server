@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Lime - HighTech Solutions s.r.o.
+ * Copyright 2016 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,6 @@ public class PushServerClientTest {
         pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
         attributes.setSilent(true);
         attributes.setPersonal(true);
-        attributes.setEncrypted(false);
         pushMessage.setUserId("123");
         pushMessage.setActivationId("49414e31-f3df-4cea-87e6-f214ca3b8412");
         pushMessage.setAttributes(attributes);
@@ -185,7 +184,6 @@ public class PushServerClientTest {
         pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
         attributes.setSilent(true);
         attributes.setPersonal(true);
-        attributes.setEncrypted(false);
         pushMessage.setUserId("123");
         pushMessage.setActivationId("49414e31-f3df-4cea-87e6-f214ca3b8412");
         pushMessage.setAttributes(attributes);
