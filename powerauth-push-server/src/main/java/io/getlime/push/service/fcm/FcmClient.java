@@ -27,13 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
-import reactor.ipc.netty.http.client.HttpClientOptions;
-import reactor.ipc.netty.options.ClientProxyOptions;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.tcp.ProxyProvider;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -110,21 +109,26 @@ public class FcmClient {
      * Initialize WebClient instance and configure it based on client configuration.
      */
     public void initializeWebClient() {
-        ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options -> {
-            HttpClientOptions.Builder optionsBuilder = options
-                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, pushServiceConfiguration.getFcmConnectTimeout());
-            if (proxyHost != null) {
-                optionsBuilder.httpProxy((addressSpec -> {
-                    ClientProxyOptions.Builder proxyOptionsBuilder = addressSpec.host(proxyHost).port(proxyPort);
-                    if (proxyUsername == null) {
-                        return proxyOptionsBuilder;
-                    } else {
-                        return proxyOptionsBuilder.username(proxyUsername).password(s -> proxyPassword);
+        HttpClient httpClient = HttpClient.create()
+                .tcpConfiguration(tcpClient -> {
+                    tcpClient = tcpClient.option(
+                            ChannelOption.CONNECT_TIMEOUT_MILLIS,
+                            pushServiceConfiguration.getFcmConnectTimeout());
+                    if (proxyHost != null) {
+                        tcpClient.proxy(proxySpec -> {
+                            ProxyProvider.Builder builder = proxySpec
+                                    .type(ProxyProvider.Proxy.HTTP)
+                                    .host(proxyHost)
+                                    .port(proxyPort);
+                            if (proxyUsername != null) {
+                                builder.username(proxyUsername);
+                                builder.password(s -> proxyPassword);
+                            }
+                        });
                     }
-                }));
-            }
-        });
-        webClient = WebClient.builder().clientConnector(clientHttpConnector).build();
+                    return tcpClient;
+                });
+        webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
     }
 
     /**
