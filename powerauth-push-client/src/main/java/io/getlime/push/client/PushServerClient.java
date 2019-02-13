@@ -159,9 +159,9 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, token, platform.value());
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform.value());
         Response response = postObjectImpl("/push/device/create", new ObjectRequest<>(request));
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, token, platform.value());
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform.value());
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -185,9 +185,9 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling push server delete device service, appId: {}, token: {} - start", appId, token);
+        logger.info("Calling push server delete device service, appId: {}, token: {} - start", appId, maskToken(token));
         Response response = postObjectImpl("/push/device/delete", new ObjectRequest<>(request));
-        logger.info("Calling push server delete device service, appId: {}, token: {} - finish", appId, token);
+        logger.info("Calling push server delete device service, appId: {}, token: {} - finish", appId, maskToken(token));
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -768,6 +768,18 @@ public class PushServerClient {
                 throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus());
             }
         }
+    }
+
+    /**
+     * Mask push service token to avoid leaking tokens in log files.
+     * @param token Push service token.
+     * @return Masked push service token.
+     */
+    private String maskToken(String token) {
+        if (token == null || token.length() < 10) {
+            return token;
+        }
+        return token.substring(0, 10) + "...";
     }
 
 }
