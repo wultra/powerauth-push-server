@@ -49,9 +49,6 @@ public class FcmClient {
 
     private static final Logger logger = LoggerFactory.getLogger(FcmClient.class);
 
-    // FCM URL for posting push messages
-    private static final String FCM_URL = "https://fcm.googleapis.com/v1/projects/%s/messages:send";
-
     // Time buffer for refresh access tokens
     private static final long REFRESH_TOKEN_TIME_BUFFER_SECONDS = 60L;
 
@@ -62,7 +59,7 @@ public class FcmClient {
     private final byte[] privateKey;
 
     // FCM send message URL
-    private final String fcmSendMessageUrl;
+    private String fcmSendMessageUrl;
 
     // Google Credential instance for obtaining access tokens
     private GoogleCredential googleCredential;
@@ -86,7 +83,6 @@ public class FcmClient {
         this.projectId = projectId;
         this.privateKey = privateKey;
         this.pushServiceConfiguration = pushServiceConfiguration;
-        this.fcmSendMessageUrl = String.format(FCM_URL, projectId);
         this.fcmConverter = fcmConverter;
     }
 
@@ -129,6 +125,14 @@ public class FcmClient {
                     return tcpClient;
                 });
         webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
+    }
+
+    /**
+     * Set the FCM send message endpoint URL.
+     * @param fcmSendMessageUrl FCM send message endpoint URL.
+     */
+    public void setFcmSendMessageUrl(String fcmSendMessageUrl) {
+        this.fcmSendMessageUrl = fcmSendMessageUrl;
     }
 
     /**
@@ -186,6 +190,10 @@ public class FcmClient {
         }
         if (projectId == null) {
             logger.error("Push message delivery failed because FCM project ID is not configured.");
+            return;
+        }
+        if (fcmSendMessageUrl == null) {
+            logger.error("Push message delivery failed because FCM send message URL is not configured.");
             return;
         }
 
