@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.ws.WebServiceException;
 
 /**
  * Implementation of a default exception handler for the push server service.
@@ -40,9 +41,9 @@ public class DefaultExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  // 500
     @ExceptionHandler(Throwable.class)
     @ResponseBody
-    public ErrorResponse handleConflict(Exception e) {
-        logger.error(e.getMessage(), e);
-        return new ErrorResponse(Error.Code.ERROR_GENERIC, e);
+    public ErrorResponse handleConflict(Throwable t) {
+        logger.error(t.getMessage(), t);
+        return new ErrorResponse(Error.Code.ERROR_GENERIC, t);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
@@ -53,12 +54,19 @@ public class DefaultExceptionHandler {
         return new ErrorResponse(Error.Code.ERROR_GENERIC, e);
     }
 
-
     @ResponseStatus(HttpStatus.NOT_FOUND)  // 404
     @ExceptionHandler(EmptyResultDataAccessException.class)
     @ResponseBody
     public ErrorResponse handleDatabaseNotFound(Exception e) {
         logger.error(e.getMessage(), e);
         return new ErrorResponse(DatabaseError.Code.ERROR_DATABASE, e);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
+    @ExceptionHandler(WebServiceException.class)
+    @ResponseBody
+    public ErrorResponse handleWebServiceError(Exception e) {
+        logger.error(e.getMessage(), e);
+        return new ErrorResponse(WebServiceError.Code.ERROR_PA_SERVER_COMM, e);
     }
 }

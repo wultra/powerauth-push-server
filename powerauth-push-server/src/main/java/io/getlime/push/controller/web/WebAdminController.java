@@ -139,8 +139,7 @@ public class WebAdminController {
             model.put("applications", appListResponse.getResponseObject().getApplicationList());
             return "applications";
         } catch (PushServerClientException ex) {
-            model.put("message", ex.getMessage());
-            logger.error(ex.getMessage());
+            handleError(ex, model);
             return "error";
         }
     }
@@ -157,8 +156,7 @@ public class WebAdminController {
             model.put("applications", appListResponse.getResponseObject().getApplicationList());
             return "applicationCreate";
         } catch (PushServerClientException ex) {
-            model.put("message", ex.getMessage());
-            logger.error(ex.getMessage());
+            handleError(ex, model);
             return "error";
         }
     }
@@ -179,8 +177,7 @@ public class WebAdminController {
             model.put("application", appResponse.getResponseObject().getApplication());
             return "applicationEdit";
         } catch (PushServerClientException ex) {
-            model.put("message", ex.getMessage());
-            logger.error(ex.getMessage());
+            handleError(ex, model);
             return "error";
         }
     }
@@ -213,8 +210,7 @@ public class WebAdminController {
             model.put("application", app);
             return "applicationIosUpload";
         } catch (PushServerClientException ex) {
-            model.put("message", ex.getMessage());
-            logger.error(ex.getMessage());
+            handleError(ex, model);
             return "error";
         }
     }
@@ -244,8 +240,7 @@ public class WebAdminController {
             model.put("application", app);
             return "applicationAndroidUpload";
         } catch (PushServerClientException ex) {
-            model.put("message", ex.getMessage());
-            logger.error(ex.getMessage());
+            handleError(ex, model);
             return "error";
         }
     }
@@ -262,8 +257,7 @@ public class WebAdminController {
             model.put("applications", appListResponse.getResponseObject().getApplicationList());
             return "pushMessageCreate";
         } catch (PushServerClientException ex) {
-            model.put("message", ex.getMessage());
-            logger.error(ex.getMessage());
+            handleError(ex, model);
             return "error";
         }
     }
@@ -286,8 +280,7 @@ public class WebAdminController {
             ObjectResponse<CreateApplicationResponse> createAppResponse = pushServerClient.createApplication(appCreateForm.getAppId());
             return "redirect:/web/admin/app/" + createAppResponse.getResponseObject().getId() + "/edit";
         } catch (PushServerClientException ex) {
-            model.put("message", ex.getMessage());
-            logger.error(ex.getMessage());
+            handleError(ex, model);
             return "error";
         }
     }
@@ -314,7 +307,10 @@ public class WebAdminController {
         try {
             pushServerClient.updateIos(id, uploadIosCredentialsForm.getBundle(), uploadIosCredentialsForm.getKeyId(), uploadIosCredentialsForm.getTeamId(), uploadIosCredentialsForm.getPrivateKey().getBytes());
             return "redirect:/web/admin/app/" + id + "/edit";
-        } catch (PushServerClientException | IOException ex) {
+        } catch (PushServerClientException ex) {
+            handleError(ex, model);
+            return "error";
+        } catch (IOException ex) {
             model.put("message", ex.getMessage());
             logger.error(ex.getMessage());
             return "error";
@@ -338,8 +334,7 @@ public class WebAdminController {
             pushServerClient.removeIos(id);
             return "redirect:/web/admin/app/" + id  + "/edit";
         } catch (PushServerClientException ex) {
-            model.put("message", ex.getMessage());
-            logger.error(ex.getMessage());
+            handleError(ex, model);
             return "error";
         }
     }
@@ -366,7 +361,10 @@ public class WebAdminController {
         try {
             pushServerClient.updateAndroid(id, uploadAndroidCredentialsForm.getProjectId(), uploadAndroidCredentialsForm.getPrivateKey().getBytes());
             return "redirect:/web/admin/app/" + id + "/edit";
-        } catch (PushServerClientException | IOException ex) {
+        } catch (PushServerClientException ex) {
+            handleError(ex, model);
+            return "error";
+        } catch (IOException ex) {
             model.put("message", ex.getMessage());
             logger.error(ex.getMessage());
             return "error";
@@ -390,8 +388,7 @@ public class WebAdminController {
             pushServerClient.removeAndroid(id);
             return "redirect:/web/admin/app/" + id + "/edit";
         } catch (PushServerClientException ex) {
-            model.put("message", ex.getMessage());
-            logger.error(ex.getMessage());
+            handleError(ex, model);
             return "error";
         }
     }
@@ -422,10 +419,23 @@ public class WebAdminController {
             pushServerClient.sendPushMessage(composePushMessageForm.getAppId(), message);
             return "redirect:/web/admin/message/create";
         } catch (PushServerClientException ex) {
-            model.put("message", ex.getMessage());
-            logger.error(ex.getMessage());
+            handleError(ex, model);
             return "error";
         }
+    }
+
+    /**
+     * Handle Push Server Client error.
+     * @param ex Exception.
+     * @param model Model to update.
+     */
+    private void handleError(PushServerClientException ex, Map<String, Object> model) {
+        model.put("message", ex.getMessage());
+        if (ex.getError() != null) {
+            model.put("error_code", ex.getError().getCode());
+            model.put("error_details", ex.getError().getMessage());
+        }
+        logger.error(ex.getMessage());
     }
 
 }

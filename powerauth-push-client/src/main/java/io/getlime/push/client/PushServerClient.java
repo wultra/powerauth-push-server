@@ -765,7 +765,7 @@ public class PushServerClient {
                 throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus(), errorResponse.getResponseObject());
             } catch (IOException ex) {
                 logger.warn(ex.getMessage(), ex);
-                throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus());
+                throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus() + ". Check server log for error details.");
             }
         }
     }
