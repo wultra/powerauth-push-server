@@ -111,7 +111,7 @@ public class FcmClient {
                             ChannelOption.CONNECT_TIMEOUT_MILLIS,
                             pushServiceConfiguration.getFcmConnectTimeout());
                     if (proxyHost != null) {
-                        tcpClient.proxy(proxySpec -> {
+                        tcpClient = tcpClient.proxy(proxySpec -> {
                             ProxyProvider.Builder builder = proxySpec
                                     .type(ProxyProvider.Proxy.HTTP)
                                     .host(proxyHost)
@@ -120,6 +120,7 @@ public class FcmClient {
                                 builder.username(proxyUsername);
                                 builder.password(s -> proxyPassword);
                             }
+                            builder.build();
                         });
                     }
                     return tcpClient;
