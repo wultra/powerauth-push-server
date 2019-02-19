@@ -56,8 +56,7 @@ ALTER TABLE PUSH_MESSAGE DROP COLUMN IS_ENCRYPTED;
 
 You can apply following database indexes to improve database performance of Push Server.
 
-The DDL script is identical for all supported databases:
-
+The DDL script for Oracle:
 ```sql
 CREATE UNIQUE INDEX PUSH_APP_CRED_APP ON PUSH_APP_CREDENTIALS(APP_ID);
 
@@ -71,6 +70,22 @@ CREATE INDEX PUSH_CAMPAIGN_SENT ON PUSH_CAMPAIGN(IS_SENT);
 
 CREATE INDEX PUSH_CAMPAIGN_USER_CAMPAIGN ON PUSH_CAMPAIGN_USER(CAMPAIGN_ID, USER_ID);
 CREATE INDEX PUSH_CAMPAIGN_USER_DETAIL ON PUSH_CAMPAIGN_USER(USER_ID);
+```
+
+The DDL script for MySQL:
+```sql
+CREATE UNIQUE INDEX `push_app_cred_app` ON `push_app_credentials`(`app_id`);
+
+CREATE INDEX `push_device_app_token` ON `push_device_registration`(`app_id`, `push_token`);
+CREATE INDEX `push_device_user_app` ON `push_device_registration`(`user_id`, `app_id`);
+CREATE INDEX `push_device_activation` ON `push_device_registration`(`activation_id`);
+
+CREATE INDEX `push_message_status` ON `push_message`(`status`);
+
+CREATE INDEX `push_campaign_sent` ON `push_campaign`(`is_sent`);
+
+CREATE INDEX `push_campaign_user_campaign` ON `push_campaign_user`(`campaign_id`, `user_id`);
+CREATE INDEX `push_campaign_user_detail` ON `push_campaign_user`(`user_id`);
 ```
 
 ## Storing of sent push messages disabled by default
