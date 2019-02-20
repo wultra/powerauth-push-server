@@ -21,6 +21,7 @@
                 <c:otherwise>An unknown error occurred.</c:otherwise>
             </c:choose>
         </p>
+        <c:if test="${not empty error_details}"><p>${error_details}</p></c:if>
         <c:if test="${not empty stacktrace}">
             <div class="code">
                 ${stacktrace}
