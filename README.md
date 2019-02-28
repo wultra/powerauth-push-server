@@ -4,7 +4,7 @@ PowerAuth Push Server is an optional application that facilitates sending APNs /
 
 ## Documentation
 
-- For the most recent documentation and tutorials, please visit [PowerAuth Push Server Documentation](./docs/Home.md)
+- For the most recent documentation and tutorials, please visit [PowerAuth Push Server Documentation](https://developers.wultra.com/docs/latest/powerauth-push-server/)
 
 # License
 
