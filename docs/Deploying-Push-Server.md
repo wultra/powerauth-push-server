@@ -6,7 +6,7 @@ Push Server is a Java EE application (packaged as an executable WAR file) that c
 
 You can download the latest `powerauth-push-server.war` at the releases page:
 
-- https://github.com/wultra/powerauth-push-server/releases
+- [Push Server Releases](https://github.com/wultra/powerauth-push-server/releases)
 
 ## Database
 
