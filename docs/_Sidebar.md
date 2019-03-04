@@ -1,6 +1,6 @@
 **Deployment Tutorials**
 
-- [Home](./Home.md)
+- [Home](./Readme.md)
 - [Deploy Push Server](./Deploying-Push-Server.md)
 - [Migration Instructions](./Migration-Instructions.md)
 
