@@ -112,5 +112,7 @@ The configuration parameters have changed for FCM HTTP API v1:
 - `Private key` needs to be configured instead of server key (which was removed from configuration).
 - `Project ID` needs to be configured.
 
-You can obtain both parameters from [Firebase Console](https://console.firebase.google.com). The project ID is visible in *Project Settings* | *General*. The private key can be generated using *Project Settings* | *Service Accounts* | *Firebase Admin SDK*, as described in [FCM documentation](https://firebase.google.com/docs/cloud-messaging/auth-server). Use the whole generated JSON file when configuring private key in Push server.
-
+You can obtain both parameters from [Firebase Console](https://console.firebase.google.com). 
+The project ID is visible in *Project Settings*, *General*. The private key can be generated 
+using *Project Settings*, *Service Accounts*, *Firebase Admin SDK* as described in [FCM documentation](https://firebase.google.com/docs/cloud-messaging/auth-server). 
+Use the whole generated JSON file when configuring private key in Push server.
