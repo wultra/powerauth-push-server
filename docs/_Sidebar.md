@@ -2,6 +2,7 @@
 
 - [Home](./Readme.md)
 - [Deploy Push Server](./Deploying-Push-Server.md)
+- [Deploy Push Server on JBoss / Wildfly](./Deploying-Wildfly.md)
 - [Migration Instructions](./Migration-Instructions.md)
 
 **Integration Tutorials**

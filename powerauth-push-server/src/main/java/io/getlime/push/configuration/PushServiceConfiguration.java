@@ -17,12 +17,14 @@
 package io.getlime.push.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Petr Dvorak, petr@wultra.com
  */
 @Configuration
+@ConfigurationProperties("ext")
 public class PushServiceConfiguration {
 
     @Value("${powerauth.push.service.applicationName}")
