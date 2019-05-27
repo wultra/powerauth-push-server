@@ -27,13 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
-import reactor.ipc.netty.http.client.HttpClientOptions;
-import reactor.ipc.netty.options.ClientProxyOptions;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.tcp.ProxyProvider;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -50,9 +49,6 @@ public class FcmClient {
 
     private static final Logger logger = LoggerFactory.getLogger(FcmClient.class);
 
-    // FCM URL for posting push messages
-    private static final String FCM_URL = "https://fcm.googleapis.com/v1/projects/%s/messages:send";
-
     // Time buffer for refresh access tokens
     private static final long REFRESH_TOKEN_TIME_BUFFER_SECONDS = 60L;
 
@@ -63,7 +59,7 @@ public class FcmClient {
     private final byte[] privateKey;
 
     // FCM send message URL
-    private final String fcmSendMessageUrl;
+    private String fcmSendMessageUrl;
 
     // Google Credential instance for obtaining access tokens
     private GoogleCredential googleCredential;
@@ -87,7 +83,6 @@ public class FcmClient {
         this.projectId = projectId;
         this.privateKey = privateKey;
         this.pushServiceConfiguration = pushServiceConfiguration;
-        this.fcmSendMessageUrl = String.format(FCM_URL, projectId);
         this.fcmConverter = fcmConverter;
     }
 
@@ -110,21 +105,35 @@ public class FcmClient {
      * Initialize WebClient instance and configure it based on client configuration.
      */
     public void initializeWebClient() {
-        ClientHttpConnector clientHttpConnector = new ReactorClientHttpConnector(options -> {
-            HttpClientOptions.Builder optionsBuilder = options
-                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, pushServiceConfiguration.getFcmConnectTimeout());
-            if (proxyHost != null) {
-                optionsBuilder.httpProxy((addressSpec -> {
-                    ClientProxyOptions.Builder proxyOptionsBuilder = addressSpec.host(proxyHost).port(proxyPort);
-                    if (proxyUsername == null) {
-                        return proxyOptionsBuilder;
-                    } else {
-                        return proxyOptionsBuilder.username(proxyUsername).password(s -> proxyPassword);
+        HttpClient httpClient = HttpClient.create()
+                .tcpConfiguration(tcpClient -> {
+                    tcpClient = tcpClient.option(
+                            ChannelOption.CONNECT_TIMEOUT_MILLIS,
+                            pushServiceConfiguration.getFcmConnectTimeout());
+                    if (proxyHost != null) {
+                        tcpClient = tcpClient.proxy(proxySpec -> {
+                            ProxyProvider.Builder builder = proxySpec
+                                    .type(ProxyProvider.Proxy.HTTP)
+                                    .host(proxyHost)
+                                    .port(proxyPort);
+                            if (proxyUsername != null) {
+                                builder.username(proxyUsername);
+                                builder.password(s -> proxyPassword);
+                            }
+                            builder.build();
+                        });
                     }
-                }));
-            }
-        });
-        webClient = WebClient.builder().clientConnector(clientHttpConnector).build();
+                    return tcpClient;
+                });
+        webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
+    }
+
+    /**
+     * Set the FCM send message endpoint URL.
+     * @param fcmSendMessageUrl FCM send message endpoint URL.
+     */
+    public void setFcmSendMessageUrl(String fcmSendMessageUrl) {
+        this.fcmSendMessageUrl = fcmSendMessageUrl;
     }
 
     /**
@@ -182,6 +191,10 @@ public class FcmClient {
         }
         if (projectId == null) {
             logger.error("Push message delivery failed because FCM project ID is not configured.");
+            return;
+        }
+        if (fcmSendMessageUrl == null) {
+            logger.error("Push message delivery failed because FCM send message URL is not configured.");
             return;
         }
 

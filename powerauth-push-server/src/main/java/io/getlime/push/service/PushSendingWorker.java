@@ -113,6 +113,14 @@ public class PushSendingWorker {
         }
         fcmClient.initializeWebClient();
         fcmClient.initializeGoogleCredential();
+        String fcmUrl = pushServiceConfiguration.getFcmSendMessageUrl();
+        if (fcmUrl.contains("projects/%s/")) {
+            // Configure project ID in FCM URL in case the project ID parameter is expected in configured URL
+            fcmClient.setFcmSendMessageUrl(String.format(fcmUrl, projectId));
+        } else {
+            // Set FCM url as is (e.g. for testing)
+            fcmClient.setFcmSendMessageUrl(fcmUrl);
+        }
         return fcmClient;
     }
 

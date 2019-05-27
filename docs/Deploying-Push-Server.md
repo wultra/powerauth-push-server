@@ -6,7 +6,7 @@ Push Server is a Java EE application (packaged as an executable WAR file) that c
 
 You can download the latest `powerauth-push-server.war` at the releases page:
 
-- https://github.com/wultra/powerauth-push-server/releases
+- [Push Server Releases](https://github.com/wultra/powerauth-push-server/releases)
 
 ## Database
 
@@ -146,3 +146,7 @@ java -jar powerauth-push-server.war
 _Note: You can overwrite the port using `-Dserver.port=8090` parameter to avoid port conflicts._
 
 *__Important note: Since PowerAuth Push Server is a very simple application with direct access to the PowerAuth Server SOAP services, it must not be under any circumstances published publicly and must be constrained to the in-house closed infrastructure. The only exception to this rule is the requirement to open up ports for the purpose of communication with APNs and FCM services - the push notifications apparently would not work without access to the primary push service providers.__*
+
+## Deploying Push Server On JBoss / Wildfly
+
+Follow the extra instructions in chapter [Deploying Push Server on JBoss / Wildfly](./Deploying-Wildfly.md).

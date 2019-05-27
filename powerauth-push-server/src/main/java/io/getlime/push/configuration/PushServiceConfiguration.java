@@ -17,12 +17,14 @@
 package io.getlime.push.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Petr Dvorak, petr@wultra.com
  */
 @Configuration
+@ConfigurationProperties("ext")
 public class PushServiceConfiguration {
 
     @Value("${powerauth.push.service.applicationName}")
@@ -73,6 +75,9 @@ public class PushServiceConfiguration {
 
     @Value("${powerauth.push.service.fcm.dataNotificationOnly}")
     private boolean fcmDataNotificationOnly;
+
+    @Value("${powerauth.push.service.fcm.sendMessageUrl}")
+    private String fcmSendMessageUrl;
 
     // Campaign Configuration
     @Value("${powerauth.push.service.campaign.batchSize}")
@@ -332,6 +337,22 @@ public class PushServiceConfiguration {
      */
     public void setFcmDataNotificationOnly(boolean fcmDataNotificationOnly) {
         this.fcmDataNotificationOnly = fcmDataNotificationOnly;
+    }
+
+    /**
+     * Get FCM send message endpoint URL.
+     * @return FCM send message endpoint URL.
+     */
+    public String getFcmSendMessageUrl() {
+        return fcmSendMessageUrl;
+    }
+
+    /**
+     * Set FCM send message endpoint URL.
+     * @param fcmSendMessageUrl FCM send message endpoint URL.
+     */
+    public void setFcmSendMessageUrl(String fcmSendMessageUrl) {
+        this.fcmSendMessageUrl = fcmSendMessageUrl;
     }
 
     /**

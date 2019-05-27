@@ -35,7 +35,7 @@ CREATE TABLE `push_message` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-CREATE TABLE push_campaign (
+CREATE TABLE `push_campaign` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `app_id` bigint(20) NOT NULL,
   `message` text NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE push_campaign (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-CREATE TABLE push_campaign_user (
+CREATE TABLE `push_campaign_user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `campaign_id` bigint(20) NOT NULL,
   `user_id` varchar(255) NOT NULL,
@@ -54,19 +54,19 @@ CREATE TABLE push_campaign_user (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
----
---- Indexes for better performance.
----
+--
+-- Indexes for better performance.
+--
 
-CREATE UNIQUE INDEX PUSH_APP_CRED_APP ON PUSH_APP_CREDENTIALS(APP_ID);
+CREATE UNIQUE INDEX `push_app_cred_app` ON `push_app_credentials`(`app_id`);
 
-CREATE INDEX PUSH_DEVICE_APP_TOKEN ON PUSH_DEVICE_REGISTRATION(APP_ID, PUSH_TOKEN);
-CREATE INDEX PUSH_DEVICE_USER_APP ON PUSH_DEVICE_REGISTRATION(USER_ID, APP_ID);
-CREATE INDEX PUSH_DEVICE_ACTIVATION ON PUSH_DEVICE_REGISTRATION(ACTIVATION_ID);
+CREATE INDEX `push_device_app_token` ON `push_device_registration`(`app_id`, `push_token`);
+CREATE INDEX `push_device_user_app` ON `push_device_registration`(`user_id`, `app_id`);
+CREATE INDEX `push_device_activation` ON `push_device_registration`(`activation_id`);
 
-CREATE INDEX PUSH_MESSAGE_STATUS ON PUSH_MESSAGE(STATUS);
+CREATE INDEX `push_message_status` ON `push_message`(`status`);
 
-CREATE INDEX PUSH_CAMPAIGN_SENT ON PUSH_CAMPAIGN(IS_SENT);
+CREATE INDEX `push_campaign_sent` ON `push_campaign`(`is_sent`);
 
-CREATE INDEX PUSH_CAMPAIGN_USER_CAMPAIGN ON PUSH_CAMPAIGN_USER(CAMPAIGN_ID, USER_ID);
-CREATE INDEX PUSH_CAMPAIGN_USER_DETAIL ON PUSH_CAMPAIGN_USER(USER_ID);
+CREATE INDEX `push_campaign_user_campaign` ON `push_campaign_user`(`campaign_id`, `user_id`);
+CREATE INDEX `push_campaign_user_detail` ON `push_campaign_user`(`user_id`);
