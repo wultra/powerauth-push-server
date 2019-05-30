@@ -118,6 +118,13 @@
             </exclusions>
         </dependency>
 
+        <!-- Optional Native Cryptographic Provider -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-tcnative-boringssl-static</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- PowerAuth Dependencies -->
         <dependency>
             <groupId>io.getlime.security</groupId>
