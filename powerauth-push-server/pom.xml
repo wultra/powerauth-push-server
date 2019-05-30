@@ -117,14 +117,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        
-        <!-- Optional Native Cryptographic Provider -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-tcnative-boringssl-static</artifactId>
-            <version>${tcnative.version}</version>
-            <scope>runtime</scope>
-        </dependency>
 
         <!-- PowerAuth Dependencies -->
         <dependency>

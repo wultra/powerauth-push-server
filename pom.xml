@@ -19,7 +19,7 @@
     </parent>
 
     <inceptionYear>2016</inceptionYear>
-    <url>http://powerauth.com/</url>
+    <url>https://wultra.com/</url>
 
     <organization>
         <name>Wultra s.r.o.</name>
@@ -84,7 +84,6 @@
         <lime.rest.version>1.1.0</lime.rest.version>
         <powerauth.version>0.22.0</powerauth.version>
         <pushy.version>0.13.8</pushy.version>
-        <tcnative.version>2.0.20.Final</tcnative.version>
         <swagger.version>2.9.2</swagger.version>
         <unirest.version>1.4.9</unirest.version>
         <google-api-client.version>1.27.0</google-api-client.version>
@@ -93,7 +92,6 @@
         <istack.version>3.0.8</istack.version>
         <jaxws.version>1.4.0</jaxws.version>
         <saaj.version>1.5.1</saaj.version>
-        <reactor-netty.version>0.7.14.RELEASE</reactor-netty.version>
     </properties>
 
     <build>
