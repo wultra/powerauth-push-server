@@ -99,7 +99,7 @@ public class PushSendingWorker {
     FcmClient prepareFcmClient(String projectId, byte[] privateKey) throws PushServerException {
         FcmClient fcmClient = new FcmClient(projectId, privateKey, pushServiceConfiguration, fcmConverter);
         if (pushServiceConfiguration.isFcmProxyEnabled()) {
-            String proxyHost = pushServiceConfiguration.getFcmProxyUrl();
+            String proxyHost = pushServiceConfiguration.getFcmProxyHost();
             int proxyPort = pushServiceConfiguration.getFcmProxyPort();
             String proxyUsername = pushServiceConfiguration.getFcmProxyUsername();
             String proxyPassword = pushServiceConfiguration.getFcmProxyPassword();
@@ -283,7 +283,7 @@ public class PushSendingWorker {
      */
     private HttpProxyHandlerFactory apnsClientProxy() {
         if (pushServiceConfiguration.isApnsProxyEnabled()) {
-            String proxyUrl = pushServiceConfiguration.getApnsProxyUrl();
+            String proxyUrl = pushServiceConfiguration.getApnsProxyHost();
             int proxyPort = pushServiceConfiguration.getApnsProxyPort();
             String proxyUsername = pushServiceConfiguration.getApnsProxyUsername();
             String proxyPassword = pushServiceConfiguration.getApnsProxyPassword();
