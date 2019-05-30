@@ -255,8 +255,10 @@ public class PushSendingWorker {
         apnsClientBuilder.setProxyHandlerFactory(apnsClientProxy());
         apnsClientBuilder.setConnectionTimeout(pushServiceConfiguration.getApnsConnectTimeout(), TimeUnit.MILLISECONDS);
         if (pushServiceConfiguration.isApnsUseDevelopment()) {
+            logger.info("Using APNs development host");
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
         } else {
+            logger.info("Using APNs production host");
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
         }
         try {
