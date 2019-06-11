@@ -44,8 +44,8 @@ public class PushServiceConfiguration {
     @Value("${powerauth.push.service.apns.proxy.enabled}")
     private boolean apnsProxyEnabled;
 
-    @Value("${powerauth.push.service.apns.proxy.url}")
-    private String apnsProxyUrl;
+    @Value("${powerauth.push.service.apns.proxy.host}")
+    private String apnsProxyHost;
 
     @Value("${powerauth.push.service.apns.proxy.port}")
     private int apnsProxyPort;
@@ -61,8 +61,8 @@ public class PushServiceConfiguration {
     @Value("${powerauth.push.service.fcm.proxy.enabled}")
     private boolean fcmProxyEnabled;
 
-    @Value("${powerauth.push.service.fcm.proxy.url}")
-    private String fcmProxyUrl;
+    @Value("${powerauth.push.service.fcm.proxy.host}")
+    private String fcmProxyHost;
 
     @Value("${powerauth.push.service.fcm.proxy.port}")
     private int fcmProxyPort;
@@ -183,16 +183,16 @@ public class PushServiceConfiguration {
      * Get APNs proxy URL address.
      * @return APNs proxy URL address.
      */
-    public String getApnsProxyUrl() {
-        return apnsProxyUrl;
+    public String getApnsProxyHost() {
+        return apnsProxyHost;
     }
 
     /**
      * Set APNs proxy URL address.
-     * @param apnsProxyUrl APNs proxy URL address.
+     * @param apnsProxyHost APNs proxy URL address.
      */
-    public void setApnsProxyUrl(String apnsProxyUrl) {
-        this.apnsProxyUrl = apnsProxyUrl;
+    public void setApnsProxyHost(String apnsProxyHost) {
+        this.apnsProxyHost = apnsProxyHost;
     }
 
     /**
@@ -263,16 +263,16 @@ public class PushServiceConfiguration {
      * Get FCM proxy URL.
      * @return FCM proxy URL.
      */
-    public String getFcmProxyUrl() {
-        return fcmProxyUrl;
+    public String getFcmProxyHost() {
+        return fcmProxyHost;
     }
 
     /**
      * Set FCM proxy URL.
-     * @param fcmProxyUrl FCM proxy URL.
+     * @param fcmProxyHost FCM proxy URL.
      */
-    public void setFcmProxyUrl(String fcmProxyUrl) {
-        this.fcmProxyUrl = fcmProxyUrl;
+    public void setFcmProxyHost(String fcmProxyHost) {
+        this.fcmProxyHost = fcmProxyHost;
     }
 
     /**

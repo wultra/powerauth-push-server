@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.glassfish.web</groupId>
             <artifactId>javax.servlet.jsp.jstl</artifactId>
-            <version>1.2.5</version>
+            <version>${jstl.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -117,12 +117,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        
+
         <!-- Optional Native Cryptographic Provider -->
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-tcnative-boringssl-static</artifactId>
-            <version>${tcnative.version}</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -153,11 +152,6 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-joda</artifactId>
             <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.projectreactor.ipc</groupId>
-            <artifactId>reactor-netty</artifactId>
-            <version>${reactor-netty.version}</version>
         </dependency>
 
         <!-- Dependencies for Java 11 -->

@@ -1,5 +1,23 @@
 # Migration from 0.21.0 to 0.22.0
 
+## Proxy Configuration
+
+We have renamed the proxy host configuration attributes to use correct terminology - `host` instead of `url`.
+
+Original names:
+
+```
+powerauth.push.service.apns.proxy.url=127.0.0.1
+powerauth.push.service.fcm.proxy.url=127.0.0.1
+```
+
+New names:
+
+```
+powerauth.push.service.apns.proxy.host=127.0.0.1
+powerauth.push.service.fcm.proxy.host=127.0.0.1
+```
+
 ## Java 11 Support
 
 PowerAuth Push Server now supports Java 11.
