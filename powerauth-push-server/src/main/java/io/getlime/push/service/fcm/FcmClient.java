@@ -17,6 +17,9 @@
 package io.getlime.push.service.fcm;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.firebase.messaging.Message;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmInitializationFailedException;
@@ -37,6 +40,8 @@ import reactor.netty.tcp.ProxyProvider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.Collections;
 import java.util.function.Consumer;
 
@@ -143,8 +148,15 @@ public class FcmClient {
     public void initializeGoogleCredential() throws FcmInitializationFailedException {
         try {
             InputStream is = new ByteArrayInputStream(privateKey);
+            HttpTransport httpTransport;
+            if (proxyHost != null) {
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+                httpTransport = new NetHttpTransport.Builder().setProxy(proxy).build();
+            } else {
+                httpTransport = new NetHttpTransport.Builder().build();
+            }
             googleCredential = GoogleCredential
-                    .fromStream(is)
+                    .fromStream(is, httpTransport, JacksonFactory.getDefaultInstance())
                     .createScoped(Collections.singletonList("https://www.googleapis.com/auth/firebase.messaging"));
         } catch (IOException ex) {
             throw new FcmInitializationFailedException("Error occurred while initializing Google Credential using FCM private key: " + ex.getMessage(), ex);
