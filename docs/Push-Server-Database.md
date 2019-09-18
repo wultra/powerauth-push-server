@@ -14,7 +14,6 @@ You can download DDL scripts for supported databases:
 - [Push messages](#push-messages-table)
 - [Push campaigns](#push-campaigns-table)
 - [Push campaign users](#push-campaign-users-table)
-- [Push campaign devices](#push-campaign-devices-table)
 
 ### Push Devices Table
 
