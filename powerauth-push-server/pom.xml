@@ -6,13 +6,13 @@
     <name>powerauth-push-server</name>
     <description>PowerAuth Push Server</description>
     <artifactId>powerauth-push-server</artifactId>
-    <version>0.22.0</version>
+    <version>0.22.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <parent>
         <groupId>io.getlime.security</groupId>
         <artifactId>powerauth-push-server-parent</artifactId>
-        <version>0.22.0</version>
+        <version>0.22.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
