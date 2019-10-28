@@ -74,7 +74,7 @@
 
         <!-- Library Versions -->
         <guava.version>28.1-jre</guava.version>
-        <h2.version>1.4.200</h2.version>
+        <h2.version>1.4.199</h2.version>
         <httpclient.version>4.5.10</httpclient.version>
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
         <jackson.version>2.9.10</jackson.version>
