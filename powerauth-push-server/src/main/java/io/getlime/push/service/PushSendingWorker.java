@@ -19,10 +19,7 @@ package io.getlime.push.service;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
-import com.turo.pushy.apns.ApnsClient;
-import com.turo.pushy.apns.ApnsClientBuilder;
-import com.turo.pushy.apns.DeliveryPriority;
-import com.turo.pushy.apns.PushNotificationResponse;
+import com.turo.pushy.apns.*;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.proxy.HttpProxyHandlerFactory;
 import com.turo.pushy.apns.util.ApnsPayloadBuilder;
@@ -311,9 +308,11 @@ public class PushSendingWorker {
     void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
-        final String payload = buildApnsPayload(pushMessageBody, attributes == null ? false : attributes.getSilent()); // In case there are no attributes, the message is not silent
-        Date validUntil = pushMessageBody.getValidUntil();
-        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushMessageBody.getCollapseKey());
+        final boolean isSilent = attributes == null ? false : attributes.getSilent(); // In case there are no attributes, the message is not silent
+        final String payload = buildApnsPayload(pushMessageBody, isSilent);
+        final Date validUntil = pushMessageBody.getValidUntil();
+        final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set
+        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushType, pushMessageBody.getCollapseKey());
         final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
         sendNotificationFuture.addListener((PushNotificationResponseListener<SimpleApnsPushNotification>) future -> {
