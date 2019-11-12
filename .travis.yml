@@ -1,13 +1,13 @@
 language: java
 jdk:
-  - oraclejdk8
+  - openjdk11
 branches:
   only:
     - master
     - coverity_scan
 env:
   global:
-    - secure: "lN/1nBJvrLsBhDRJwoAKiu5Xv9dRyH7EJ4DC1AUgRfaz/2in8e9X8psluCxXiCkUqxJqjqIwp/IUWJyIgnUj1Tj8KT2dyR/wp68Q+tr3buRxGbZf9lAIirj44LB7ji5cxGKmuvJNY3M5hFaLoovquqacwB0FslnhssH/HpuSHMC2lyNXxnIduTLha/7AZAX7+xNTeRQ86cpVIh5/UJEhvqICdlywhsguAdeyyI/ZLRElLY07O3R9SJAaOgy95oDmSwq3IflIjBNhlxrWKYUUAkQFjM3HdwcmLbhP5aZAJWbrDRiAeXzJyqgvvo/oHS+AtSc8r68TvZ+O+H4d0XLbExrz4cFdXHKCJY/OuI6pwpXRWoXiPgEBpNodef5iGupU84ZxKiBGvSWEJNgGDSHLwUgVzEtOSPnvmeVGRHHi2hO9onOMKHPsJR8aHWg8VDcsf3kXIF7YVC2lvaO5Ubi9ESzjBoE3tQsQlcaHCOzYsXqI70DAH4lgZtabYRIWbFcbl+RSoNsrvh5HhMl17W0YM1a3+bXdF/Q926jFg506XDvYhyPy2DUoiwnSdtthxMJYYLTDSYjZDzykmCH0A2TM+iM2hJLP8LO/b7wLxj/lI2NhmRQzhI8pMhkBHa97kMH3eTX+QZYJt9PJR+MyixcBzcOaTLLm2kBoPZOFU7oKgI8="
+    - secure: "hUmHJZJmFBXV8j8SCVOEWGTcRlqAcllfWDwXz+owY5cWIOtDRvMrZXOvgupRsAHzRL7BUAsKo8k7/eqeZVfjO+zSlYLr3/06krCv5T/8GQTwHv3nTNq3r03GLZpYypuUapfUFCCVQchafWvYuNs7O5IsL1YHcRB5MjwbobARw1AezkEs+0n9kIeEofTFDZntILKXYuEO4Xa44KOzOEenxHieBeKgUpa43JFH/Qoh96qumqt3US+F4raHTwDG8KgNKc7bEzMdGxZ8MrfwljZP0teuc6B6/mPsIh8ZNdWTnsxq04M6Qe3fvCrkyUOyHZsAVA0xoSK2pTuMkAQOF0c9tLYcs1aOg4gM/tOsbgQa8iS5loC+zxPo5UgixIwGg/QxnQTHZLrOTCpsQqGbtqK5qTP/2v6FXKOUQ8tnvth8DQpsyI/FUKe0KEZYs5WSen5anXIkWE7fITlVUXaUvNAILIzM2nAdaYnhdnyUaVNfjvIVIwiciEzBL7FiuZnVRcfGaX2HTqp9embnFW43kpkSypvDUwaBFhsLDLVgr6xyurYwdWD6Ot+gwN6BMT8ajPnqSRTtiesdYGOu+uQ5AnwkRpeD87r6C1yHTAeyMlPVpVoslpw6cocEWlBNOR4oMwHoqcV9/ygjHdHBnZeWO7oEoJtds1oY6WmFzZM2TuToPbk="
 
 before_install:
   - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
