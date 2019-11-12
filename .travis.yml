@@ -19,5 +19,5 @@ addons:
       description: "Build submitted via Travis CI"
     notification_email: roman.strobl@wultra.com
     build_command_prepend: "mvn clean"
-    build_command: "mvn compile -DskipTests=true"
+    build_command: "mvn -DskipTests=true compile"
     branch_pattern: coverity_scan
