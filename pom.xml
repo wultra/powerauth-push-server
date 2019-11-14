@@ -8,14 +8,14 @@
 
     <groupId>io.getlime.security</groupId>
     <artifactId>powerauth-push-server-parent</artifactId>
-    <version>0.22.1-SNAPSHOT</version>
+    <version>0.23.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.5.RELEASE</version>
-        <relativePath /> <!-- lookup parent from repository -->
+        <version>2.2.1.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <inceptionYear>2016</inceptionYear>
@@ -73,23 +73,24 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- Library Versions -->
-        <guava.version>27.0.1-jre</guava.version>
-        <h2.version>1.4.197</h2.version>
-        <httpclient.version>4.5.6</httpclient.version>
+        <guava.version>28.1-jre</guava.version>
+        <h2.version>1.4.199</h2.version>
+        <httpclient.version>4.5.10</httpclient.version>
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
-        <jackson.version>2.9.8</jackson.version>
+        <jackson.version>2.10.0</jackson.version>
+        <jackson-databind.version>2.10.0</jackson-databind.version>
         <javax.interceptor-api.version>1.2.2</javax.interceptor-api.version>
         <jsp-api.version>2.0</jsp-api.version>
         <jstl.version>1.2.5</jstl.version>
         <lime.rest.version>1.1.0</lime.rest.version>
-        <powerauth.version>0.22.0</powerauth.version>
-        <pushy.version>0.13.8</pushy.version>
+        <powerauth.version>0.23.0-SNAPSHOT</powerauth.version>
+        <pushy.version>0.13.10</pushy.version>
         <swagger.version>2.9.2</swagger.version>
         <unirest.version>1.4.9</unirest.version>
-        <google-api-client.version>1.27.0</google-api-client.version>
-        <firebase-admin.version>6.8.1</firebase-admin.version>
+        <google-api-client.version>1.30.5</google-api-client.version>
+        <firebase-admin.version>6.10.0</firebase-admin.version>
         <jaxb.version>2.3.1</jaxb.version>
-        <istack.version>3.0.8</istack.version>
+        <istack.version>3.0.10</istack.version>
         <jaxws.version>1.4.0</jaxws.version>
         <saaj.version>1.5.1</saaj.version>
     </properties>

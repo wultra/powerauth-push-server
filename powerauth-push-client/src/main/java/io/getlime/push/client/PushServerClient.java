@@ -631,7 +631,7 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      *
      */
-    private <T> T getObjectImpl(String url, Map<String, Object> params, TypeReference typeReference) throws PushServerClientException {
+    private <T> T getObjectImpl(String url, Map<String, Object> params, TypeReference<? extends Response> typeReference) throws PushServerClientException {
         try {
             HttpResponse response = Unirest.get(serviceBaseUrl + url)
                     .header("Accept", "application/json")
@@ -676,7 +676,7 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T postObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
+    private <T> T postObjectImpl(String url, Object request, TypeReference<? extends Response> typeReference) throws PushServerClientException {
         try {
             // Fetch post response from given URL and for provided request object
             HttpResponse response = Unirest.post(serviceBaseUrl + url)
@@ -721,7 +721,7 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T putObjectImpl(String url, Object request, TypeReference typeReference) throws PushServerClientException {
+    private <T> T putObjectImpl(String url, Object request, TypeReference<Response> typeReference) throws PushServerClientException {
         try {
             HttpResponse response = Unirest.put(serviceBaseUrl + url)
                     .header("Accept", "application/json")
@@ -754,9 +754,10 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      * @throws IOException In case JSON processing fails.
      */
-    private <T> T checkHttpStatus(TypeReference typeReference, HttpResponse response) throws IOException, PushServerClientException {
+    @SuppressWarnings("unchecked")
+    private <T> T checkHttpStatus(TypeReference<? extends Response> typeReference, HttpResponse response) throws IOException, PushServerClientException {
         if (response.getStatus() == 200) {
-            return jacksonObjectMapper.readValue(response.getRawBody(), typeReference);
+            return (T) jacksonObjectMapper.readValue(response.getRawBody(), typeReference);
         } else {
             try {
                 // Response body contains data, return Exception with status code and error response
