@@ -40,7 +40,9 @@ import reactor.netty.tcp.ProxyProvider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Authenticator;
 import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.util.Collections;
 import java.util.function.Consumer;
@@ -152,6 +154,9 @@ public class FcmClient {
             if (proxyHost != null) {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
                 httpTransport = new NetHttpTransport.Builder().setProxy(proxy).build();
+                if (proxyUsername != null && proxyPassword != null) {
+                    setProxyAuthentication();
+                }
             } else {
                 httpTransport = new NetHttpTransport.Builder().build();
             }
@@ -161,6 +166,23 @@ public class FcmClient {
         } catch (IOException ex) {
             throw new FcmInitializationFailedException("Error occurred while initializing Google Credential using FCM private key: " + ex.getMessage(), ex);
         }
+    }
+
+    /**
+     * Set proxy authentication for FCM.
+     */
+    private void setProxyAuthentication() {
+        Authenticator.setDefault(new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                if (getRequestorType() == RequestorType.PROXY) {
+                    if (getRequestingHost().equals(proxyHost) && getRequestingPort() == proxyPort) {
+                        return new PasswordAuthentication(proxyUsername, proxyPassword.toCharArray());
+                    }
+                }
+                return null;
+            }
+        });
     }
 
     /**
