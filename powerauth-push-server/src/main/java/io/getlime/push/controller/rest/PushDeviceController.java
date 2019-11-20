@@ -19,7 +19,9 @@ import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.powerauth.soap.v3.ActivationStatus;
 import io.getlime.powerauth.soap.v3.GetActivationStatusResponse;
+import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.model.request.CreateDeviceForActivationsRequest;
 import io.getlime.push.model.request.CreateDeviceRequest;
 import io.getlime.push.model.request.DeleteDeviceRequest;
 import io.getlime.push.model.request.UpdateDeviceStatusRequest;
@@ -49,17 +51,15 @@ import java.util.List;
 @RequestMapping(value = "push/device")
 public class PushDeviceController {
 
-    private PushDeviceRepository pushDeviceRepository;
-    private PowerAuthServiceClient client;
+    private final PushDeviceRepository pushDeviceRepository;
+    private final PowerAuthServiceClient client;
+    private final PushServiceConfiguration config;
 
     @Autowired
-    public PushDeviceController(PushDeviceRepository pushDeviceRepository) {
+    public PushDeviceController(PushDeviceRepository pushDeviceRepository, PowerAuthServiceClient client, PushServiceConfiguration config) {
         this.pushDeviceRepository = pushDeviceRepository;
-    }
-
-    @Autowired
-    void setClient(PowerAuthServiceClient client) {
         this.client = client;
+        this.config = config;
     }
 
     /**
@@ -87,24 +87,93 @@ public class PushDeviceController {
         String pushToken = requestedObject.getToken();
         String platform = requestedObject.getPlatform();
         String activationId = requestedObject.getActivationId();
-        PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
-        if (device == null) {
+        // Make sure push token is unique for activation ID, in case activation ID is specified in request. See: https://github.com/wultra/powerauth-push-server/issues/262
+        // Both Apple and Google issue new push token despite the fact the old one didn't expire yet. The old push tokens need to be deleted.
+        if (activationId != null) {
+            pushDeviceRepository.deleteByAppIdAndActivationId(appId, activationId);
+        }
+        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(appId, pushToken);
+        PushDeviceRegistrationEntity device;
+        if (devices.isEmpty()) {
             device = new PushDeviceRegistrationEntity();
             device.setAppId(appId);
             device.setPushToken(pushToken);
+        } else if (devices.size() == 1) {
+            device = devices.get(0);
+        } else {
+            // Push token can be associated with multiple device registrations only when associated activations are enabled.
+            // Push device registration must be done using /push/device/create/multi endpoint in this case.
+            throw new PushServerException("Multiple device registrations found for push token. Use /push/device/create/multi endpoint for this scenario.");
         }
         device.setTimestampLastRegistered(new Date());
         device.setPlatform(platform);
         if (activationId != null) {
-            final GetActivationStatusResponse activation = client.getActivationStatus(activationId);
-            if (activation != null && !ActivationStatus.REMOVED.equals(activation.getActivationStatus())) {
-                device.setActivationId(activationId);
-                device.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
-                device.setUserId(activation.getUserId());
-            }
+            updateActivationForDevice(device, activationId);
         }
         pushDeviceRepository.save(device);
         return new Response();
+    }
+
+    /**
+     * Create a new device registration for multiple associated activations.
+     * @param request Device registration request.
+     * @return Device registration status.
+     * @throws PushServerException In case request object is invalid.
+     */
+    @RequestMapping(value = "create/multi", method = RequestMethod.POST)
+    @ApiOperation(value = "Create a device for multiple associated activations",
+            notes = "Create a new device push token (platform specific). The call must include one or more activation IDs." +
+                    "Request body should contain application ID, device token, device's platform and list of activation IDs. " +
+                    "If such device already exist, date on last registration is updated and also platform might be changed\n" +
+                    "\n---" +
+                    "Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. " +
+                    "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activationId value," +
+                    " so that there are no incorrect bindings.")
+    public @ResponseBody Response createDeviceMultipleActivations(@RequestBody ObjectRequest<CreateDeviceForActivationsRequest> request) throws PushServerException {
+        CreateDeviceForActivationsRequest requestedObject = request.getRequestObject();
+        String errorMessage;
+        if (!config.isRegistrationOfMultipleActivationsEnabled()) {
+            errorMessage = "Registration of multiple associated activations per device is not enabled.";
+        } else {
+            errorMessage = CreateDeviceRequestValidator.validate(requestedObject);
+        }
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
+        }
+        Long appId = requestedObject.getAppId();
+        String pushToken = requestedObject.getToken();
+        String platform = requestedObject.getPlatform();
+        List<String> activationIds = requestedObject.getActivationIds();
+
+        activationIds.forEach(activationId -> {
+            // Make sure push token is unique for given activation ID. See: https://github.com/wultra/powerauth-push-server/issues/262
+            // Both Apple and Google issue new push token despite the fact the old one didn't expire yet. The old push token
+            // needs to be deleted.
+            pushDeviceRepository.deleteByAppIdAndActivationId(appId, activationId);
+            // Register device for given activation ID. Device registration is always new because of the previous delete step.
+            PushDeviceRegistrationEntity device = new PushDeviceRegistrationEntity();
+            device.setAppId(appId);
+            device.setPushToken(pushToken);
+            device.setTimestampLastRegistered(new Date());
+            device.setPlatform(platform);
+            updateActivationForDevice(device, activationId);
+            pushDeviceRepository.save(device);
+        });
+        return new Response();
+    }
+
+    /**
+     * Update activation for given device in case activation exists in PowerAuth server and it is not in REMOVED state.
+     * @param device Push device registration entity.
+     * @param activationId Activation ID.
+     */
+    private void updateActivationForDevice(PushDeviceRegistrationEntity device, String activationId) {
+        final GetActivationStatusResponse activation = client.getActivationStatus(activationId);
+        if (activation != null && !ActivationStatus.REMOVED.equals(activation.getActivationStatus())) {
+            device.setActivationId(activationId);
+            device.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
+            device.setUserId(activation.getUserId());
+        }
     }
 
     /**
@@ -152,9 +221,9 @@ public class PushDeviceController {
         }
         Long appId = requestedObject.getAppId();
         String pushToken = requestedObject.getToken();
-        PushDeviceRegistrationEntity device = pushDeviceRepository.findFirstByAppIdAndPushToken(appId, pushToken);
-        if (device != null)  {
-            pushDeviceRepository.delete(device);
+        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(appId, pushToken);
+        if (!devices.isEmpty())  {
+            pushDeviceRepository.deleteAll(devices);
         }
         return new Response();
     }

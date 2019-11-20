@@ -126,7 +126,7 @@ public class PushServerClient {
     /**
      * Register anonymous device to the push server.
      *
-     * @param appId PowerAuth 2.0 application app ID.
+     * @param appId PowerAuth application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
      * @param platform Mobile platform (iOS, Android).
      * @return True if device registration was successful, false otherwise.
@@ -139,10 +139,10 @@ public class PushServerClient {
     /**
      * Register device associated with activation ID to the push server.
      *
-     * @param appId PowerAuth 2.0 application app ID.
+     * @param appId PowerAuth application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
      * @param platform Mobile platform (iOS, Android).
-     * @param activationId PowerAuth 2.0 activation ID.
+     * @param activationId PowerAuth activation ID.
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
@@ -167,9 +167,39 @@ public class PushServerClient {
     }
 
     /**
+     * Register device associated with multiple activation IDs to the push server.
+     *
+     * @param appId PowerAuth application app ID.
+     * @param token Token received from the push service provider (APNs, FCM).
+     * @param platform Mobile platform (iOS, Android).
+     * @param activationIds PowerAuth activation IDs.
+     * @return True if device registration was successful, false otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    public boolean createDeviceForActivations(Long appId, String token, MobilePlatform platform, List<String> activationIds) throws PushServerClientException {
+        CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
+        request.setAppId(appId);
+        request.setToken(token);
+        request.setPlatform(platform.value());
+        request.getActivationIds().addAll(activationIds);
+
+        // Validate request on the client side.
+        String error = CreateDeviceRequestValidator.validate(request);
+        if (error != null) {
+            throw new PushServerClientException(error);
+        }
+
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform.value());
+        Response response = postObjectImpl("/push/device/create/multi", new ObjectRequest<>(request));
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform.value());
+
+        return response.getStatus().equals(Response.Status.OK);
+    }
+
+    /**
      * Remove device from the push server
      *
-     * @param appId PowerAuth 2.0 application app ID.
+     * @param appId PowerAuth application app ID.
      * @param token Token received from the push service provider.
      * @return True if device removal was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
@@ -221,7 +251,7 @@ public class PushServerClient {
     /**
      * Send a single push message to application with given ID.
      *
-     * @param appId PowerAuth 2.0 application app ID.
+     * @param appId PowerAuth application app ID.
      * @param pushMessage Push message to be sent.
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
@@ -249,7 +279,7 @@ public class PushServerClient {
     /**
      * Send a push message batch to application with given ID.
      *
-     * @param appId PowerAuth 2.0 application app ID.
+     * @param appId PowerAuth application app ID.
      * @param batch Push message batch to be sent.
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.

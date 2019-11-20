@@ -15,6 +15,7 @@
  */
 package io.getlime.push.model.validator;
 
+import io.getlime.push.model.request.CreateDeviceForActivationsRequest;
 import io.getlime.push.model.request.CreateDeviceRequest;
 
 /**
@@ -39,6 +40,31 @@ public class CreateDeviceRequestValidator {
         }
         if (request.getAppId() < 1) {
             return "App ID must be a positive number.";
+        }
+        if (request.getPlatform() == null || request.getPlatform().isEmpty()) {
+            return "Platform must not be null or empty.";
+        }
+        if (request.getToken() == null || request.getToken().isEmpty()) {
+            return "Push token must not be null or empty.";
+        }
+        return null;
+    }
+
+    public static String validate(CreateDeviceForActivationsRequest request) {
+        if (request == null) {
+            return "Request must not be empty.";
+        }
+        if (request.getAppId() == null) {
+            return "App ID must not be null.";
+        }
+        if (request.getAppId() < 1) {
+            return "App ID must be a positive number.";
+        }
+        if (request.getActivationIds() == null) {
+            return "Activation ID list must not be null.";
+        }
+        if (request.getActivationIds().isEmpty()) {
+            return "Activation ID list must not empty.";
         }
         if (request.getPlatform() == null || request.getPlatform().isEmpty()) {
             return "Platform must not be null or empty.";
