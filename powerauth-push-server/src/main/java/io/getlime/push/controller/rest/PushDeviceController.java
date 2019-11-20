@@ -150,6 +150,9 @@ public class PushDeviceController {
             // Both Apple and Google issue new push token despite the fact the old one didn't expire yet. The old push token
             // needs to be deleted.
             pushDeviceRepository.deleteByAppIdAndActivationId(appId, activationId);
+        });
+
+        activationIds.forEach(activationId -> {
             // Register device for given activation ID. Device registration is always new because of the previous delete step.
             PushDeviceRegistrationEntity device = new PushDeviceRegistrationEntity();
             device.setAppId(appId);
@@ -159,6 +162,7 @@ public class PushDeviceController {
             updateActivationForDevice(device, activationId);
             pushDeviceRepository.save(device);
         });
+
         return new Response();
     }
 
