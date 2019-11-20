@@ -8,7 +8,7 @@ Push Server provides a simple to use RESTful API for the 3rd party integration p
 - [Campaign](#campaign)
 - [Administration](#administration)
 
-Following endpoints are published in PowerAuth 2.0 Push Server RESTful API:
+Following endpoints are published in PowerAuth Push Server RESTful API:
 
 ## Methods
 
@@ -26,6 +26,7 @@ Following endpoints are published in PowerAuth 2.0 Push Server RESTful API:
 #### Device Management
 
 - `POST` [/push/device/create](#create-device) - Create new device registration
+- `POST` [/push/device/create/multi](#create-device-for-multiple-associated-activations) - Create new device registration for multiple activations
 - `POST` [/push/device/delete](#delete-device) - Remove registered device
 - `POST` [/push/device/status/update](#update-device-status) - Update the status of the activation so that when activation associated with given device is not active, no notifications are sent to the device.
 
@@ -66,7 +67,7 @@ Following endpoints are published in PowerAuth 2.0 Push Server RESTful API:
 
 ### Error Handling
 
-PowerAuth 2.0 Push Server uses following format for error response body, accompanied with an appropriate HTTP status code. Besides the HTTP error codes that application server may return regardless of server application (such as 404 when resource is not found or 503 when server is down), following status codes may be returned:
+PowerAuth Push Server uses following format for error response body, accompanied with an appropriate HTTP status code. Besides the HTTP error codes that application server may return regardless of server application (such as 404 when resource is not found or 503 when server is down), following status codes may be returned:
 
 |`status`|`HTTP code`       |Description|
 |---     |---          |---|
@@ -74,7 +75,7 @@ PowerAuth 2.0 Push Server uses following format for error response body, accompa
 |ERROR   |400          |Issue with a request format, or issue of the business logic|
 |ERROR   |401          | Unauthorized, invalid security token configuration|
 
-All error responses that are produced by the PowerAuth 2.0 Push Server have following body:
+All error responses that are produced by the PowerAuth Push Server have following body:
 
 ```json
 
@@ -118,7 +119,7 @@ Send a system status response, with basic information about the running applicat
     "status": "OK",
     "responseObject": {
         "applicationName": "powerauth-push",
-        "applicationDisplayName": "PowerAuth 2.0 Push Server",
+        "applicationDisplayName": "PowerAuth Push Server",
         "applicationEnvironment": "",
         "version": "0.21.0",
         "buildTime": "2019-01-22T14:59:14.954+0000",
@@ -141,9 +142,9 @@ Then it has to forward the push token to the push server end-point. After that p
 
 ### Create Device
 
-Create a new device push token (platform specific). Optionally, the call may include also `activationId`, so that the token is associated with given user in the PowerAuth 2.0 Server.
+Create a new device push token (platform specific). Optionally, the call may include also `activationId`, so that the token is associated with given user in the PowerAuth Server.
 
-_Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activationId value, so that there are no incorrect bindings._
+_Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID, so that there are no incorrect bindings._
 
 <table>
 <tr>
@@ -175,6 +176,54 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 - `activationId` - Activation identifier
 
 _Note: Activation ID is optional._
+
+#### **Response**
+
+```json
+{
+    "status": "OK"
+}
+```
+
+### Create Device for Multiple Associated Activations
+
+Create a new device push token (platform specific). The call must include `activationIds` which contains list of activations to be associated with the registered device.
+
+_Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs, so that there are no incorrect bindings._
+
+<table>
+<tr>
+<td>Method</td>
+<td><code>POST</code></td>
+</tr>
+<tr>
+<td>Resource URI</td>
+<td>/push/device/create/multi</td>
+</tr>
+</table>
+
+#### **Request**
+
+```json
+{
+    "requestObject": {
+        "appId": 2,
+        "token": "1234567890987654321234567890",
+        "platform": "ios",
+        "activationIds": [
+          "49414e31-f3df-4cea-87e6-f214ca3b8412",
+          "26c94bf8-f594-4bd8-9c51-93449926b644"
+        ]
+    }
+}
+```
+
+- `appId` - Application that device is using.
+- `token` - Identifier for device.
+- `platform` - "_ios_ | _android_"
+- `activationIds` - Associated activation identifiers
+
+_Note: Activation ID list is mandatory._
 
 #### **Response**
 

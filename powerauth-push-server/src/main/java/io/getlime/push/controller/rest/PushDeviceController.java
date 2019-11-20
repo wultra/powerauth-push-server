@@ -75,7 +75,7 @@ public class PushDeviceController {
                           "If such device already exist, date on last registration is updated and also platform might be changed\n" +
                           "\n---" +
                           "Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. " +
-                          "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activationId value," +
+                          "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID," +
                           " so that there are no incorrect bindings.")
     public @ResponseBody Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
         CreateDeviceRequest requestedObject = request.getRequestObject();
@@ -127,7 +127,7 @@ public class PushDeviceController {
                     "If such device already exist, date on last registration is updated and also platform might be changed\n" +
                     "\n---" +
                     "Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. " +
-                    "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activationId value," +
+                    "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs," +
                     " so that there are no incorrect bindings.")
     public @ResponseBody Response createDeviceMultipleActivations(@RequestBody ObjectRequest<CreateDeviceForActivationsRequest> request) throws PushServerException {
         CreateDeviceForActivationsRequest requestedObject = request.getRequestObject();
