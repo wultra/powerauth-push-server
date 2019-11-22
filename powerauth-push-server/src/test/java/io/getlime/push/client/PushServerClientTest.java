@@ -45,6 +45,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Class used for testing client-server methods
@@ -60,6 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PushServerClientTest {
 
     private static final String MOCK_ACTIVATION_ID = "11111111-1111-1111-1111-111111111111";
+    private static final String MOCK_ACTIVATION_ID_2 = "22222222-2222-2222-2222-222222222222";
     private static final Long MOCK_APPLICATION_ID = 1L;
     private static final String MOCK_PUSH_TOKEN = "1234567890987654321234567890";
 
@@ -102,26 +105,26 @@ public class PushServerClientTest {
     @Test
     public void createDeviceTest() throws Exception {
         boolean actual = pushServerClient.createDevice(MOCK_APPLICATION_ID, MOCK_PUSH_TOKEN, MobilePlatform.iOS);
-        assertThat(actual).isTrue();
+        assertTrue(actual);
     }
 
     @Test
     public void createDeviceWithActivationIDTest() throws Exception {
         boolean actual = pushServerClient.createDevice(MOCK_APPLICATION_ID, MOCK_PUSH_TOKEN, MobilePlatform.iOS, MOCK_ACTIVATION_ID);
-        assertThat(actual).isTrue();
+        assertTrue(actual);
     }
 
     @Test
     public void deleteDeviceTest() throws Exception {
         boolean actual = pushServerClient.deleteDevice(MOCK_APPLICATION_ID, MOCK_PUSH_TOKEN);
-        assertThat(actual).isTrue();
+        assertTrue(actual);
     }
 
 
     @Test
     public void updateDeviceStatusTest() throws Exception {
         boolean actual = pushServerClient.updateDeviceStatus(MOCK_ACTIVATION_ID);
-        assertThat(actual).isTrue();
+        assertTrue(actual);
     }
 
 
@@ -226,7 +229,7 @@ public class PushServerClientTest {
     @Test
     public void deleteCampaignTest() throws Exception {
         boolean actual = pushServerClient.deleteCampaign(2L);
-        assertThat(actual).isTrue();
+        assertTrue(actual);
     }
 
     @Test
@@ -254,7 +257,7 @@ public class PushServerClientTest {
         ListOfUsers listOfUsers = new ListOfUsers();
         listOfUsers.addAll(Arrays.asList("1234567890", "1234567891", "1234567893"));
         boolean actual = pushServerClient.addUsersToCampaign(1L, listOfUsers);
-        assertThat(actual).isTrue();
+        assertTrue(actual);
 
     }
 
@@ -275,7 +278,7 @@ public class PushServerClientTest {
         ListOfUsers listOfUsers = new ListOfUsers();
         listOfUsers.addAll(Arrays.asList("1234567890", "1234567891", "1234567893"));
         boolean actual = pushServerClient.deleteUsersFromCampaign(3L, listOfUsers);
-        assertThat(actual).isTrue();
+        assertTrue(actual);
     }
 
     @Test
@@ -285,12 +288,26 @@ public class PushServerClientTest {
             exception.expect(HasPropertyWithValue.hasProperty("error", HasPropertyWithValue.hasProperty("message", CoreMatchers.is("Application not found"))));
         }
         boolean actual = pushServerClient.sendTestCampaign(1L, "1234567890");
-        assertThat(actual).isTrue();
+        assertTrue(actual);
     }
 
     @Test
     public void sendCampaignTest() throws Exception {
         boolean actual = pushServerClient.sendCampaign(1L);
-        assertThat(actual).isTrue();
+        assertTrue(actual);
+    }
+
+    @Test
+    public void createDeviceWithMultipleActivationsTest() throws Exception {
+        List<String> activationIds = new ArrayList<>();
+        activationIds.add(MOCK_ACTIVATION_ID);
+        activationIds.add(MOCK_ACTIVATION_ID_2);
+        Exception exception = null;
+        try {
+            pushServerClient.createDeviceForActivations(MOCK_APPLICATION_ID, MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds);
+        } catch (Exception ex) {
+            exception = ex;
+        }
+        assertNotNull(exception);
     }
 }
