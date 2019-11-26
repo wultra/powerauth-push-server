@@ -74,10 +74,4 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceRegistrat
      */
     List<PushDeviceRegistrationEntity> findByUserIdAndAppIdAndActivationId(String userId, Long appId, String activationId);
 
-    /**
-     * Delete all device registrations for given app ID and activation ID.
-     * @param appId
-     * @param activationId
-     */
-    void deleteByAppIdAndActivationId(Long appId, String activationId);
 }
