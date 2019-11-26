@@ -305,9 +305,7 @@ public class PushDeviceController {
         Long appId = requestedObject.getAppId();
         String pushToken = requestedObject.getToken();
         List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(appId, pushToken);
-        if (!devices.isEmpty())  {
-            pushDeviceRepository.deleteAll(devices);
-        }
+        devices.forEach(pushDeviceRepository::delete);
         return new Response();
     }
 }
