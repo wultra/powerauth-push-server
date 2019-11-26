@@ -98,9 +98,7 @@ public class PushDeviceController {
         PushDeviceRegistrationEntity device;
         if (devices.isEmpty()) {
             // The device registration is new, create a new entity.
-            device = new PushDeviceRegistrationEntity();
-            device.setAppId(appId);
-            device.setPushToken(pushToken);
+            device = initDeviceRegistrationEntity(appId, pushToken);
         } else if (devices.size() == 1) {
             // An existing row was found by one of the lookup methods, update this row. This means that either:
             // 1. A row with same activation ID and push token is updated, in this case only the last registration timestamp changes.
