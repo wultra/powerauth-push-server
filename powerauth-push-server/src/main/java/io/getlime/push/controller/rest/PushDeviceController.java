@@ -172,7 +172,7 @@ public class PushDeviceController {
                     // Multiple existing rows have been found. This can only occur during lookup by push token.
                     // It is not clear how original rows should be mapped to new rows because they were not looked up
                     // using an activation ID. Delete existing rows and create a new row.
-                    pushDeviceRepository.deleteByAppIdAndActivationId(appId, activationId);
+                    devices.forEach(pushDeviceRepository::delete);
                     device = initDeviceRegistrationEntity(appId, pushToken);
                 }
                 device.setAppId(appId);
