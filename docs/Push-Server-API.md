@@ -142,7 +142,7 @@ Then it has to forward the push token to the push server end-point. After that p
 
 ### Create Device
 
-Create a new device push token (platform specific). Optionally, the call may include also `activationId`, so that the token is associated with given user in the PowerAuth Server.
+Create a new device push token (platform specific). The call must include `activationId`, so that the token is associated with given user in the PowerAuth Server.
 
 _Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID, so that there are no incorrect bindings._
 
@@ -174,8 +174,6 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 - `token` - Identifier for device.
 - `platform` - "_ios_ | _android_"
 - `activationId` - Activation identifier
-
-_Note: Activation ID is optional._
 
 #### **Response**
 
@@ -222,8 +220,6 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 - `token` - Identifier for device.
 - `platform` - "_ios_ | _android_"
 - `activationIds` - Associated activation identifiers
-
-_Note: Activation ID list is mandatory._
 
 #### **Response**
 

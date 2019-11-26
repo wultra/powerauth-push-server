@@ -77,8 +77,8 @@ public class PushDeviceController {
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
     @ApiOperation(value = "Create a device",
-                  notes = "Create a new device push token (platform specific). Optionally, the call may include also activationId, so that the token is associated with given user." +
-                          "Request body should contain application ID, device token, device's platform and optionally an activation ID. " +
+                  notes = "Create a new device push token (platform specific). The call must include activationId, so that the token is associated with given user." +
+                          "Request body should contain application ID, device token, device's platform and an activation ID. " +
                           "If such device already exist, date on last registration is updated and also platform might be changed\n" +
                           "\n---" +
                           "Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. " +
