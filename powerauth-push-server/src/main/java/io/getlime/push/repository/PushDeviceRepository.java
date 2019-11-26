@@ -41,6 +41,14 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceRegistrat
     List<PushDeviceRegistrationEntity> findByAppIdAndPushToken(Long appId, String pushToken);
 
     /**
+     * Find all device registrations for given activation ID and push token.
+     * @param activationId Activation ID.
+     * @param pushToken Push token.
+     * @return Device registrations matching provided values.
+     */
+    List<PushDeviceRegistrationEntity> findByActivationIdAndPushToken(String activationId, String pushToken);
+
+    /**
      * Find all device registrations by given activation ID. In normal case, the list will contain only one value.
      * @param activationId Activation ID.
      * @return List of device registrations.

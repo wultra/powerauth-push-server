@@ -41,6 +41,9 @@ public class CreateDeviceRequestValidator {
         if (request.getAppId() < 1) {
             return "App ID must be a positive number.";
         }
+        if (request.getActivationId() == null) {
+            return "Activation ID must not be null.";
+        }
         if (request.getPlatform() == null || request.getPlatform().isEmpty()) {
             return "Platform must not be null or empty.";
         }
