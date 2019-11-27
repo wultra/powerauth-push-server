@@ -102,10 +102,9 @@ public class PushServerClientTest {
         assertThat(actual.getResponseObject().getApplicationName()).isEqualTo(expected.getResponseObject().getApplicationName());
     }
 
-    @Test
-    public void createDeviceTest() throws Exception {
-        boolean actual = pushServerClient.createDevice(MOCK_APPLICATION_ID, MOCK_PUSH_TOKEN, MobilePlatform.iOS);
-        assertTrue(actual);
+    @Test(expected = PushServerClientException.class)
+    public void createDeviceWithoutActivationIDTest() throws Exception {
+        pushServerClient.createDevice(MOCK_APPLICATION_ID, MOCK_PUSH_TOKEN, MobilePlatform.iOS);
     }
 
     @Test
