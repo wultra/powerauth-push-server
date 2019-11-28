@@ -163,7 +163,7 @@ public class PushServerMultipleActivationsTests {
         devices2.forEach(device -> rowIds2.add(device.getId()));
         // Row IDs do not match, because the activations are different
         assertNotEquals(rowIds, rowIds2);
-        pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN_2).forEach(pushDeviceRepository::delete);
+        pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN).forEach(pushDeviceRepository::delete);
     }
 
     @Test
@@ -189,7 +189,7 @@ public class PushServerMultipleActivationsTests {
         devices2.forEach(device -> rowIds2.add(device.getId()));
         // Row IDs do not match, because the one of activations is different
         assertNotEquals(rowIds, rowIds2);
-        pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN_2).forEach(pushDeviceRepository::delete);
+        pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN).forEach(pushDeviceRepository::delete);
     }
 
     @Test(expected = PushServerClientException.class)
