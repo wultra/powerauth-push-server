@@ -105,6 +105,7 @@ public class PushDeviceController {
             // 2. A row with same activation ID but different push token is updated. A new push token has been issued by Google or Apple for an activation.
             // 3. A row with same push token but different activation ID is updated. The user removed an activation and created a new one, the push token remains the same.
             device = devices.get(0);
+            updateDeviceRegistrationEntity(device, appId, pushToken);
         } else {
             // Multiple existing rows have been found. This can only occur during lookup by push token.
             // Push token can be associated with multiple activations only when associated activations are enabled.
@@ -163,24 +164,25 @@ public class PushDeviceController {
                 } else if (devices.size() == 1) {
                     device = devices.get(0);
                     if (usedDeviceRegistrationIds.contains(device.getId())) {
-                        // The row has already been used for another activation within this request. Create a new row instead.
+                        // The row has already been used within this request. Create a new row instead.
                         device = initDeviceRegistrationEntity(appId, pushToken);
+                    } else {
+                        // Update existing row.
+                        updateDeviceRegistrationEntity(device, appId, pushToken);
                     }
-                    // Add the device registration entity ID into list of used entities to avoid merging multiple rows into one.
-                    usedDeviceRegistrationIds.add(device.getId());
                 } else {
                     // Multiple existing rows have been found. This can only occur during lookup by push token.
                     // It is not clear how original rows should be mapped to new rows because they were not looked up
-                    // using an activation ID. Delete existing rows and create a new row.
-                    devices.forEach(pushDeviceRepository::delete);
+                    // using an activation ID. Delete existing rows (unless they were already used in this request)
+                    // and create a new row.
+                    devices.stream().filter(existingDevice -> !usedDeviceRegistrationIds.contains(existingDevice.getId())).forEach(pushDeviceRepository::delete);
                     device = initDeviceRegistrationEntity(appId, pushToken);
                 }
-                device.setAppId(appId);
-                device.setPushToken(pushToken);
                 device.setTimestampLastRegistered(new Date());
                 device.setPlatform(platform);
                 updateActivationForDevice(device, activationId);
-                pushDeviceRepository.save(device);
+                PushDeviceRegistrationEntity registeredDevice = pushDeviceRepository.save(device);
+                usedDeviceRegistrationIds.add(registeredDevice.getId());
             } catch (PushServerException ex) {
                 logger.error(ex.getMessage(), ex);
                 registrationFailed.set(true);
@@ -205,6 +207,16 @@ public class PushDeviceController {
         device.setAppId(appId);
         device.setPushToken(pushToken);
         return device;
+    }
+
+    /**
+     * Update a device registration entity with given app ID and push token.
+     * @param appId App ID.
+     * @param pushToken Push token.
+     */
+    private void updateDeviceRegistrationEntity(PushDeviceRegistrationEntity device, Long appId, String pushToken) {
+        device.setAppId(appId);
+        device.setPushToken(pushToken);
     }
 
     /**
@@ -247,16 +259,19 @@ public class PushDeviceController {
 
     /**
      * Update activation for given device in case activation exists in PowerAuth server and it is not in REMOVED state.
+     * Otherwise fail the device registration because registration could not be associated with an activation.
      * @param device Push device registration entity.
      * @param activationId Activation ID.
      */
-    private void updateActivationForDevice(PushDeviceRegistrationEntity device, String activationId) {
+    private void updateActivationForDevice(PushDeviceRegistrationEntity device, String activationId) throws PushServerException {
         final GetActivationStatusResponse activation = client.getActivationStatus(activationId);
         if (activation != null && !ActivationStatus.REMOVED.equals(activation.getActivationStatus())) {
             device.setActivationId(activationId);
             device.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
             device.setUserId(activation.getUserId());
+            return;
         }
+        throw new PushServerException("Device registration failed because associated activation is not ACTIVE.");
     }
 
     /**
