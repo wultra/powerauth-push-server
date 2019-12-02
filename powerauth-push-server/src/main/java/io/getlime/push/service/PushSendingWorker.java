@@ -109,13 +109,14 @@ public class PushSendingWorker {
             fcmClient.setProxySettings(proxyHost, proxyPort, proxyUsername, proxyPassword);
         }
         fcmClient.initializeWebClient();
-        fcmClient.initializeGoogleCredential();
         String fcmUrl = pushServiceConfiguration.getFcmSendMessageUrl();
         if (fcmUrl.contains("projects/%s/")) {
+            // Initialize Google Credential for production FCM URL
+            fcmClient.initializeGoogleCredential();
             // Configure project ID in FCM URL in case the project ID parameter is expected in configured URL
             fcmClient.setFcmSendMessageUrl(String.format(fcmUrl, projectId));
         } else {
-            // Set FCM url as is (e.g. for testing)
+            // Set FCM url as is (for testing)
             fcmClient.setFcmSendMessageUrl(fcmUrl);
         }
         return fcmClient;
