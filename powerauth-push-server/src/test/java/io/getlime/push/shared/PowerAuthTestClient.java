@@ -117,14 +117,15 @@ public class PowerAuthTestClient {
         EciesEncryptor eciesEncryptorL2 = eciesFactory.getEciesEncryptorForApplication(masterPK, applicationSecretBytes, EciesSharedInfo1.ACTIVATION_LAYER_2);
         ByteArrayOutputStream baosL2 = new ByteArrayOutputStream();
         objectMapper.writeValue(baosL2, requestL2);
-        EciesCryptogram eciesCryptogramL2 = eciesEncryptorL2.encryptRequest(baosL2.toByteArray());
+        EciesCryptogram eciesCryptogramL2 = eciesEncryptorL2.encryptRequest(baosL2.toByteArray(), true);
 
         String ephemeralPublicKey = BaseEncoding.base64().encode(eciesCryptogramL2.getEphemeralPublicKey());
         String encryptedData = BaseEncoding.base64().encode(eciesCryptogramL2.getEncryptedData());
         String mac = BaseEncoding.base64().encode(eciesCryptogramL2.getMac());
+        String nonce = BaseEncoding.base64().encode(eciesCryptogramL2.getNonce());
 
         // Prepare activation
-        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, ephemeralPublicKey, encryptedData, mac);
+        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, ephemeralPublicKey, encryptedData, mac, nonce);
         assertNotNull(prepareResponse.getActivationId());
 
         // Commit activation
