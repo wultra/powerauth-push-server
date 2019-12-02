@@ -16,6 +16,7 @@
 package io.getlime.push.rest;
 
 import io.getlime.push.service.fcm.model.FcmSuccessResponse;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,6 +26,7 @@ import java.security.SecureRandom;
  * Push message controller for testing push message delivery.
  */
 @RestController
+@Profile("test")
 public class TestPushMessageController {
 
     @PostMapping("/mockfcm/message:send")
