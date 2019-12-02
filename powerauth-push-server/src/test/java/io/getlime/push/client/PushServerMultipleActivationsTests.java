@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource(locations = "classpath:application-test-multiple-activations.properties")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PushServerMultipleActivationsTests {
