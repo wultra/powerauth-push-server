@@ -33,12 +33,20 @@ import java.util.List;
 public interface PushDeviceRepository extends CrudRepository<PushDeviceRegistrationEntity, Long> {
 
     /**
-     * Find first device for given app ID and push token.
+     * Find all device registrations for given app ID and push token.
      * @param appId App ID.
      * @param pushToken Push token.
-     * @return Device registration with provided values.
+     * @return Device registrations matching provided values.
      */
-    PushDeviceRegistrationEntity findFirstByAppIdAndPushToken(Long appId, String pushToken);
+    List<PushDeviceRegistrationEntity> findByAppIdAndPushToken(Long appId, String pushToken);
+
+    /**
+     * Find all device registrations for given activation ID and push token.
+     * @param activationId Activation ID.
+     * @param pushToken Push token.
+     * @return Device registrations matching provided values.
+     */
+    List<PushDeviceRegistrationEntity> findByActivationIdAndPushToken(String activationId, String pushToken);
 
     /**
      * Find all device registrations by given activation ID. In normal case, the list will contain only one value.
@@ -48,7 +56,7 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceRegistrat
     List<PushDeviceRegistrationEntity> findByActivationId(String activationId);
 
     /**
-     * Find all device registration by given user ID and app ID. This list represents all devices that a single user
+     * Find all device registrations by given user ID and app ID. This list represents all devices that a single user
      * has registered.
      * @param userId User ID.
      * @param appId App ID.
@@ -57,7 +65,7 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceRegistrat
     List<PushDeviceRegistrationEntity> findByUserIdAndAppId(String userId, Long appId);
 
     /**
-     * Find all device registration by given user ID, app ID and activation ID. This list should contain one record
+     * Find all device registrations by given user ID, app ID and activation ID. This list should contain one record
      * only under normal circumstances.
      * @param userId User ID.
      * @param appId App ID.
@@ -65,4 +73,5 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceRegistrat
      * @return List of device registrations.
      */
     List<PushDeviceRegistrationEntity> findByUserIdAndAppIdAndActivationId(String userId, Long appId, String activationId);
+
 }

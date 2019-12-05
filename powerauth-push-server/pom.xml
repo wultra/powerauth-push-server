@@ -203,6 +203,24 @@
             <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.getlime.security</groupId>
+            <artifactId>powerauth-java-crypto</artifactId>
+            <version>${powerauth.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.getlime.security</groupId>
+            <artifactId>powerauth-restful-model</artifactId>
+            <version>${powerauth.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>${bc.version}</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Swagger Dependencies-->
         <dependency>

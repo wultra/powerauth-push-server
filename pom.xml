@@ -93,6 +93,7 @@
         <istack.version>3.0.10</istack.version>
         <jaxws.version>1.4.0</jaxws.version>
         <saaj.version>1.5.1</saaj.version>
+        <bc.version>1.64</bc.version>
     </properties>
 
     <build>
