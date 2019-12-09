@@ -60,6 +60,14 @@ You can enable storing of sent messages in database using following property:
 powerauth.push.service.message.storage.enabled=true
 ```
 
+### Enabling Multiple Associated Activations in Device Registration 
+
+You can enable registration of multiple associated activations for a push token using following property:
+
+```
+powerauth.push.service.registration.multipleActivations.enabled=true
+```
+
 ### APNS Environment Configuration
 
 In order to separate development and production environment on APNS, you may want to set following property:
