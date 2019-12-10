@@ -45,14 +45,14 @@ You can download DDL scripts for supported databases:
 
 | Name | Type | Info | Note |
 |---|---|---|---|
-| id | BIGINT(20) | primary key, index, autoincrement | Unique credential record ID. |
-| app_id | BIGINT(20) | index | Associated application ID. |
-| ios_key_id | VARCHAR(255) | - | Key ID used for identifying a private key in APNs service. |
-| ios_private_key | BLOB | - | Binary representation of P8 file with private key used for Apple's APNs service. |
-| ios_team_id | VARCHAR(255) | - | Team ID used for sending push notifications. |
-| ios_bundle | VARCHAR(255) | - | Application bundle ID, used as a APNs "topic". |
-| android_private_key | BLOB | - | Firebase service account private key used when obtaining access tokens for FCM HTTP v1 API. |
-| android_project_id | VARCHAR(255) | - | Firebase project ID, used when sending push messages using FCM. |
+| `id` | BIGINT(20) | primary key, index, autoincrement | Unique credential record ID. |
+| `app_id` | BIGINT(20) | index | Associated application ID. |
+| `ios_key_id` | VARCHAR(255) | - | Key ID used for identifying a private key in APNs service. |
+| `ios_private_key` | BLOB | - | Binary representation of P8 file with private key used for Apple's APNs service. |
+| `ios_team_id` | VARCHAR(255) | - | Team ID used for sending push notifications. |
+| `ios_bundle` | VARCHAR(255) | - | Application bundle ID, used as a APNs "topic". |
+| `android_private_key` | BLOB | - | Firebase service account private key used when obtaining access tokens for FCM HTTP v1 API. |
+| `android_project_id` | VARCHAR(255) | - | Firebase project ID, used when sending push messages using FCM. |
 
 ### Push Messages Table
 
@@ -64,15 +64,15 @@ You can download DDL scripts for supported databases:
 
 | Name | Type | Info | Note |
 |---|---|---|---|
-| id | BIGINT(20) | primary key, index, autoincrement | Unique message record ID. |
-| device_registration_id | INT | index | Associated device registration (device that is used to receive the message), for the purpose of resend on fail operation. |
-| user_id | BIGINT(20) | index | Associated user ID. |
-| activation_id | VARCHAR(37) | index | PowerAuth activation ID. |
-| is_silent | INT | - | Flag indicating if the message was "silent" (0 = NO, 1 = YES). |
-| is_personal | INT | - | Flag indicating if the message was "personal" - sent only on active devices (0 = NO, 1 = YES). |
-| message_body | TEXT | - | Payload of the message in a unified server format. This format is later translated in a platform specific payload. |
-| timestamp_created | TIMESTAMP | - | Date and time when the record was created. |
-| status | INT | - | Value indicating message send status. (-1 = FAILED, 0 = PENDING, 1 = SENT). |
+| `id` | BIGINT(20) | primary key, index, autoincrement | Unique message record ID. |
+| `device_registration_id` | INT | index | Associated device registration (device that is used to receive the message), for the purpose of resend on fail operation. |
+| `user_id` | BIGINT(20) | index | Associated user ID. |
+| `activation_id` | VARCHAR(37) | index | PowerAuth activation ID. |
+| `is_silent` | INT | - | Flag indicating if the message was "silent" (0 = NO, 1 = YES). |
+| `is_personal` | INT | - | Flag indicating if the message was "personal" - sent only on active devices (0 = NO, 1 = YES). |
+| `message_body` | TEXT | - | Payload of the message in a unified server format. This format is later translated in a platform specific payload. |
+| `timestamp_created` | TIMESTAMP | - | Date and time when the record was created. |
+| `status` | INT | - | Value indicating message send status. (-1 = FAILED, 0 = PENDING, 1 = SENT). |
 
 ### Push Campaigns Table
 
@@ -84,13 +84,13 @@ You can download DDL scripts for supported databases:
 
 | Name | Type | Info | Note |
 |---|---|---|---|
-| id | BIGINT(20) | primary key, index, autoincrement | Unique campaign record ID. |
-| appid | BIGINT(20) | index | Associated Application identifier. |
-| message | TEXT | - | Certain notification that is written in unified format. |
-| sent| INT(1) | - | Flag indicating if campaign was successfully sent. |
-| timestamp_created | TIMESTAMP | - | Timestamp of campaign creation. |
-| timestamp_sent | TIMESTAMP | - | Timestamp of campaign sending initiation. |
-| timestamp_completed | TIMESTAMP | - | Timestamp of campaign successful sending (all messages sent). |
+| `id` | BIGINT(20) | primary key, index, autoincrement | Unique campaign record ID. |
+| `app_id` | BIGINT(20) | index | Associated Application identifier. |
+| `message` | TEXT | - | Certain notification that is written in unified format. |
+| `sent` | INT(1) | - | Flag indicating if campaign was successfully sent. |
+| `timestamp_created` | TIMESTAMP | - | Timestamp of campaign creation. |
+| `timestamp_sent` | TIMESTAMP | - | Timestamp of campaign sending initiation. |
+| `timestamp_completed` | TIMESTAMP | - | Timestamp of campaign successful sending (all messages sent). |
 
 ### Push Campaign Users Table
 
@@ -102,7 +102,7 @@ You can download DDL scripts for supported databases:
 
 | Name | Type | Info | Note |
 |---|---|---|---|
-| id | BIGINT(20) | primary key, index, autoincrement | Unique user ID. |
-| campaign_id | BIGINT(20) | index | Identifier of campaign that is user related to. |
-| user_id | BIGINT(20) | index | Identifier of user, can occur multiple times in different campaigns. |
-| timestamp_created | TIMESTAMP | - | Timestamp of user creation (assignment to the campaign). |
+| `id` | BIGINT(20) | primary key, index, autoincrement | Unique user ID. |
+| `campaign_id` | BIGINT(20) | index | Identifier of campaign that is user related to. |
+| `user_id` | BIGINT(20) | index | Identifier of user, can occur multiple times in different campaigns. |
+| `timestamp_created` | TIMESTAMP | - | Timestamp of user creation (assignment to the campaign). |
