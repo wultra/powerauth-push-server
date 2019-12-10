@@ -19,10 +19,7 @@ package io.getlime.push.service;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
-import com.turo.pushy.apns.ApnsClient;
-import com.turo.pushy.apns.ApnsClientBuilder;
-import com.turo.pushy.apns.DeliveryPriority;
-import com.turo.pushy.apns.PushNotificationResponse;
+import com.turo.pushy.apns.*;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.proxy.HttpProxyHandlerFactory;
 import com.turo.pushy.apns.util.ApnsPayloadBuilder;
@@ -112,13 +109,14 @@ public class PushSendingWorker {
             fcmClient.setProxySettings(proxyHost, proxyPort, proxyUsername, proxyPassword);
         }
         fcmClient.initializeWebClient();
-        fcmClient.initializeGoogleCredential();
         String fcmUrl = pushServiceConfiguration.getFcmSendMessageUrl();
         if (fcmUrl.contains("projects/%s/")) {
+            // Initialize Google Credential for production FCM URL
+            fcmClient.initializeGoogleCredential();
             // Configure project ID in FCM URL in case the project ID parameter is expected in configured URL
             fcmClient.setFcmSendMessageUrl(String.format(fcmUrl, projectId));
         } else {
-            // Set FCM url as is (e.g. for testing)
+            // Set FCM url as is (for testing)
             fcmClient.setFcmSendMessageUrl(fcmUrl);
         }
         return fcmClient;
@@ -311,9 +309,11 @@ public class PushSendingWorker {
     void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
-        final String payload = buildApnsPayload(pushMessageBody, attributes == null ? false : attributes.getSilent()); // In case there are no attributes, the message is not silent
-        Date validUntil = pushMessageBody.getValidUntil();
-        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushMessageBody.getCollapseKey());
+        final boolean isSilent = attributes == null ? false : attributes.getSilent(); // In case there are no attributes, the message is not silent
+        final String payload = buildApnsPayload(pushMessageBody, isSilent);
+        final Date validUntil = pushMessageBody.getValidUntil();
+        final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set
+        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushType, pushMessageBody.getCollapseKey());
         final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
         sendNotificationFuture.addListener((PushNotificationResponseListener<SimpleApnsPushNotification>) future -> {

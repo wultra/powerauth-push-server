@@ -255,7 +255,7 @@ public class PushMessageSenderService {
                     }
                     case FAILED_DELETE: {
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
-                        pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
+                        pushDeviceRepository.deleteAll(pushDeviceRepository.findByAppIdAndPushToken(appId, token));
                         break;
                     }
                 }
@@ -277,7 +277,7 @@ public class PushMessageSenderService {
                     }
                     case FAILED_DELETE: {
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
-                        pushDeviceRepository.delete(pushDeviceRepository.findFirstByAppIdAndPushToken(appId, token));
+                        pushDeviceRepository.deleteAll(pushDeviceRepository.findByAppIdAndPushToken(appId, token));
                         break;
                     }
                 }

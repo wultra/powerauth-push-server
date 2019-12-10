@@ -6,13 +6,13 @@
 
     <artifactId>powerauth-push-model</artifactId>
     <description>PowerAuth Push Server RESTful Model Classes</description>
-    <version>0.22.0</version>
+    <version>0.23.0</version>
     <packaging>jar</packaging>
 
     <parent>
         <artifactId>powerauth-push-server-parent</artifactId>
         <groupId>io.getlime.security</groupId>
-        <version>0.22.0</version>
+        <version>0.23.0</version>
     </parent>
 
     <dependencies>

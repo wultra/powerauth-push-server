@@ -87,6 +87,10 @@ public class PushServiceConfiguration {
     @Value("${powerauth.push.service.message.storage.enabled}")
     private boolean messageStorageEnabled;
 
+    // Whether multiple activations are enabled per registered device
+    @Value("${powerauth.push.service.registration.multipleActivations.enabled}")
+    private boolean registrationOfMultipleActivationsEnabled;
+
     /**
      * FCM connect timeout in milliseconds.
      */
@@ -385,6 +389,22 @@ public class PushServiceConfiguration {
      */
     public void setMessageStorageEnabled(boolean messageStorageEnabled) {
         this.messageStorageEnabled = messageStorageEnabled;
+    }
+
+    /**
+     * Get whether multiple activations are enabled per registered device.
+     * @return Whether multiple activations are enabled per registered device.
+     */
+    public boolean isRegistrationOfMultipleActivationsEnabled() {
+        return registrationOfMultipleActivationsEnabled;
+    }
+
+    /**
+     * Set whether multiple activations are enabled per registered device.
+     * @param registrationOfMultipleActivationsEnabled Whether multiple activations are enabled per registered device.
+     */
+    public void setRegistrationOfMultipleActivationsEnabled(boolean registrationOfMultipleActivationsEnabled) {
+        this.registrationOfMultipleActivationsEnabled = registrationOfMultipleActivationsEnabled;
     }
 
     /**

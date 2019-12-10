@@ -62,7 +62,8 @@ CREATE UNIQUE INDEX `push_app_cred_app` ON `push_app_credentials`(`app_id`);
 
 CREATE INDEX `push_device_app_token` ON `push_device_registration`(`app_id`, `push_token`);
 CREATE INDEX `push_device_user_app` ON `push_device_registration`(`user_id`, `app_id`);
-CREATE INDEX `push_device_activation` ON `push_device_registration`(`activation_id`);
+CREATE UNIQUE INDEX `push_device_activation` ON `push_device_registration`(`activation_id`);
+CREATE UNIQUE INDEX `push_device_activation_token` ON `push_device_registration`(`activation_id`, `push_token`);
 
 CREATE INDEX `push_message_status` ON `push_message`(`status`);
 
