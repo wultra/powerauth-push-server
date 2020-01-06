@@ -181,7 +181,7 @@ public class PushSendingWorker {
                 }
             }
 
-            // Unexepected errors
+            // Unexpected errors
             logger.error("Unexpected error occurred while sending push message: {}", t.getMessage(), t);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         };

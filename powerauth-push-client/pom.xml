@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>powerauth-push-client</artifactId>
     <description>PowerAuth Push Server RESTful Client</description>
-    <version>0.23.0</version>
+    <version>0.24.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <parent>
         <artifactId>powerauth-push-server-parent</artifactId>
         <groupId>io.getlime.security</groupId>
-        <version>0.23.0</version>
+        <version>0.24.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -20,7 +20,7 @@
         <dependency>
             <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-push-model</artifactId>
-            <version>0.23.0</version>
+            <version>0.24.0-SNAPSHOT</version>
         </dependency>
 
         <!-- Other Dependencies -->

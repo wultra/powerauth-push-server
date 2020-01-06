@@ -16,10 +16,10 @@
 
 package io.getlime.push.service.fcm;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.messaging.Message;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmInitializationFailedException;
@@ -56,9 +56,6 @@ public class FcmClient {
 
     private static final Logger logger = LoggerFactory.getLogger(FcmClient.class);
 
-    // Time buffer for refresh access tokens
-    private static final long REFRESH_TOKEN_TIME_BUFFER_SECONDS = 60L;
-
     // FCM project ID
     private final String projectId;
 
@@ -68,8 +65,8 @@ public class FcmClient {
     // FCM send message URL
     private String fcmSendMessageUrl;
 
-    // Google Credential instance for obtaining access tokens
-    private GoogleCredential googleCredential;
+    // Google Credentials instance for obtaining access tokens
+    private GoogleCredentials googleCredentials;
 
     // Push server configuration
     private final PushServiceConfiguration pushServiceConfiguration;
@@ -160,9 +157,10 @@ public class FcmClient {
             } else {
                 httpTransport = new NetHttpTransport.Builder().build();
             }
-            googleCredential = GoogleCredential
-                    .fromStream(is, httpTransport, JacksonFactory.getDefaultInstance())
+            googleCredentials = GoogleCredentials
+                    .fromStream(is, () -> httpTransport)
                     .createScoped(Collections.singletonList("https://www.googleapis.com/auth/firebase.messaging"));
+            googleCredentials.refresh();
         } catch (IOException ex) {
             throw new FcmInitializationFailedException("Error occurred while initializing Google Credential using FCM private key: " + ex.getMessage(), ex);
         }
@@ -190,22 +188,15 @@ public class FcmClient {
      * @return FCM access token.
      * @throws FcmMissingTokenException In case FCM access token cannot be retrieved.
      */
-    private String getAccessToken() throws FcmMissingTokenException {
-        if (googleCredential == null) {
+    private AccessToken getAccessToken() throws FcmMissingTokenException {
+        if (googleCredentials == null) {
             // In case FCM registration failed, access token is not available.
             // Exception is not thrown to allow test execution.
             return null;
         }
         try {
-            String accessToken = googleCredential.getAccessToken();
-            Long expiresIn = googleCredential.getExpiresInSeconds();
-            if (accessToken != null && expiresIn != null && expiresIn > REFRESH_TOKEN_TIME_BUFFER_SECONDS) {
-                // return existing access token, it is still valid
-                return accessToken;
-            }
-            // refresh access token, it either does not exist or it is expired
-            googleCredential.refreshToken();
-            return googleCredential.getAccessToken();
+            googleCredentials.refreshIfExpired();
+            return googleCredentials.getAccessToken();
         } catch (IOException ex) {
             throw new FcmMissingTokenException("Error occurred while refreshing FCM access token: " + ex.getMessage(), ex);
         }
@@ -233,19 +224,23 @@ public class FcmClient {
             return;
         }
 
-        String accessToken = getAccessToken();
-
         Flux<DataBuffer> body = fcmConverter.convertMessageToFlux(message, validationOnly);
         if (body == null) {
             logger.error("Push message delivery failed because message is invalid.");
             return;
         }
 
-        webClient
+        WebClient.RequestBodySpec requestBody = webClient
                 .post()
-                .uri(fcmSendMessageUrl)
+                .uri(fcmSendMessageUrl);
+
+        AccessToken accessToken = getAccessToken();
+        if (accessToken != null) {
+            requestBody.header("Authorization", "Bearer " + accessToken.getTokenValue());
+        }
+
+        requestBody
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + accessToken)
                 .body(BodyInserters.fromDataBuffers(body))
                 .retrieve()
                 .bodyToMono(FcmSuccessResponse.class)
