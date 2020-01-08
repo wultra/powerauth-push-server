@@ -1,8 +1,6 @@
 package io.getlime.push.shared;
 
 import io.getlime.push.client.PushServerClient;
-import io.getlime.security.powerauth.crypto.lib.config.PowerAuthConfiguration;
-import io.getlime.security.powerauth.provider.CryptoProviderUtilFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,6 @@ public class PushServerTestClientFactory {
 
     public PowerAuthTestClient createPowerAuthTestClient() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
-        PowerAuthConfiguration.INSTANCE.setKeyConvertor(CryptoProviderUtilFactory.getCryptoProviderUtils());
 
         PowerAuthTestClient powerAuthTestClient = new PowerAuthTestClient();
         powerAuthTestClient.initializeClient(powerAuthServiceUrl);
