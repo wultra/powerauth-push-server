@@ -40,7 +40,7 @@
             <version>${jackson-databind.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.mashape.unirest</groupId>
+            <groupId>com.konghq</groupId>
             <artifactId>unirest-java</artifactId>
             <version>${unirest.version}</version>
         </dependency>
