@@ -17,14 +17,10 @@
 package io.getlime.push.client;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.ObjectMapper;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ErrorResponse;
@@ -38,6 +34,9 @@ import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.request.*;
 import io.getlime.push.model.response.*;
 import io.getlime.push.model.validator.*;
+import kong.unirest.HttpResponse;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,56 +55,21 @@ import java.util.Map;
  */
 public class PushServerClient {
 
-    private Logger logger = LoggerFactory.getLogger(PushServerClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(PushServerClient.class);
 
-    private com.fasterxml.jackson.databind.ObjectMapper jacksonObjectMapper;
+    private ObjectMapper mapper = new ObjectMapper();
+
     private String serviceBaseUrl;
 
     /**
-     * Default constructor.
-     */
-    public PushServerClient() {
-
-        jacksonObjectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
-
-        Unirest.setObjectMapper(new ObjectMapper() {
-
-            public <T> T readValue(String value, Class<T> valueType) {
-                try {
-                    return jacksonObjectMapper.readValue(value, valueType);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            public String writeValue(Object value) {
-                try {
-                    return jacksonObjectMapper.writeValueAsString(value);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-    }
-
-    /**
-     * Constructor with a push server base URL.
-     *
-     * @param serviceBaseUrl URL pointing to the running push server instance, for example "http://localhost:8080/powerauth-push-server".
+     * Main constructor with the push server base URL.
+     * @param serviceBaseUrl Push server instance base URL.
      */
     public PushServerClient(String serviceBaseUrl) {
-        this();
         this.serviceBaseUrl = serviceBaseUrl;
     }
 
-    /**
-     * Set the service base URL.
-     *
-     * @param serviceBaseUrl Base URL.
-     */
-    public void setServiceBaseUrl(String serviceBaseUrl) {
-        this.serviceBaseUrl = serviceBaseUrl;
-    }
+    // Client calls
 
     /**
      * Returns service information
@@ -663,7 +627,7 @@ public class PushServerClient {
      */
     private <T> T getObjectImpl(String url, Map<String, Object> params, TypeReference<? extends Response> typeReference) throws PushServerClientException {
         try {
-            HttpResponse response = Unirest.get(serviceBaseUrl + url)
+            HttpResponse<String> response = Unirest.get(serviceBaseUrl + url)
                     .header("Accept", "application/json")
                     .header("Content-Type", "application/json")
                     .queryString(params)
@@ -709,7 +673,7 @@ public class PushServerClient {
     private <T> T postObjectImpl(String url, Object request, TypeReference<? extends Response> typeReference) throws PushServerClientException {
         try {
             // Fetch post response from given URL and for provided request object
-            HttpResponse response = Unirest.post(serviceBaseUrl + url)
+            HttpResponse<String> response = Unirest.post(serviceBaseUrl + url)
                     .header("Accept", "application/json")
                     .header("Content-Type", "application/json")
                     .body(request)
@@ -753,7 +717,7 @@ public class PushServerClient {
      */
     private <T> T putObjectImpl(String url, Object request, TypeReference<Response> typeReference) throws PushServerClientException {
         try {
-            HttpResponse response = Unirest.put(serviceBaseUrl + url)
+            HttpResponse<String> response = Unirest.put(serviceBaseUrl + url)
                     .header("Accept", "application/json")
                     .header("Content-Type", "application/json")
                     .body(request)
@@ -785,14 +749,13 @@ public class PushServerClient {
      * @throws IOException In case JSON processing fails.
      */
     @SuppressWarnings("unchecked")
-    private <T> T checkHttpStatus(TypeReference<? extends Response> typeReference, HttpResponse response) throws IOException, PushServerClientException {
+    private <T> T checkHttpStatus(TypeReference<? extends Response> typeReference, HttpResponse<String> response) throws IOException, PushServerClientException {
         if (response.getStatus() == 200) {
-            return (T) jacksonObjectMapper.readValue(response.getRawBody(), typeReference);
+            return (T) mapper.readValue(response.getBody(), typeReference);
         } else {
             try {
                 // Response body contains data, return Exception with status code and error response
-                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                ErrorResponse errorResponse = mapper.readValue(response.getRawBody(), ErrorResponse.class);
+                ErrorResponse errorResponse = mapper.readValue(response.getBody(), ErrorResponse.class);
                 throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus(), errorResponse.getResponseObject());
             } catch (IOException ex) {
                 logger.warn(ex.getMessage(), ex);
