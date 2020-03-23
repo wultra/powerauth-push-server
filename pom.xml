@@ -74,7 +74,7 @@
 
         <!-- Library Versions -->
         <guava.version>28.2-jre</guava.version>
-        <h2.version>1.4.200</h2.version>
+        <h2.version>1.4.199</h2.version> <!-- CAUTION WHEN UPDATING - https://github.com/h2database/h2database/issues/2078 -->
         <httpclient.version>4.5.12</httpclient.version>
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
         <jackson.version>2.10.3</jackson.version>
