@@ -16,6 +16,7 @@
 
 package io.getlime.push.client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
@@ -31,6 +32,7 @@ import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.shared.PowerAuthTestClient;
 import io.getlime.push.shared.PushServerTestClientFactory;
+import kong.unirest.Unirest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -102,6 +104,27 @@ public class PushServerTests {
 
     @Before
     public void setUp() throws Exception {
+
+        Unirest.config()
+                .setObjectMapper(new kong.unirest.ObjectMapper() {
+
+                    public String writeValue(Object value) {
+                        try {
+                            return mapper.writeValueAsString(value);
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    public <T> T readValue(String value, Class<T> valueType) {
+                        try {
+                            return mapper.readValue(value, valueType);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+
         pushServerClient = testClientFactory.createPushServerClient("http://localhost:" + port);
         powerAuthTestClient = testClientFactory.createPowerAuthTestClient();
         AppCredentialsEntity testCredentials = new AppCredentialsEntity();
