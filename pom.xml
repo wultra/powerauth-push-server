@@ -84,6 +84,7 @@
         <jstl.version>1.2.5</jstl.version>
         <lime.rest.version>1.1.0</lime.rest.version>
         <powerauth.version>0.23.0</powerauth.version>
+        <push-client.version>0.23.1</push-client.version>
         <pushy.version>0.13.10</pushy.version>
         <swagger.version>2.9.2</swagger.version>
         <unirest.version>3.6.01</unirest.version>
