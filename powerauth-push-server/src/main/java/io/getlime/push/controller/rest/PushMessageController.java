@@ -26,12 +26,13 @@ import io.getlime.push.model.validator.SendPushMessageBatchRequestValidator;
 import io.getlime.push.model.validator.SendPushMessageRequestValidator;
 import io.getlime.push.service.PushMessageSenderService;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,9 +42,11 @@ import java.util.List;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-@Controller
+@RestController
 @RequestMapping(value = "push/message")
 public class PushMessageController {
+    private static final Logger logger = LoggerFactory.getLogger(PushMessageController.class);
+
 
     private PushMessageSenderService pushMessageSenderService;
 
@@ -59,7 +62,7 @@ public class PushMessageController {
      * @return Response with message sending results.
      * @throws PushServerException In case request object is invalid.
      */
-    @RequestMapping(value = "send", method = RequestMethod.POST)
+    @PostMapping(value = "send")
     @ApiOperation(value = "Send a single Push message",
                   notes = "Send push message to user, defined in request body - message object by user ID and activation ID," +
                           " using given application ID \n \n" +
@@ -67,8 +70,12 @@ public class PushMessageController {
                           "Attributes describe whether message has to be " +
                           "silent (If true, no system UI is displayed), personal (If true and activation is not in ACTIVE state the message is not sent)\n" +
                           "Body consist of body (message), and notification parameters")
-    public @ResponseBody ObjectResponse<PushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
+    public ObjectResponse<PushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
         SendPushMessageRequest requestObject = request.getRequestObject();
+        if (requestObject != null && requestObject.getMessage() != null) {
+            logger.info("Received sendPushMessage request, application ID: {}, activation ID: {}, user ID: {}", requestObject.getAppId(),
+                    requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
+        }
         String errorMessage = SendPushMessageRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -78,6 +85,8 @@ public class PushMessageController {
         pushMessageList.add(requestObject.getMessage());
         PushMessageSendResult result;
         result = pushMessageSenderService.sendPushMessage(appId, pushMessageList);
+        logger.info("The sendPushMessage request succeeded, application ID: {}, activation ID: {}, user ID: {}", requestObject.getAppId(),
+                requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
         return new ObjectResponse<>(result);
     }
 
@@ -88,12 +97,15 @@ public class PushMessageController {
      * @return Response with message sending results.
      * @throws PushServerException In case request object is invalid.
      */
-    @RequestMapping(value = "batch/send", method = RequestMethod.POST)
+    @PostMapping(value = "batch/send")
     @ApiOperation(value = "Send batch of push messages",
                   notes = "Send to each user in request body, assigned to application ID, message. Message and user definition is same as in \"send a single push message\" method. " +
                           "Users and their messages are inside request body - batch param.")
-    public @ResponseBody ObjectResponse<PushMessageSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
+    public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
         SendPushMessageBatchRequest requestObject = request.getRequestObject();
+        if (requestObject != null && requestObject.getBatch() != null) {
+            logger.info("Received sendPushMessageBatch request, application ID: {}", requestObject.getAppId());
+        }
         String errorMessage = SendPushMessageBatchRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -102,6 +114,7 @@ public class PushMessageController {
         final List<PushMessage> batch = requestObject.getBatch();
         PushMessageSendResult result;
         result = pushMessageSenderService.sendPushMessage(appId, batch);
+        logger.info("The sendPushMessageBatch request succeeded, application ID: {}", requestObject.getAppId());
         return new ObjectResponse<>(result);
     }
 }

@@ -30,21 +30,24 @@ import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
 import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
 
 /**
  * @author Roman Strobl, roman.strobl@wultra.com
  */
-@Controller
+@RestController
 @RequestMapping(value = "admin/app")
 public class AdministrationController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdministrationController.class);
 
     private final PowerAuthServiceClient powerAuthClient;
     private final AppCredentialsRepository appCredentialsRepository;
@@ -67,8 +70,9 @@ public class AdministrationController {
      * List applications configured in Push Server.
      * @return Application list response.
      */
-    @RequestMapping(value = "list", method = RequestMethod.GET)
-    public @ResponseBody ObjectResponse<GetApplicationListResponse> listApplications() {
+    @PostMapping(value = "list")
+    public ObjectResponse<GetApplicationListResponse> listApplications() {
+        logger.debug("Received listApplications request");
         final GetApplicationListResponse response = new GetApplicationListResponse();
         final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
         final List<PushServerApplication> appList = new ArrayList<>();
@@ -82,6 +86,7 @@ public class AdministrationController {
             appList.add(app);
         }
         response.setApplicationList(appList);
+        logger.debug("The listApplications request succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -89,8 +94,9 @@ public class AdministrationController {
      * List applications which are not yet configured in Push Server.
      * @return Application list response.
      */
-    @RequestMapping(value = "unconfigured/list", method = RequestMethod.GET)
-    public @ResponseBody ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() {
+    @PostMapping(value = "unconfigured/list")
+    public ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() {
+        logger.debug("Received listUnconfiguredApplications request");
         GetApplicationListResponse response = new GetApplicationListResponse();
         // Get all applications in PA Server
         final List<io.getlime.powerauth.soap.v3.GetApplicationListResponse.Applications> applicationList = powerAuthClient.getApplicationList();
@@ -112,6 +118,7 @@ public class AdministrationController {
                 response.getApplicationList().add(applicationToAdd);
             }
         }
+        logger.debug("The listUnconfiguredApplications request succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -121,8 +128,9 @@ public class AdministrationController {
      * @return Application detail response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @RequestMapping(value = "detail", method = RequestMethod.POST)
-    public @ResponseBody ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(@RequestBody ObjectRequest<GetApplicationDetailRequest> request) throws PushServerException {
+    @PostMapping(value = "detail")
+    public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(@RequestBody ObjectRequest<GetApplicationDetailRequest> request) throws PushServerException {
+        logger.debug("Received getApplicationDetail request");
         final GetApplicationDetailRequest requestObject = request.getRequestObject();
         String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
         if (errorMessage != null) {
@@ -145,6 +153,7 @@ public class AdministrationController {
         if (requestObject.getIncludeAndroid()) {
             response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
         }
+        logger.debug("The getApplicationDetail request succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -154,9 +163,12 @@ public class AdministrationController {
      * @return Create application response.
      * @throws PushServerException Thrown when request validation fails.
      */
-    @RequestMapping(value = "create", method = RequestMethod.POST)
-    public @ResponseBody ObjectResponse<CreateApplicationResponse> createApplication(@RequestBody ObjectRequest<CreateApplicationRequest> request) throws PushServerException {
+    @PostMapping(value = "create")
+    public ObjectResponse<CreateApplicationResponse> createApplication(@RequestBody ObjectRequest<CreateApplicationRequest> request) throws PushServerException {
         final CreateApplicationRequest requestObject = request.getRequestObject();
+        if (requestObject != null) {
+            logger.info("Received createApplication request, application ID: {}", requestObject.getAppId());
+        }
         String errorMessage = CreateApplicationRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -165,6 +177,7 @@ public class AdministrationController {
         appCredentialsEntity.setAppId(requestObject.getAppId());
         AppCredentialsEntity newAppCredentialsEntity = appCredentialsRepository.save(appCredentialsEntity);
         final CreateApplicationResponse response = new CreateApplicationResponse(newAppCredentialsEntity.getId());
+        logger.info("The createApplication request succeeded, application ID: {}", requestObject.getAppId());
         return new ObjectResponse<>(response);
     }
 
@@ -174,9 +187,12 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @RequestMapping(value = "ios/update", method = RequestMethod.PUT)
-    public @ResponseBody Response updateIos(@RequestBody ObjectRequest<UpdateIosRequest> request) throws PushServerException {
+    @PostMapping(value = "ios/update")
+    public Response updateIos(@RequestBody ObjectRequest<UpdateIosRequest> request) throws PushServerException {
         final UpdateIosRequest requestObject = request.getRequestObject();
+        if (requestObject != null) {
+            logger.info("Received updateIos request, application credentials entity ID: {}", requestObject.getId());
+        }
         String errorMessage = UpdateIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -189,6 +205,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosBundle(requestObject.getBundle());
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        logger.info("The updateIos request succeeded, application credentials entity ID: {}", requestObject.getId());
         return new Response();
     }
 
@@ -198,9 +215,12 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @RequestMapping(value = "ios/remove", method = RequestMethod.POST)
-    public @ResponseBody Response removeIos(@RequestBody ObjectRequest<RemoveIosRequest> request) throws PushServerException {
+    @PostMapping(value = "ios/remove")
+    public Response removeIos(@RequestBody ObjectRequest<RemoveIosRequest> request) throws PushServerException {
         final RemoveIosRequest requestObject = request.getRequestObject();
+        if (requestObject != null) {
+            logger.info("Received removeIos request, application credentials entity ID: {}", requestObject.getId());
+        }
         String errorMessage = RemoveIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -212,6 +232,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosBundle(null);
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(requestObject.getId());
+        logger.info("The removeIos request succeeded, application credentials entity ID: {}", requestObject.getId());
         return new Response();
     }
 
@@ -221,9 +242,12 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @RequestMapping(value = "android/update", method = RequestMethod.PUT)
-    public @ResponseBody Response updateAndroid(@RequestBody ObjectRequest<UpdateAndroidRequest> request) throws PushServerException {
+    @PostMapping(value = "android/update")
+    public Response updateAndroid(@RequestBody ObjectRequest<UpdateAndroidRequest> request) throws PushServerException {
         final UpdateAndroidRequest requestObject = request.getRequestObject();
+        if (requestObject != null) {
+            logger.info("Received updateAndroid request, application credentials entity ID: {}", requestObject.getId());
+        }
         String errorMessage = UpdateAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -234,6 +258,7 @@ public class AdministrationController {
         appCredentialsEntity.setAndroidProjectId(requestObject.getProjectId());
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        logger.info("The updateAndroid request succeeded, application credentials entity ID: {}", requestObject.getId());
         return new Response();
     }
 
@@ -243,9 +268,12 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @RequestMapping(value = "android/remove", method = RequestMethod.POST)
-    public @ResponseBody Response removeAndroid(@RequestBody ObjectRequest<RemoveAndroidRequest> request) throws PushServerException {
+    @PostMapping(value = "android/remove")
+    public Response removeAndroid(@RequestBody ObjectRequest<RemoveAndroidRequest> request) throws PushServerException {
         final RemoveAndroidRequest requestObject = request.getRequestObject();
+        if (requestObject != null) {
+            logger.info("Received removeAndroid request, application credentials entity ID: {}", requestObject.getId());
+        }
         String errorMessage = RemoveAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -255,6 +283,7 @@ public class AdministrationController {
         appCredentialsEntity.setAndroidProjectId(null);
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(requestObject.getId());
+        logger.info("The removeAndroid request succeeded, application credentials entity ID: {}", requestObject.getId());
         return new Response();
     }
 
