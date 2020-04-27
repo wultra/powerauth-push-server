@@ -77,9 +77,10 @@ public class PushCampaignController {
                           "and a certain message that users will receive")
     public ObjectResponse<CreateCampaignResponse> createCampaign(@RequestBody ObjectRequest<CreateCampaignRequest> request) throws PushServerException {
         CreateCampaignRequest requestObject = request.getRequestObject();
-        if (requestObject != null) {
-            logger.info("Received createCampaign request, app ID: {}", requestObject.getAppId());
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
         }
+        logger.info("Received createCampaign request, app ID: {}", requestObject.getAppId());
         String errorMessage = CreateCampaignRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);

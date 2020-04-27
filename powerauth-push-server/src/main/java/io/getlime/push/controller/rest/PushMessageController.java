@@ -72,10 +72,14 @@ public class PushMessageController {
                           "Body consist of body (message), and notification parameters")
     public ObjectResponse<PushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
         SendPushMessageRequest requestObject = request.getRequestObject();
-        if (requestObject != null && requestObject.getMessage() != null) {
-            logger.info("Received sendPushMessage request, application ID: {}, activation ID: {}, user ID: {}", requestObject.getAppId(),
-                    requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
         }
+        if (requestObject.getMessage() == null) {
+            throw new PushServerException("Message must not be empty");
+        }
+        logger.info("Received sendPushMessage request, application ID: {}, activation ID: {}, user ID: {}", requestObject.getAppId(),
+                requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
         String errorMessage = SendPushMessageRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -103,9 +107,13 @@ public class PushMessageController {
                           "Users and their messages are inside request body - batch param.")
     public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
         SendPushMessageBatchRequest requestObject = request.getRequestObject();
-        if (requestObject != null && requestObject.getBatch() != null) {
-            logger.info("Received sendPushMessageBatch request, application ID: {}", requestObject.getAppId());
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
         }
+        if (requestObject.getBatch() == null) {
+            throw new PushServerException("Batch must not be empty");
+        }
+        logger.info("Received sendPushMessageBatch request, application ID: {}", requestObject.getAppId());
         String errorMessage = SendPushMessageBatchRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);

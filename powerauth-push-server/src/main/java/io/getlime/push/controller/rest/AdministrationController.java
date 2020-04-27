@@ -166,9 +166,10 @@ public class AdministrationController {
     @PostMapping(value = "create")
     public ObjectResponse<CreateApplicationResponse> createApplication(@RequestBody ObjectRequest<CreateApplicationRequest> request) throws PushServerException {
         final CreateApplicationRequest requestObject = request.getRequestObject();
-        if (requestObject != null) {
-            logger.info("Received createApplication request, application ID: {}", requestObject.getAppId());
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
         }
+        logger.info("Received createApplication request, application ID: {}", requestObject.getAppId());
         String errorMessage = CreateApplicationRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -190,9 +191,10 @@ public class AdministrationController {
     @PostMapping(value = "ios/update")
     public Response updateIos(@RequestBody ObjectRequest<UpdateIosRequest> request) throws PushServerException {
         final UpdateIosRequest requestObject = request.getRequestObject();
-        if (requestObject != null) {
-            logger.info("Received updateIos request, application credentials entity ID: {}", requestObject.getId());
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
         }
+        logger.info("Received updateIos request, application credentials entity ID: {}", requestObject.getId());
         String errorMessage = UpdateIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -218,9 +220,10 @@ public class AdministrationController {
     @PostMapping(value = "ios/remove")
     public Response removeIos(@RequestBody ObjectRequest<RemoveIosRequest> request) throws PushServerException {
         final RemoveIosRequest requestObject = request.getRequestObject();
-        if (requestObject != null) {
-            logger.info("Received removeIos request, application credentials entity ID: {}", requestObject.getId());
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
         }
+        logger.info("Received removeIos request, application credentials entity ID: {}", requestObject.getId());
         String errorMessage = RemoveIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -245,9 +248,10 @@ public class AdministrationController {
     @PostMapping(value = "android/update")
     public Response updateAndroid(@RequestBody ObjectRequest<UpdateAndroidRequest> request) throws PushServerException {
         final UpdateAndroidRequest requestObject = request.getRequestObject();
-        if (requestObject != null) {
-            logger.info("Received updateAndroid request, application credentials entity ID: {}", requestObject.getId());
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
         }
+        logger.info("Received updateAndroid request, application credentials entity ID: {}", requestObject.getId());
         String errorMessage = UpdateAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -271,9 +275,10 @@ public class AdministrationController {
     @PostMapping(value = "android/remove")
     public Response removeAndroid(@RequestBody ObjectRequest<RemoveAndroidRequest> request) throws PushServerException {
         final RemoveAndroidRequest requestObject = request.getRequestObject();
-        if (requestObject != null) {
-            logger.info("Received removeAndroid request, application credentials entity ID: {}", requestObject.getId());
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
         }
+        logger.info("Received removeAndroid request, application credentials entity ID: {}", requestObject.getId());
         String errorMessage = RemoveAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);

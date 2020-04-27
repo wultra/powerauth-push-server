@@ -84,19 +84,20 @@ public class PushDeviceController {
                           "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID," +
                           " so that there are no incorrect bindings.")
     public Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
-        CreateDeviceRequest requestedObject = request.getRequestObject();
-        if (requestedObject != null) {
-            logger.info("Received createDevice request, app ID: {}, activation ID: {}, token: {}, platform: {}", requestedObject.getAppId(),
-                    requestedObject.getActivationId(), maskPushToken(requestedObject.getToken()), requestedObject.getPlatform());
+        CreateDeviceRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
         }
-        String errorMessage = CreateDeviceRequestValidator.validate(requestedObject);
+        logger.info("Received createDevice request, app ID: {}, activation ID: {}, token: {}, platform: {}", requestObject.getAppId(),
+                requestObject.getActivationId(), maskPushToken(requestObject.getToken()), requestObject.getPlatform());
+        String errorMessage = CreateDeviceRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        Long appId = requestedObject.getAppId();
-        String pushToken = requestedObject.getToken();
-        String platform = requestedObject.getPlatform();
-        String activationId = requestedObject.getActivationId();
+        Long appId = requestObject.getAppId();
+        String pushToken = requestObject.getToken();
+        String platform = requestObject.getPlatform();
+        String activationId = requestObject.getActivationId();
         List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
         PushDeviceRegistrationEntity device;
         if (devices.isEmpty()) {
@@ -119,7 +120,7 @@ public class PushDeviceController {
         device.setPlatform(platform);
         updateActivationForDevice(device, activationId);
         pushDeviceRepository.save(device);
-        logger.info("The createDevice request succeeded, app ID: {}, activation ID: {}, platform: {}", requestedObject.getAppId(), requestedObject.getActivationId(), requestedObject.getPlatform());
+        logger.info("The createDevice request succeeded, app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
         return new Response();
     }
 
@@ -140,10 +141,11 @@ public class PushDeviceController {
                     " so that there are no incorrect bindings.")
     public Response createDeviceMultipleActivations(@RequestBody ObjectRequest<CreateDeviceForActivationsRequest> request) throws PushServerException {
         CreateDeviceForActivationsRequest requestedObject = request.getRequestObject();
-        if (requestedObject != null) {
-            logger.info("Received createDeviceMultipleActivations request, app ID: {}, activation IDs: {}, token: {}, platform: {}",
-                    requestedObject.getAppId(), requestedObject.getActivationIds(), maskPushToken(requestedObject.getToken()), requestedObject.getPlatform());
+        if (requestedObject == null) {
+            throw new PushServerException("Request object must not be empty");
         }
+        logger.info("Received createDeviceMultipleActivations request, app ID: {}, activation IDs: {}, token: {}, platform: {}",
+                requestedObject.getAppId(), requestedObject.getActivationIds(), maskPushToken(requestedObject.getToken()), requestedObject.getPlatform());
         String errorMessage;
         if (!config.isRegistrationOfMultipleActivationsEnabled()) {
             errorMessage = "Registration of multiple associated activations per device is not enabled.";
@@ -293,9 +295,10 @@ public class PushDeviceController {
                   notes = "Update the status of given device registration based on the associated activation ID. " +
                           "This can help assure that registration is in non-active state and cannot receive personal messages.")
     public Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
-        if (request != null) {
-            logger.info("Received updateDeviceStatus request, activation ID: {}", request.getActivationId());
+        if (request == null) {
+            throw new PushServerException("Request object must not be empty");
         }
+        logger.info("Received updateDeviceStatus request, activation ID: {}", request.getActivationId());
         String errorMessage = UpdateDeviceStatusRequestValidator.validate(request);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -324,19 +327,20 @@ public class PushDeviceController {
                   notes = "Remove device identified by application ID and device token. " +
                           "If device identifiers don't match, nothing happens")
     public Response deleteDevice(@RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
-        DeleteDeviceRequest requestedObject = request.getRequestObject();
-        if (requestedObject != null) {
-            logger.info("Received deleteDevice request, app ID: {}, token: {}", requestedObject.getAppId(), maskPushToken(requestedObject.getToken()));
+        DeleteDeviceRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
         }
-        String errorMessage = DeleteDeviceRequestValidator.validate(requestedObject);
+        logger.info("Received deleteDevice request, app ID: {}, token: {}", requestObject.getAppId(), maskPushToken(requestObject.getToken()));
+        String errorMessage = DeleteDeviceRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        Long appId = requestedObject.getAppId();
-        String pushToken = requestedObject.getToken();
+        Long appId = requestObject.getAppId();
+        String pushToken = requestObject.getToken();
         List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(appId, pushToken);
         devices.forEach(pushDeviceRepository::delete);
-        logger.info("The deleteDevice request succeeded, app ID: {}", requestedObject.getAppId());
+        logger.info("The deleteDevice request succeeded, app ID: {}", requestObject.getAppId());
         return new Response();
     }
 
