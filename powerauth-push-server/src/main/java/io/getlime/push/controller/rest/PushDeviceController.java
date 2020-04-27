@@ -35,11 +35,10 @@ import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -52,7 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-@Controller
+@RestController
 @RequestMapping(value = "push/device")
 public class PushDeviceController {
 
@@ -75,7 +74,7 @@ public class PushDeviceController {
      * @return Device registration status.
      * @throws PushServerException In case request object is invalid.
      */
-    @RequestMapping(value = "create", method = RequestMethod.POST)
+    @PostMapping(value = "create")
     @ApiOperation(value = "Create a device",
                   notes = "Create a new device push token (platform specific). The call must include an activation ID, so that the token is associated with given user." +
                           "Request body should contain application ID, device token, device's platform and an activation ID. " +
@@ -84,16 +83,21 @@ public class PushDeviceController {
                           "Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. " +
                           "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID," +
                           " so that there are no incorrect bindings.")
-    public @ResponseBody Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
-        CreateDeviceRequest requestedObject = request.getRequestObject();
-        String errorMessage = CreateDeviceRequestValidator.validate(requestedObject);
+    public Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
+        CreateDeviceRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
+        }
+        logger.info("Received createDevice request, app ID: {}, activation ID: {}, token: {}, platform: {}", requestObject.getAppId(),
+                requestObject.getActivationId(), maskPushToken(requestObject.getToken()), requestObject.getPlatform());
+        String errorMessage = CreateDeviceRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        Long appId = requestedObject.getAppId();
-        String pushToken = requestedObject.getToken();
-        String platform = requestedObject.getPlatform();
-        String activationId = requestedObject.getActivationId();
+        Long appId = requestObject.getAppId();
+        String pushToken = requestObject.getToken();
+        String platform = requestObject.getPlatform();
+        String activationId = requestObject.getActivationId();
         List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
         PushDeviceRegistrationEntity device;
         if (devices.isEmpty()) {
@@ -116,6 +120,7 @@ public class PushDeviceController {
         device.setPlatform(platform);
         updateActivationForDevice(device, activationId);
         pushDeviceRepository.save(device);
+        logger.info("The createDevice request succeeded, app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
         return new Response();
     }
 
@@ -125,7 +130,7 @@ public class PushDeviceController {
      * @return Device registration status.
      * @throws PushServerException In case request object is invalid.
      */
-    @RequestMapping(value = "create/multi", method = RequestMethod.POST)
+    @PostMapping(value = "create/multi")
     @ApiOperation(value = "Create a device for multiple associated activations",
             notes = "Create a new device push token (platform specific). The call must include one or more activation IDs." +
                     "Request body should contain application ID, device token, device's platform and list of activation IDs. " +
@@ -134,8 +139,13 @@ public class PushDeviceController {
                     "Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. " +
                     "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs," +
                     " so that there are no incorrect bindings.")
-    public @ResponseBody Response createDeviceMultipleActivations(@RequestBody ObjectRequest<CreateDeviceForActivationsRequest> request) throws PushServerException {
+    public Response createDeviceMultipleActivations(@RequestBody ObjectRequest<CreateDeviceForActivationsRequest> request) throws PushServerException {
         CreateDeviceForActivationsRequest requestedObject = request.getRequestObject();
+        if (requestedObject == null) {
+            throw new PushServerException("Request object must not be empty");
+        }
+        logger.info("Received createDeviceMultipleActivations request, app ID: {}, activation IDs: {}, token: {}, platform: {}",
+                requestedObject.getAppId(), requestedObject.getActivationIds(), maskPushToken(requestedObject.getToken()), requestedObject.getPlatform());
         String errorMessage;
         if (!config.isRegistrationOfMultipleActivationsEnabled()) {
             errorMessage = "Registration of multiple associated activations per device is not enabled.";
@@ -192,7 +202,7 @@ public class PushDeviceController {
         if (registrationFailed.get()) {
             throw new PushServerException("Device registration failed");
         }
-
+        logger.info("The createDeviceMultipleActivations request succeeded, app ID: {}, activation IDs: {}, platform: {}", requestedObject.getAppId(), requestedObject.getActivationIds(), requestedObject.getPlatform());
         return new Response();
     }
 
@@ -280,11 +290,15 @@ public class PushDeviceController {
      * @return Status update response.
      * @throws PushServerException In case request object is invalid.
      */
-    @RequestMapping(value = "status/update", method = RequestMethod.POST)
+    @PostMapping(value = "status/update")
     @ApiOperation(value = "Update device status",
                   notes = "Update the status of given device registration based on the associated activation ID. " +
                           "This can help assure that registration is in non-active state and cannot receive personal messages.")
-    public @ResponseBody Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
+    public Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
+        if (request == null) {
+            throw new PushServerException("Request object must not be empty");
+        }
+        logger.info("Received updateDeviceStatus request, activation ID: {}", request.getActivationId());
         String errorMessage = UpdateDeviceStatusRequestValidator.validate(request);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -298,6 +312,7 @@ public class PushDeviceController {
                 pushDeviceRepository.save(registration);
             }
         }
+        logger.info("The updateDeviceStatus request succeeded, activation ID: {}", request.getActivationId());
         return new Response();
     }
 
@@ -307,20 +322,37 @@ public class PushDeviceController {
      * @return Removal status response.
      * @throws PushServerException In case request object is invalid.
      */
-    @RequestMapping(value = "delete", method = RequestMethod.POST)
+    @PostMapping(value = "delete")
     @ApiOperation(value = "Delete a device",
                   notes = "Remove device identified by application ID and device token. " +
                           "If device identifiers don't match, nothing happens")
-    public @ResponseBody Response deleteDevice(@RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
-        DeleteDeviceRequest requestedObject = request.getRequestObject();
-        String errorMessage = DeleteDeviceRequestValidator.validate(requestedObject);
+    public Response deleteDevice(@RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
+        DeleteDeviceRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
+        }
+        logger.info("Received deleteDevice request, app ID: {}, token: {}", requestObject.getAppId(), maskPushToken(requestObject.getToken()));
+        String errorMessage = DeleteDeviceRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        Long appId = requestedObject.getAppId();
-        String pushToken = requestedObject.getToken();
+        Long appId = requestObject.getAppId();
+        String pushToken = requestObject.getToken();
         List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(appId, pushToken);
         devices.forEach(pushDeviceRepository::delete);
+        logger.info("The deleteDevice request succeeded, app ID: {}", requestObject.getAppId());
         return new Response();
+    }
+
+    /**
+     * Mask push token String to avoid revealing the full token in logs.
+     * @param token Push token.
+     * @return Masked push token.
+     */
+    private String maskPushToken(String token) {
+        if (token == null || token.length() < 6) {
+            return token;
+        }
+        return token.substring(0, 6) + "...";
     }
 }
