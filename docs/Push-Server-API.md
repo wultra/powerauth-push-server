@@ -47,7 +47,7 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 - `POST` [/push/campaign/${ID}/user/delete](#delete-users-from-campaign) - Delete users from specific campaign
 - `PUT` [/push/campaign/${ID}/user/add](#add-users-to-campaign) - Add users to specific campaign
 - `GET` [/push/campaign/${ID}/detail](#get-campaign) - Return specific campaign
-- `GET` [/push/campaign/list/?all={true|false}](#get-list-of-campaigns) - Return actual list of campaigns
+- `GET` [/push/campaign/list?all={true|false}](#get-list-of-campaigns) - Return actual list of campaigns
 - `GET` [/push/campaign/${ID}/user/list?page=${PAGE}&size=${SIZE}](#get-users-from-campaign) - Return paged list of users from specific campaign
 
 #### Administration of Push Server
@@ -69,11 +69,11 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 
 PowerAuth Push Server uses following format for error response body, accompanied with an appropriate HTTP status code. Besides the HTTP error codes that application server may return regardless of server application (such as 404 when resource is not found or 503 when server is down), following status codes may be returned:
 
-|`status`|`HTTP code`       |Description|
-|---     |---          |---|
-|OK      |200          |No issue|
-|ERROR   |400          |Issue with a request format, or issue of the business logic|
-|ERROR   |401          | Unauthorized, invalid security token configuration|
+| Status | HTTP Code | Description |
+|--------|-----------|-------------|
+| OK     | 200       | No issue    |
+| ERROR  | 400       | Issue with a request format, or issue of the business logic |
+| ERROR  | 401       | Unauthorized, invalid security token configuration |
 
 All error responses that are produced by the PowerAuth Push Server have following body:
 
@@ -88,8 +88,8 @@ All error responses that are produced by the PowerAuth Push Server have followin
 }
 ```
 
-- `status` - _OK_ | _ERROR_
-- `code` - _ERROR_GENERIC_ | _ERROR_DATABASE_
+- `status` - `OK`, `ERROR`
+- `code` - `ERROR_GENERIC`, `ERROR_DATABASE`
 - `message` - Message that describes certain error.
 
 ## Service
@@ -172,7 +172,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
-- `platform` - "_ios_ | _android_"
+- `platform` - `ios`, `android`
 - `activationId` - Activation identifier
 
 #### **Response**
@@ -218,7 +218,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
-- `platform` - "_ios_ | _android_"
+- `platform` - `ios`, `android`
 - `activationIds` - Associated activation identifiers
 
 #### **Response**
@@ -438,7 +438,7 @@ Sends a message message batch - each item in the batch represents a message to g
 
 ```
 
-- `appId` - Application that user/s is/are using.
+- `appId` - Application that user is using.
 - `batch` - List of messages, see [documentation for sending a single message](#send-message) for details
 
 #### **Response**
@@ -560,7 +560,6 @@ Delete a specific campaign. Also users associated with this campaign are going t
 
 ```json
 {
-
 }
 ```
 
@@ -725,6 +724,7 @@ Associate users to a specific campaign. Users are identified in request body as 
     ]
 }
 ```
+
 - list of users
 
 #### **Response**
