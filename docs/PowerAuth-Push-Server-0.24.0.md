@@ -2,8 +2,41 @@
 
 ## Unirest Initialization
 
-The migration steps will be added soon.
+In previous versions, we included configuration of [Unirest](https://kong.github.io/unirest-java/) client right in the push server client code. This was incorrect, since Unirest initializes in a static manner. Our configuration could be clashing with other components using Unirest. As a result, you need to add Unirest configuration yourself soon after the application launch.
+
+Below is a minimal Unirest configuration plugged into the Spring framework in a way to reuse `ObjectMapper` configuration. Of course, you can use any other [Unirest configuration parameters](https://kong.github.io/unirest-java/#configuration).
+
+```java
+@Configuration
+public class UnirestConfiguration {
+
+    @Autowired
+    private com.fasterxml.jackson.databind.ObjectMapper mapper;
+
+    @PostConstruct
+    public void postConstruct() {
+        Unirest.config().setObjectMapper(new ObjectMapper() {
+
+            public String writeValue(Object value) {
+                try {
+                    return mapper.writeValueAsString(value);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            public <T> T readValue(String value, Class<T> valueType) {
+                try {
+                    return mapper.readValue(value, valueType);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+}
+```
 
 ## Push Server Administration  
 
-The migration steps will be added soon.
+In the latest version of Push Server, we decided to remove the web administration console, due to it's simplicity. You can configure apps either via database by inserting values to the `push_app_credentials` table, or by calling [Administration API](./Push-Server-API.md#administration)
