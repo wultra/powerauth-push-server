@@ -2,7 +2,7 @@
 
 ## Unirest Initialization
 
-In previous versions, we included configuration of [Unirest](https://kong.github.io/unirest-java/) client right in the push server client code. This was incorrect, since Unirest initializes in a static manner. Our configuration could be clashing with other components using Unirest. As a result, you need to add Unirest configuration yourself soon after the application launch in case you would like to use our client library. In the case you call our API's yourself, no changes are needed.
+In previous versions, we included configuration of [Unirest](https://kong.github.io/unirest-java/) client right in the Push Server client code. This was incorrect, since Unirest initializes in a static manner. Our configuration could be clashing with other components using Unirest. As a result, you need to add Unirest configuration yourself soon after the application launch in case you would like to use our client library. In the case you call our API's yourself, no changes are needed.
 
 Below is a minimal Unirest configuration plugged into the Spring framework in a way to reuse `ObjectMapper` configuration. Of course, you can use any other [Unirest configuration parameters](https://kong.github.io/unirest-java/#configuration).
 
@@ -39,4 +39,4 @@ public class UnirestConfiguration {
 
 ## Push Server Administration  
 
-In the latest version of Push Server, we decided to remove the web administration console, due to it's simplicity. You can configure apps either via database by inserting values to the `push_app_credentials` table, or by calling [Administration API](./Push-Server-API.md#administration)
+In the latest version of Push Server, we decided to remove the web administration console, due to its simplicity. You can configure apps either via database by inserting values to the `push_app_credentials` table, or by calling [Administration API](./Push-Server-API.md#administration)
