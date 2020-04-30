@@ -47,7 +47,7 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 - `POST` [/push/campaign/${ID}/user/delete](#delete-users-from-campaign) - Delete users from specific campaign
 - `PUT` [/push/campaign/${ID}/user/add](#add-users-to-campaign) - Add users to specific campaign
 - `GET` [/push/campaign/${ID}/detail](#get-campaign) - Return specific campaign
-- `GET` [/push/campaign/list?all={true|false}](#get-list-of-campaigns) - Return actual list of campaigns
+- `GET` [/push/campaign/list?all={true,false}](#get-list-of-campaigns) - Return actual list of campaigns
 - `GET` [/push/campaign/${ID}/user/list?page=${PAGE}&size=${SIZE}](#get-users-from-campaign) - Return paged list of users from specific campaign
 
 #### Administration of Push Server
