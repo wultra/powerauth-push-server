@@ -2,7 +2,7 @@
 
 ## Unirest Initialization
 
-In previous versions, we included configuration of [Unirest](https://kong.github.io/unirest-java/) client right in the push server client code. This was incorrect, since Unirest initializes in a static manner. Our configuration could be clashing with other components using Unirest. As a result, you need to add Unirest configuration yourself soon after the application launch.
+In previous versions, we included configuration of [Unirest](https://kong.github.io/unirest-java/) client right in the push server client code. This was incorrect, since Unirest initializes in a static manner. Our configuration could be clashing with other components using Unirest. As a result, you need to add Unirest configuration yourself soon after the application launch in case you would like to use our client library. In the case you call our API's yourself, no changes are needed.
 
 Below is a minimal Unirest configuration plugged into the Spring framework in a way to reuse `ObjectMapper` configuration. Of course, you can use any other [Unirest configuration parameters](https://kong.github.io/unirest-java/#configuration).
 
