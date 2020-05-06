@@ -35,10 +35,7 @@ import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -290,7 +287,7 @@ public class PushDeviceController {
      * @return Status update response.
      * @throws PushServerException In case request object is invalid.
      */
-    @PostMapping(value = "status/update")
+    @RequestMapping(value = "status/update", method = {RequestMethod.POST, RequestMethod.PUT})
     @ApiOperation(value = "Update device status",
                   notes = "Update the status of given device registration based on the associated activation ID. " +
                           "This can help assure that registration is in non-active state and cannot receive personal messages.")
@@ -322,7 +319,7 @@ public class PushDeviceController {
      * @return Removal status response.
      * @throws PushServerException In case request object is invalid.
      */
-    @PostMapping(value = "delete")
+    @RequestMapping(value = "delete", method = {RequestMethod.POST, RequestMethod.DELETE})
     @ApiOperation(value = "Delete a device",
                   notes = "Remove device identified by application ID and device token. " +
                           "If device identifiers don't match, nothing happens")

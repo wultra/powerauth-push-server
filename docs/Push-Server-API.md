@@ -27,8 +27,8 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 
 - `POST` [/push/device/create](#create-device) - Create new device registration
 - `POST` [/push/device/create/multi](#create-device-for-multiple-associated-activations) - Create new device registration for multiple activations
-- `POST` [/push/device/delete](#delete-device) - Remove registered device
-- `POST` [/push/device/status/update](#update-device-status) - Update the status of the activation so that when activation associated with given device is not active, no notifications are sent to the device.
+- `POST` / `DELETE` [/push/device/delete](#delete-device) - Remove registered device
+- `POST` / `PUT` [/push/device/status/update](#update-device-status) - Update the status of the activation so that when activation associated with given device is not active, no notifications are sent to the device.
 
 #### Sending Push Messages
 
@@ -43,9 +43,9 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 #### Campaign Management
 
 - `POST` [/push/campaign/create](#create-campaign) - Create new campaign
-- `POST` [/push/campaign/${ID}/delete](#delete-campaign) - Delete specific campaign
-- `POST` [/push/campaign/${ID}/user/delete](#delete-users-from-campaign) - Delete users from specific campaign
-- `PUT` [/push/campaign/${ID}/user/add](#add-users-to-campaign) - Add users to specific campaign
+- `POST` / `DELETE` [/push/campaign/${ID}/delete](#delete-campaign) - Delete specific campaign
+- `POST` / `DELETE` [/push/campaign/${ID}/user/delete](#delete-users-from-campaign) - Delete users from specific campaign
+- `POST` / `PUT` [/push/campaign/${ID}/user/add](#add-users-to-campaign) - Add users to specific campaign
 - `GET` [/push/campaign/${ID}/detail](#get-campaign) - Return specific campaign
 - `GET` [/push/campaign/list?all={true,false}](#get-list-of-campaigns) - Return actual list of campaigns
 - `GET` [/push/campaign/${ID}/user/list?page=${PAGE}&size=${SIZE}](#get-users-from-campaign) - Return paged list of users from specific campaign
@@ -56,10 +56,10 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 - `GET` [/admin/app/unconfigured/list](#list-unconfigured-applications) - List unconfigured applications
 - `POST` [/admin/app/detail](#application-detail) - Get application detail
 - `POST` [/admin/app/create](#create-application) - Create application
-- `PUT` [/admin/ios/update](#update-ios-configuration) - Update iOS configuration
-- `POST` [/admin/ios/remove](#remove-ios-configuration) - Remove iOS configuration
-- `PUT` [/admin/android/update](#update-android-configuration) - Update Android configuration
-- `POST` [/admin/android/remove](#remove-android-configuration) - Remove Android configuration
+- `POST / `PUT` [/admin/ios/update](#update-ios-configuration) - Update iOS configuration
+- `POST` / `DELETE` [/admin/ios/remove](#remove-ios-configuration) - Remove iOS configuration
+- `POST / `PUT` [/admin/android/update](#update-android-configuration) - Update Android configuration
+- `POST` / `DELETE` [/admin/android/remove](#remove-android-configuration) - Remove Android configuration
 
 #### Service Status
 

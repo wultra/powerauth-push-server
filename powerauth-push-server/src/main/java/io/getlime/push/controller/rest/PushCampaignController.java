@@ -105,7 +105,7 @@ public class PushCampaignController {
      * @param campaignId Identifier for deleting a campaign
      * @return Remove campaign status response.
      */
-    @PostMapping(value = "{id}/delete")
+    @RequestMapping(value = "{id}/delete", method = { RequestMethod.POST, RequestMethod.DELETE })
     @ApiOperation(value = "Delete a campaign",
                   notes = "Specified with id. Also users associated with this campaign are going to be deleted. If deletion was applied then deleted status is true. False if such campaign does not exist")
     public ObjectResponse<DeleteCampaignResponse> deleteCampaign(@PathVariable(value = "id") Long campaignId) {
@@ -130,7 +130,7 @@ public class PushCampaignController {
      * @return Campaign Response
      * @throws PushServerException In case campaign with provided ID does not exist.
      */
-    @PostMapping(value = "{id}/detail")
+    @GetMapping(value = "{id}/detail")
     @ApiOperation(value = "Return details about campaign",
                   notes = "Campaign specified by id. Details contain campaign id, application id, status if campaign was sent and message.")
     public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
@@ -154,7 +154,7 @@ public class PushCampaignController {
      * @return List of campaigns.
      * @throws PushServerException In case campaign message cannot be deserialized.
      */
-    @PostMapping(value = "list")
+    @GetMapping(value = "list")
     @ApiOperation(value = "Return a detailed list of campaigns",
                   notes = "Restricted with all param. This parameter decides if return campaigns that are 'only sent'(statement false)" +
                           " or return all registered campaigns (statement true). Details are same as in getCampaign method")
@@ -191,7 +191,7 @@ public class PushCampaignController {
      * @return Response status
      * @throws PushServerException In case campaign with given ID does not exist.
      */
-    @PostMapping(value = "{id}/user/add")
+    @RequestMapping(value = "{id}/user/add", method = { RequestMethod.POST, RequestMethod.PUT })
     @ApiOperation(value = "Associate users to campaign",
                   notes = "Users are identified in request body as an array of strings in request body.")
     public Response addUsersToCampaign(@PathVariable(value = "id") Long campaignId, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
@@ -222,7 +222,7 @@ public class PushCampaignController {
      * @param pageable Format for pagination (?page=x&amp;size=y), where "x" is chosen page and "y" is size is number of elements per page, beginning from zero
      * @return Campaign id, list of users
      */
-    @PostMapping(value = "{id}/user/list")
+    @GetMapping(value = "{id}/user/list")
     @ApiOperation(value = "Return list of users",
                   notes = "Return all users' ids from campaign that is specified in URI {id} variable. " +
                           "Users are shown in paginated format based on parameters assigned in URI. " +
@@ -251,7 +251,7 @@ public class PushCampaignController {
      * @param request List of users to remove
      * @return Response status
      */
-    @PostMapping(value = "{id}/user/delete")
+    @RequestMapping(value = "{id}/user/delete", method = { RequestMethod.POST, RequestMethod.DELETE })
     @ApiOperation(value = "Delete users from campaign",
                   notes = "Delete users from certain campaign specified with {id} variable in URI." +
                           "Users are described as list of their ids in Request body")
