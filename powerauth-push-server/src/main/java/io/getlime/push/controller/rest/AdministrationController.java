@@ -33,10 +33,7 @@ import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -70,7 +67,7 @@ public class AdministrationController {
      * List applications configured in Push Server.
      * @return Application list response.
      */
-    @PostMapping(value = "list")
+    @GetMapping(value = "list")
     public ObjectResponse<GetApplicationListResponse> listApplications() {
         logger.debug("Received listApplications request");
         final GetApplicationListResponse response = new GetApplicationListResponse();
@@ -94,7 +91,7 @@ public class AdministrationController {
      * List applications which are not yet configured in Push Server.
      * @return Application list response.
      */
-    @PostMapping(value = "unconfigured/list")
+    @GetMapping(value = "unconfigured/list")
     public ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() {
         logger.debug("Received listUnconfiguredApplications request");
         GetApplicationListResponse response = new GetApplicationListResponse();
@@ -188,7 +185,7 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @PostMapping(value = "ios/update")
+    @RequestMapping(value = "ios/update", method = { RequestMethod.POST, RequestMethod.PUT })
     public Response updateIos(@RequestBody ObjectRequest<UpdateIosRequest> request) throws PushServerException {
         final UpdateIosRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
@@ -217,7 +214,7 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @PostMapping(value = "ios/remove")
+    @RequestMapping(value = "ios/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
     public Response removeIos(@RequestBody ObjectRequest<RemoveIosRequest> request) throws PushServerException {
         final RemoveIosRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
@@ -245,7 +242,7 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @PostMapping(value = "android/update")
+    @RequestMapping(value = "android/update", method = { RequestMethod.POST, RequestMethod.PUT })
     public Response updateAndroid(@RequestBody ObjectRequest<UpdateAndroidRequest> request) throws PushServerException {
         final UpdateAndroidRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
@@ -272,7 +269,7 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @PostMapping(value = "android/remove")
+    @RequestMapping(value = "android/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
     public Response removeAndroid(@RequestBody ObjectRequest<RemoveAndroidRequest> request) throws PushServerException {
         final RemoveAndroidRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
