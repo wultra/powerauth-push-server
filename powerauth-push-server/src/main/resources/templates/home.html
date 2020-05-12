@@ -1,0 +1,86 @@
+<!--
+  ~ PowerAuth Server and related software components
+  ~ Copyright (C) 2020 Wultra s.r.o.
+  ~  
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU Affero General Public License as published
+  ~ by the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~  
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU Affero General Public License for more details.
+  ~  
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="resources/css/bootstrap.min.css"/>
+    <title>PowerAuth Push Server</title>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mt-3 rounded">
+            <a class="navbar-brand" href="#">
+                <img src="resources/image/wultra-square.svg" width="30" height="30" alt="Wultra Logo" class="mr-2">
+                <strong>PowerAuth Push Server</strong>
+            </a>
+        </nav>
+
+        <div class="row mt-3">
+            <div class="col-sm-7">
+                <div class="card mb-3">
+                    <h5 class="card-header">System Information</h5>
+                    <div class="card-body">
+                        <div class="card-text">
+                            <p>Version: <strong th:text="${version}">0.24.0</strong></p>
+                            <p>Build Time: <strong th:text="${buildTime}">2020-05-01T00:00:00</strong></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <h5 class="card-header">Available Interfaces</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="swagger-ui.html">PowerAuth Push Server RESTful API</a>
+                            <span class="badge badge-secondary badge-pill">Swagger</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <div class="card mb-3">
+                    <h5 class="card-header">Quick Links</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><a target="_blank" href="https://developers.wultra.com/docs/develop/powerauth-push-server/">Technical Documentation</a></li>
+                        <li class="list-group-item"><a target="_blank" th:href="@{'https://github.com/wultra/powerauth-push-server/releases/tag/' + ${version}}">Release on Github</a></li>
+                        <li class="list-group-item"><a target="_blank" href="https://github.com/wultra/powerauth-push-server">Github Develop Repository</a></li>
+                        <li class="list-group-item"><a target="_blank" href="https://github.com/wultra/powerauth-push-server/issues">Report Issue</a></li>
+                    </ul>
+                </div>
+                <div class="card mb-3">
+                    <h5 class="card-header">Contact Us</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><a target="_blank" href="https://wultra.com">🔗 Website</a></li>
+                        <li class="list-group-item"><a target="_blank" href="https://gitter.im/wultra/powerauth">💬 Gitter Chat</a></li>
+                        <li class="list-group-item"><a href="mailto:hello@wultra.com">✉️ E-mail</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="container mt-3">
+        <p>&copy; <span th:text="${#dates.year(#dates.createNow())}">2020</span> <a target="_blank" href="https://wultra.com">Wultra s.r.o.</a></p>
+    </footer>
+
+    <!-- scripts //-->
+    <script src="resources/js/bootstrap.min.js"></script>
+    <script src="resources/js/jquery-3.4.1.min.js"></script>
+    <script src="resources/js/popper.min.js"></script>
+</body>
+</html>

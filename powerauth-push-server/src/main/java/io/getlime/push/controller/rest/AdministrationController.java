@@ -168,6 +168,10 @@ public class AdministrationController {
         }
         logger.info("Received createApplication request, application ID: {}", requestObject.getAppId());
         String errorMessage = CreateApplicationRequestValidator.validate(requestObject);
+        AppCredentialsEntity existingAppCredentialsEntity = appCredentialsRepository.findFirstByAppId(requestObject.getAppId());
+        if (existingAppCredentialsEntity != null) {
+            errorMessage = "Application already exists";
+        }
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
