@@ -13,6 +13,7 @@
 
 - [Push Server RESTful API](./Push-Server-API.md)
 - [Push Server Database Structure](./Push-Server-Database.md)
+- [Push Server Administration](./Push-Server-Administration.md)
 
 **Technical Topics**
 

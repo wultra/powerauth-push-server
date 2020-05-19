@@ -56,9 +56,9 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 - `GET` [/admin/app/unconfigured/list](#list-unconfigured-applications) - List unconfigured applications
 - `POST` [/admin/app/detail](#application-detail) - Get application detail
 - `POST` [/admin/app/create](#create-application) - Create application
-- `POST / `PUT` [/admin/ios/update](#update-ios-configuration) - Update iOS configuration
+- `POST` / `PUT` [/admin/ios/update](#update-ios-configuration) - Update iOS configuration
 - `POST` / `DELETE` [/admin/ios/remove](#remove-ios-configuration) - Remove iOS configuration
-- `POST / `PUT` [/admin/android/update](#update-android-configuration) - Update Android configuration
+- `POST` / `PUT` [/admin/android/update](#update-android-configuration) - Update Android configuration
 - `POST` / `DELETE` [/admin/android/remove](#remove-android-configuration) - Remove Android configuration
 
 #### Service Status
@@ -236,7 +236,7 @@ Removes registered device based on the push token value.
 <table>
 <tr>
 <td>Method</td>
-<td><code>POST</code></td>
+<td><code>POST / DELETE</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -273,7 +273,7 @@ Update the status of given device registration based on the associated activatio
 <table>
 <tr>
 <td>Method</td>
-<td><code>POST</code></td>
+<td><code>POST / PUT</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -546,7 +546,7 @@ Delete a specific campaign. Also users associated with this campaign are going t
 <table>
 <tr>
 <td>Method</td>
-<td><code>POST</code></td>
+<td><code>POST / DELETE</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -703,7 +703,7 @@ Associate users to a specific campaign. Users are identified in request body as 
 <table>
 <tr>
 <td>Method</td>
-<td><code>PUT</code></td>
+<td><code>POST / PUT</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -794,7 +794,7 @@ Delete users associated with a specific campaign. Users are identified request b
 <table>
 <tr>
 <td>Method</td>
-<td><code>POST</code></td>
+<td><code>POST / DELETE</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -842,7 +842,6 @@ Send message from a specific campaign on test user to check rightness of that ca
 <tr>
 <td>Var ${ID} </td>
 <td>Campaign identifier</td>
-</tr>
 </tr>
 </table>
 
@@ -1063,7 +1062,7 @@ Update an iOS configuration.
 <table>
 <tr>
 <td>Method</td>
-<td><code>PUT</code></td>
+<td><code>POST / PUT</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -1100,7 +1099,7 @@ Remove an iOS configuration.
 <table>
 <tr>
 <td>Method</td>
-<td><code>PUT</code></td>
+<td><code>POST / DELETE</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -1133,7 +1132,7 @@ Update an Android configuration.
 <table>
 <tr>
 <td>Method</td>
-<td><code>PUT</code></td>
+<td><code>POST / PUT</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -1166,7 +1165,7 @@ Update an Android configuration.
 <table>
 <tr>
 <td>Method</td>
-<td><code>POST</code></td>
+<td><code>POST / DELETE</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
