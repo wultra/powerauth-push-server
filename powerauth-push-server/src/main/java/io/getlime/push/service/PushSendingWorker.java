@@ -338,7 +338,7 @@ public class PushSendingWorker {
                             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         }
                     } else {
-                        logger.info("Notification sent, APNS ID: {}", pushNotificationResponse.getApnsId());
+                        logger.info("Notification sent, APNs ID: {}", pushNotificationResponse.getApnsId());
                         callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                     }
                 } else {
