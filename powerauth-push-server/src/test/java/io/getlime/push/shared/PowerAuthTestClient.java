@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
 import io.getlime.powerauth.soap.v3.*;
 import io.getlime.security.powerauth.crypto.client.activation.PowerAuthClientActivation;
-import io.getlime.security.powerauth.crypto.lib.config.PowerAuthConfiguration;
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.EciesEncryptor;
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.EciesFactory;
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesCryptogram;
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesSharedInfo1;
-import io.getlime.security.powerauth.provider.CryptoProviderUtil;
+import io.getlime.security.powerauth.crypto.lib.util.KeyConvertor;
 import io.getlime.security.powerauth.rest.api.model.request.v3.ActivationLayer2Request;
 import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -29,7 +28,7 @@ public class PowerAuthTestClient {
 
     private final PowerAuthClientActivation activation = new PowerAuthClientActivation();
     private final EciesFactory eciesFactory = new EciesFactory();
-    private CryptoProviderUtil keyConversion;
+    private final KeyConvertor keyConvertor = new KeyConvertor();
     private PowerAuthServiceClient powerAuthClient;
 
     private Long applicationId;
@@ -51,7 +50,6 @@ public class PowerAuthTestClient {
         marshaller.setContextPath("io.getlime.powerauth.soap.v3");
         powerAuthClient.setMarshaller(marshaller);
         powerAuthClient.setUnmarshaller(marshaller);
-        keyConversion = PowerAuthConfiguration.INSTANCE.getKeyConvertor();
     }
 
     public Long initializeApplication(String applicationName, String applicationVersion) {
@@ -101,7 +99,7 @@ public class PowerAuthTestClient {
 
         // Generate device key pair
         KeyPair deviceKeyPair = activation.generateDeviceKeyPair();
-        byte[] devicePublicKeyBytes = keyConversion.convertPublicKeyToBytes(deviceKeyPair.getPublic());
+        byte[] devicePublicKeyBytes = keyConvertor.convertPublicKeyToBytes(deviceKeyPair.getPublic());
         String devicePublicKeyBase64 = BaseEncoding.base64().encode(devicePublicKeyBytes);
 
         // Create activation layer 2 request which is decryptable only on PowerAuth server
@@ -111,7 +109,7 @@ public class PowerAuthTestClient {
 
         // Encrypt request data using ECIES in application scope with sharedInfo1 = /pa/activation
         byte[] masterKeyBytes = BaseEncoding.base64().decode(masterPublicKey);
-        ECPublicKey masterPK = (ECPublicKey) keyConversion.convertBytesToPublicKey(masterKeyBytes);
+        ECPublicKey masterPK = (ECPublicKey) keyConvertor.convertBytesToPublicKey(masterKeyBytes);
         byte[] applicationSecretBytes = applicationSecret.getBytes(StandardCharsets.UTF_8);
 
         EciesEncryptor eciesEncryptorL2 = eciesFactory.getEciesEncryptorForApplication(masterPK, applicationSecretBytes, EciesSharedInfo1.ACTIVATION_LAYER_2);

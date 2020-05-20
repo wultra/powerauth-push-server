@@ -27,8 +27,8 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 
 - `POST` [/push/device/create](#create-device) - Create new device registration
 - `POST` [/push/device/create/multi](#create-device-for-multiple-associated-activations) - Create new device registration for multiple activations
-- `POST` [/push/device/delete](#delete-device) - Remove registered device
-- `POST` [/push/device/status/update](#update-device-status) - Update the status of the activation so that when activation associated with given device is not active, no notifications are sent to the device.
+- `POST` / `DELETE` [/push/device/delete](#delete-device) - Remove registered device
+- `POST` / `PUT` [/push/device/status/update](#update-device-status) - Update the status of the activation so that when activation associated with given device is not active, no notifications are sent to the device.
 
 #### Sending Push Messages
 
@@ -43,11 +43,11 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 #### Campaign Management
 
 - `POST` [/push/campaign/create](#create-campaign) - Create new campaign
-- `POST` [/push/campaign/${ID}/delete](#delete-campaign) - Delete specific campaign
-- `POST` [/push/campaign/${ID}/user/delete](#delete-users-from-campaign) - Delete users from specific campaign
-- `PUT` [/push/campaign/${ID}/user/add](#add-users-to-campaign) - Add users to specific campaign
+- `POST` / `DELETE` [/push/campaign/${ID}/delete](#delete-campaign) - Delete specific campaign
+- `POST` / `DELETE` [/push/campaign/${ID}/user/delete](#delete-users-from-campaign) - Delete users from specific campaign
+- `POST` / `PUT` [/push/campaign/${ID}/user/add](#add-users-to-campaign) - Add users to specific campaign
 - `GET` [/push/campaign/${ID}/detail](#get-campaign) - Return specific campaign
-- `GET` [/push/campaign/list/?all={true|false}](#get-list-of-campaigns) - Return actual list of campaigns
+- `GET` [/push/campaign/list?all={true,false}](#get-list-of-campaigns) - Return actual list of campaigns
 - `GET` [/push/campaign/${ID}/user/list?page=${PAGE}&size=${SIZE}](#get-users-from-campaign) - Return paged list of users from specific campaign
 
 #### Administration of Push Server
@@ -56,10 +56,10 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 - `GET` [/admin/app/unconfigured/list](#list-unconfigured-applications) - List unconfigured applications
 - `POST` [/admin/app/detail](#application-detail) - Get application detail
 - `POST` [/admin/app/create](#create-application) - Create application
-- `PUT` [/admin/ios/update](#update-ios-configuration) - Update iOS configuration
-- `POST` [/admin/ios/remove](#remove-ios-configuration) - Remove iOS configuration
-- `PUT` [/admin/android/update](#update-android-configuration) - Update Android configuration
-- `POST` [/admin/android/remove](#remove-android-configuration) - Remove Android configuration
+- `POST` / `PUT` [/admin/ios/update](#update-ios-configuration) - Update iOS configuration
+- `POST` / `DELETE` [/admin/ios/remove](#remove-ios-configuration) - Remove iOS configuration
+- `POST` / `PUT` [/admin/android/update](#update-android-configuration) - Update Android configuration
+- `POST` / `DELETE` [/admin/android/remove](#remove-android-configuration) - Remove Android configuration
 
 #### Service Status
 
@@ -69,11 +69,11 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 
 PowerAuth Push Server uses following format for error response body, accompanied with an appropriate HTTP status code. Besides the HTTP error codes that application server may return regardless of server application (such as 404 when resource is not found or 503 when server is down), following status codes may be returned:
 
-|`status`|`HTTP code`       |Description|
-|---     |---          |---|
-|OK      |200          |No issue|
-|ERROR   |400          |Issue with a request format, or issue of the business logic|
-|ERROR   |401          | Unauthorized, invalid security token configuration|
+| Status | HTTP Code | Description |
+|--------|-----------|-------------|
+| OK     | 200       | No issue    |
+| ERROR  | 400       | Issue with a request format, or issue of the business logic |
+| ERROR  | 401       | Unauthorized, invalid security token configuration |
 
 All error responses that are produced by the PowerAuth Push Server have following body:
 
@@ -88,8 +88,8 @@ All error responses that are produced by the PowerAuth Push Server have followin
 }
 ```
 
-- `status` - _OK_ | _ERROR_
-- `code` - _ERROR_GENERIC_ | _ERROR_DATABASE_
+- `status` - `OK`, `ERROR`
+- `code` - `ERROR_GENERIC`, `ERROR_DATABASE`
 - `message` - Message that describes certain error.
 
 ## Service
@@ -172,7 +172,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
-- `platform` - "_ios_ | _android_"
+- `platform` - `ios`, `android`
 - `activationId` - Activation identifier
 
 #### **Response**
@@ -218,7 +218,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
-- `platform` - "_ios_ | _android_"
+- `platform` - `ios`, `android`
 - `activationIds` - Associated activation identifiers
 
 #### **Response**
@@ -236,7 +236,7 @@ Removes registered device based on the push token value.
 <table>
 <tr>
 <td>Method</td>
-<td><code>POST</code></td>
+<td><code>POST / DELETE</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -273,7 +273,7 @@ Update the status of given device registration based on the associated activatio
 <table>
 <tr>
 <td>Method</td>
-<td><code>POST</code></td>
+<td><code>POST / PUT</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -438,7 +438,7 @@ Sends a message message batch - each item in the batch represents a message to g
 
 ```
 
-- `appId` - Application that user/s is/are using.
+- `appId` - Application that user is using.
 - `batch` - List of messages, see [documentation for sending a single message](#send-message) for details
 
 #### **Response**
@@ -546,7 +546,7 @@ Delete a specific campaign. Also users associated with this campaign are going t
 <table>
 <tr>
 <td>Method</td>
-<td><code>POST</code></td>
+<td><code>POST / DELETE</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -560,7 +560,6 @@ Delete a specific campaign. Also users associated with this campaign are going t
 
 ```json
 {
-
 }
 ```
 
@@ -704,7 +703,7 @@ Associate users to a specific campaign. Users are identified in request body as 
 <table>
 <tr>
 <td>Method</td>
-<td><code>PUT</code></td>
+<td><code>POST / PUT</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -725,6 +724,7 @@ Associate users to a specific campaign. Users are identified in request body as 
     ]
 }
 ```
+
 - list of users
 
 #### **Response**
@@ -794,7 +794,7 @@ Delete users associated with a specific campaign. Users are identified request b
 <table>
 <tr>
 <td>Method</td>
-<td><code>POST</code></td>
+<td><code>POST / DELETE</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -842,7 +842,6 @@ Send message from a specific campaign on test user to check rightness of that ca
 <tr>
 <td>Var ${ID} </td>
 <td>Campaign identifier</td>
-</tr>
 </tr>
 </table>
 
@@ -1063,7 +1062,7 @@ Update an iOS configuration.
 <table>
 <tr>
 <td>Method</td>
-<td><code>PUT</code></td>
+<td><code>POST / PUT</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -1100,7 +1099,7 @@ Remove an iOS configuration.
 <table>
 <tr>
 <td>Method</td>
-<td><code>PUT</code></td>
+<td><code>POST / DELETE</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -1133,7 +1132,7 @@ Update an Android configuration.
 <table>
 <tr>
 <td>Method</td>
-<td><code>PUT</code></td>
+<td><code>POST / PUT</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>
@@ -1166,7 +1165,7 @@ Update an Android configuration.
 <table>
 <tr>
 <td>Method</td>
-<td><code>POST</code></td>
+<td><code>POST / DELETE</code></td>
 </tr>
 <tr>
 <td>Resource URI</td>

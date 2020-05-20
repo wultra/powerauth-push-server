@@ -27,6 +27,8 @@ import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.serialization.JSONSerialization;
 import io.getlime.push.service.PushMessageSenderService;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -36,7 +38,6 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -49,9 +50,11 @@ import java.util.Optional;
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-@Controller
+@RestController
 @RequestMapping(value = "push/campaign/send")
 public class SendCampaignController {
+
+    private static final Logger logger = LoggerFactory.getLogger(SendCampaignController.class);
 
     private final JobLauncher jobLauncher;
     private final Job job;
@@ -76,13 +79,13 @@ public class SendCampaignController {
      * @return Response with status.
      * @throws PushServerException In case campaign with given ID is not found.
      */
-    @RequestMapping(value = "live/{id}", method = RequestMethod.POST)
-    @ResponseBody
+    @PostMapping(value = "live/{id}")
     @ApiOperation(value = "Send a campaign",
                   notes = "Send message from a specific campaign to devices belonged to users associated with that campaign. Whereas each device gets a campaign only once.\n" +
                           "\n" +
                           "If sending was successful then sent parameter is set on true and timestampSent is set on current time.")
     public Response sendCampaign(@PathVariable(value = "id") Long id) throws PushServerException {
+        logger.info("Received sendCampaign request, campaign ID: {}", id);
         try {
             final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(id);
             if (!campaignEntityOptional.isPresent()) {
@@ -93,6 +96,7 @@ public class SendCampaignController {
                     .addDate("timestamp", new Date())
                     .toJobParameters();
             jobLauncher.run(job, jobParameters);
+            logger.info("The sendCampaign request succeeded, campaign ID: {}", id);
             return new Response();
         } catch (JobExecutionAlreadyRunningException e) {
             throw new PushServerException("Job execution already running", e);
@@ -113,11 +117,11 @@ public class SendCampaignController {
      * @return Response with status
      * @throws PushServerException In case request object is invalid.
      */
-    @RequestMapping(value = "test/{id}", method = RequestMethod.POST)
-    @ResponseBody
+    @PostMapping(value = "test/{id}")
     @ApiOperation(value = "Send a test campaign",
                   notes = "Send message from a specific campaign on test user identified in request body, userId param, to check rightness of that campaign.")
     public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
+        logger.info("Received sendTestCampaign request, campaign ID: {}", id);
         final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(id);
         if (!campaignEntityOptional.isPresent()) {
             throw new PushServerException("Campaign with entered ID does not exist");
@@ -134,6 +138,7 @@ public class SendCampaignController {
         List<PushMessage> message = new ArrayList<>();
         message.add(pushMessage);
         pushMessageSenderService.sendPushMessage(campaign.getAppId(), message);
+        logger.info("The sendTestCampaign request succeeded, campaign ID: {}", id);
         return new Response();
     }
 }

@@ -17,7 +17,7 @@ package io.getlime.push.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
@@ -47,7 +47,7 @@ public class WebApplicationConfig implements WebMvcConfigurer {
         bean.afterPropertiesSet();
         ObjectMapper objectMapper = bean.getObject();
         if (objectMapper != null) {
-            objectMapper.registerModule(new JodaModule());
+            objectMapper.registerModule(new JavaTimeModule());
         }
         return objectMapper;
     }

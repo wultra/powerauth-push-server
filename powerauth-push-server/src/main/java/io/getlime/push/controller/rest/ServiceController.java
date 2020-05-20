@@ -22,10 +22,9 @@ import io.getlime.push.model.response.ServiceStatusResponse;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 
@@ -34,7 +33,7 @@ import java.util.Date;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-@Controller
+@RestController
 @RequestMapping(value = "push/service")
 public class ServiceController {
 
@@ -55,10 +54,10 @@ public class ServiceController {
      * Controller resource with system information.
      * @return System status info.
      */
-    @RequestMapping(value = "status", method = RequestMethod.GET)
+    @GetMapping(value = "status")
     @ApiOperation(value = "Service status",
                   notes = "Send a system status response, with basic information about the running application.")
-    public @ResponseBody ObjectResponse<ServiceStatusResponse> getServiceStatus() {
+    public ObjectResponse<ServiceStatusResponse> getServiceStatus() {
         ServiceStatusResponse response = new ServiceStatusResponse();
         response.setApplicationName(pushServiceConfiguration.getPushServerName());
         response.setApplicationDisplayName(pushServiceConfiguration.getPushServerDisplayName());
