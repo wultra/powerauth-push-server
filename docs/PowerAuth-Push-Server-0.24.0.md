@@ -39,4 +39,4 @@ public class UnirestConfiguration {
 
 ## Push Server Administration  
 
-In the latest version of Push Server, we decided to remove the web administration console, due to its simplicity. You can configure apps either via database by inserting values to the `push_app_credentials` table, or by calling [Administration API](./Push-Server-API.md#administration)
+In the latest version of Push Server, we decided to remove the web administration console, due to its simplicity. You can configure apps either via database by inserting values to the `push_app_credentials` table, or by calling [Administration API](./Push-Server-API.md#administration). A new section regarding Push Server administration is [available in the documentation](./Push-Server-Administration.md). 
