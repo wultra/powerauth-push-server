@@ -488,6 +488,7 @@ Further campaign comes with:
 Create a campaign with application that campaign is using and certain message that contains parameters of message object.
 
 #### **Request**
+
 <table>
 <tr>
 <td>Method</td>
@@ -543,6 +544,7 @@ _note: identifier of campaign is generated automatically_
 Delete a specific campaign. Also users associated with this campaign are going to be deleted. If deletion was applied then deleted status is true.
 
 #### **Request**
+
 <table>
 <tr>
 <td>Method</td>
@@ -583,6 +585,7 @@ Delete a specific campaign. Also users associated with this campaign are going t
 Return details of a specific campaign.
 
 #### **Request**
+
 <table>
 <tr>
 <td>Method</td>
@@ -634,6 +637,7 @@ Return details of a specific campaign.
 Return list of actually registered campaigns, based on `all` parameter. This parameter decides if return campaigns that are 'only sent'(statement _false_) or return all registered campaigns (statement _true_).
 
 #### **Request**
+
 <table>
 <tr>
 <td>Method</td>
@@ -700,6 +704,7 @@ Return list of actually registered campaigns, based on `all` parameter. This par
 Associate users to a specific campaign. Users are identified in request body as an array of strings.
 
 #### **Request**
+
 <table>
 <tr>
 <td>Method</td>
@@ -740,6 +745,7 @@ Associate users to a specific campaign. Users are identified in request body as 
 Return list users from a specific campaign. Users are shown in paginated format based on parameters assigned in URI.
 
 #### **Request**
+
 <table>
 <tr>
 <td>Method</td>
@@ -791,6 +797,7 @@ Return list users from a specific campaign. Users are shown in paginated format 
 Delete users associated with a specific campaign. Users are identified request body as an array of strings.
 
 #### **Request**
+
 <table>
 <tr>
 <td>Method</td>
@@ -831,6 +838,7 @@ Delete users associated with a specific campaign. Users are identified request b
 Send message from a specific campaign on test user to check rightness of that campaign.
 
 #### **Request**
+
 <table>
 <tr>
 <td>Method</td>
@@ -870,6 +878,7 @@ Send message from a specific campaign to devices belonged to users associated wi
 If sending was successful then `sent` parameter is set on _true_ and `timestampSent` is set on current time.
 
 #### **Request**
+
 <table>
 <tr>
 <td>Method</td>
