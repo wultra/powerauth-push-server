@@ -89,10 +89,6 @@
         <unirest.version>3.7.02</unirest.version>
         <google-api-client.version>1.30.9</google-api-client.version>
         <firebase-admin.version>6.12.2</firebase-admin.version>
-        <jaxb.version>2.3.1</jaxb.version>
-        <istack.version>3.0.10</istack.version>
-        <jaxws.version>1.4.0</jaxws.version>
-        <saaj.version>1.5.1</saaj.version>
         <bc.version>1.65</bc.version>
     </properties>
 
