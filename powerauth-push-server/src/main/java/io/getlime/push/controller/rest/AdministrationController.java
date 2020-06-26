@@ -16,6 +16,7 @@
 package io.getlime.push.controller.rest;
 
 import com.google.common.io.BaseEncoding;
+import com.wultra.security.powerauth.client.PowerAuthClient;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
@@ -29,7 +30,6 @@ import io.getlime.push.model.validator.*;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
-import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +46,7 @@ public class AdministrationController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdministrationController.class);
 
-    private final PowerAuthServiceClient powerAuthClient;
+    private final PowerAuthClient powerAuthClient;
     private final AppCredentialsRepository appCredentialsRepository;
     private final AppCredentialStorageMap appCredentialStorageMap;
 
@@ -57,7 +57,7 @@ public class AdministrationController {
      * @param appCredentialStorageMap Application credentials storage map.
      */
     @Autowired
-    public AdministrationController(PowerAuthServiceClient powerAuthClient, AppCredentialsRepository appCredentialsRepository, AppCredentialStorageMap appCredentialStorageMap) {
+    public AdministrationController(PowerAuthClient powerAuthClient, AppCredentialsRepository appCredentialsRepository, AppCredentialStorageMap appCredentialStorageMap) {
         this.powerAuthClient = powerAuthClient;
         this.appCredentialsRepository = appCredentialsRepository;
         this.appCredentialStorageMap = appCredentialStorageMap;
@@ -96,7 +96,7 @@ public class AdministrationController {
         logger.debug("Received listUnconfiguredApplications request");
         GetApplicationListResponse response = new GetApplicationListResponse();
         // Get all applications in PA Server
-        final List<io.getlime.powerauth.soap.v3.GetApplicationListResponse.Applications> applicationList = powerAuthClient.getApplicationList();
+        final List<com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications> applicationList = powerAuthClient.getApplicationList();
 
         // Get all applications that are already set up
         final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
@@ -106,7 +106,7 @@ public class AdministrationController {
         for (AppCredentialsEntity appCred: appCredentials) {
             identifiers.add(appCred.getAppId());
         }
-        for (io.getlime.powerauth.soap.v3.GetApplicationListResponse.Applications app : applicationList) {
+        for (com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications app : applicationList) {
             if (!identifiers.contains(app.getId())) {
                 PushServerApplication applicationToAdd = new PushServerApplication();
                 applicationToAdd.setId(app.getId());

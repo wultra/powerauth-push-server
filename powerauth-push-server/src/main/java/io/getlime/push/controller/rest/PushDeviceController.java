@@ -15,10 +15,11 @@
  */
 package io.getlime.push.controller.rest;
 
+import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.v3.ActivationStatus;
+import com.wultra.security.powerauth.client.v3.GetActivationStatusResponse;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.Response;
-import io.getlime.powerauth.soap.v3.ActivationStatus;
-import io.getlime.powerauth.soap.v3.GetActivationStatusResponse;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.request.CreateDeviceForActivationsRequest;
@@ -30,7 +31,6 @@ import io.getlime.push.model.validator.DeleteDeviceRequestValidator;
 import io.getlime.push.model.validator.UpdateDeviceStatusRequestValidator;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
-import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,11 +55,11 @@ public class PushDeviceController {
     private static final Logger logger = LoggerFactory.getLogger(PushDeviceController.class);
 
     private final PushDeviceRepository pushDeviceRepository;
-    private final PowerAuthServiceClient client;
+    private final PowerAuthClient client;
     private final PushServiceConfiguration config;
 
     @Autowired
-    public PushDeviceController(PushDeviceRepository pushDeviceRepository, PowerAuthServiceClient client, PushServiceConfiguration config) {
+    public PushDeviceController(PushDeviceRepository pushDeviceRepository, PowerAuthClient client, PushServiceConfiguration config) {
         this.pushDeviceRepository = pushDeviceRepository;
         this.client = client;
         this.config = config;

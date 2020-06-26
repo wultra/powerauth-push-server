@@ -97,7 +97,7 @@ public class PushServerTests {
     private int port;
 
     @Value("${powerauth.service.url}")
-    private String powerAuthServiceUrl;
+    private String powerAuthRestUrl;
 
     @Value("${powerauth.push.service.fcm.sendMessageUrl}")
     private String fcmUrlForTests;

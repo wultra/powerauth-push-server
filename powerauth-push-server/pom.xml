@@ -6,13 +6,13 @@
     <name>powerauth-push-server</name>
     <description>PowerAuth Push Server</description>
     <artifactId>powerauth-push-server</artifactId>
-    <version>0.24.0</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <parent>
         <groupId>io.getlime.security</groupId>
         <artifactId>powerauth-push-server-parent</artifactId>
-        <version>0.24.0</version>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -135,7 +135,7 @@
         </dependency>
         <dependency>
             <groupId>io.getlime.security</groupId>
-            <artifactId>powerauth-java-client-spring</artifactId>
+            <artifactId>powerauth-rest-client-spring</artifactId>
             <version>${powerauth.version}</version>
         </dependency>
 
@@ -149,33 +149,6 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson.version}</version>
-        </dependency>
-
-        <!-- Dependencies for Java 11 -->
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>${jaxb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>${jaxb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.istack</groupId>
-            <artifactId>istack-commons-runtime</artifactId>
-            <version>${istack.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.soap</groupId>
-            <artifactId>javax.xml.soap-api</artifactId>
-            <version>${jaxws.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.messaging.saaj</groupId>
-            <artifactId>saaj-impl</artifactId>
-            <version>${saaj.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->
