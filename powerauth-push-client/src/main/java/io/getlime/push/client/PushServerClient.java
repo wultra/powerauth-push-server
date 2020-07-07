@@ -17,9 +17,7 @@
 package io.getlime.push.client;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
 import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
@@ -34,18 +32,23 @@ import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.request.*;
 import io.getlime.push.model.response.*;
 import io.getlime.push.model.validator.*;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
-import kong.unirest.UnirestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * Simple class for interacting with the push server RESTful API.
@@ -57,16 +60,14 @@ public class PushServerClient {
 
     private static final Logger logger = LoggerFactory.getLogger(PushServerClient.class);
 
-    private ObjectMapper mapper = new ObjectMapper();
-
-    private String serviceBaseUrl;
+    private final WebClient webClient;
 
     /**
      * Main constructor with the push server base URL.
      * @param serviceBaseUrl Push server instance base URL.
      */
     public PushServerClient(String serviceBaseUrl) {
-        this.serviceBaseUrl = serviceBaseUrl;
+        this.webClient = WebClient.builder().baseUrl(serviceBaseUrl).build();
     }
 
     // Client calls
@@ -78,7 +79,7 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<ServiceStatusResponse> getServiceStatus() throws PushServerClientException {
-        TypeReference<ObjectResponse<ServiceStatusResponse>> typeReference = new TypeReference<ObjectResponse<ServiceStatusResponse>>() {};
+        ParameterizedTypeReference<ObjectResponse<ServiceStatusResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<ServiceStatusResponse>>() {};
 
         logger.info("Calling push server status service - start");
         final ObjectResponse<ServiceStatusResponse> result = getObjectImpl("/push/service/status", null, typeReference);
@@ -231,7 +232,7 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {};
+        ParameterizedTypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new ParameterizedTypeReference<ObjectResponse<PushMessageSendResult>>() {};
 
         logger.info("Calling push server to send a push message, app ID: {}, user ID: {} - start", appId, pushMessage.getUserId());
         final ObjectResponse<PushMessageSendResult> result = postObjectImpl("/push/message/send", new ObjectRequest<>(request), typeReference);
@@ -259,7 +260,7 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        TypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new TypeReference<ObjectResponse<PushMessageSendResult>>() {};
+        ParameterizedTypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new ParameterizedTypeReference<ObjectResponse<PushMessageSendResult>>() {};
 
         logger.info("Calling push server to send a push message batch, app ID: {} - start", appId);
         final ObjectResponse<PushMessageSendResult> result = postObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), typeReference);
@@ -287,7 +288,7 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        TypeReference<ObjectResponse<CreateCampaignResponse>> typeReference = new TypeReference<ObjectResponse<CreateCampaignResponse>>() {};
+        ParameterizedTypeReference<ObjectResponse<CreateCampaignResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<CreateCampaignResponse>>() {};
 
         logger.info("Calling push server to create a push campaign, app ID: {} - start", appId);
         final ObjectResponse<CreateCampaignResponse> result = postObjectImpl("/push/campaign/create", new ObjectRequest<>(request), typeReference);
@@ -307,7 +308,7 @@ public class PushServerClient {
         try {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
 
-            TypeReference<ObjectResponse<DeleteCampaignResponse>> typeReference = new TypeReference<ObjectResponse<DeleteCampaignResponse>>() {};
+            ParameterizedTypeReference<ObjectResponse<DeleteCampaignResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<DeleteCampaignResponse>>() {};
 
             logger.info("Calling push server to delete a push campaign, campaign ID: {} - start", campaignId);
             ObjectResponse<DeleteCampaignResponse> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, typeReference);
@@ -327,10 +328,10 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(boolean all) throws PushServerClientException {
-        Map<String, Object> params = new HashMap<>();
-        params.put("all", all);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.put("all", Collections.singletonList(Boolean.valueOf(all).toString()));
 
-        TypeReference<ObjectResponse<ListOfCampaignsResponse>> typeReference = new TypeReference<ObjectResponse<ListOfCampaignsResponse>>() {};
+        ParameterizedTypeReference<ObjectResponse<ListOfCampaignsResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<ListOfCampaignsResponse>>() {};
 
         logger.info("Calling push server to obtain a push campaign list - start");
         final ObjectResponse<ListOfCampaignsResponse> result = getObjectImpl("/push/campaign/list", params, typeReference);
@@ -350,7 +351,7 @@ public class PushServerClient {
         try {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
 
-            TypeReference<ObjectResponse<CampaignResponse>> typeReference = new TypeReference<ObjectResponse<CampaignResponse>>() {};
+            ParameterizedTypeReference<ObjectResponse<CampaignResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<CampaignResponse>>() {};
 
             logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - start", campaignId);
             final ObjectResponse<CampaignResponse> result = getObjectImpl("/push/campaign/" + campaignIdSanitized + "/detail", null, typeReference);
@@ -401,11 +402,11 @@ public class PushServerClient {
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(Long campaignId, int page, int size) throws PushServerClientException {
         try {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
-            Map<String, Object> params = new HashMap<>();
-            params.put("page", page);
-            params.put("size", size);
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.put("page", Collections.singletonList(Integer.valueOf(page).toString()));
+            params.put("size", Collections.singletonList(Integer.valueOf(size).toString()));
 
-            TypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new TypeReference<PagedResponse<ListOfUsersFromCampaignResponse>>() {};
+            ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>>() {};
 
             logger.info("Calling push server to get users from the campaign, campaign ID: {} - start", campaignId);
             final PagedResponse<ListOfUsersFromCampaignResponse> result = getObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
@@ -497,7 +498,7 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<GetApplicationListResponse> getApplicationList() throws PushServerClientException {
-        final TypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new TypeReference<ObjectResponse<GetApplicationListResponse>>() {};
+        final ParameterizedTypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetApplicationListResponse>>() {};
         logger.info("Calling push server to retrieve list of applications - start");
         final ObjectResponse<GetApplicationListResponse> response = getObjectImpl("/admin/app/list", null, typeReference);
         logger.info("Calling push server to retrieve list of applications - finish");
@@ -510,7 +511,7 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<GetApplicationListResponse> getUnconfiguredApplicationList() throws PushServerClientException {
-        final TypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new TypeReference<ObjectResponse<GetApplicationListResponse>>() {};
+        final ParameterizedTypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetApplicationListResponse>>() {};
         logger.info("Calling push server to retrieve list of unconfigured applications - start");
         final ObjectResponse<GetApplicationListResponse> response = getObjectImpl("/admin/app/unconfigured/list", null, typeReference);
         logger.info("Calling push server to retrieve list of unconfigured applications - finish");
@@ -526,7 +527,7 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(Long id, boolean includeIos, boolean includeAndroid) throws PushServerClientException {
-        final TypeReference<ObjectResponse<GetApplicationDetailResponse>> typeReference = new TypeReference<ObjectResponse<GetApplicationDetailResponse>>() {};
+        final ParameterizedTypeReference<ObjectResponse<GetApplicationDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetApplicationDetailResponse>>() {};
         GetApplicationDetailRequest request = new GetApplicationDetailRequest(id, includeIos, includeAndroid);
         logger.info("Calling push server to retrieve application detail, ID: {} - start", id);
         final ObjectResponse<GetApplicationDetailResponse> response = postObjectImpl("/admin/app/detail", new ObjectRequest<>(request), typeReference);
@@ -541,7 +542,7 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<CreateApplicationResponse> createApplication(Long appId) throws PushServerClientException {
-        final TypeReference<ObjectResponse<CreateApplicationResponse>> typeReference = new TypeReference<ObjectResponse<CreateApplicationResponse>>() {};
+        final ParameterizedTypeReference<ObjectResponse<CreateApplicationResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<CreateApplicationResponse>>() {};
         final CreateApplicationRequest request = new CreateApplicationRequest(appId);
         logger.info("Calling push server to create application, app ID: {} - start", appId);
         final ObjectResponse<CreateApplicationResponse> response = postObjectImpl("/admin/app/create", new ObjectRequest<>(request), typeReference);
@@ -625,17 +626,14 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      *
      */
-    private <T> T getObjectImpl(String url, Map<String, Object> params, TypeReference<? extends Response> typeReference) throws PushServerClientException {
+    private <T> T getObjectImpl(String url, MultiValueMap<String, String> params, ParameterizedTypeReference<? extends Response> typeReference) throws PushServerClientException {
         try {
-            HttpResponse<String> response = Unirest.get(serviceBaseUrl + url)
-                    .header("Accept", "application/json")
-                    .header("Content-Type", "application/json")
-                    .queryString(params)
-                    .asString();
-            return checkHttpStatus(typeReference, response);
-        } catch (UnirestException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
+            ClientResponse response = webClient.get()
+                    .uri(uriBuilder -> uriBuilder.path(url).queryParams(params).build())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .block();
+            return checkHttpStatus(typeReference, Objects.requireNonNull(response));
         } catch (JsonParseException e) {
             logger.warn(e.getMessage(), e);
             throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
@@ -658,7 +656,7 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     private <T> T postObjectImpl(String url, Object request) throws PushServerClientException {
-        return postObjectImpl(url, request, new TypeReference<Response>() {});
+        return postObjectImpl(url, request, new ParameterizedTypeReference<Response>() {});
     }
 
     /**
@@ -670,18 +668,21 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T postObjectImpl(String url, Object request, TypeReference<? extends Response> typeReference) throws PushServerClientException {
+    private <T> T postObjectImpl(String url, Object request, ParameterizedTypeReference<? extends Response> typeReference) throws PushServerClientException {
         try {
             // Fetch post response from given URL and for provided request object
-            HttpResponse<String> response = Unirest.post(serviceBaseUrl + url)
-                    .header("Accept", "application/json")
-                    .header("Content-Type", "application/json")
-                    .body(request)
-                    .asString();
-            return checkHttpStatus(typeReference, response);
-        } catch (UnirestException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
+            WebClient.RequestBodySpec spec = webClient.post()
+                    .uri(uriBuilder -> uriBuilder.path(url).build())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON);
+            Mono<ClientResponse> responseMono;
+            if (request != null) {
+                responseMono = spec.body(BodyInserters.fromValue(request)).exchange();
+            } else {
+                responseMono = spec.exchange();
+            }
+            ClientResponse response = responseMono.block();
+            return checkHttpStatus(typeReference, Objects.requireNonNull(response));
         } catch (JsonParseException e) {
             logger.warn(e.getMessage(), e);
             throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
@@ -703,7 +704,7 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     private <T> T putObjectImpl(String url, Object request) throws PushServerClientException {
-        return putObjectImpl(url, request, new TypeReference<Response>() {});
+        return putObjectImpl(url, request, new ParameterizedTypeReference<Response>() {});
     }
 
     /**
@@ -715,17 +716,20 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T putObjectImpl(String url, Object request, TypeReference<Response> typeReference) throws PushServerClientException {
+    private <T> T putObjectImpl(String url, Object request, ParameterizedTypeReference<Response> typeReference) throws PushServerClientException {
         try {
-            HttpResponse<String> response = Unirest.put(serviceBaseUrl + url)
-                    .header("Accept", "application/json")
-                    .header("Content-Type", "application/json")
-                    .body(request)
-                    .asString();
-            return checkHttpStatus(typeReference, response);
-        } catch (UnirestException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
+            WebClient.RequestBodySpec spec = webClient.put()
+                    .uri(uriBuilder -> uriBuilder.path(url).build())
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON);
+            Mono<ClientResponse> responseMono;
+            if (request != null) {
+                responseMono = spec.body(BodyInserters.fromValue(request)).exchange();
+            } else {
+                responseMono = spec.exchange();
+            }
+            ClientResponse response = responseMono.block();
+            return checkHttpStatus(typeReference, Objects.requireNonNull(response));
         } catch (JsonParseException e) {
             logger.warn(e.getMessage(), e);
             throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
@@ -749,17 +753,17 @@ public class PushServerClient {
      * @throws IOException In case JSON processing fails.
      */
     @SuppressWarnings("unchecked")
-    private <T> T checkHttpStatus(TypeReference<? extends Response> typeReference, HttpResponse<String> response) throws IOException, PushServerClientException {
-        if (response.getStatus() == 200) {
-            return (T) mapper.readValue(response.getBody(), typeReference);
+    private <T> T checkHttpStatus(ParameterizedTypeReference<? extends Response> typeReference, ClientResponse response) throws IOException, PushServerClientException {
+        if (!response.statusCode().isError()) {
+            return (T) response.bodyToMono(typeReference).block();
         } else {
             try {
                 // Response body contains data, return Exception with status code and error response
-                ErrorResponse errorResponse = mapper.readValue(response.getBody(), ErrorResponse.class);
-                throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus(), errorResponse.getResponseObject());
-            } catch (IOException ex) {
+                ErrorResponse errorResponse = (ErrorResponse) response.bodyToMono(typeReference).block();
+                throw new PushServerClientException("Error HTTP response status code received: " + response.rawStatusCode(), Objects.requireNonNull(errorResponse).getResponseObject());
+            } catch (Exception ex) {
                 logger.warn(ex.getMessage(), ex);
-                throw new PushServerClientException("Error HTTP response status code received: " + response.getStatus() + ". Check server log for error details.");
+                throw new PushServerClientException("Error HTTP response status code received: " + response.rawStatusCode() + ". Check server log for error details.");
             }
         }
     }
