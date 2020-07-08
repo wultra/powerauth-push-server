@@ -754,7 +754,7 @@ public class PushServerClient {
      */
     @SuppressWarnings("unchecked")
     private <T> T checkHttpStatus(ParameterizedTypeReference<? extends Response> typeReference, ClientResponse response) throws IOException, PushServerClientException {
-        if (!response.statusCode().isError()) {
+        if (response.statusCode().is2xxSuccessful()) {
             return (T) response.bodyToMono(typeReference).block();
         } else {
             try {
