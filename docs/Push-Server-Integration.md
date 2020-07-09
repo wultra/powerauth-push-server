@@ -4,10 +4,10 @@ In order to register devices and send push notifications, the Push Server needs 
 
 ## Prerequisites for the tutorial
 
-- Running PowerAuth Server with available SOAP interface.
-- Running PowerAuth Push Server with available RESTful interface.
+- Running PowerAuth Server with available REST interface.
+- Running PowerAuth Push Server with available REST interface.
 - Knowledge of applications based on Spring Framework.
-- Software: IDE - Spring Tool Suite, Java EE Application Server (Pivotal Server, Tomcat, ...)
+- Software: IDE, Application Server (Tomcat, Wildfly, ...)
 
 ## Common integration steps
 

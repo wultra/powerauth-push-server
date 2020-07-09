@@ -15,10 +15,12 @@
  */
 package io.getlime.push.controller.rest;
 
+import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
+import com.wultra.security.powerauth.client.v3.ActivationStatus;
+import com.wultra.security.powerauth.client.v3.GetActivationStatusResponse;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.Response;
-import io.getlime.powerauth.soap.v3.ActivationStatus;
-import io.getlime.powerauth.soap.v3.GetActivationStatusResponse;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.request.CreateDeviceForActivationsRequest;
@@ -30,7 +32,6 @@ import io.getlime.push.model.validator.DeleteDeviceRequestValidator;
 import io.getlime.push.model.validator.UpdateDeviceStatusRequestValidator;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
-import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,11 +56,11 @@ public class PushDeviceController {
     private static final Logger logger = LoggerFactory.getLogger(PushDeviceController.class);
 
     private final PushDeviceRepository pushDeviceRepository;
-    private final PowerAuthServiceClient client;
+    private final PowerAuthClient client;
     private final PushServiceConfiguration config;
 
     @Autowired
-    public PushDeviceController(PushDeviceRepository pushDeviceRepository, PowerAuthServiceClient client, PushServiceConfiguration config) {
+    public PushDeviceController(PushDeviceRepository pushDeviceRepository, PowerAuthClient client, PushServiceConfiguration config) {
         this.pushDeviceRepository = pushDeviceRepository;
         this.client = client;
         this.config = config;
@@ -269,16 +270,22 @@ public class PushDeviceController {
      * Otherwise fail the device registration because registration could not be associated with an activation.
      * @param device Push device registration entity.
      * @param activationId Activation ID.
+     * @throws PushServerException Throw in case communication with PowerAuth server fails.
      */
     private void updateActivationForDevice(PushDeviceRegistrationEntity device, String activationId) throws PushServerException {
-        final GetActivationStatusResponse activation = client.getActivationStatus(activationId);
-        if (activation != null && !ActivationStatus.REMOVED.equals(activation.getActivationStatus())) {
-            device.setActivationId(activationId);
-            device.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
-            device.setUserId(activation.getUserId());
-            return;
+        try {
+            final GetActivationStatusResponse activation = client.getActivationStatus(activationId);
+            if (activation != null && !ActivationStatus.REMOVED.equals(activation.getActivationStatus())) {
+                device.setActivationId(activationId);
+                device.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
+                device.setUserId(activation.getUserId());
+                return;
+            }
+            throw new PushServerException("Device registration failed because associated activation is not ACTIVE");
+        } catch (PowerAuthClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerException("Device registration failed because activation status is unknown");
         }
-        throw new PushServerException("Device registration failed because associated activation is not ACTIVE.");
     }
 
     /**
@@ -292,25 +299,30 @@ public class PushDeviceController {
                   notes = "Update the status of given device registration based on the associated activation ID. " +
                           "This can help assure that registration is in non-active state and cannot receive personal messages.")
     public Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
-        if (request == null) {
-            throw new PushServerException("Request object must not be empty");
-        }
-        logger.info("Received updateDeviceStatus request, activation ID: {}", request.getActivationId());
-        String errorMessage = UpdateDeviceStatusRequestValidator.validate(request);
-        if (errorMessage != null) {
-            throw new PushServerException(errorMessage);
-        }
-        String activationId = request.getActivationId();
-        List<PushDeviceRegistrationEntity> device = pushDeviceRepository.findByActivationId(activationId);
-        if (device != null)  {
-            ActivationStatus status = client.getActivationStatus(activationId).getActivationStatus();
-            for (PushDeviceRegistrationEntity registration: device) {
-                registration.setActive(status.equals(ActivationStatus.ACTIVE));
-                pushDeviceRepository.save(registration);
+        try {
+            if (request == null) {
+                throw new PushServerException("Request object must not be empty");
             }
+            logger.info("Received updateDeviceStatus request, activation ID: {}", request.getActivationId());
+            String errorMessage = UpdateDeviceStatusRequestValidator.validate(request);
+            if (errorMessage != null) {
+                throw new PushServerException(errorMessage);
+            }
+            String activationId = request.getActivationId();
+            List<PushDeviceRegistrationEntity> device = pushDeviceRepository.findByActivationId(activationId);
+            if (device != null)  {
+                ActivationStatus status = client.getActivationStatus(activationId).getActivationStatus();
+                for (PushDeviceRegistrationEntity registration: device) {
+                    registration.setActive(status.equals(ActivationStatus.ACTIVE));
+                    pushDeviceRepository.save(registration);
+                }
+            }
+            logger.info("The updateDeviceStatus request succeeded, activation ID: {}", request.getActivationId());
+            return new Response();
+        } catch (PowerAuthClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerException("Update device status failed because activation status is unknown");
         }
-        logger.info("The updateDeviceStatus request succeeded, activation ID: {}", request.getActivationId());
-        return new Response();
     }
 
     /**

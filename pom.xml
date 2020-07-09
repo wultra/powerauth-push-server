@@ -8,7 +8,7 @@
 
     <groupId>io.getlime.security</groupId>
     <artifactId>powerauth-push-server-parent</artifactId>
-    <version>0.24.0</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <parent>
@@ -83,16 +83,12 @@
         <jsp-api.version>2.0</jsp-api.version>
         <jstl.version>1.2.5</jstl.version>
         <lime.rest.version>1.1.0</lime.rest.version>
-        <powerauth.version>0.24.0</powerauth.version>
+        <powerauth.version>1.0.0-SNAPSHOT</powerauth.version>
         <pushy.version>0.13.10</pushy.version>
         <swagger.version>2.9.2</swagger.version>
         <reactor-spring.version>1.0.1.RELEASE</reactor-spring.version>
         <google-api-client.version>1.30.9</google-api-client.version>
         <firebase-admin.version>6.12.2</firebase-admin.version>
-        <jaxb.version>2.3.1</jaxb.version>
-        <istack.version>3.0.10</istack.version>
-        <jaxws.version>1.4.0</jaxws.version>
-        <saaj.version>1.5.1</saaj.version>
         <bc.version>1.65</bc.version>
     </properties>
 
