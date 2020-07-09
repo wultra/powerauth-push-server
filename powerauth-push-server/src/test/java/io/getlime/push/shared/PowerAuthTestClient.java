@@ -3,6 +3,7 @@ package io.getlime.push.shared;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
 import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import com.wultra.security.powerauth.client.v3.*;
 import com.wultra.security.powerauth.rest.client.PowerAuthRestClient;
 import io.getlime.security.powerauth.crypto.client.activation.PowerAuthClientActivation;
@@ -47,7 +48,7 @@ public class PowerAuthTestClient {
         powerAuthClient = new PowerAuthRestClient(powerAuthRestUrl);
     }
 
-    public Long initializeApplication(String applicationName, String applicationVersion) {
+    public Long initializeApplication(String applicationName, String applicationVersion) throws PowerAuthClientException {
         // Create application if it does not exist
         List<GetApplicationListResponse.Applications> applications = powerAuthClient.getApplicationList();
         boolean applicationExists = false;
@@ -128,11 +129,11 @@ public class PowerAuthTestClient {
         return initResponse.getActivationId();
     }
 
-    public void blockActivation(String activationId) {
+    public void blockActivation(String activationId) throws PowerAuthClientException {
         powerAuthClient.blockActivation(activationId, "TEST", "test");
     }
 
-    public void unblockActivation(String activationId) {
+    public void unblockActivation(String activationId) throws PowerAuthClientException {
         powerAuthClient.unblockActivation(activationId, "test");
     }
 
