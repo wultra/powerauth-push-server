@@ -21,6 +21,11 @@
             <artifactId>rest-model-base</artifactId>
             <version>${lime.rest.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.getlime.security</groupId>
+            <artifactId>powerauth-client-model</artifactId>
+            <version>${powerauth.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

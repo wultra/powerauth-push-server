@@ -309,11 +309,15 @@ public class PushDeviceController {
                 throw new PushServerException(errorMessage);
             }
             String activationId = request.getActivationId();
+            ActivationStatus activationStatus = request.getActivationStatus();
             List<PushDeviceRegistrationEntity> device = pushDeviceRepository.findByActivationId(activationId);
             if (device != null)  {
-                ActivationStatus status = client.getActivationStatus(activationId).getActivationStatus();
+                if (activationStatus == null) {
+                    // Activation status was not received via callback data, retrieve it from PowerAuth server
+                    activationStatus = client.getActivationStatus(activationId).getActivationStatus();
+                }
                 for (PushDeviceRegistrationEntity registration: device) {
-                    registration.setActive(status.equals(ActivationStatus.ACTIVE));
+                    registration.setActive(activationStatus.equals(ActivationStatus.ACTIVE));
                     pushDeviceRepository.save(registration);
                 }
             }
