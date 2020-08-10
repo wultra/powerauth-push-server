@@ -46,6 +46,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.Instant;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -195,7 +196,7 @@ public class PushServerTests {
         pushMessageBody.setSound("riff.wav");
         pushMessageBody.setCategory("balance-update");
         pushMessageBody.setCollapseKey("balance-update");
-        pushMessageBody.setValidUntil(new Date());
+        pushMessageBody.setValidUntil(Instant.now());
         pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
         attributes.setSilent(false);
         attributes.setPersonal(true);
@@ -229,7 +230,7 @@ public class PushServerTests {
         pushMessageBody.setSound("riff.wav");
         pushMessageBody.setCategory("balance-update");
         pushMessageBody.setCollapseKey("balance-update");
-        pushMessageBody.setValidUntil(new Date());
+        pushMessageBody.setValidUntil(Instant.now());
         pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
         attributes.setSilent(false);
         attributes.setPersonal(true);
@@ -260,7 +261,7 @@ public class PushServerTests {
         pushMessageBody.setSound("riff.wav");
         pushMessageBody.setCategory("balance-update");
         pushMessageBody.setCollapseKey("balance-update");
-        pushMessageBody.setValidUntil(new Date());
+        pushMessageBody.setValidUntil(Instant.now());
         pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
         campaignRequest.setAppId(powerAuthTestClient.getApplicationId());
         campaignRequest.setMessage(pushMessageBody);

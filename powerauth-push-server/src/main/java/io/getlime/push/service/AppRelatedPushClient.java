@@ -15,7 +15,7 @@
  */
 package io.getlime.push.service;
 
-import com.turo.pushy.apns.ApnsClient;
+import com.eatthepath.pushy.apns.ApnsClient;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.fcm.FcmClient;
 

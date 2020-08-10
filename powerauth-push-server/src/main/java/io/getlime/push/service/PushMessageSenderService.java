@@ -16,7 +16,7 @@
 
 package io.getlime.push.service;
 
-import com.turo.pushy.apns.ApnsClient;
+import com.eatthepath.pushy.apns.ApnsClient;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;

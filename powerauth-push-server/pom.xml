@@ -90,9 +90,9 @@
             <version>${httpasyncclient.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.turo</groupId>
+            <groupId>com.eatthepath</groupId>
             <artifactId>pushy</artifactId>
-            <version>${pushy.version}</version>
+            <version>0.14.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.api-client</groupId>
