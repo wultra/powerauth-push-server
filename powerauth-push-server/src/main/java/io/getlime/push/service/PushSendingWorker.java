@@ -67,6 +67,10 @@ public class PushSendingWorker {
     // Expected response String from FCM
     private static final String FCM_RESPONSE_VALID_REGEXP       = "projects/.+/messages/.+";
 
+
+    // Maximum Android TTL value in seconds, see: https://firebase.google.com/docs/cloud-messaging/concept-options#ttl
+    private static final int ANDROID_TTL_SECONDS_MAX            = 2_419_200;
+
     private final PushServiceConfiguration pushServiceConfiguration;
     private final FcmModelConverter fcmConverter;
 
@@ -206,6 +210,18 @@ public class PushSendingWorker {
 
         AndroidConfig.Builder androidConfigBuilder = AndroidConfig.builder()
                 .setCollapseKey(pushMessageBody.getCollapseKey());
+
+        // Calculate TTL and set it if the TTL is within reasonable limits
+        Instant validUntil = pushMessageBody.getValidUntil();
+        if (validUntil != null) {
+            long validUntilMs = validUntil.toEpochMilli();
+            long currentTimeMs = System.currentTimeMillis();
+            long ttlInSeconds = (validUntilMs - currentTimeMs) / 1000;
+
+            if (ttlInSeconds > 0 && ttlInSeconds < ANDROID_TTL_SECONDS_MAX) {
+                androidConfigBuilder.setTtl(ttlInSeconds);
+            }
+        }
 
         AndroidNotification notification = AndroidNotification.builder()
                 .setTitle(pushMessageBody.getTitle())

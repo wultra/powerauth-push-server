@@ -18,7 +18,6 @@ package io.getlime.push.configuration;
 import com.wultra.security.powerauth.client.PowerAuthClient;
 import com.wultra.security.powerauth.rest.client.PowerAuthRestClient;
 import com.wultra.security.powerauth.rest.client.PowerAuthRestClientConfiguration;
-import io.getlime.push.client.PushServerClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -35,9 +34,6 @@ public class PowerAuthWebServiceConfiguration {
 
     @Value("${powerauth.service.url}")
     private String powerAuthRestUrl;
-
-    @Value("${powerauth.push.service.url}")
-    private String pushServiceUrl;
 
     @Value("${powerauth.service.ssl.acceptInvalidSslCertificate}")
     private boolean acceptInvalidSslCertificate;
@@ -59,15 +55,6 @@ public class PowerAuthWebServiceConfiguration {
         config.setPowerAuthClientSecret(clientSecret);
         config.setAcceptInvalidSslCertificate(acceptInvalidSslCertificate);
         return new PowerAuthRestClient(powerAuthRestUrl, config);
-    }
-
-    /**
-     * Initialize PowerAuth 2.0 Push server client.
-     * @return Push server client.
-     */
-    @Bean
-    public PushServerClient pushServerClient() {
-        return new PushServerClient(pushServiceUrl);
     }
 
 }
