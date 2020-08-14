@@ -16,7 +16,7 @@
 
 package io.getlime.push.model.entity;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 
 /**
@@ -34,7 +34,7 @@ public class PushMessageBody {
     private String sound;
     private String category;
     private String collapseKey;
-    private Date validUntil;
+    private Instant validUntil;
     private Map<String, Object> extras;
 
     /**
@@ -142,7 +142,7 @@ public class PushMessageBody {
      * Get notification delivery validity (timestamp message should live to in case it's not delivered immediately).
      * @return Validity timestamp.
      */
-    public Date getValidUntil() {
+    public Instant getValidUntil() {
         return validUntil;
     }
 
@@ -150,7 +150,7 @@ public class PushMessageBody {
      * Set notification delivery validity (timestamp message should live to in case it's not delivered immediately).
      * @param validUntil Validity timestamp.
      */
-    public void setValidUntil(Date validUntil) {
+    public void setValidUntil(Instant validUntil) {
         this.validUntil = validUntil;
     }
 
