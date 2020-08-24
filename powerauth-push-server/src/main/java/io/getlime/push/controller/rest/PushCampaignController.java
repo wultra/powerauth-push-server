@@ -30,7 +30,7 @@ import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.PushCampaignUserRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.PushCampaignUserEntity;
-import io.getlime.push.repository.serialization.JSONSerialization;
+import io.getlime.push.repository.serialization.JsonSerialization;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,14 +54,16 @@ public class PushCampaignController {
 
     private static final Logger logger = LoggerFactory.getLogger(PushCampaignController.class);
 
-    private PushCampaignRepository pushCampaignRepository;
-    private PushCampaignUserRepository pushCampaignUserRepository;
+    private final PushCampaignRepository pushCampaignRepository;
+    private final PushCampaignUserRepository pushCampaignUserRepository;
+    private final JsonSerialization jsonSerialization;
 
     @Autowired
     public PushCampaignController(PushCampaignRepository pushCampaignRepository,
-                                  PushCampaignUserRepository pushCampaignUserRepository) {
+                                  PushCampaignUserRepository pushCampaignUserRepository, JsonSerialization jsonSerialization) {
         this.pushCampaignRepository = pushCampaignRepository;
         this.pushCampaignUserRepository = pushCampaignUserRepository;
+        this.jsonSerialization = jsonSerialization;
     }
 
     /**
@@ -87,7 +89,7 @@ public class PushCampaignController {
         }
         PushCampaignEntity campaign = new PushCampaignEntity();
         PushMessageBody message = requestObject.getMessage();
-        String messageString = JSONSerialization.serializePushMessageBody(message);
+        String messageString = jsonSerialization.serializePushMessageBody(message);
         campaign.setAppId(requestObject.getAppId());
         campaign.setSent(false);
         campaign.setTimestampCreated(new Date());
@@ -140,7 +142,7 @@ public class PushCampaignController {
         campaignResponse.setId(campaign.getId());
         campaignResponse.setSent(campaign.isSent());
         campaignResponse.setAppId(campaign.getAppId());
-        PushMessageBody message = JSONSerialization.deserializePushMessageBody(campaign.getMessage());
+        PushMessageBody message = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
         campaignResponse.setMessage(message);
         logger.debug("The getCampaign request succeeded, campaign ID: {}", campaignId);
         return new ObjectResponse<>(campaignResponse);
@@ -174,7 +176,7 @@ public class PushCampaignController {
             campaignResponse.setId(campaign.getId());
             campaignResponse.setAppId(campaign.getAppId());
             campaignResponse.setSent(campaign.isSent());
-            PushMessageBody pushMessageBody = JSONSerialization.deserializePushMessageBody(campaign.getMessage());
+            PushMessageBody pushMessageBody = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
             campaignResponse.setMessage(pushMessageBody);
             listOfCampaignsResponse.add(campaignResponse);
         }

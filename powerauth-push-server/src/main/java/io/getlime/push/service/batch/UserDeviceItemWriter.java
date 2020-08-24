@@ -21,7 +21,7 @@ import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.aggregate.UserDevice;
-import io.getlime.push.repository.serialization.JSONSerialization;
+import io.getlime.push.repository.serialization.JsonSerialization;
 import io.getlime.push.service.PushMessageSenderService;
 import io.getlime.push.service.batch.storage.CampaignMessageStorageMap;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -41,17 +41,19 @@ import java.util.Optional;
 @StepScope
 public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
 
-    private PushMessageSenderService pushMessageSenderService;
-    private PushCampaignRepository pushCampaignRepository;
+    private final PushMessageSenderService pushMessageSenderService;
+    private final PushCampaignRepository pushCampaignRepository;
+    private final JsonSerialization jsonSerialization;
 
     // Non-autowired fields
     private CampaignMessageStorageMap campaignStorageMap = new CampaignMessageStorageMap();
 
     @Autowired
     public UserDeviceItemWriter(PushMessageSenderService pushMessageSenderService,
-                                PushCampaignRepository pushCampaignRepository) {
+                                PushCampaignRepository pushCampaignRepository, JsonSerialization jsonSerialization) {
         this.pushMessageSenderService = pushMessageSenderService;
         this.pushCampaignRepository = pushCampaignRepository;
+        this.jsonSerialization = jsonSerialization;
     }
 
     @Override
@@ -73,7 +75,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
                     throw new PushServerException("Campaign with entered ID does not exist");
                 }
                 final PushCampaignEntity campaignEntity = campaignEntityOptional.get();
-                messageBody = JSONSerialization.deserializePushMessageBody(campaignEntity.getMessage());
+                messageBody = jsonSerialization.deserializePushMessageBody(campaignEntity.getMessage());
                 campaignStorageMap.put(campaignId, messageBody);
             }
 

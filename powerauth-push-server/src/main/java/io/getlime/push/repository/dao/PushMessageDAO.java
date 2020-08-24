@@ -21,7 +21,7 @@ import io.getlime.push.model.entity.PushMessageAttributes;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.repository.PushMessageRepository;
 import io.getlime.push.repository.model.PushMessageEntity;
-import io.getlime.push.repository.serialization.JSONSerialization;
+import io.getlime.push.repository.serialization.JsonSerialization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -37,11 +37,13 @@ import java.util.Date;
 @Transactional
 public class PushMessageDAO {
 
-    private PushMessageRepository pushMessageRepository;
+    private final PushMessageRepository pushMessageRepository;
+    private final JsonSerialization jsonSerialization;
 
     @Autowired
-    public PushMessageDAO(PushMessageRepository pushMessageRepository) {
+    public PushMessageDAO(PushMessageRepository pushMessageRepository, JsonSerialization jsonSerialization) {
         this.pushMessageRepository = pushMessageRepository;
+        this.jsonSerialization = jsonSerialization;
     }
 
     /**
@@ -69,7 +71,7 @@ public class PushMessageDAO {
         }
         entity.setStatus(PushMessageEntity.Status.PENDING);
         entity.setTimestampCreated(new Date());
-        String messageBody = JSONSerialization.serializePushMessageBody(pushMessageBody);
+        String messageBody = jsonSerialization.serializePushMessageBody(pushMessageBody);
         entity.setMessageBody(messageBody);
         return pushMessageRepository.save(entity);
     }
