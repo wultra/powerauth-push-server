@@ -24,7 +24,7 @@ import io.getlime.push.model.request.TestCampaignRequest;
 import io.getlime.push.model.validator.TestCampaignRequestValidator;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
-import io.getlime.push.repository.serialization.JSONSerialization;
+import io.getlime.push.repository.serialization.JsonSerialization;
 import io.getlime.push.service.PushMessageSenderService;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -60,16 +60,18 @@ public class SendCampaignController {
     private final Job job;
     private final PushCampaignRepository pushCampaignRepository;
     private final PushMessageSenderService pushMessageSenderService;
+    private final JsonSerialization jsonSerialization;
 
     @Autowired
     public SendCampaignController(JobLauncher jobLauncher,
                                   Job job,
                                   PushCampaignRepository pushCampaignRepository,
-                                  PushMessageSenderService pushMessageSenderService) {
+                                  PushMessageSenderService pushMessageSenderService, JsonSerialization jsonSerialization) {
         this.jobLauncher = jobLauncher;
         this.job = job;
         this.pushCampaignRepository = pushCampaignRepository;
         this.pushMessageSenderService = pushMessageSenderService;
+        this.jsonSerialization = jsonSerialization;
     }
 
     /**
@@ -134,7 +136,7 @@ public class SendCampaignController {
         }
         PushMessage pushMessage = new PushMessage();
         pushMessage.setUserId(request.getRequestObject().getUserId());
-        pushMessage.setBody(JSONSerialization.deserializePushMessageBody(campaign.getMessage()));
+        pushMessage.setBody(jsonSerialization.deserializePushMessageBody(campaign.getMessage()));
         List<PushMessage> message = new ArrayList<>();
         message.add(pushMessage);
         pushMessageSenderService.sendPushMessage(campaign.getAppId(), message);
