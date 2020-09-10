@@ -25,7 +25,7 @@ import io.getlime.push.model.request.SendPushMessageRequest;
 import io.getlime.push.model.validator.SendPushMessageBatchRequestValidator;
 import io.getlime.push.model.validator.SendPushMessageRequestValidator;
 import io.getlime.push.service.PushMessageSenderService;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,8 +63,8 @@ public class PushMessageController {
      * @throws PushServerException In case request object is invalid.
      */
     @PostMapping(value = "send")
-    @ApiOperation(value = "Send a single Push message",
-                  notes = "Send push message to user, defined in request body - message object by user ID and activation ID," +
+    @Operation(summary = "Send a single Push message",
+                  description = "Send push message to user, defined in request body - message object by user ID and activation ID," +
                           " using given application ID \n \n" +
                           "Message contains attributes and body\n" +
                           "Attributes describe whether message has to be " +
@@ -102,8 +102,8 @@ public class PushMessageController {
      * @throws PushServerException In case request object is invalid.
      */
     @PostMapping(value = "batch/send")
-    @ApiOperation(value = "Send batch of push messages",
-                  notes = "Send to each user in request body, assigned to application ID, message. Message and user definition is same as in \"send a single push message\" method. " +
+    @Operation(summary = "Send batch of push messages",
+                  description = "Send to each user in request body, assigned to application ID, message. Message and user definition is same as in \"send a single push message\" method. " +
                           "Users and their messages are inside request body - batch param.")
     public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
         SendPushMessageBatchRequest requestObject = request.getRequestObject();
