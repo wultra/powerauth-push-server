@@ -53,7 +53,7 @@ public class OpenApiConfiguration {
         String[] packages = {"io.getlime.push.controller.rest"};
 
         return GroupedOpenApi.builder()
-                .setGroup("push")
+                .group("push")
                 .packagesToScan(packages)
                 .build();
     }
