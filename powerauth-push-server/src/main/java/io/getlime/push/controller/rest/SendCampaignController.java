@@ -26,7 +26,7 @@ import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.serialization.JsonSerialization;
 import io.getlime.push.service.PushMessageSenderService;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -82,8 +82,8 @@ public class SendCampaignController {
      * @throws PushServerException In case campaign with given ID is not found.
      */
     @PostMapping(value = "live/{id}")
-    @ApiOperation(value = "Send a campaign",
-                  notes = "Send message from a specific campaign to devices belonged to users associated with that campaign. Whereas each device gets a campaign only once.\n" +
+    @Operation(summary = "Send a campaign",
+                  description = "Send message from a specific campaign to devices belonged to users associated with that campaign. Whereas each device gets a campaign only once.\n" +
                           "\n" +
                           "If sending was successful then sent parameter is set on true and timestampSent is set on current time.")
     public Response sendCampaign(@PathVariable(value = "id") Long id) throws PushServerException {
@@ -120,8 +120,8 @@ public class SendCampaignController {
      * @throws PushServerException In case request object is invalid.
      */
     @PostMapping(value = "test/{id}")
-    @ApiOperation(value = "Send a test campaign",
-                  notes = "Send message from a specific campaign on test user identified in request body, userId param, to check rightness of that campaign.")
+    @Operation(summary = "Send a test campaign",
+                  description = "Send message from a specific campaign on test user identified in request body, userId param, to check rightness of that campaign.")
     public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
         logger.info("Received sendTestCampaign request, campaign ID: {}", id);
         final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(id);

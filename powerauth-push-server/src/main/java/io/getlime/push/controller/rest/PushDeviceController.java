@@ -32,7 +32,7 @@ import io.getlime.push.model.validator.DeleteDeviceRequestValidator;
 import io.getlime.push.model.validator.UpdateDeviceStatusRequestValidator;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,8 +73,8 @@ public class PushDeviceController {
      * @throws PushServerException In case request object is invalid.
      */
     @PostMapping(value = "create")
-    @ApiOperation(value = "Create a device",
-                  notes = "Create a new device push token (platform specific). The call must include an activation ID, so that the token is associated with given user." +
+    @Operation(summary = "Create a device",
+                  description = "Create a new device push token (platform specific). The call must include an activation ID, so that the token is associated with given user." +
                           "Request body should contain application ID, device token, device's platform and an activation ID. " +
                           "If such device already exist, date on last registration is updated and also platform might be changed\n" +
                           "\n---" +
@@ -129,8 +129,8 @@ public class PushDeviceController {
      * @throws PushServerException In case request object is invalid.
      */
     @PostMapping(value = "create/multi")
-    @ApiOperation(value = "Create a device for multiple associated activations",
-            notes = "Create a new device push token (platform specific). The call must include one or more activation IDs." +
+    @Operation(summary = "Create a device for multiple associated activations",
+            description = "Create a new device push token (platform specific). The call must include one or more activation IDs." +
                     "Request body should contain application ID, device token, device's platform and list of activation IDs. " +
                     "If such device already exist, date on last registration is updated and also platform might be changed\n" +
                     "\n---" +
@@ -295,8 +295,8 @@ public class PushDeviceController {
      * @throws PushServerException In case request object is invalid.
      */
     @RequestMapping(value = "status/update", method = {RequestMethod.POST, RequestMethod.PUT})
-    @ApiOperation(value = "Update device status",
-                  notes = "Update the status of given device registration based on the associated activation ID. " +
+    @Operation(summary = "Update device status",
+                  description = "Update the status of given device registration based on the associated activation ID. " +
                           "This can help assure that registration is in non-active state and cannot receive personal messages.")
     public Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
         try {
@@ -336,8 +336,8 @@ public class PushDeviceController {
      * @throws PushServerException In case request object is invalid.
      */
     @RequestMapping(value = "delete", method = {RequestMethod.POST, RequestMethod.DELETE})
-    @ApiOperation(value = "Delete a device",
-                  notes = "Remove device identified by application ID and device token. " +
+    @Operation(summary = "Delete a device",
+                  description = "Remove device identified by application ID and device token. " +
                           "If device identifiers don't match, nothing happens")
     public Response deleteDevice(@RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
         DeleteDeviceRequest requestObject = request.getRequestObject();
