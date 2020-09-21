@@ -120,7 +120,7 @@ curl --request POST \
 
 Set the `id` value for Push Server application ID to want to update.
 
-Enter the base64-encoded value of APNs private key into `privateKeyBase64`.
+Enter the base64-encoded value of FCM private key into `privateKeyBase64`.
 
 You can encode the file using `base64` command on Mac. You can also use `Certutil.exe` on Windows or OpenSSL on all platforms.
 ```
