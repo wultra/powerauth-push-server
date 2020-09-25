@@ -15,6 +15,7 @@
  */
 package io.getlime.push.errorhandling;
 
+import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.core.rest.model.base.response.ErrorResponse;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.ws.WebServiceException;
 
 /**
  * Implementation of a default exception handler for the push server service.
@@ -63,9 +63,9 @@ public class DefaultExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
-    @ExceptionHandler(WebServiceException.class)
+    @ExceptionHandler(PowerAuthClientException.class)
     @ResponseBody
-    public ErrorResponse handleWebServiceError(Exception e) {
+    public ErrorResponse handlePowerAuthClientException(Exception e) {
         logger.error(e.getMessage(), e);
         return new ErrorResponse(WebServiceError.Code.ERROR_PA_SERVER_COMM, e);
     }
