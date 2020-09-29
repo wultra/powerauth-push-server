@@ -21,6 +21,7 @@ import io.getlime.core.rest.model.base.response.ErrorResponse;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -41,7 +42,7 @@ public class DefaultExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  // 500
     @ExceptionHandler(Throwable.class)
     @ResponseBody
-    public ErrorResponse handleConflict(Throwable t) {
+    public ErrorResponse handleUnexpectedError(Throwable t) {
         logger.error(t.getMessage(), t);
         return new ErrorResponse(Error.Code.ERROR_GENERIC, t);
     }
@@ -60,6 +61,14 @@ public class DefaultExceptionHandler {
     public ErrorResponse handleDatabaseNotFound(Exception e) {
         logger.error(e.getMessage(), e);
         return new ErrorResponse(DatabaseError.Code.ERROR_DATABASE, e);
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT) // 409
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseBody
+    public ErrorResponse handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        logger.error(e.getMessage(), e);
+        return new ErrorResponse(DataIntegrityError.Code.ERROR_DATA_INTEGRITY, e);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
