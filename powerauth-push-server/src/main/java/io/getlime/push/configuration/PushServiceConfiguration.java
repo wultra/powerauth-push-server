@@ -104,6 +104,12 @@ public class PushServiceConfiguration {
     private int apnsConnectTimeout;
 
     /**
+     * APNS concurrent connections.
+     */
+    @Value("${powerauth.push.service.apns.concurrentConnections}")
+    private int concurrentConnections;
+
+    /**
      * Get push server name.
      * @return Push server name.
      */
@@ -437,5 +443,21 @@ public class PushServiceConfiguration {
      */
     public void setApnsConnectTimeout(int apnsConnectTimeout) {
         this.apnsConnectTimeout = apnsConnectTimeout;
+    }
+
+    /**
+     * Get APNS concurrent connections.
+     * @return APNS concurrent connections.
+     */
+    public int getConcurrentConnections() {
+        return concurrentConnections;
+    }
+
+    /**
+     * Set APNS concurrent connections.
+     * @param concurrentConnections APNS concurrent connections.
+     */
+    public void setConcurrentConnections(int concurrentConnections) {
+        this.concurrentConnections = concurrentConnections;
     }
 }
