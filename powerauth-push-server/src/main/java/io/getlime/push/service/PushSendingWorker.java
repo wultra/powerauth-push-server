@@ -259,6 +259,7 @@ public class PushSendingWorker {
     ApnsClient prepareApnsClient(String teamId, String keyId, byte[] apnsPrivateKey) throws PushServerException {
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
         apnsClientBuilder.setProxyHandlerFactory(apnsClientProxy());
+        apnsClientBuilder.setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections());
         apnsClientBuilder.setConnectionTimeout(Duration.ofMillis(pushServiceConfiguration.getApnsConnectTimeout()));
         if (pushServiceConfiguration.isApnsUseDevelopment()) {
             logger.info("Using APNs development host");

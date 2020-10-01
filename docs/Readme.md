@@ -5,7 +5,9 @@ PowerAuth Push Server is an optional application that facilitates sending APNs /
 ## Deployment Tutorials
 
 - [Deploy PowerAuth Push Server](./Deploying-Push-Server.md)
+- [Deploy Push Server on JBoss / Wildfly](./Deploying-Wildfly.md)
 - [Migration Instructions](./Migration-Instructions.md)
+- [Configuration Properties](./Configuration-Properties.md)
 
 ## Integration Tutorials
 
