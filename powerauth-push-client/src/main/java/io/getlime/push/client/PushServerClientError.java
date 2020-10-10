@@ -28,7 +28,7 @@ public class PushServerClientError extends Error implements Serializable {
 
     private static final long serialVersionUID = -3063064667769595550L;
 
-    private static String ERROR_VALIDATION = "ERROR_VALIDATION";
+    private static final String ERROR_VALIDATION = "ERROR_VALIDATION";
 
 
     public PushServerClientError(String message) {

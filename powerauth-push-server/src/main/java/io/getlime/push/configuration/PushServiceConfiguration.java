@@ -110,6 +110,12 @@ public class PushServiceConfiguration {
     private int concurrentConnections;
 
     /**
+     * Interval specifying the frequency of APNS ping calls in idle state.
+     */
+    @Value("${powerauth.push.service.apns.idlePingInterval}")
+    private long idlePingInterval;
+
+    /**
      * Get push server name.
      * @return Push server name.
      */
@@ -459,5 +465,13 @@ public class PushServiceConfiguration {
      */
     public void setConcurrentConnections(int concurrentConnections) {
         this.concurrentConnections = concurrentConnections;
+    }
+
+    public long getIdlePingInterval() {
+        return idlePingInterval;
+    }
+
+    public void setIdlePingInterval(long idlePingInterval) {
+        this.idlePingInterval = idlePingInterval;
     }
 }

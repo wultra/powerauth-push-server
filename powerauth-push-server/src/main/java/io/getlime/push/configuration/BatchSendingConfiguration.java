@@ -38,6 +38,7 @@ import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -65,7 +66,7 @@ public class BatchSendingConfiguration implements BatchConfigurer {
     private final SendCampaignJobListener sendCampaignJobListener;
 
     private DataSource dataSource;
-    private EntityManagerFactory entityManagerFactory;
+    private final EntityManagerFactory entityManagerFactory;
     private PlatformTransactionManager transactionManager;
     private JobRepository jobRepository;
     private JobLauncher jobLauncher;
@@ -117,21 +118,25 @@ public class BatchSendingConfiguration implements BatchConfigurer {
     }
 
     @Override
+    @NonNull
     public JobRepository getJobRepository() {
         return jobRepository;
     }
 
     @Override
+    @NonNull
     public PlatformTransactionManager getTransactionManager() {
         return transactionManager;
     }
 
     @Override
+    @NonNull
     public JobLauncher getJobLauncher() {
         return jobLauncher;
     }
 
     @Override
+    @NonNull
     public JobExplorer getJobExplorer() {
         return jobExplorer;
     }

@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class AppCredentialStorageMap implements ItemStorageMap<Long, AppRelatedPushClient> {
 
-    private ConcurrentMap<Long, AppRelatedPushClient> map = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, AppRelatedPushClient> map = new ConcurrentHashMap<>();
 
     @Override
     public AppRelatedPushClient get(Long key) {

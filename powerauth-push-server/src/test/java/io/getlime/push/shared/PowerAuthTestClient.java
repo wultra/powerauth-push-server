@@ -42,7 +42,7 @@ public class PowerAuthTestClient {
     private String activationId3;
     private String activationId4;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void initializeClient(String powerAuthRestUrl) {
         powerAuthClient = new PowerAuthRestClient(powerAuthRestUrl);

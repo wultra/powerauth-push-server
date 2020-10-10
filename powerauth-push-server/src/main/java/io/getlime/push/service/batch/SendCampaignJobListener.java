@@ -23,6 +23,7 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -32,7 +33,7 @@ import java.util.Optional;
 @JobScope
 public class SendCampaignJobListener implements JobExecutionListener {
 
-    private PushCampaignRepository pushCampaignRepository;
+    private final PushCampaignRepository pushCampaignRepository;
 
     @Value("#{jobParameters['campaignId']}")
     private Long campaignId;
@@ -43,14 +44,14 @@ public class SendCampaignJobListener implements JobExecutionListener {
     }
 
     @Override
-    public void beforeJob(JobExecution jobExecution) {
+    public void beforeJob(@NonNull JobExecution jobExecution) {
         PushCampaignEntity campaign = findPushCampaignById(campaignId);
         campaign.setTimestampSent(new Date());
         pushCampaignRepository.save(campaign);
     }
 
     @Override
-    public void afterJob(JobExecution jobExecution) {
+    public void afterJob(@NonNull JobExecution jobExecution) {
         PushCampaignEntity campaign = findPushCampaignById(campaignId);
         campaign.setTimestampCompleted(new Date());
         campaign.setSent(true);

@@ -211,8 +211,8 @@ public class PushMessageSendResult {
         }
     }
 
-    private iOS ios;
-    private Android android;
+    private final iOS ios;
+    private final Android android;
 
     public PushMessageSendResult() {
         this.ios = new iOS();
