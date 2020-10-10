@@ -16,8 +16,6 @@
 
 package io.getlime.push.service.apns;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-
 /**
  * APNs rejection reason codes, documented on the Apple site:
  * https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/handling_notification_responses_from_apns

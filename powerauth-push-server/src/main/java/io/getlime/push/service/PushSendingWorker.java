@@ -261,6 +261,7 @@ public class PushSendingWorker {
         apnsClientBuilder.setProxyHandlerFactory(apnsClientProxy());
         apnsClientBuilder.setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections());
         apnsClientBuilder.setConnectionTimeout(Duration.ofMillis(pushServiceConfiguration.getApnsConnectTimeout()));
+        apnsClientBuilder.setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()));
         if (pushServiceConfiguration.isApnsUseDevelopment()) {
             logger.info("Using APNs development host");
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
@@ -318,7 +319,7 @@ public class PushSendingWorker {
     void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
-        final boolean isSilent = attributes == null ? false : attributes.getSilent(); // In case there are no attributes, the message is not silent
+        final boolean isSilent = attributes != null && attributes.getSilent(); // In case there are no attributes, the message is not silent
         final String payload = buildApnsPayload(pushMessageBody, isSilent);
         final Instant validUntil = pushMessageBody.getValidUntil();
         final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set

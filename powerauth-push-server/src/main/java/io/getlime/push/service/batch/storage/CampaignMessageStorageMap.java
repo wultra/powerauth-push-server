@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class CampaignMessageStorageMap implements ItemStorageMap<Long, PushMessageBody> {
 
-    private ConcurrentMap<Long, PushMessageBody> mapStorage = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, PushMessageBody> mapStorage = new ConcurrentHashMap<>();
 
     @Override
     public PushMessageBody get(Long key) {

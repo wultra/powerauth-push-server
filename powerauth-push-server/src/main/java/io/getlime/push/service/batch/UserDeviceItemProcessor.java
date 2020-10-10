@@ -20,6 +20,7 @@ import io.getlime.push.service.batch.storage.ItemStorageSet;
 import io.getlime.push.service.batch.storage.UserDeviceStorageSet;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Component;
 @StepScope
 public class UserDeviceItemProcessor implements ItemProcessor<UserDevice, UserDevice> {
 
-    private ItemStorageSet<UserDevice> itemStore = new UserDeviceStorageSet<>();
+    private final ItemStorageSet<UserDevice> itemStore = new UserDeviceStorageSet<>();
 
     /**
      * Decides if current userDevice is going to be processed to sending
@@ -40,7 +41,7 @@ public class UserDeviceItemProcessor implements ItemProcessor<UserDevice, UserDe
      * @return userDevice
      */
     @Override
-    public UserDevice process(UserDevice userDevice) {
+    public UserDevice process(@NonNull UserDevice userDevice) {
         if (itemStore.exists(userDevice)) {
             return null;
         }

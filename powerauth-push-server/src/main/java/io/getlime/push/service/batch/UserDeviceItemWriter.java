@@ -46,7 +46,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
     private final JsonSerialization jsonSerialization;
 
     // Non-autowired fields
-    private CampaignMessageStorageMap campaignStorageMap = new CampaignMessageStorageMap();
+    private final CampaignMessageStorageMap campaignStorageMap = new CampaignMessageStorageMap();
 
     @Autowired
     public UserDeviceItemWriter(PushMessageSenderService pushMessageSenderService,

@@ -48,7 +48,7 @@ public class PushMessageController {
     private static final Logger logger = LoggerFactory.getLogger(PushMessageController.class);
 
 
-    private PushMessageSenderService pushMessageSenderService;
+    private final PushMessageSenderService pushMessageSenderService;
 
     @Autowired
     public PushMessageController(PushMessageSenderService pushMessageSenderService) {
