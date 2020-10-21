@@ -74,7 +74,7 @@
         <dependency>
             <groupId>com.eatthepath</groupId>
             <artifactId>pushy</artifactId>
-            <version>0.14.1</version>
+            <version>${pushy.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.api-client</groupId>
