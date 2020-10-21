@@ -16,8 +16,6 @@
 
 package io.getlime.push.client;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.common.io.BaseEncoding;
 import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
@@ -35,6 +33,7 @@ import io.getlime.push.model.validator.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -43,7 +42,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collections;
@@ -626,24 +624,13 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      *
      */
-    private <T> T getObjectImpl(String url, MultiValueMap<String, String> params, ParameterizedTypeReference<? extends Response> typeReference) throws PushServerClientException {
-        try {
-            ClientResponse response = webClient.get()
-                    .uri(uriBuilder -> uriBuilder.path(url).queryParams(params).build())
-                    .accept(MediaType.APPLICATION_JSON)
-                    .exchange()
-                    .block();
-            return checkHttpStatus(typeReference, Objects.requireNonNull(response));
-        } catch (JsonParseException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
-        } catch (JsonMappingException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
-        } catch (IOException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
-        }
+    private <T extends Response> T getObjectImpl(String url, MultiValueMap<String, String> params, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        ClientResponse response = webClient.get()
+                .uri(uriBuilder -> uriBuilder.path(url).queryParams(params).build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .block();
+        return checkHttpStatus(typeReference, Objects.requireNonNull(response));
 
     }
 
@@ -655,8 +642,8 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T postObjectImpl(String url, Object request) throws PushServerClientException {
-        return postObjectImpl(url, request, new ParameterizedTypeReference<Response>() {});
+    private <T extends Response> T postObjectImpl(String url, Object request) throws PushServerClientException {
+        return postObjectImpl(url, request, new ParameterizedTypeReference<T>() {});
     }
 
     /**
@@ -668,31 +655,8 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T postObjectImpl(String url, Object request, ParameterizedTypeReference<? extends Response> typeReference) throws PushServerClientException {
-        try {
-            // Fetch post response from given URL and for provided request object
-            WebClient.RequestBodySpec spec = webClient.post()
-                    .uri(uriBuilder -> uriBuilder.path(url).build())
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON);
-            Mono<ClientResponse> responseMono;
-            if (request != null) {
-                responseMono = spec.body(BodyInserters.fromValue(request)).exchange();
-            } else {
-                responseMono = spec.exchange();
-            }
-            ClientResponse response = responseMono.block();
-            return checkHttpStatus(typeReference, Objects.requireNonNull(response));
-        } catch (JsonParseException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
-        } catch (JsonMappingException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
-        } catch (IOException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
-        }
+    private <T extends Response> T postObjectImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        return httpExchangeObjectImpl(HttpMethod.POST, url, request, typeReference);
     }
 
     /**
@@ -703,8 +667,8 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T putObjectImpl(String url, Object request) throws PushServerClientException {
-        return putObjectImpl(url, request, new ParameterizedTypeReference<Response>() {});
+    private <T extends Response> T putObjectImpl(String url, Object request) throws PushServerClientException {
+        return putObjectImpl(url, request, new ParameterizedTypeReference<T>() {});
     }
 
     /**
@@ -716,30 +680,33 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T putObjectImpl(String url, Object request, ParameterizedTypeReference<Response> typeReference) throws PushServerClientException {
-        try {
-            WebClient.RequestBodySpec spec = webClient.put()
-                    .uri(uriBuilder -> uriBuilder.path(url).build())
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON);
-            Mono<ClientResponse> responseMono;
-            if (request != null) {
-                responseMono = spec.body(BodyInserters.fromValue(request)).exchange();
-            } else {
-                responseMono = spec.exchange();
-            }
-            ClientResponse response = responseMono.block();
-            return checkHttpStatus(typeReference, Objects.requireNonNull(response));
-        } catch (JsonParseException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON parsing has failed."));
-        } catch (JsonMappingException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "JSON mapping has failed."));
-        } catch (IOException e) {
-            logger.warn(e.getMessage(), e);
-            throw new PushServerClientException(e, new Error("PUSH_SERVER_CLIENT_ERROR", "Unknown IO error."));
+    private <T extends Response> T putObjectImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        return httpExchangeObjectImpl(HttpMethod.PUT, url, request, typeReference);
+    }
+
+    /**
+     * Exchange object response.
+     *
+     * @param method HTTP method
+     * @param url specific url of method
+     * @param request request body
+     * @param typeReference reference on type for parsing into JSON
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    private <T extends Response> T httpExchangeObjectImpl(HttpMethod method, String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        WebClient.RequestBodySpec spec = webClient.method(method)
+                .uri(uriBuilder -> uriBuilder.path(url).build())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+        Mono<ClientResponse> responseMono;
+        if (request != null) {
+            responseMono = spec.body(BodyInserters.fromValue(request)).exchange();
+        } else {
+            responseMono = spec.exchange();
         }
+        ClientResponse response = responseMono.block();
+        return checkHttpStatus(typeReference, Objects.requireNonNull(response));
     }
 
     /**
@@ -750,10 +717,8 @@ public class PushServerClient {
      * @return In case response code is 200, returns instance of expected response type. Otherwise, it attempts to
      * reconstruct error response and returns the error response.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
-     * @throws IOException In case JSON processing fails.
      */
-    @SuppressWarnings("unchecked")
-    private <T> T checkHttpStatus(ParameterizedTypeReference<? extends Response> typeReference, ClientResponse response) throws IOException, PushServerClientException {
+    private <T extends Response> T checkHttpStatus(ParameterizedTypeReference<T> typeReference, ClientResponse response) throws PushServerClientException {
         if (response.statusCode().is2xxSuccessful()) {
             return (T) response.bodyToMono(typeReference).block();
         } else {
