@@ -720,7 +720,7 @@ public class PushServerClient {
      */
     private <T extends Response> T checkHttpStatus(ParameterizedTypeReference<T> typeReference, ClientResponse response) throws PushServerClientException {
         if (response.statusCode().is2xxSuccessful()) {
-            return (T) response.bodyToMono(typeReference).block();
+            return response.bodyToMono(typeReference).block();
         } else {
             try {
                 // Response body contains data, return Exception with status code and error response

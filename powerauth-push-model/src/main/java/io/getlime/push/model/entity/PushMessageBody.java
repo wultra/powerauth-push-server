@@ -18,6 +18,7 @@ package io.getlime.push.model.entity;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class representing a message body - the information that do not serve as a "message descriptor"
@@ -187,8 +188,10 @@ public class PushMessageBody {
 
         PushMessageBody that = (PushMessageBody) o;
 
-        if (title != null ? !title.equals(that.title) : that.title != null) return false;
-        return body != null ? body.equals(that.body) : that.body == null;
+        if (!Objects.equals(title, that.title)) {
+            return false;
+        }
+        return Objects.equals(body, that.body);
     }
 
     @Override
