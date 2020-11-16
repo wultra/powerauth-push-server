@@ -32,11 +32,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.projectreactor</groupId>
-            <artifactId>reactor-spring</artifactId>
-            <version>${reactor-spring.version}</version>
-        </dependency>
 
         <!-- Other Dependencies -->
         <dependency>
