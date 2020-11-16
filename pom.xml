@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.4.RELEASE</version>
+        <version>2.3.5.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -75,19 +75,17 @@
         <!-- Library Versions -->
         <guava.version>30.0-jre</guava.version>
         <h2.version>1.4.199</h2.version> <!-- CAUTION WHEN UPDATING - https://github.com/h2database/h2database/issues/2078 -->
-        <httpclient.version>4.5.13</httpclient.version>
-        <httpasyncclient.version>4.1.4</httpasyncclient.version>
         <jackson.version>2.11.3</jackson.version>
         <jackson-databind.version>2.11.3</jackson-databind.version>
         <javax.interceptor-api.version>1.2.2</javax.interceptor-api.version>
         <lime.rest.version>1.1.0</lime.rest.version>
         <powerauth.version>1.0.0-SNAPSHOT</powerauth.version>
         <pushy.version>0.14.2</pushy.version>
-        <springdoc-openapi.version>1.4.6</springdoc-openapi.version>
+        <springdoc-openapi.version>1.5.0</springdoc-openapi.version>
         <reactor-spring.version>1.0.1.RELEASE</reactor-spring.version>
-        <google-api-client.version>1.30.11</google-api-client.version>
+        <google-api-client.version>1.31.0</google-api-client.version>
         <firebase-admin.version>7.0.1</firebase-admin.version>
-        <bc.version>1.66</bc.version>
+        <bc.version>1.67</bc.version>
     </properties>
 
     <build>
