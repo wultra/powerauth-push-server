@@ -273,7 +273,7 @@ public class PushCampaignController {
      * @param request An object request to check the nullity
      * @throws PushServerException In case request object is null.
      */
-    private void checkRequestNullity(ObjectRequest request) throws PushServerException {
+    private void checkRequestNullity(ObjectRequest<?> request) throws PushServerException {
         if (request.getRequestObject() == null) {
             throw new PushServerException("Empty requestObject data");
         }

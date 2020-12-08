@@ -44,7 +44,7 @@ public class PowerAuthTestClient {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void initializeClient(String powerAuthRestUrl) {
+    public void initializeClient(String powerAuthRestUrl) throws PowerAuthClientException {
         powerAuthClient = new PowerAuthRestClient(powerAuthRestUrl);
     }
 
