@@ -105,10 +105,10 @@ public class FcmClient {
     }
 
     /**
-     * Initialize WebClient instance and configure it based on client configuration.
+     * Initialize RestClient instance and configure it based on client configuration.
      * @throws PushServerException Thrown in case REST client initialization fails.
      */
-    public void initializeWebClient() throws PushServerException {
+    public void initializeRestClient() throws PushServerException {
         DefaultRestClient.Builder builder = DefaultRestClient.builder()
                 .connectionTimeout(pushServiceConfiguration.getFcmConnectTimeout());
         if (proxyHost != null) {

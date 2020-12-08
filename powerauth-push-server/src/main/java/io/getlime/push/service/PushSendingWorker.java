@@ -105,7 +105,7 @@ public class PushSendingWorker {
             }
             fcmClient.setProxySettings(proxyHost, proxyPort, proxyUsername, proxyPassword);
         }
-        fcmClient.initializeWebClient();
+        fcmClient.initializeRestClient();
         String fcmUrl = pushServiceConfiguration.getFcmSendMessageUrl();
         if (fcmUrl.contains("projects/%s/")) {
             // Initialize Google Credential for production FCM URL
