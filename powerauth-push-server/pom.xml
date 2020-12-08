@@ -58,16 +58,6 @@
 
         <!-- HTTP and Push Sending Dependencies -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${httpclient.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpasyncclient</artifactId>
-            <version>${httpasyncclient.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.eatthepath</groupId>
             <artifactId>pushy</artifactId>
             <version>${pushy.version}</version>
