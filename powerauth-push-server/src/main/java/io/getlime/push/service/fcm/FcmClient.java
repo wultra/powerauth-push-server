@@ -21,21 +21,20 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.messaging.Message;
+import com.wultra.core.rest.client.base.DefaultRestClient;
+import com.wultra.core.rest.client.base.RestClient;
+import com.wultra.core.rest.client.base.RestClientException;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmInitializationFailedException;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
-import io.getlime.push.service.fcm.model.FcmSuccessResponse;
-import io.netty.channel.ChannelOption;
+import io.getlime.push.errorhandling.exceptions.PushServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.MediaType;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Flux;
-import reactor.netty.http.client.HttpClient;
-import reactor.netty.tcp.ProxyProvider;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -74,8 +73,8 @@ public class FcmClient {
     // FCM converter for model classes
     private final FcmModelConverter fcmConverter;
 
-    // WebClient instance
-    private WebClient webClient;
+    // RestClient instance
+    private RestClient restClient;
 
     // Proxy settings
     private String proxyHost;
@@ -107,29 +106,22 @@ public class FcmClient {
 
     /**
      * Initialize WebClient instance and configure it based on client configuration.
+     * @throws PushServerException Thrown in case REST client initialization fails.
      */
-    public void initializeWebClient() {
-        HttpClient httpClient = HttpClient.create()
-                .tcpConfiguration(tcpClient -> {
-                    tcpClient = tcpClient.option(
-                            ChannelOption.CONNECT_TIMEOUT_MILLIS,
-                            pushServiceConfiguration.getFcmConnectTimeout());
-                    if (proxyHost != null) {
-                        tcpClient = tcpClient.proxy(proxySpec -> {
-                            ProxyProvider.Builder builder = proxySpec
-                                    .type(ProxyProvider.Proxy.HTTP)
-                                    .host(proxyHost)
-                                    .port(proxyPort);
-                            if (proxyUsername != null) {
-                                builder.username(proxyUsername);
-                                builder.password(s -> proxyPassword);
-                            }
-                            builder.build();
-                        });
-                    }
-                    return tcpClient;
-                });
-        webClient = WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient)).build();
+    public void initializeWebClient() throws PushServerException {
+        DefaultRestClient.Builder builder = DefaultRestClient.builder()
+                .connectionTimeout(pushServiceConfiguration.getFcmConnectTimeout());
+        if (proxyHost != null) {
+            DefaultRestClient.ProxyBuilder proxyBuilder = builder.proxy().host(proxyHost).port(proxyPort);
+            if (proxyUsername != null) {
+                proxyBuilder.username(proxyUsername).password(proxyPassword);
+            }
+        }
+        try {
+            restClient = builder.build();
+        } catch (RestClientException ex) {
+            throw new PushServerException("REST client initialization failed", ex);
+        }
     }
 
     /**
@@ -210,9 +202,9 @@ public class FcmClient {
      * @param onError Callback called when request fails.
      * @throws FcmMissingTokenException Thrown when FCM is not configured.
      */
-    public void exchange(Message message, boolean validationOnly, Consumer<FcmSuccessResponse> onSuccess, Consumer<Throwable> onError) throws FcmMissingTokenException {
-        if (webClient == null) {
-            logger.error("Push message delivery failed because WebClient is not initialized.");
+    public void exchange(Message message, boolean validationOnly, Consumer<ClientResponse> onSuccess, Consumer<Throwable> onError) throws FcmMissingTokenException {
+        if (restClient == null) {
+            logger.error("Push message delivery failed because RestClient is not initialized.");
             return;
         }
         if (projectId == null) {
@@ -230,21 +222,18 @@ public class FcmClient {
             return;
         }
 
-        WebClient.RequestBodySpec requestBody = webClient
-                .post()
-                .uri(fcmSendMessageUrl);
-
         AccessToken accessToken = getAccessToken();
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         if (accessToken != null) {
-            requestBody.header("Authorization", "Bearer " + accessToken.getTokenValue());
+            headers.add("Authorization", "Bearer " + accessToken.getTokenValue());
         }
 
-        requestBody
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromDataBuffers(body))
-                .retrieve()
-                .bodyToMono(FcmSuccessResponse.class)
-                .subscribe(onSuccess, onError);
+        try {
+            restClient.postNonBlocking(fcmSendMessageUrl, body, null, headers, onSuccess, onError);
+        } catch (RestClientException ex) {
+            logger.debug(ex.getMessage(), ex);
+            logger.error("Push message delivery failed because of a RestClient error: " + ex.getMessage());
+        }
     }
 
 }

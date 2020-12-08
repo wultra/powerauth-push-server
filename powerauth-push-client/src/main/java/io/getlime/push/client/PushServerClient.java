@@ -17,9 +17,11 @@
 package io.getlime.push.client;
 
 import com.google.common.io.BaseEncoding;
+import com.wultra.core.rest.client.base.DefaultRestClient;
+import com.wultra.core.rest.client.base.RestClient;
+import com.wultra.core.rest.client.base.RestClientException;
 import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
-import io.getlime.core.rest.model.base.response.ErrorResponse;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.model.base.PagedResponse;
@@ -33,20 +35,13 @@ import io.getlime.push.model.validator.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Simple class for interacting with the push server RESTful API.
@@ -58,14 +53,19 @@ public class PushServerClient {
 
     private static final Logger logger = LoggerFactory.getLogger(PushServerClient.class);
 
-    private final WebClient webClient;
+    private final RestClient restClient;
 
     /**
      * Main constructor with the push server base URL.
      * @param serviceBaseUrl Push server instance base URL.
+     * @throws PushServerClientException Thrown in case REST client initialization fails.
      */
-    public PushServerClient(String serviceBaseUrl) {
-        this.webClient = WebClient.builder().baseUrl(serviceBaseUrl).build();
+    public PushServerClient(String serviceBaseUrl) throws PushServerClientException {
+        try {
+            this.restClient = DefaultRestClient.builder().baseUrl(serviceBaseUrl).build();
+        } catch (RestClientException ex) {
+            throw new PushServerClientException("Rest client initialization failed, error: " + ex.getMessage());
+        }
     }
 
     // Client calls
@@ -624,14 +624,13 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      *
      */
-    private <T extends Response> T getObjectImpl(String url, MultiValueMap<String, String> params, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
-        ClientResponse response = webClient.get()
-                .uri(uriBuilder -> uriBuilder.path(url).queryParams(params).build())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .block();
-        return checkHttpStatus(typeReference, Objects.requireNonNull(response));
-
+    private <T> T getObjectImpl(String url, MultiValueMap<String, String> params, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        try {
+            return restClient.get(url, params, null, typeReference).getBody();
+        } catch (RestClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP GET request failed."));
+        }
     }
 
     /**
@@ -642,7 +641,7 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T extends Response> T postObjectImpl(String url, Object request) throws PushServerClientException {
+    private <T> T postObjectImpl(String url, Object request) throws PushServerClientException {
         return postObjectImpl(url, request, new ParameterizedTypeReference<T>() {});
     }
 
@@ -655,8 +654,13 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T extends Response> T postObjectImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
-        return httpExchangeObjectImpl(HttpMethod.POST, url, request, typeReference);
+    private <T> T postObjectImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        try {
+            return restClient.post(url, request, typeReference).getBody();
+        } catch (RestClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
+        }
     }
 
     /**
@@ -667,7 +671,7 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T extends Response> T putObjectImpl(String url, Object request) throws PushServerClientException {
+    private <T> T putObjectImpl(String url, Object request) throws PushServerClientException {
         return putObjectImpl(url, request, new ParameterizedTypeReference<T>() {});
     }
 
@@ -680,56 +684,12 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T extends Response> T putObjectImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
-        return httpExchangeObjectImpl(HttpMethod.PUT, url, request, typeReference);
-    }
-
-    /**
-     * Exchange object response.
-     *
-     * @param method HTTP method
-     * @param url specific url of method
-     * @param request request body
-     * @param typeReference reference on type for parsing into JSON
-     * @return Object obtained after processing the response JSON.
-     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
-     */
-    private <T extends Response> T httpExchangeObjectImpl(HttpMethod method, String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
-        WebClient.RequestBodySpec spec = webClient.method(method)
-                .uri(uriBuilder -> uriBuilder.path(url).build())
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON);
-        Mono<ClientResponse> responseMono;
-        if (request != null) {
-            responseMono = spec.body(BodyInserters.fromValue(request)).exchange();
-        } else {
-            responseMono = spec.exchange();
-        }
-        ClientResponse response = responseMono.block();
-        return checkHttpStatus(typeReference, Objects.requireNonNull(response));
-    }
-
-    /**
-     * Checks response status
-     *
-     * @param typeReference reference on type of response body from which map into JSON
-     * @param response prepared http response
-     * @return In case response code is 200, returns instance of expected response type. Otherwise, it attempts to
-     * reconstruct error response and returns the error response.
-     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
-     */
-    private <T extends Response> T checkHttpStatus(ParameterizedTypeReference<T> typeReference, ClientResponse response) throws PushServerClientException {
-        if (response.statusCode().is2xxSuccessful()) {
-            return response.bodyToMono(typeReference).block();
-        } else {
-            try {
-                // Response body contains data, return Exception with status code and error response
-                ErrorResponse errorResponse = (ErrorResponse) response.bodyToMono(typeReference).block();
-                throw new PushServerClientException("Error HTTP response status code received: " + response.rawStatusCode(), Objects.requireNonNull(errorResponse).getResponseObject());
-            } catch (Exception ex) {
-                logger.warn(ex.getMessage(), ex);
-                throw new PushServerClientException("Error HTTP response status code received: " + response.rawStatusCode() + ". Check server log for error details.");
-            }
+    private <T> T putObjectImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        try {
+            return restClient.put(url, request, typeReference).getBody();
+        } catch (RestClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP PUT request failed."));
         }
     }
 

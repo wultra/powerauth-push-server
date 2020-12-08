@@ -16,6 +16,7 @@
 package io.getlime.push.configuration;
 
 import io.getlime.push.client.PushServerClient;
+import io.getlime.push.client.PushServerClientException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +37,7 @@ public class PushSeverTestConfiguration {
      * @return Push server client.
      */
     @Bean
-    public PushServerClient pushServerClient() {
+    public PushServerClient pushServerClient() throws PushServerClientException {
         return new PushServerClient(pushServiceUrl);
     }
 }

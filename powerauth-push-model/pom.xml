@@ -19,7 +19,12 @@
         <dependency>
             <groupId>io.getlime.core</groupId>
             <artifactId>rest-model-base</artifactId>
-            <version>${lime.rest.version}</version>
+            <version>${rest-base.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.getlime.core</groupId>
+            <artifactId>rest-client-base</artifactId>
+            <version>${rest-base.version}</version>
         </dependency>
         <dependency>
             <groupId>io.getlime.security</groupId>

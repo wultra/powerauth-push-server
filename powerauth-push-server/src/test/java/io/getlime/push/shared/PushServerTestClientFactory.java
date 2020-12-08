@@ -1,6 +1,7 @@
 package io.getlime.push.shared;
 
 import io.getlime.push.client.PushServerClient;
+import io.getlime.push.client.PushServerClientException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ public class PushServerTestClientFactory {
     @Value("${powerauth.service.url}")
     private String powerAuthRestUrl;
 
-    public PushServerClient createPushServerClient(String baseUrl) {
+    public PushServerClient createPushServerClient(String baseUrl) throws PushServerClientException {
         return new PushServerClient(baseUrl);
     }
 

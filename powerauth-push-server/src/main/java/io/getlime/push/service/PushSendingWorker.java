@@ -16,17 +16,17 @@
 
 package io.getlime.push.service;
 
-import com.eatthepath.pushy.apns.util.SimpleApnsPayloadBuilder;
-import com.google.firebase.messaging.AndroidConfig;
-import com.google.firebase.messaging.AndroidNotification;
-import com.google.firebase.messaging.Message;
 import com.eatthepath.pushy.apns.*;
 import com.eatthepath.pushy.apns.auth.ApnsSigningKey;
 import com.eatthepath.pushy.apns.proxy.HttpProxyHandlerFactory;
 import com.eatthepath.pushy.apns.util.ApnsPayloadBuilder;
+import com.eatthepath.pushy.apns.util.SimpleApnsPayloadBuilder;
 import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
 import com.eatthepath.pushy.apns.util.TokenUtil;
 import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.Message;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import javax.net.ssl.SSLException;
@@ -132,9 +133,10 @@ public class PushSendingWorker {
         Message message = buildAndroidMessage(pushMessageBody, attributes, pushToken);
 
         // Callback when FCM request succeeds
-        Consumer<FcmSuccessResponse> onSuccess = body -> {
-            if (body.getName() != null && body.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
-                logger.info("Notification sent, response: {}", body.getName());
+        Consumer<ClientResponse> onSuccess = body -> {
+            FcmSuccessResponse response = body.bodyToMono(FcmSuccessResponse.class).block();
+            if (response != null && response.getName() != null && response.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
+                logger.info("Notification sent, response: {}", response.getName());
                 callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                 return;
             }

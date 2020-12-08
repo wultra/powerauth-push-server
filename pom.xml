@@ -80,7 +80,7 @@
         <jackson.version>2.11.3</jackson.version>
         <jackson-databind.version>2.11.3</jackson-databind.version>
         <javax.interceptor-api.version>1.2.2</javax.interceptor-api.version>
-        <lime.rest.version>1.1.0</lime.rest.version>
+        <rest-base.version>1.2.0-SNAPSHOT</rest-base.version>
         <powerauth.version>1.0.0-SNAPSHOT</powerauth.version>
         <pushy.version>0.14.2</pushy.version>
         <springdoc-openapi.version>1.4.6</springdoc-openapi.version>
