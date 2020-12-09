@@ -22,21 +22,14 @@ import com.google.api.client.json.JsonGenerator;
 import com.google.api.client.json.JsonParser;
 import com.google.common.collect.ImmutableMap;
 import com.google.firebase.messaging.AndroidNotification;
-import com.google.firebase.messaging.Message;
 import io.getlime.push.service.fcm.model.FcmErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -114,35 +107,6 @@ public class FcmModelConverter {
             logger.error("Json serialization failed: {}", ex.getMessage(), ex);
             return null;
         }
-    }
-
-    /**
-     * Convert Message to payload for WebClient.
-     *
-     * @param message      Message to send.
-     * @param validateOnly Whether to perform only validation.
-     * @return Flux of DataBuffer.
-     */
-    public Flux<DataBuffer> convertMessageToFlux(Message message, boolean validateOnly) {
-        ImmutableMap.Builder<String, Object> payloadBuilder = ImmutableMap.<String, Object>builder().put("message", message);
-        if (validateOnly) {
-            payloadBuilder.put("validate_only", true);
-        }
-        ImmutableMap<String, Object> payload = payloadBuilder.build();
-        String convertedMessage;
-        try {
-            StringWriter writer = new StringWriter();
-            JsonGenerator gen = jsonFactory.createJsonGenerator(writer);
-            gen.serialize(payload);
-            gen.close();
-            convertedMessage = writer.toString();
-        } catch (IOException ex) {
-            logger.error("Json serialization failed: {}", ex.getMessage(), ex);
-            return null;
-        }
-        DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-        DefaultDataBuffer dataBuffer = factory.wrap(ByteBuffer.wrap(convertedMessage.getBytes(StandardCharsets.UTF_8)));
-        return Flux.just(dataBuffer);
     }
 
 }

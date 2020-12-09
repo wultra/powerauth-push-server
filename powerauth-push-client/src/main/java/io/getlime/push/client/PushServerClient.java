@@ -77,10 +77,9 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<ServiceStatusResponse> getServiceStatus() throws PushServerClientException {
-        ParameterizedTypeReference<ObjectResponse<ServiceStatusResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<ServiceStatusResponse>>() {};
 
         logger.info("Calling push server status service - start");
-        final ObjectResponse<ServiceStatusResponse> result = getObjectImpl("/push/service/status", null, typeReference);
+        final ObjectResponse<ServiceStatusResponse> result = getObjectImpl("/push/service/status", null, ServiceStatusResponse.class);
         logger.info("Calling push server status service - finish");
 
         return result;
@@ -205,7 +204,7 @@ public class PushServerClient {
         logger.info("Calling push server update device status, activation ID: {} - start", activationId);
         // Note that there is just plain 'request' in the request, not 'new ObjectRequest<>(request)'.
         // This is due to the fact that standard PowerAuth Server callback format is used here.
-        Response response = postObjectImpl("/push/device/status/update", request);
+        Response response = postImpl("/push/device/status/update", request, new ParameterizedTypeReference<Response>(){});
         logger.info("Calling push server update device status, activation ID: {} - finish", activationId);
 
         return response.getStatus().equals(Response.Status.OK);
@@ -230,10 +229,8 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        ParameterizedTypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new ParameterizedTypeReference<ObjectResponse<PushMessageSendResult>>() {};
-
         logger.info("Calling push server to send a push message, app ID: {}, user ID: {} - start", appId, pushMessage.getUserId());
-        final ObjectResponse<PushMessageSendResult> result = postObjectImpl("/push/message/send", new ObjectRequest<>(request), typeReference);
+        final ObjectResponse<PushMessageSendResult> result = postObjectImpl("/push/message/send", new ObjectRequest<>(request), PushMessageSendResult.class);
         logger.info("Calling push server to send a push message, app ID: {}, user ID: {} - finish", appId, pushMessage.getUserId());
 
         return result;
@@ -258,10 +255,8 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        ParameterizedTypeReference<ObjectResponse<PushMessageSendResult>> typeReference = new ParameterizedTypeReference<ObjectResponse<PushMessageSendResult>>() {};
-
         logger.info("Calling push server to send a push message batch, app ID: {} - start", appId);
-        final ObjectResponse<PushMessageSendResult> result = postObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), typeReference);
+        final ObjectResponse<PushMessageSendResult> result = postObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), PushMessageSendResult.class);
         logger.info("Calling push server to send a push message batch, app ID: {} - finish", appId);
 
         return result;
@@ -286,10 +281,8 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        ParameterizedTypeReference<ObjectResponse<CreateCampaignResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<CreateCampaignResponse>>() {};
-
         logger.info("Calling push server to create a push campaign, app ID: {} - start", appId);
-        final ObjectResponse<CreateCampaignResponse> result = postObjectImpl("/push/campaign/create", new ObjectRequest<>(request), typeReference);
+        final ObjectResponse<CreateCampaignResponse> result = postObjectImpl("/push/campaign/create", new ObjectRequest<>(request), CreateCampaignResponse.class);
         logger.info("Calling push server to create a push campaign, app ID: {} - finish", appId);
 
         return result;
@@ -306,10 +299,8 @@ public class PushServerClient {
         try {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
 
-            ParameterizedTypeReference<ObjectResponse<DeleteCampaignResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<DeleteCampaignResponse>>() {};
-
             logger.info("Calling push server to delete a push campaign, campaign ID: {} - start", campaignId);
-            ObjectResponse<DeleteCampaignResponse> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, typeReference);
+            ObjectResponse<DeleteCampaignResponse> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, DeleteCampaignResponse.class);
             logger.info("Calling push server to delete a push campaign, campaign ID: {} - finish", campaignId);
 
             return response.getStatus().equals(Response.Status.OK);
@@ -329,10 +320,8 @@ public class PushServerClient {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("all", Collections.singletonList(Boolean.valueOf(all).toString()));
 
-        ParameterizedTypeReference<ObjectResponse<ListOfCampaignsResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<ListOfCampaignsResponse>>() {};
-
         logger.info("Calling push server to obtain a push campaign list - start");
-        final ObjectResponse<ListOfCampaignsResponse> result = getObjectImpl("/push/campaign/list", params, typeReference);
+        final ObjectResponse<ListOfCampaignsResponse> result = getObjectImpl("/push/campaign/list", params, ListOfCampaignsResponse.class);
         logger.info("Calling push server to obtain a push campaign list - finish");
 
         return result;
@@ -349,10 +338,8 @@ public class PushServerClient {
         try {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
 
-            ParameterizedTypeReference<ObjectResponse<CampaignResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<CampaignResponse>>() {};
-
             logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - start", campaignId);
-            final ObjectResponse<CampaignResponse> result = getObjectImpl("/push/campaign/" + campaignIdSanitized + "/detail", null, typeReference);
+            final ObjectResponse<CampaignResponse> result = getObjectImpl("/push/campaign/" + campaignIdSanitized + "/detail", null, CampaignResponse.class);
             logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - finish", campaignId);
 
             return result;
@@ -405,9 +392,8 @@ public class PushServerClient {
             params.put("size", Collections.singletonList(Integer.valueOf(size).toString()));
 
             ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>>() {};
-
             logger.info("Calling push server to get users from the campaign, campaign ID: {} - start", campaignId);
-            final PagedResponse<ListOfUsersFromCampaignResponse> result = getObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
+            final PagedResponse<ListOfUsersFromCampaignResponse> result = getImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
             logger.info("Calling push server to get users from the campaign, campaign ID: {} - finish", campaignId);
 
             return result;
@@ -496,9 +482,8 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<GetApplicationListResponse> getApplicationList() throws PushServerClientException {
-        final ParameterizedTypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetApplicationListResponse>>() {};
         logger.info("Calling push server to retrieve list of applications - start");
-        final ObjectResponse<GetApplicationListResponse> response = getObjectImpl("/admin/app/list", null, typeReference);
+        final ObjectResponse<GetApplicationListResponse> response = getObjectImpl("/admin/app/list", null, GetApplicationListResponse.class);
         logger.info("Calling push server to retrieve list of applications - finish");
         return response;
     }
@@ -509,9 +494,8 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<GetApplicationListResponse> getUnconfiguredApplicationList() throws PushServerClientException {
-        final ParameterizedTypeReference<ObjectResponse<GetApplicationListResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetApplicationListResponse>>() {};
         logger.info("Calling push server to retrieve list of unconfigured applications - start");
-        final ObjectResponse<GetApplicationListResponse> response = getObjectImpl("/admin/app/unconfigured/list", null, typeReference);
+        final ObjectResponse<GetApplicationListResponse> response = getObjectImpl("/admin/app/unconfigured/list", null, GetApplicationListResponse.class);
         logger.info("Calling push server to retrieve list of unconfigured applications - finish");
         return response;
     }
@@ -525,10 +509,9 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(Long id, boolean includeIos, boolean includeAndroid) throws PushServerClientException {
-        final ParameterizedTypeReference<ObjectResponse<GetApplicationDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetApplicationDetailResponse>>() {};
         GetApplicationDetailRequest request = new GetApplicationDetailRequest(id, includeIos, includeAndroid);
         logger.info("Calling push server to retrieve application detail, ID: {} - start", id);
-        final ObjectResponse<GetApplicationDetailResponse> response = postObjectImpl("/admin/app/detail", new ObjectRequest<>(request), typeReference);
+        final ObjectResponse<GetApplicationDetailResponse> response = postObjectImpl("/admin/app/detail", new ObjectRequest<>(request), GetApplicationDetailResponse.class);
         logger.info("Calling push server to retrieve application detail, ID: {} - finish", id);
         return response;
     }
@@ -540,10 +523,9 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<CreateApplicationResponse> createApplication(Long appId) throws PushServerClientException {
-        final ParameterizedTypeReference<ObjectResponse<CreateApplicationResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<CreateApplicationResponse>>() {};
         final CreateApplicationRequest request = new CreateApplicationRequest(appId);
         logger.info("Calling push server to create application, app ID: {} - start", appId);
-        final ObjectResponse<CreateApplicationResponse> response = postObjectImpl("/admin/app/create", new ObjectRequest<>(request), typeReference);
+        final ObjectResponse<CreateApplicationResponse> response = postObjectImpl("/admin/app/create", new ObjectRequest<>(request), CreateApplicationResponse.class);
         logger.info("Calling push server to create application, app ID: {} - finish", appId);
         return response;
     }
@@ -615,21 +597,58 @@ public class PushServerClient {
     // Generic HTTP client methods
 
     /**
-     * Prepare GET object response.
+     * Prepare GET response.
      *
      * @param url specific url of method.
      * @param params params to pass to url path, optional.
-     * @param typeReference reference on type for parsing into JSON.
+     * @param typeReference response type reference.
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      *
      */
-    private <T> T getObjectImpl(String url, MultiValueMap<String, String> params, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+    private <T> T getImpl(String url, MultiValueMap<String, String> params, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
         try {
             return restClient.get(url, params, null, typeReference).getBody();
         } catch (RestClientException ex) {
             logger.warn(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP GET request failed."));
+        }
+    }
+
+    /**
+     * Prepare GET object response.
+     *
+     * @param url specific url of method.
+     * @param params params to pass to url path, optional.
+     * @param responseType response type.
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     *
+     */
+    private <T> ObjectResponse<T> getObjectImpl(String url, MultiValueMap<String, String> params, Class<T> responseType) throws PushServerClientException {
+        try {
+            return restClient.getObject(url, params, null, responseType);
+        } catch (RestClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP GET request failed."));
+        }
+    }
+
+    /**
+     * Prepare a generic POST response.
+     *
+     * @param url specific url of method
+     * @param request request body
+     * @param typeReference type reference
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    private <T> T postImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        try {
+            return restClient.post(url, request, typeReference).getBody();
+        } catch (RestClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
 
@@ -641,8 +660,13 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T postObjectImpl(String url, Object request) throws PushServerClientException {
-        return postObjectImpl(url, request, new ParameterizedTypeReference<T>() {});
+    private Response postObjectImpl(String url, ObjectRequest<?> request) throws PushServerClientException {
+        try {
+            return restClient.postObject(url, request);
+        } catch (RestClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
+        }
     }
 
     /**
@@ -650,13 +674,13 @@ public class PushServerClient {
      *
      * @param url specific url of method
      * @param request request body
-     * @param typeReference reference on type for parsing into JSON
+     * @param responseType response type
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T postObjectImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+    private <T> ObjectResponse<T> postObjectImpl(String url, ObjectRequest<?> request, Class<T> responseType) throws PushServerClientException {
         try {
-            return restClient.post(url, request, typeReference).getBody();
+            return restClient.postObject(url, request, responseType);
         } catch (RestClientException ex) {
             logger.warn(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
@@ -671,8 +695,13 @@ public class PushServerClient {
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T putObjectImpl(String url, Object request) throws PushServerClientException {
-        return putObjectImpl(url, request, new ParameterizedTypeReference<T>() {});
+    private Response putObjectImpl(String url, ObjectRequest<?> request) throws PushServerClientException {
+        try {
+            return restClient.putObject(url, request);
+        } catch (RestClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
+        }
     }
 
     /**
@@ -680,13 +709,13 @@ public class PushServerClient {
      *
      * @param url specific url of method
      * @param request request body
-     * @param typeReference reference on type for parsing into JSON
+     * @param responseType response type
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private <T> T putObjectImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+    private <T> ObjectResponse<T> putObjectImpl(String url, ObjectRequest<?> request, Class<T> responseType) throws PushServerClientException {
         try {
-            return restClient.put(url, request, typeReference).getBody();
+            return restClient.putObject(url, request, responseType);
         } catch (RestClientException ex) {
             logger.warn(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP PUT request failed."));
