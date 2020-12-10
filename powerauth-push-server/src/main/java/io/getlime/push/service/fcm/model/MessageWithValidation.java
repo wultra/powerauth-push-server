@@ -15,6 +15,7 @@
  */
 package io.getlime.push.service.fcm.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.firebase.messaging.Message;
 
 /**
@@ -25,7 +26,9 @@ import com.google.firebase.messaging.Message;
 public class MessageWithValidation {
 
     private Message message;
-    private boolean validate_only;
+
+    @JsonProperty("validate_only")
+    private boolean validateOnly;
 
     /**
      * Default constructor.
@@ -40,7 +43,7 @@ public class MessageWithValidation {
      */
     public MessageWithValidation(Message message, boolean validateOnly) {
         this.message = message;
-        this.validate_only = validateOnly;
+        this.validateOnly = validateOnly;
     }
 
     /**
@@ -64,7 +67,7 @@ public class MessageWithValidation {
      * @return Validation mode.
      */
     public boolean isValidateOnly() {
-        return validate_only;
+        return validateOnly;
     }
 
     /**
@@ -72,6 +75,6 @@ public class MessageWithValidation {
      * @param validateOnly Validation mode.
      */
     public void setValidateOnly(boolean validateOnly) {
-        this.validate_only = validateOnly;
+        this.validateOnly = validateOnly;
     }
 }
