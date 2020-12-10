@@ -28,13 +28,12 @@ import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmInitializationFailedException;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.service.fcm.model.MessageWithValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import reactor.core.publisher.Flux;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -216,11 +215,7 @@ public class FcmClient {
             return;
         }
 
-        Flux<DataBuffer> body = fcmConverter.convertMessageToFlux(message, validationOnly);
-        if (body == null) {
-            logger.error("Push message delivery failed because message is invalid.");
-            return;
-        }
+        MessageWithValidation body = new MessageWithValidation(message, validationOnly);
 
         AccessToken accessToken = getAccessToken();
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
