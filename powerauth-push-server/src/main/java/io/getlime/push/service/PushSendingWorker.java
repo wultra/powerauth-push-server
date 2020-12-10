@@ -40,6 +40,7 @@ import io.getlime.push.service.fcm.model.FcmSuccessResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -132,9 +133,9 @@ public class PushSendingWorker {
         // Build Android message
         Message message = buildAndroidMessage(pushMessageBody, attributes, pushToken);
 
-        // Callback when FCM request succeeds
-        Consumer<ClientResponse> onSuccess = body -> {
-            FcmSuccessResponse response = body.bodyToMono(FcmSuccessResponse.class).block();
+        // Extraction of FCM success response
+        Consumer<ResponseEntity<FcmSuccessResponse>> fcmConsumer = responseEntity -> {
+            FcmSuccessResponse response = responseEntity.getBody();
             if (response != null && response.getName() != null && response.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
                 logger.info("Notification sent, response: {}", response.getName());
                 callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
@@ -144,6 +145,9 @@ public class PushSendingWorker {
             logger.error("Invalid response received from FCM, notification sending failed");
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         };
+
+        // Callback when FCM request succeeds
+        Consumer<ClientResponse> onSuccess = body -> body.toEntity(FcmSuccessResponse.class).subscribe(fcmConsumer);
 
         // Callback when FCM request fails
         Consumer<Throwable> onError = t -> {
