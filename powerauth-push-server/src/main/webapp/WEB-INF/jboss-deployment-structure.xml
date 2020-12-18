@@ -4,6 +4,7 @@
 		<exclude-subsystems>
 			<!-- disable the logging subsystem because the application manages its own logging independently -->
 			<subsystem name="logging" />
+			<subsystem name="jaxrs" />
 		</exclude-subsystems>
 
 		<dependencies>
