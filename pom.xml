@@ -155,13 +155,26 @@
         </profile>
     </profiles>
 
+    <repositories>
+        <repository>
+            <id>ossrh-snapshots</id>
+            <url>http://oss.sonatype.org/content/repositories/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <distributionManagement>
         <snapshotRepository>
-            <id>ossrh</id>
+            <id>ossrh-snapshots-distribution</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </snapshotRepository>
         <repository>
-            <id>ossrh</id>
+            <id>ossrh-staging-distribution</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
