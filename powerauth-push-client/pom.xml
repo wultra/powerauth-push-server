@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>powerauth-push-client</artifactId>
     <description>PowerAuth Push Server RESTful Client</description>
-    <version>0.24.0</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <parent>
         <artifactId>powerauth-push-server-parent</artifactId>
         <groupId>io.getlime.security</groupId>
-        <version>0.24.0</version>
+        <version>1.0.0</version>
     </parent>
 
     <dependencies>
@@ -20,7 +20,13 @@
         <dependency>
             <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-push-model</artifactId>
-            <version>0.24.0</version>
+            <version>1.0.0</version>
+        </dependency>
+
+        <!-- Spring Dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
         <!-- Other Dependencies -->
@@ -38,11 +44,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-databind.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.konghq</groupId>
-            <artifactId>unirest-java</artifactId>
-            <version>${unirest.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

@@ -16,7 +16,6 @@
 
 package io.getlime.push.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
@@ -32,12 +31,9 @@ import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.shared.PowerAuthTestClient;
 import io.getlime.push.shared.PushServerTestClientFactory;
-import kong.unirest.Unirest;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +44,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.Instant;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,34 +94,13 @@ public class PushServerTests {
     private int port;
 
     @Value("${powerauth.service.url}")
-    private String powerAuthServiceUrl;
+    private String powerAuthRestUrl;
 
     @Value("${powerauth.push.service.fcm.sendMessageUrl}")
     private String fcmUrlForTests;
 
     @Before
     public void setUp() throws Exception {
-
-        Unirest.config()
-                .setObjectMapper(new kong.unirest.ObjectMapper() {
-
-                    public String writeValue(Object value) {
-                        try {
-                            return mapper.writeValueAsString(value);
-                        } catch (JsonProcessingException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-
-                    public <T> T readValue(String value, Class<T> valueType) {
-                        try {
-                            return mapper.readValue(value, valueType);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                });
-
         pushServerClient = testClientFactory.createPushServerClient("http://localhost:" + port);
         powerAuthTestClient = testClientFactory.createPowerAuthTestClient();
         AppCredentialsEntity testCredentials = new AppCredentialsEntity();
@@ -133,9 +109,6 @@ public class PushServerTests {
         testCredentials.setAndroidPrivateKey(new byte[128]);
         appCredentialsRepository.save(testCredentials);
     }
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
 
     @Test
     public void getServiceStatusTest() throws Exception {
@@ -218,7 +191,7 @@ public class PushServerTests {
         pushMessageBody.setSound("riff.wav");
         pushMessageBody.setCategory("balance-update");
         pushMessageBody.setCollapseKey("balance-update");
-        pushMessageBody.setValidUntil(new Date());
+        pushMessageBody.setValidUntil(Instant.now());
         pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
         attributes.setSilent(false);
         attributes.setPersonal(true);
@@ -252,7 +225,7 @@ public class PushServerTests {
         pushMessageBody.setSound("riff.wav");
         pushMessageBody.setCategory("balance-update");
         pushMessageBody.setCollapseKey("balance-update");
-        pushMessageBody.setValidUntil(new Date());
+        pushMessageBody.setValidUntil(Instant.now());
         pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
         attributes.setSilent(false);
         attributes.setPersonal(true);
@@ -283,7 +256,7 @@ public class PushServerTests {
         pushMessageBody.setSound("riff.wav");
         pushMessageBody.setCategory("balance-update");
         pushMessageBody.setCollapseKey("balance-update");
-        pushMessageBody.setValidUntil(new Date());
+        pushMessageBody.setValidUntil(Instant.now());
         pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
         campaignRequest.setAppId(powerAuthTestClient.getApplicationId());
         campaignRequest.setMessage(pushMessageBody);

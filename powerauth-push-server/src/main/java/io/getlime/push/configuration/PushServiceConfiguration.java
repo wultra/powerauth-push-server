@@ -104,6 +104,18 @@ public class PushServiceConfiguration {
     private int apnsConnectTimeout;
 
     /**
+     * APNS concurrent connections.
+     */
+    @Value("${powerauth.push.service.apns.concurrentConnections}")
+    private int concurrentConnections;
+
+    /**
+     * Interval specifying the frequency of APNS ping calls in idle state.
+     */
+    @Value("${powerauth.push.service.apns.idlePingInterval}")
+    private long idlePingInterval;
+
+    /**
      * Get push server name.
      * @return Push server name.
      */
@@ -437,5 +449,29 @@ public class PushServiceConfiguration {
      */
     public void setApnsConnectTimeout(int apnsConnectTimeout) {
         this.apnsConnectTimeout = apnsConnectTimeout;
+    }
+
+    /**
+     * Get APNS concurrent connections.
+     * @return APNS concurrent connections.
+     */
+    public int getConcurrentConnections() {
+        return concurrentConnections;
+    }
+
+    /**
+     * Set APNS concurrent connections.
+     * @param concurrentConnections APNS concurrent connections.
+     */
+    public void setConcurrentConnections(int concurrentConnections) {
+        this.concurrentConnections = concurrentConnections;
+    }
+
+    public long getIdlePingInterval() {
+        return idlePingInterval;
+    }
+
+    public void setIdlePingInterval(long idlePingInterval) {
+        this.idlePingInterval = idlePingInterval;
     }
 }

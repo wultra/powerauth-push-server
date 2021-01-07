@@ -16,6 +16,8 @@
 package io.getlime.push.controller.rest;
 
 import com.google.common.io.BaseEncoding;
+import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
@@ -29,7 +31,6 @@ import io.getlime.push.model.validator.*;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
-import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class AdministrationController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdministrationController.class);
 
-    private final PowerAuthServiceClient powerAuthClient;
+    private final PowerAuthClient powerAuthClient;
     private final AppCredentialsRepository appCredentialsRepository;
     private final AppCredentialStorageMap appCredentialStorageMap;
 
@@ -57,7 +58,7 @@ public class AdministrationController {
      * @param appCredentialStorageMap Application credentials storage map.
      */
     @Autowired
-    public AdministrationController(PowerAuthServiceClient powerAuthClient, AppCredentialsRepository appCredentialsRepository, AppCredentialStorageMap appCredentialStorageMap) {
+    public AdministrationController(PowerAuthClient powerAuthClient, AppCredentialsRepository appCredentialsRepository, AppCredentialStorageMap appCredentialStorageMap) {
         this.powerAuthClient = powerAuthClient;
         this.appCredentialsRepository = appCredentialsRepository;
         this.appCredentialStorageMap = appCredentialStorageMap;
@@ -66,57 +67,69 @@ public class AdministrationController {
     /**
      * List applications configured in Push Server.
      * @return Application list response.
+     * @throws PushServerException Throw in case communication with PowerAuth server fails.
      */
     @GetMapping(value = "list")
-    public ObjectResponse<GetApplicationListResponse> listApplications() {
-        logger.debug("Received listApplications request");
-        final GetApplicationListResponse response = new GetApplicationListResponse();
-        final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
-        final List<PushServerApplication> appList = new ArrayList<>();
-        for (AppCredentialsEntity appCredentialsEntity : appCredentials) {
-            PushServerApplication app = new PushServerApplication();
-            app.setId(appCredentialsEntity.getId());
-            app.setAppId(appCredentialsEntity.getAppId());
-            app.setAppName(powerAuthClient.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
-            app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-            app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
-            appList.add(app);
+    public ObjectResponse<GetApplicationListResponse> listApplications() throws PushServerException {
+        try {
+            logger.debug("Received listApplications request");
+            final GetApplicationListResponse response = new GetApplicationListResponse();
+            final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
+            final List<PushServerApplication> appList = new ArrayList<>();
+            for (AppCredentialsEntity appCredentialsEntity : appCredentials) {
+                PushServerApplication app = new PushServerApplication();
+                app.setId(appCredentialsEntity.getId());
+                app.setAppId(appCredentialsEntity.getAppId());
+                app.setAppName(powerAuthClient.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
+                app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
+                app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
+                appList.add(app);
+            }
+            response.setApplicationList(appList);
+            logger.debug("The listApplications request succeeded");
+            return new ObjectResponse<>(response);
+        } catch (PowerAuthClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerException("Application list failed because application name could not be retrieved");
         }
-        response.setApplicationList(appList);
-        logger.debug("The listApplications request succeeded");
-        return new ObjectResponse<>(response);
     }
 
     /**
      * List applications which are not yet configured in Push Server.
      * @return Application list response.
+     * @throws PushServerException Throw in case communication with PowerAuth server fails.
      */
     @GetMapping(value = "unconfigured/list")
-    public ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() {
-        logger.debug("Received listUnconfiguredApplications request");
-        GetApplicationListResponse response = new GetApplicationListResponse();
-        // Get all applications in PA Server
-        final List<io.getlime.powerauth.soap.v3.GetApplicationListResponse.Applications> applicationList = powerAuthClient.getApplicationList();
+    public ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() throws PushServerException {
+        try {
+            logger.debug("Received listUnconfiguredApplications request");
+            GetApplicationListResponse response = new GetApplicationListResponse();
+            // Get all applications in PA Server
+            final List<com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications> applicationList = powerAuthClient.getApplicationList();
 
-        // Get all applications that are already set up
-        final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
+            // Get all applications that are already set up
+            final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
 
-        // Compute intersection by app ID
-        Set<Long> identifiers = new HashSet<>();
-        for (AppCredentialsEntity appCred: appCredentials) {
-            identifiers.add(appCred.getAppId());
-        }
-        for (io.getlime.powerauth.soap.v3.GetApplicationListResponse.Applications app : applicationList) {
-            if (!identifiers.contains(app.getId())) {
-                PushServerApplication applicationToAdd = new PushServerApplication();
-                applicationToAdd.setId(app.getId());
-                applicationToAdd.setAppName(app.getApplicationName());
-                // add apps in intersection
-                response.getApplicationList().add(applicationToAdd);
+            // Compute intersection by app ID
+            Set<Long> identifiers = new HashSet<>();
+            for (AppCredentialsEntity appCred: appCredentials) {
+                identifiers.add(appCred.getAppId());
             }
+            for (com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications app : applicationList) {
+                if (!identifiers.contains(app.getId())) {
+                    PushServerApplication applicationToAdd = new PushServerApplication();
+                    applicationToAdd.setId(app.getId());
+                    applicationToAdd.setAppName(app.getApplicationName());
+                    // add apps in intersection
+                    response.getApplicationList().add(applicationToAdd);
+                }
+            }
+            logger.debug("The listUnconfiguredApplications request succeeded");
+            return new ObjectResponse<>(response);
+        } catch (PowerAuthClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerException("Unconfigured application list failed because application name could not be retrieved");
         }
-        logger.debug("The listUnconfiguredApplications request succeeded");
-        return new ObjectResponse<>(response);
     }
 
     /**
@@ -127,31 +140,36 @@ public class AdministrationController {
      */
     @PostMapping(value = "detail")
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(@RequestBody ObjectRequest<GetApplicationDetailRequest> request) throws PushServerException {
-        logger.debug("Received getApplicationDetail request");
-        final GetApplicationDetailRequest requestObject = request.getRequestObject();
-        String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
-        if (errorMessage != null) {
-            throw new PushServerException(errorMessage);
+        try {
+            logger.debug("Received getApplicationDetail request");
+            final GetApplicationDetailRequest requestObject = request.getRequestObject();
+            String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
+            if (errorMessage != null) {
+                throw new PushServerException(errorMessage);
+            }
+            final GetApplicationDetailResponse response = new GetApplicationDetailResponse();
+            final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
+            final PushServerApplication app = new PushServerApplication();
+            app.setId(appCredentialsEntity.getId());
+            app.setAppId(appCredentialsEntity.getAppId());
+            app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
+            app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
+            app.setAppName(powerAuthClient.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
+            response.setApplication(app);
+            if (requestObject.getIncludeIos()) {
+                response.setIosBundle(appCredentialsEntity.getIosBundle());
+                response.setIosKeyId(appCredentialsEntity.getIosKeyId());
+                response.setIosTeamId(appCredentialsEntity.getIosTeamId());
+            }
+            if (requestObject.getIncludeAndroid()) {
+                response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
+            }
+            logger.debug("The getApplicationDetail request succeeded");
+            return new ObjectResponse<>(response);
+        } catch (PowerAuthClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerException("Application detail failed because application name could not be retrieved");
         }
-        final GetApplicationDetailResponse response = new GetApplicationDetailResponse();
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
-        final PushServerApplication app = new PushServerApplication();
-        app.setId(appCredentialsEntity.getId());
-        app.setAppId(appCredentialsEntity.getAppId());
-        app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-        app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
-        app.setAppName(powerAuthClient.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
-        response.setApplication(app);
-        if (requestObject.getIncludeIos()) {
-            response.setIosBundle(appCredentialsEntity.getIosBundle());
-            response.setIosKeyId(appCredentialsEntity.getIosKeyId());
-            response.setIosTeamId(appCredentialsEntity.getIosTeamId());
-        }
-        if (requestObject.getIncludeAndroid()) {
-            response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
-        }
-        logger.debug("The getApplicationDetail request succeeded");
-        return new ObjectResponse<>(response);
     }
 
     /**

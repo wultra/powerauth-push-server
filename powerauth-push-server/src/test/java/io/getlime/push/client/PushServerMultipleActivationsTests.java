@@ -21,13 +21,10 @@ import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.shared.PowerAuthTestClient;
 import io.getlime.push.shared.PushServerTestClientFactory;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -60,9 +57,6 @@ public class PushServerMultipleActivationsTests {
     @LocalServerPort
     private int port;
 
-    @Value("${powerauth.service.url}")
-    private String powerAuthServiceUrl;
-
     @Autowired
     private PushServerTestClientFactory testClientFactory;
 
@@ -71,9 +65,6 @@ public class PushServerMultipleActivationsTests {
 
     @MockBean
     private PowerAuthTestClient powerAuthTestClient;
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {

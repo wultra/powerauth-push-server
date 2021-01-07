@@ -28,7 +28,7 @@ public class CreateDeviceForActivationsRequest {
     private Long appId;
     private String token;
     private String platform;
-    private List<String> activationIds = new ArrayList<>();
+    private final List<String> activationIds = new ArrayList<>();
 
     /**
      * Get app ID associated with given device registration.

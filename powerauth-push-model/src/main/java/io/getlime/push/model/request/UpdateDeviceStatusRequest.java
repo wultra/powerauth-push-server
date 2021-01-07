@@ -16,6 +16,8 @@
 
 package io.getlime.push.model.request;
 
+import com.wultra.security.powerauth.client.v3.ActivationStatus;
+
 /**
  * Class representing request object responsible for updating activation status.
  *
@@ -24,9 +26,10 @@ package io.getlime.push.model.request;
 public class UpdateDeviceStatusRequest {
 
     private String activationId;
+    private ActivationStatus activationStatus;
 
     /**
-     * Get PowerAuth 2.0 Activation ID.
+     * Get PowerAuth activation ID.
      * @return Activation ID.
      */
     public String getActivationId() {
@@ -34,11 +37,27 @@ public class UpdateDeviceStatusRequest {
     }
 
     /**
-     * Set PowerAuth 2.0 Activation ID.
+     * Set PowerAuth activation ID.
      * @param activationId Activation ID.
      */
     public void setActivationId(String activationId) {
         this.activationId = activationId;
+    }
+
+    /**
+     * Get PowerAuth activation status.
+     * @return Activation status.
+     */
+    public ActivationStatus getActivationStatus() {
+        return activationStatus;
+    }
+
+    /**
+     * Set PowerAuth activation status.
+     * @param activationStatus Activation status.
+     */
+    public void setActivationStatus(ActivationStatus activationStatus) {
+        this.activationStatus = activationStatus;
     }
 
 }

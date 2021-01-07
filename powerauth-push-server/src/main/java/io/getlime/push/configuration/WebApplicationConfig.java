@@ -18,6 +18,7 @@ package io.getlime.push.configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
@@ -40,7 +41,8 @@ public class WebApplicationConfig implements WebMvcConfigurer {
      *
      * @return A new object mapper.
      */
-    private ObjectMapper objectMapper() {
+    @Bean
+    public ObjectMapper objectMapper() {
         Jackson2ObjectMapperFactoryBean bean = new Jackson2ObjectMapperFactoryBean();
         bean.setIndentOutput(true);
         bean.setDateFormat(new StdDateFormat());

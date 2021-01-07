@@ -16,22 +16,23 @@
 
 package io.getlime.push.service;
 
+import com.eatthepath.pushy.apns.*;
+import com.eatthepath.pushy.apns.auth.ApnsSigningKey;
+import com.eatthepath.pushy.apns.proxy.HttpProxyHandlerFactory;
+import com.eatthepath.pushy.apns.util.ApnsPayloadBuilder;
+import com.eatthepath.pushy.apns.util.SimpleApnsPayloadBuilder;
+import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
+import com.eatthepath.pushy.apns.util.TokenUtil;
+import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
-import com.turo.pushy.apns.*;
-import com.turo.pushy.apns.auth.ApnsSigningKey;
-import com.turo.pushy.apns.proxy.HttpProxyHandlerFactory;
-import com.turo.pushy.apns.util.ApnsPayloadBuilder;
-import com.turo.pushy.apns.util.SimpleApnsPushNotification;
-import com.turo.pushy.apns.util.TokenUtil;
-import com.turo.pushy.apns.util.concurrent.PushNotificationFuture;
-import com.turo.pushy.apns.util.concurrent.PushNotificationResponseListener;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageAttributes;
 import io.getlime.push.model.entity.PushMessageBody;
+import io.getlime.push.service.apns.ApnsRejectionReason;
 import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmModelConverter;
 import io.getlime.push.service.fcm.model.FcmErrorResponse;
@@ -39,7 +40,9 @@ import io.getlime.push.service.fcm.model.FcmSuccessResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import javax.net.ssl.SSLException;
@@ -48,10 +51,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 
@@ -66,14 +69,9 @@ public class PushSendingWorker {
     // Expected response String from FCM
     private static final String FCM_RESPONSE_VALID_REGEXP       = "projects/.+/messages/.+";
 
-    // APNS bad device token String
-    private static final String APNS_BAD_DEVICE_TOKEN           = "BadDeviceToken";
 
-    // APNS device token not for topic String
-    private static final String APNS_DEVICE_TOKEN_NOT_FOR_TOPIC = "DeviceTokenNotForTopic";
-
-    // APNS topic disallowed String
-    private static final String APNS_TOPIC_DISALLOWED           = "TopicDisallowed";
+    // Maximum Android TTL value in seconds, see: https://firebase.google.com/docs/cloud-messaging/concept-options#ttl
+    private static final int ANDROID_TTL_SECONDS_MAX            = 2_419_200;
 
     private final PushServiceConfiguration pushServiceConfiguration;
     private final FcmModelConverter fcmConverter;
@@ -108,7 +106,7 @@ public class PushSendingWorker {
             }
             fcmClient.setProxySettings(proxyHost, proxyPort, proxyUsername, proxyPassword);
         }
-        fcmClient.initializeWebClient();
+        fcmClient.initializeRestClient();
         String fcmUrl = pushServiceConfiguration.getFcmSendMessageUrl();
         if (fcmUrl.contains("projects/%s/")) {
             // Initialize Google Credential for production FCM URL
@@ -135,10 +133,11 @@ public class PushSendingWorker {
         // Build Android message
         Message message = buildAndroidMessage(pushMessageBody, attributes, pushToken);
 
-        // Callback when FCM request succeeds
-        Consumer<FcmSuccessResponse> onSuccess = body -> {
-            if (body.getName() != null && body.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
-                logger.info("Notification sent, response: {}", body.getName());
+        // Extraction of FCM success response
+        Consumer<ResponseEntity<FcmSuccessResponse>> fcmConsumer = responseEntity -> {
+            FcmSuccessResponse response = responseEntity.getBody();
+            if (response != null && response.getName() != null && response.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
+                logger.info("Notification sent, response: {}", response.getName());
                 callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                 return;
             }
@@ -146,6 +145,9 @@ public class PushSendingWorker {
             logger.error("Invalid response received from FCM, notification sending failed");
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         };
+
+        // Callback when FCM request succeeds
+        Consumer<ClientResponse> onSuccess = body -> body.toEntity(FcmSuccessResponse.class).subscribe(fcmConsumer);
 
         // Callback when FCM request fails
         Consumer<Throwable> onError = t -> {
@@ -215,6 +217,18 @@ public class PushSendingWorker {
         AndroidConfig.Builder androidConfigBuilder = AndroidConfig.builder()
                 .setCollapseKey(pushMessageBody.getCollapseKey());
 
+        // Calculate TTL and set it if the TTL is within reasonable limits
+        Instant validUntil = pushMessageBody.getValidUntil();
+        if (validUntil != null) {
+            long validUntilMs = validUntil.toEpochMilli();
+            long currentTimeMs = System.currentTimeMillis();
+            long ttlInSeconds = (validUntilMs - currentTimeMs) / 1000;
+
+            if (ttlInSeconds > 0 && ttlInSeconds < ANDROID_TTL_SECONDS_MAX) {
+                androidConfigBuilder.setTtl(ttlInSeconds);
+            }
+        }
+
         AndroidNotification notification = AndroidNotification.builder()
                 .setTitle(pushMessageBody.getTitle())
                 .setBody(pushMessageBody.getBody())
@@ -251,7 +265,9 @@ public class PushSendingWorker {
     ApnsClient prepareApnsClient(String teamId, String keyId, byte[] apnsPrivateKey) throws PushServerException {
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
         apnsClientBuilder.setProxyHandlerFactory(apnsClientProxy());
-        apnsClientBuilder.setConnectionTimeout(pushServiceConfiguration.getApnsConnectTimeout(), TimeUnit.MILLISECONDS);
+        apnsClientBuilder.setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections());
+        apnsClientBuilder.setConnectionTimeout(Duration.ofMillis(pushServiceConfiguration.getApnsConnectTimeout()));
+        apnsClientBuilder.setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()));
         if (pushServiceConfiguration.isApnsUseDevelopment()) {
             logger.info("Using APNs development host");
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
@@ -309,45 +325,52 @@ public class PushSendingWorker {
     void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
-        final boolean isSilent = attributes == null ? false : attributes.getSilent(); // In case there are no attributes, the message is not silent
+        final boolean isSilent = attributes != null && attributes.getSilent(); // In case there are no attributes, the message is not silent
         final String payload = buildApnsPayload(pushMessageBody, isSilent);
-        final Date validUntil = pushMessageBody.getValidUntil();
+        final Instant validUntil = pushMessageBody.getValidUntil();
         final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set
         final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushType, pushMessageBody.getCollapseKey());
         final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
-        sendNotificationFuture.addListener((PushNotificationResponseListener<SimpleApnsPushNotification>) future -> {
-            if (future.isSuccess()) {
-                final PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = future.getNow();
-                if (pushNotificationResponse != null) {
-                    if (!pushNotificationResponse.isAccepted()) {
-                        logger.error("Notification rejected by the APNs gateway: {}", pushNotificationResponse.getRejectionReason());
-                        if (pushNotificationResponse.getRejectionReason().equals(APNS_BAD_DEVICE_TOKEN)) {
-                            logger.error("\t... due to bad device token value.");
-                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
-                        } else if (pushNotificationResponse.getRejectionReason().equals(APNS_DEVICE_TOKEN_NOT_FOR_TOPIC)) {
-                            logger.error("\t... due to device token not for topic error.");
-                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
-                        } else if (pushNotificationResponse.getRejectionReason().equals(APNS_TOPIC_DISALLOWED)) {
-                            logger.error("\t... due to topic disallowed error.");
-                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
-                        } else if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
-                            logger.error("\t... and the token is invalid as of " + pushNotificationResponse.getTokenInvalidationTimestamp());
-                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
-                        } else {
-                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
-                        }
-                    } else {
-                        logger.info("Notification sent, APNS ID: {}", pushNotificationResponse.getApnsId());
-                        callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
-                    }
+        sendNotificationFuture.whenCompleteAsync((response, cause) -> {
+            if (response != null) {
+                if (response.isAccepted()) {
+                    logger.info("Notification sent, APNs ID: {}", response.getApnsId());
+                    callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                 } else {
-                    logger.error("Notification rejected by the APNs gateway: unknown error, will retry");
-                    callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
+                    final String rejectionReason = response.getRejectionReason();
+                    logger.info("Notification rejected by the APNs gateway: {}", rejectionReason);
+
+                    // Determine if the push token should be deleted.
+                    if (ApnsRejectionReason.BAD_DEVICE_TOKEN.isEqualToText(rejectionReason)) {
+                        logger.debug("Deleting push token: {}", pushToken);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
+                    } else if (ApnsRejectionReason.DEVICE_TOKEN_NOT_FOR_TOPIC.isEqualToText(rejectionReason)) {
+                        logger.debug("Deleting push token: {}", pushToken);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
+                    } else if (ApnsRejectionReason.TOPIC_DISALLOWED.isEqualToText(rejectionReason)) {
+                        logger.debug("Deleting push token: {}", pushToken);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
+                    } else if (ApnsRejectionReason.EXPIRED_PROVIDER_TOKEN.isEqualToText(rejectionReason)) {
+                        logger.debug("Deleting push token: {}", pushToken);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
+                    } else if (ApnsRejectionReason.INVALID_PROVIDER_TOKEN.isEqualToText(rejectionReason)) {
+                        logger.debug("Deleting push token: {}", pushToken);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
+                    } else if (response.getTokenInvalidationTimestamp().isPresent()) {
+                        logger.info("Push token is invalid as of: {}", response.getTokenInvalidationTimestamp().get());
+                        logger.debug("Deleting push token: {}", pushToken);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
+                    } else {
+                        logger.debug("Sending the push message failed with push token: {}", pushToken);
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
+                    }
                 }
             } else {
-                logger.error("Push Message Sending Failed", future.cause());
-                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
+                // In this case, the delivery failed because the future failed, not because APNs rejected the
+                // notification payload. This means that we should be able to attempt resending the message.
+                logger.error("Push Message Sending Failed", cause);
+                callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
             }
         });
     }
@@ -360,7 +383,7 @@ public class PushSendingWorker {
      * @return String with APNs JSON payload.
      */
     private String buildApnsPayload(PushMessageBody push, boolean isSilent) {
-        final ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
+        final ApnsPayloadBuilder payloadBuilder = new SimpleApnsPayloadBuilder();
         payloadBuilder.setAlertTitle(push.getTitle());
         payloadBuilder.setAlertBody(push.getBody());
         payloadBuilder.setBadgeNumber(push.getBadge());
@@ -374,6 +397,6 @@ public class PushSendingWorker {
                 payloadBuilder.addCustomProperty(entry.getKey(), entry.getValue());
             }
         }
-        return payloadBuilder.buildWithDefaultMaximumLength();
+        return payloadBuilder.build();
     }
 }

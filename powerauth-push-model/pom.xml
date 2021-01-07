@@ -6,20 +6,30 @@
 
     <artifactId>powerauth-push-model</artifactId>
     <description>PowerAuth Push Server RESTful Model Classes</description>
-    <version>0.24.0</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <parent>
         <artifactId>powerauth-push-server-parent</artifactId>
         <groupId>io.getlime.security</groupId>
-        <version>0.24.0</version>
+        <version>1.0.0</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>io.getlime.core</groupId>
             <artifactId>rest-model-base</artifactId>
-            <version>${lime.rest.version}</version>
+            <version>${rest-base.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.getlime.core</groupId>
+            <artifactId>rest-client-base</artifactId>
+            <version>${rest-base.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.getlime.security</groupId>
+            <artifactId>powerauth-client-model</artifactId>
+            <version>${powerauth.version}</version>
         </dependency>
     </dependencies>
 

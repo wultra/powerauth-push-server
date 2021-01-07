@@ -102,14 +102,14 @@ Describes basic information of application.
 Send a system status response, with basic information about the running application.
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>GET</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/service/status</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/service/status</td>
+    </tr>
 </table>
 
 #### **Response**
@@ -147,14 +147,14 @@ Create a new device push token (platform specific). The call must include `activ
 _Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID, so that there are no incorrect bindings._
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/device/create</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/device/create</td>
+    </tr>
 </table>
 
 #### **Request**
@@ -190,14 +190,14 @@ Create a new device push token (platform specific). The call must include `activ
 _Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs, so that there are no incorrect bindings._
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/device/create/multi</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/device/create/multi</td>
+    </tr>
 </table>
 
 #### **Request**
@@ -234,14 +234,14 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 Removes registered device based on the push token value.
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST / DELETE</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/device/remove</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / DELETE</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/device/remove</td>
+    </tr>
 </table>
 
 #### **Request**
@@ -271,14 +271,14 @@ Removes registered device based on the push token value.
 Update the status of given device registration based on the associated activation ID. This can help assure that registration is in non-active state and cannot receive personal messages.
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST / PUT</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/device/status/update</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/device/status/update</td>
+    </tr>
 </table>
 
 #### **Request**
@@ -308,14 +308,14 @@ Represents a single notification sent to the device. It provides an abstraction 
 Send a single push message to given user via provided application, optionally to the specific device represented by given `activationId`.
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/message/send</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/message/send</td>
+    </tr>
 </table>
 
 #### **Request**
@@ -373,14 +373,14 @@ Send a single push message to given user via provided application, optionally to
 Sends a message message batch - each item in the batch represents a message to given user. The message is sent via provided application (optionally to the specific device represented by given `activationId`).
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/message/batch/send</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/message/batch/send</td>
+    </tr>
 </table>
 
 #### **Request**
@@ -488,15 +488,16 @@ Further campaign comes with:
 Create a campaign with application that campaign is using and certain message that contains parameters of message object.
 
 #### **Request**
+
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/campaign/create</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/campaign/create</td>
+    </tr>
 </table>
 
 ```json
@@ -543,19 +544,20 @@ _note: identifier of campaign is generated automatically_
 Delete a specific campaign. Also users associated with this campaign are going to be deleted. If deletion was applied then deleted status is true.
 
 #### **Request**
+
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST / DELETE</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/campaign/${ID}/delete</td>
-</tr>
-<tr>
-<td>Var ${ID} </td>
-<td>Campaign identifier</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / DELETE</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/campaign/${ID}/delete</td>
+    </tr>
+    <tr>
+        <td>Var ${ID} </td>
+        <td>Campaign identifier</td>
+    </tr>
 </table>
 
 ```json
@@ -583,19 +585,20 @@ Delete a specific campaign. Also users associated with this campaign are going t
 Return details of a specific campaign.
 
 #### **Request**
+
 <table>
-<tr>
-<td>Method</td>
-<td><code>GET</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/campaign/${ID}/detail</td>
-</tr>
-<tr>
-<td>Var ${ID} </td>
-<td>Campaign identifier</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/campaign/${ID}/detail</td>
+    </tr>
+    <tr>
+        <td>Var ${ID} </td>
+        <td>Campaign identifier</td>
+    </tr>
 </table>
 
 #### **Response**
@@ -634,15 +637,16 @@ Return details of a specific campaign.
 Return list of actually registered campaigns, based on `all` parameter. This parameter decides if return campaigns that are 'only sent'(statement _false_) or return all registered campaigns (statement _true_).
 
 #### **Request**
+
 <table>
-<tr>
-<td>Method</td>
-<td><code>GET</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/campaign/list/?all={true|false}</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/campaign/list/?all={true|false}</td>
+    </tr>
 </table>
 
 #### **Response**
@@ -700,19 +704,20 @@ Return list of actually registered campaigns, based on `all` parameter. This par
 Associate users to a specific campaign. Users are identified in request body as an array of strings.
 
 #### **Request**
+
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST / PUT</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/campaign/${ID}/user/add</td>
-</tr>
-<tr>
-<td>Var ${ID} </td>
-<td>Campaign identifier</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/campaign/${ID}/user/add</td>
+    </tr>
+    <tr>
+        <td>Var ${ID} </td>
+        <td>Campaign identifier</td>
+    </tr>
 </table>
 
 ```json
@@ -740,27 +745,28 @@ Associate users to a specific campaign. Users are identified in request body as 
 Return list users from a specific campaign. Users are shown in paginated format based on parameters assigned in URI.
 
 #### **Request**
+
 <table>
-<tr>
-<td>Method</td>
-<td><code>GET</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/campaign/${ID}/user/list?page=${PAGE}&size=${SIZE}</td>
-</tr>
-<tr>
-<td>Var ${ID} </td>
-<td>Campaign identifier</td>
-</tr>
-<tr>
-<td>Var ${PAGE} </td>
-<td>Nubmer of page to show</td>
-</tr>
-<tr>
-<td>Var ${SIZE}</td>
-<td>Number of elements per page</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/campaign/${ID}/user/list?page=${PAGE}&size=${SIZE}</td>
+    </tr>
+    <tr>
+        <td>Var ${ID} </td>
+        <td>Campaign identifier</td>
+    </tr>
+    <tr>
+        <td>Var ${PAGE} </td>
+        <td>Nubmer of page to show</td>
+    </tr>
+    <tr>
+        <td>Var ${SIZE}</td>
+        <td>Number of elements per page</td>
+    </tr>
 </table>
 
 #### **Response**
@@ -791,19 +797,20 @@ Return list users from a specific campaign. Users are shown in paginated format 
 Delete users associated with a specific campaign. Users are identified request body as an array of strings.
 
 #### **Request**
+
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST / DELETE</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/campaign/${ID}/user/delete</td>
-</tr>
-<tr>
-<td>Var ${ID} </td>
-<td>Campaign identifier</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / DELETE</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/campaign/${ID}/user/delete</td>
+    </tr>
+    <tr>
+        <td>Var ${ID} </td>
+        <td>Campaign identifier</td>
+    </tr>
 </table>
 
 ```json
@@ -831,18 +838,20 @@ Delete users associated with a specific campaign. Users are identified request b
 Send message from a specific campaign on test user to check rightness of that campaign.
 
 #### **Request**
+
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/campaign/send/test/${ID}</td>
-<tr>
-<td>Var ${ID} </td>
-<td>Campaign identifier</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/campaign/send/test/${ID}</td>
+    </tr>
+    <tr>
+        <td>Var ${ID}</td>
+        <td>Campaign identifier</td>
+    </tr>
 </table>
 
 ```json
@@ -870,19 +879,20 @@ Send message from a specific campaign to devices belonged to users associated wi
 If sending was successful then `sent` parameter is set on _true_ and `timestampSent` is set on current time.
 
 #### **Request**
+
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/push/campaign/send/live/${ID}</td>
-</tr>
-<tr>
-<td>Var ${ID} </td>
-<td>Campaign identifier</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/push/campaign/send/live/${ID}</td>
+    </tr>
+    <tr>
+        <td>Var ${ID} </td>
+        <td>Campaign identifier</td>
+    </tr>
 </table>
 
 - empty request body
@@ -904,14 +914,14 @@ Get list of all applications.
 #### **Request**
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>GET</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/admin/app/list</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/list</td>
+    </tr>
 </table>
 
 #### **Response**
@@ -940,14 +950,14 @@ Get list of applications which have not been configured yet.
 #### **Request**
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>GET</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/admin/app/unconfigured/list</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/unconfigured/list</td>
+    </tr>
 </table>
 
 #### **Response**
@@ -976,14 +986,14 @@ Get detail of an application.
 #### **Request**
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/admin/app/detail</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/detail</td>
+    </tr>
 </table>
 
 ```json
@@ -1024,14 +1034,14 @@ Create a new supported application.
 #### **Request**
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/admin/app/create</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/create</td>
+    </tr>
 </table>
 
 ```json
@@ -1060,14 +1070,14 @@ Update an iOS configuration.
 #### **Request**
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST / PUT</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/admin/app/ios/update</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/ios/update</td>
+    </tr>
 </table>
 
 ```json
@@ -1097,14 +1107,14 @@ Remove an iOS configuration.
 #### **Request**
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST / DELETE</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/admin/app/ios/remove</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / DELETE</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/ios/remove</td>
+    </tr>
 </table>
 
 ```json
@@ -1130,14 +1140,14 @@ Update an Android configuration.
 #### **Request**
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST / PUT</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/admin/app/android/update</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/android/update</td>
+    </tr>
 </table>
 
 ```json
@@ -1163,14 +1173,14 @@ Update an Android configuration.
 #### **Request**
 
 <table>
-<tr>
-<td>Method</td>
-<td><code>POST / DELETE</code></td>
-</tr>
-<tr>
-<td>Resource URI</td>
-<td>/admin/app/android/remove</td>
-</tr>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / DELETE</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/android/remove</td>
+    </tr>
 </table>
 
 ```json

@@ -18,6 +18,8 @@ package io.getlime.push.model.response;
 
 import io.getlime.push.model.entity.ListOfUsers;
 
+import java.util.Objects;
+
 /**
  * Response used for getting a list of users from certain campaign
  *
@@ -54,8 +56,10 @@ public class ListOfUsersFromCampaignResponse {
 
         ListOfUsersFromCampaignResponse that = (ListOfUsersFromCampaignResponse) o;
 
-        if (campaignId != null ? !campaignId.equals(that.campaignId) : that.campaignId != null) return false;
-        return users != null ? users.equals(that.users) : that.users == null;
+        if (!Objects.equals(campaignId, that.campaignId)) {
+            return false;
+        }
+        return Objects.equals(users, that.users);
     }
 
     @Override

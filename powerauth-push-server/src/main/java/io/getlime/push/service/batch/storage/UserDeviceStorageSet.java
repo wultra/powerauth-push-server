@@ -26,7 +26,7 @@ import java.util.Set;
  */
 public class UserDeviceStorageSet<T> implements ItemStorageSet<T> {
 
-    private Set<T> items = new HashSet<>();
+    private final Set<T> items = new HashSet<>();
 
     @Override
     public boolean exists(T item) {

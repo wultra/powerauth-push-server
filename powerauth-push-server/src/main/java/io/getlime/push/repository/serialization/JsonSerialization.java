@@ -22,6 +22,8 @@ import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
@@ -30,9 +32,17 @@ import java.io.IOException;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-public class JSONSerialization {
+@Service
+public class JsonSerialization {
 
-    private static final Logger logger = LoggerFactory.getLogger(JSONSerialization.class);
+    private static final Logger logger = LoggerFactory.getLogger(JsonSerialization.class);
+
+    private final ObjectMapper objectMapper;
+
+    @Autowired
+    public JsonSerialization(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     /**
      * Parsing message from JSON to PushMessageBody object.
@@ -41,10 +51,10 @@ public class JSONSerialization {
      * @return PushMessageBody
      * @throws PushServerException In case object mapping fails.
      */
-    public static PushMessageBody deserializePushMessageBody(String message) throws PushServerException {
+    public PushMessageBody deserializePushMessageBody(String message) throws PushServerException {
         PushMessageBody pushMessageBody;
         try {
-            pushMessageBody = new ObjectMapper().readValue(message, PushMessageBody.class);
+            pushMessageBody = objectMapper.readValue(message, PushMessageBody.class);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new PushServerException("Failed parsing from JSON", e);
@@ -59,10 +69,10 @@ public class JSONSerialization {
      * @return JSON containing the message contents.
      * @throws PushServerException In case object mapping fails.
      */
-    public static String serializePushMessageBody(PushMessageBody message) throws PushServerException {
+    public String serializePushMessageBody(PushMessageBody message) throws PushServerException {
         String messageString;
         try {
-            messageString = new ObjectMapper().writeValueAsString(message);
+            messageString = objectMapper.writeValueAsString(message);
         } catch (JsonProcessingException e) {
             logger.error(e.getMessage(), e);
             throw new PushServerException("Failed parsing into JSON", e);

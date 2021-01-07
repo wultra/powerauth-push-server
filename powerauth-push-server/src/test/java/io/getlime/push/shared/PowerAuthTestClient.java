@@ -2,7 +2,10 @@ package io.getlime.push.shared;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.BaseEncoding;
-import io.getlime.powerauth.soap.v3.*;
+import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
+import com.wultra.security.powerauth.client.v3.*;
+import com.wultra.security.powerauth.rest.client.PowerAuthRestClient;
 import io.getlime.security.powerauth.crypto.client.activation.PowerAuthClientActivation;
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.EciesEncryptor;
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.EciesFactory;
@@ -10,8 +13,6 @@ import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesCrypt
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesSharedInfo1;
 import io.getlime.security.powerauth.crypto.lib.util.KeyConvertor;
 import io.getlime.security.powerauth.rest.api.model.request.v3.ActivationLayer2Request;
-import io.getlime.security.powerauth.soap.spring.client.PowerAuthServiceClient;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -29,7 +30,7 @@ public class PowerAuthTestClient {
     private final PowerAuthClientActivation activation = new PowerAuthClientActivation();
     private final EciesFactory eciesFactory = new EciesFactory();
     private final KeyConvertor keyConvertor = new KeyConvertor();
-    private PowerAuthServiceClient powerAuthClient;
+    private PowerAuthClient powerAuthClient;
 
     private Long applicationId;
     private String applicationKey;
@@ -41,34 +42,29 @@ public class PowerAuthTestClient {
     private String activationId3;
     private String activationId4;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void initializeClient(String powerAuthServiceUrl) {
-        powerAuthClient = new PowerAuthServiceClient();
-        powerAuthClient.setDefaultUri(powerAuthServiceUrl);
-        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPath("io.getlime.powerauth.soap.v3");
-        powerAuthClient.setMarshaller(marshaller);
-        powerAuthClient.setUnmarshaller(marshaller);
+    public void initializeClient(String powerAuthRestUrl) throws PowerAuthClientException {
+        powerAuthClient = new PowerAuthRestClient(powerAuthRestUrl);
     }
 
-    public Long initializeApplication(String applicationName, String applicationVersion) {
+    public Long initializeApplication(String applicationName, String applicationVersion) throws PowerAuthClientException {
         // Create application if it does not exist
         List<GetApplicationListResponse.Applications> applications = powerAuthClient.getApplicationList();
         boolean applicationExists = false;
-        for (io.getlime.powerauth.soap.v3.GetApplicationListResponse.Applications app: applications) {
+        for (com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications app: applications) {
             if (app.getApplicationName().equals(applicationName)) {
                 applicationExists = true;
                 applicationId = app.getId();
             }
         }
         if (!applicationExists) {
-            io.getlime.powerauth.soap.v3.CreateApplicationResponse response = powerAuthClient.createApplication(applicationName);
+            com.wultra.security.powerauth.client.v3.CreateApplicationResponse response = powerAuthClient.createApplication(applicationName);
             applicationId = response.getApplicationId();
         }
 
         // Create application version if it does not exist
-        io.getlime.powerauth.soap.v3.GetApplicationDetailResponse detail = powerAuthClient.getApplicationDetail(applicationId);
+        com.wultra.security.powerauth.client.v3.GetApplicationDetailResponse detail = powerAuthClient.getApplicationDetail(applicationId);
         masterPublicKey = detail.getMasterPublicKey();
         boolean versionExists = false;
         for (GetApplicationDetailResponse.Versions appVersion: detail.getVersions()) {
@@ -133,11 +129,11 @@ public class PowerAuthTestClient {
         return initResponse.getActivationId();
     }
 
-    public void blockActivation(String activationId) {
+    public void blockActivation(String activationId) throws PowerAuthClientException {
         powerAuthClient.blockActivation(activationId, "TEST", "test");
     }
 
-    public void unblockActivation(String activationId) {
+    public void unblockActivation(String activationId) throws PowerAuthClientException {
         powerAuthClient.unblockActivation(activationId, "test");
     }
 

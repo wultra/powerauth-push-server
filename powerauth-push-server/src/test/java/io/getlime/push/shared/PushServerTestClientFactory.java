@@ -1,6 +1,7 @@
 package io.getlime.push.shared;
 
 import io.getlime.push.client.PushServerClient;
+import io.getlime.push.client.PushServerClientException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,9 @@ public class PushServerTestClientFactory {
     private static final String TEST_USER_ID = "Test_User";
 
     @Value("${powerauth.service.url}")
-    private String powerAuthServiceUrl;
+    private String powerAuthRestUrl;
 
-    public PushServerClient createPushServerClient(String baseUrl) {
+    public PushServerClient createPushServerClient(String baseUrl) throws PushServerClientException {
         return new PushServerClient(baseUrl);
     }
 
@@ -25,7 +26,7 @@ public class PushServerTestClientFactory {
         Security.addProvider(new BouncyCastleProvider());
 
         PowerAuthTestClient powerAuthTestClient = new PowerAuthTestClient();
-        powerAuthTestClient.initializeClient(powerAuthServiceUrl);
+        powerAuthTestClient.initializeClient(powerAuthRestUrl);
         Long applicationId = powerAuthTestClient.initializeApplication(TEST_APPLICATION_NAME, TEST_APPLICATION_VERSION);
         String activationId = powerAuthTestClient.createActivation(TEST_USER_ID);
         String activationId2 = powerAuthTestClient.createActivation(TEST_USER_ID);

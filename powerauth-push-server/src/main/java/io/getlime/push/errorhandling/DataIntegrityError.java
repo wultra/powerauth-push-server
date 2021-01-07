@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Wultra s.r.o.
+ * Copyright 2020 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.client;
+
+package io.getlime.push.errorhandling;
 
 import io.getlime.core.rest.model.base.entity.Error;
 
-import java.io.Serializable;
-
 /**
- * Base error class for push client.
+ * Exception for data integrity error.
  *
- * @author Petr Dvorak, petr@wultra.com
+ * @author Roman Strobl, roman.strobl@wultracom
  */
-public class PushServerClientError extends Error implements Serializable {
+public class DataIntegrityError extends Error {
+    public class Code extends Error.Code {
+        public static final String ERROR_DATA_INTEGRITY = "ERROR_DATA_INTEGRITY";
 
-    private static final long serialVersionUID = -3063064667769595550L;
-
-    private static final String ERROR_VALIDATION = "ERROR_VALIDATION";
-
-
-    public PushServerClientError(String message) {
-        super(ERROR_VALIDATION , message);
+        public Code() {
+        }
     }
 }
