@@ -70,7 +70,7 @@ public class CaCertUtil {
         try {
             final File resource = new ClassPathResource("cacert/GeoTrust_Global_CA.pem").getFile();
             final String geoTrustCertString = new String(Files.readAllBytes(resource.toPath()));
-            final X509Certificate geoTrustCert = fromPem(geoTrustCertString);
+            final X509Certificate geoTrustCert = certificateFromPem(geoTrustCertString);
             result.add(geoTrustCert);
         } catch (CertificateException | IOException e) {
             logger.error("Certificate error: {}", e.getMessage(), e);
@@ -79,7 +79,7 @@ public class CaCertUtil {
         return result.toArray(new X509Certificate[0]);
     }
 
-    private static X509Certificate fromPem(String pem) throws CertificateException {
+    private static X509Certificate certificateFromPem(String pem) throws CertificateException {
         byte [] decoded = BaseEncoding.base64().decode(pem
                 .replaceAll(X509Factory.BEGIN_CERT, "")
                 .replaceAll(X509Factory.END_CERT, "")
