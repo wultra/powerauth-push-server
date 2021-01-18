@@ -27,6 +27,7 @@ import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
+import io.getlime.push.util.CaCertUtil;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
@@ -263,11 +264,12 @@ public class PushSendingWorker {
      *   to APNs service due to SSL issue, ...).
      */
     ApnsClient prepareApnsClient(String teamId, String keyId, byte[] apnsPrivateKey) throws PushServerException {
-        final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
-        apnsClientBuilder.setProxyHandlerFactory(apnsClientProxy());
-        apnsClientBuilder.setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections());
-        apnsClientBuilder.setConnectionTimeout(Duration.ofMillis(pushServiceConfiguration.getApnsConnectTimeout()));
-        apnsClientBuilder.setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()));
+        final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder()
+                .setProxyHandlerFactory(apnsClientProxy())
+                .setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections())
+                .setConnectionTimeout(Duration.ofMillis(pushServiceConfiguration.getApnsConnectTimeout()))
+                .setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()))
+                .setTrustedServerCertificateChain(CaCertUtil.allCerts());
         if (pushServiceConfiguration.isApnsUseDevelopment()) {
             logger.info("Using APNs development host");
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
