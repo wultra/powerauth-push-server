@@ -80,7 +80,7 @@ public class CaCertUtil {
     }
 
     private static X509Certificate certificateFromPem(String pem) throws CertificateException {
-        byte [] decoded = BaseEncoding.base64().decode(pem
+        byte[] decoded = BaseEncoding.base64().decode(pem
                 .replaceAll(X509Factory.BEGIN_CERT, "")
                 .replaceAll(X509Factory.END_CERT, "")
                 .replaceAll("\\s", "")
