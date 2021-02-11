@@ -41,6 +41,13 @@ public class CaCertUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(CaCertUtil.class);
 
+    private static final String[] embeddedCertificates = {
+            "cacert/GeoTrust_Global_CA.pem",
+            "cacert/AAACertificateServices.pem",
+            "cacert/COMODORSAAAACA.pem",
+            "cacert/USERTrustRSAAAACA.pem"
+    };
+
     public static X509Certificate[] allCerts() {
         // Prepare result list
         final List<X509Certificate> result = new ArrayList<>();
@@ -66,14 +73,17 @@ public class CaCertUtil {
             logger.error("Certificate error: {}", e.getMessage(), e);
         }
 
-        // Attempt to add at least GeoTrust Global CA required by Apple for APNs
-        try {
-            final File resource = new ClassPathResource("cacert/GeoTrust_Global_CA.pem").getFile();
-            final String geoTrustCertString = new String(Files.readAllBytes(resource.toPath()));
-            final X509Certificate geoTrustCert = certificateFromPem(geoTrustCertString);
-            result.add(geoTrustCert);
-        } catch (CertificateException | IOException e) {
-            logger.error("Certificate error: {}", e.getMessage(), e);
+        // Add the locally stored CA certificates required by Apple for APNs
+        for (String certPath : embeddedCertificates) {
+            try {
+                logger.info("Importing embedded certificate: {}", certPath);
+                final File resource = new ClassPathResource(certPath).getFile();
+                final String certString = new String(Files.readAllBytes(resource.toPath()));
+                final X509Certificate cert = certificateFromPem(certString);
+                result.add(cert);
+            } catch (CertificateException | IOException e) {
+                logger.error("Certificate error: {}", e.getMessage(), e);
+            }
         }
 
         return result.toArray(new X509Certificate[0]);
