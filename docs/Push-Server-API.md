@@ -120,10 +120,10 @@ Send a system status response, with basic information about the running applicat
 </table>
 <!-- end -->
 
-<!-- begin API-RESPONSE 200 -->
 <!-- begin remove -->
 #### **Response**
 <!-- end -->
+<!-- begin API-RESPONSE 200 -->
 ```json
 {
     "status": "OK",
