@@ -102,7 +102,6 @@ Describes basic information of application.
 
 <!-- begin API GET /push/service/status Get Service Status -->
 ### Service Status
-<!-- end -->
 
 <!-- begin API-DESCRIPTION -->
 Send a system status response, with basic information about the running application.
@@ -145,6 +144,7 @@ Send a system status response, with basic information about the running applicat
 - `version` - Version of Push server.
 - `buildTime` - Timestamp when the powerauth-push-server.war file was built.
 - `timestamp` - Current time on application.
+<!-- end -->
 <!-- end -->
 
 ## Device
