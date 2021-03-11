@@ -8,8 +8,9 @@ Push Server provides a simple to use RESTful API for the 3rd party integration p
 - [Campaign](#campaign)
 - [Administration](#administration)
 
-Following endpoints are published in PowerAuth Push Server RESTful API:
+The following endpoints are published in PowerAuth Push Server RESTful API:
 
+<!-- begin remove -->
 ## Methods
 
 ##### **Request**
@@ -64,6 +65,7 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 #### Service Status
 
 - `GET` [/push/service/status](#service) - Return status of service
+<!-- end -->
 
 ### Error Handling
 
@@ -80,11 +82,11 @@ All error responses that are produced by the PowerAuth Push Server have followin
 ```json
 
 {
-    "status": "ERROR",
-    "responseObject": {
-        "code": "ERROR_GENERIC",
-        "message": "Campaign with entered ID does not exist"
-    }
+  "status": "ERROR",
+  "responseObject": {
+    "code": "ERROR_GENERIC",
+    "message": "Campaign with entered ID does not exist"
+  }
 }
 ```
 
@@ -96,11 +98,13 @@ All error responses that are produced by the PowerAuth Push Server have followin
 
 Describes basic information of application.
 
+<!-- begin API GET /push/service/status Get Service Status -->
 ### Service Status
 
-
+<!-- API-DESCRIPTION -->
 Send a system status response, with basic information about the running application.
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -108,12 +112,15 @@ Send a system status response, with basic information about the running applicat
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/push/service/status</td>
+        <td></td>
     </tr>
 </table>
+<!-- end -->
 
+<!-- API-RESPONSE 200 -->
+<!-- begin remove -->
 #### **Response**
-
+<!-- end -->
 ```json
 {
     "status": "OK",
@@ -134,6 +141,7 @@ Send a system status response, with basic information about the running applicat
 - `version` - Version of Push server.
 - `buildTime` - Timestamp when the powerauth-push-server.war file was built.
 - `timestamp` - Current time on application.
+<!-- end -->
 
 ## Device
 
