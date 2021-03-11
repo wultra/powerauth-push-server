@@ -102,26 +102,8 @@ Describes basic information of application.
 
 <!-- begin API GET /push/service/status Get Service Status -->
 ### Service Status
-
 <!-- begin API-DESCRIPTION -->
 Send a system status response, with basic information about the running application.
-<!-- end -->
-
-<!-- begin remove -->
-<table>
-    <tr>
-        <td>Method</td>
-        <td><code>GET</code></td>
-    </tr>
-    <tr>
-        <td>Resource URI</td>
-        <td></td>
-    </tr>
-</table>
-<!-- end -->
-
-<!-- begin remove -->
-#### **Response**
 <!-- end -->
 <!-- begin API-RESPONSE 200 -->
 ```json
@@ -137,13 +119,6 @@ Send a system status response, with basic information about the running applicat
     }
 }
 ```
-
-- `applicationName` - Application name.
-- `applicationDisplayName` - Application display name.
-- `applicationEnvironment` - Application environment.
-- `version` - Version of Push server.
-- `buildTime` - Timestamp when the powerauth-push-server.war file was built.
-- `timestamp` - Current time on application.
 <!-- end -->
 <!-- end -->
 
