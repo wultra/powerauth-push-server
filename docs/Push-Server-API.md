@@ -103,7 +103,7 @@ Describes basic information of application.
 <!-- begin API GET /push/service/status Get Service Status -->
 ### Service Status
 
-<!-- API-DESCRIPTION -->
+<!-- begin API-DESCRIPTION -->
 Send a system status response, with basic information about the running application.
 
 <!-- begin remove -->
@@ -119,7 +119,7 @@ Send a system status response, with basic information about the running applicat
 </table>
 <!-- end -->
 
-<!-- API-RESPONSE 200 -->
+<!-- begin API-RESPONSE 200 -->
 <!-- begin remove -->
 #### **Response**
 <!-- end -->
