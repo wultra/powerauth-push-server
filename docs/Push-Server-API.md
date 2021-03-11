@@ -144,7 +144,6 @@ Send a system status response, with basic information about the running applicat
 - `buildTime` - Timestamp when the powerauth-push-server.war file was built.
 - `timestamp` - Current time on application.
 <!-- end -->
-<!-- end -->
 
 ## Device
 
