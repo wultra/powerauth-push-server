@@ -1342,7 +1342,7 @@ Update an iOS configuration.
 Remove an iOS configuration.
 
 <!-- api-request -->
-<!-- begin-remove -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
