@@ -1,4 +1,5 @@
 # Push Server API
+<!-- template api -->
 
 Push Server provides a simple to use RESTful API for the 3rd party integration purposes. The API contains methods related with:
 
@@ -10,6 +11,7 @@ Push Server provides a simple to use RESTful API for the 3rd party integration p
 
 Following endpoints are published in PowerAuth Push Server RESTful API:
 
+<!-- begin remove -->
 ## Methods
 
 ##### **Request**
@@ -64,6 +66,7 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 #### Service Status
 
 - `GET` [/push/service/status](#service) - Return status of service
+<!-- end -->
 
 ### Error Handling
 
@@ -96,11 +99,13 @@ All error responses that are produced by the PowerAuth Push Server have followin
 
 Describes basic information of application.
 
+<!-- begin API GET /push/service/status Get Service Status -->
 ### Service Status
 
-
+<!-- api-description -->
 Send a system status response, with basic information about the running application.
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -111,8 +116,12 @@ Send a system status response, with basic information about the running applicat
         <td>/push/service/status</td>
     </tr>
 </table>
+<!-- end -->
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
@@ -134,18 +143,22 @@ Send a system status response, with basic information about the running applicat
 - `version` - Version of Push server.
 - `buildTime` - Timestamp when the powerauth-push-server.war file was built.
 - `timestamp` - Current time on application.
+<!-- end -->
 
 ## Device
 
 Represents mobile device with iOS or Android that is capable to receive a push notification. Device has to first register with APNS or FCM to obtain push token.
 Then it has to forward the push token to the push server end-point. After that push server is able to send push notification to the device.
 
+<!-- begin api POST /push/device/create Create Device -->
 ### Create Device
 
+<!-- api-description -->
 Create a new device push token (platform specific). The call must include `activationId`, so that the token is associated with given user in the PowerAuth Server.
 
 _Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID, so that there are no incorrect bindings._
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -156,8 +169,12 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
         <td>/push/device/create</td>
     </tr>
 </table>
+<!-- end -->
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
+<!-- end -->
 
 ```json
 {
@@ -175,20 +192,27 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 - `platform` - `ios`, `android`
 - `activationId` - Activation identifier
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
     "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /push/device/create/multi Create Multiple Devices -->
 ### Create Device for Multiple Associated Activations
 
+<!-- api-description -->
 Create a new device push token (platform specific). The call must include `activationIds` which contains list of activations to be associated with the registered device.
 
 _Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs, so that there are no incorrect bindings._
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -199,8 +223,12 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
         <td>/push/device/create/multi</td>
     </tr>
 </table>
+<!-- end -->
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
+<!-- end -->
 
 ```json
 {
@@ -221,18 +249,25 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 - `platform` - `ios`, `android`
 - `activationIds` - Associated activation identifiers
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
     "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api DELETE /push/device/remove Remove Device -->
 ### Delete Device
 
+<!-- api-description -->
 Removes registered device based on the push token value.
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -243,8 +278,12 @@ Removes registered device based on the push token value.
         <td>/push/device/remove</td>
     </tr>
 </table>
+<!-- end -->
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
+<!-- end -->
 
 ```json
 {
@@ -258,18 +297,25 @@ Removes registered device based on the push token value.
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end remove -->
 
 ```json
 {
     "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /push/device/status/update Update Device Status -->
 ### Update Device Status
 
+<!-- api-description -->
 Update the status of given device registration based on the associated activation ID. This can help assure that registration is in non-active state and cannot receive personal messages.
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -280,8 +326,12 @@ Update the status of given device registration based on the associated activatio
         <td>/push/device/status/update</td>
     </tr>
 </table>
+<!-- end -->
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
+<!-- end -->
 
 ```json
 {
@@ -291,22 +341,29 @@ Update the status of given device registration based on the associated activatio
 
 - `activationId` - Identifier of activation.
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
     "status": "OK"
 }
 ```
+<!-- end -->
 
 ## Message
 
 Represents a single notification sent to the device. It provides an abstraction of APNS or FCM message payload.
 
+<!-- begin api POST /push/message/send Send Message -->
 ### Send Message
 
+<!-- api-description -->
 Send a single push message to given user via provided application, optionally to the specific device represented by given `activationId`.
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -317,8 +374,12 @@ Send a single push message to given user via provided application, optionally to
         <td>/push/message/send</td>
     </tr>
 </table>
+<!-- end -->
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
+<!-- end -->
 
 ```json
 {
@@ -360,18 +421,24 @@ Send a single push message to given user via provided application, optionally to
     - `body` - Body object is described in [here](./Push-Message-Payload-Mapping.md)
         - See [Push Message Payload Mapping](./Push-Message-Payload-Mapping.md) for details.
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
-
+<!-- end -->
 ```json
 {
     "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /push/message/batch/send Send Multiple Messages -->
 ### Send Message Batch
 
+<!-- api-description -->
 Sends a message message batch - each item in the batch represents a message to given user. The message is sent via provided application (optionally to the specific device represented by given `activationId`).
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -382,8 +449,12 @@ Sends a message message batch - each item in the batch represents a message to g
         <td>/push/message/batch/send</td>
     </tr>
 </table>
+<!-- end -->
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
+<!-- end -->
 
 ```json
 {
@@ -441,8 +512,10 @@ Sends a message message batch - each item in the batch represents a message to g
 - `appId` - Application that user is using.
 - `batch` - List of messages, see [documentation for sending a single message](#send-message) for details
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
-
+<!-- end -->
 ```json
 {
     "status": "OK",
@@ -469,6 +542,7 @@ Sends a message message batch - each item in the batch represents a message to g
 - `sent` - Number of sent notifications.
 - `failed` - Number of failed notifications.
 - `total` - Number of total notifications.
+<!-- end -->
 
 ## Campaign
 
@@ -483,10 +557,14 @@ Further campaign comes with:
 - sent status - Whether is sent or not.
 - devices - To prevent getting multiple messages on device. If there would be more than one user registered.
 
+<!-- begin api POST /push/campaign/create Create Campaign -->
 ### Create Campaign
 
+<!-- api-description -->
 Create a campaign with application that campaign is using and certain message that contains parameters of message object.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -499,6 +577,7 @@ Create a campaign with application that campaign is using and certain message th
         <td>/push/campaign/create</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -526,7 +605,10 @@ Create a campaign with application that campaign is using and certain message th
 
 _note: identifier of campaign is generated automatically_
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
@@ -538,11 +620,16 @@ _note: identifier of campaign is generated automatically_
 ```
 
 - `id` - Assigned ID to campaign.
+<!-- end -->
 
+<!-- begin api DELETE /push/campaign/${id}/delete Delete Campaign -->
 ### Delete Campaign
 
+<!-- api-description -->
 Delete a specific campaign. Also users associated with this campaign are going to be deleted. If deletion was applied then deleted status is true.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -559,15 +646,18 @@ Delete a specific campaign. Also users associated with this campaign are going t
         <td>Campaign identifier</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
-{
-}
+{}
 ```
 
 - empty request body
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
@@ -579,11 +669,16 @@ Delete a specific campaign. Also users associated with this campaign are going t
 ```
 
 - `deleted` - Indicate if deletion was applied.
+<!-- end -->
 
+<!-- begin api GET /push/campaign/${id}/detail Get Campaign -->
 ### Get Campaign
 
+<!-- api-description -->
 Return details of a specific campaign.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -595,13 +690,22 @@ Return details of a specific campaign.
         <td>Resource URI</td>
         <td>/push/campaign/${ID}/detail</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
         <td>Var ${ID} </td>
         <td>Campaign identifier</td>
     </tr>
 </table>
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
@@ -631,11 +735,15 @@ Return details of a specific campaign.
 - `appId` - Identifier of application that campaign is using.
 - `sent` - Indicator if campaign was sent.
 - `message` - parameters of message object are described [here](./Push-Message-Payload-Mapping.md).
+<!-- end -->
 
+<!-- begin api GET /push/campaign/list Get List of Campaigns -->
 ### Get List Of Campaigns
 
+<!-- api-description -->
 Return list of actually registered campaigns, based on `all` parameter. This parameter decides if return campaigns that are 'only sent'(statement _false_) or return all registered campaigns (statement _true_).
 
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -648,8 +756,12 @@ Return list of actually registered campaigns, based on `all` parameter. This par
         <td>/push/campaign/list/?all={true|false}</td>
     </tr>
 </table>
+<!-- end -->
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ``` json
 {
@@ -698,11 +810,16 @@ Return list of actually registered campaigns, based on `all` parameter. This par
 - `appId` - Identifier of application that campaign is using.
 - `sent` - Indicator if campaign was sent.
 - `message` - parameters of message object are described [here](./Push-Message-Payload-Mapping.md).
+<!-- end -->
 
+<!-- begin api PUT /push/campaign/${id}/user/add Add Users To Campaign -->
 ### Add Users To Campaign
 
+<!-- api-description -->
 Associate users to a specific campaign. Users are identified in request body as an array of strings.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -714,11 +831,19 @@ Associate users to a specific campaign. Users are identified in request body as 
         <td>Resource URI</td>
         <td>/push/campaign/${ID}/user/add</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
         <td>Var ${ID} </td>
         <td>Campaign identifier</td>
     </tr>
 </table>
+
+##### Request Body
 
 ```json
 {
@@ -732,18 +857,26 @@ Associate users to a specific campaign. Users are identified in request body as 
 
 - list of users
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
     "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api GET /push/campaign/${ID}/user/list Get Users From Campaign -->
 ### Get Users From Campaign
 
+<!-- api-description -->
 Return list users from a specific campaign. Users are shown in paginated format based on parameters assigned in URI.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -755,21 +888,30 @@ Return list users from a specific campaign. Users are shown in paginated format 
         <td>Resource URI</td>
         <td>/push/campaign/${ID}/user/list?page=${PAGE}&size=${SIZE}</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
     <tr>
-        <td>Var ${PAGE} </td>
-        <td>Nubmer of page to show</td>
+        <td>page</td>
+        <td>Number of page to show</td>
     </tr>
     <tr>
-        <td>Var ${SIZE}</td>
+        <td>size</td>
         <td>Number of elements per page</td>
     </tr>
 </table>
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
@@ -791,11 +933,16 @@ Return list users from a specific campaign. Users are shown in paginated format 
 - `size` - Chosen number of users per page
 - `campaignId` - ID of a chosen campaign
 - `users` - Array of users based on pagination parameters
+<!-- end -->
 
+<!-- begin api DELETE /push/campaign/${id}/user/delete -->
 ### Delete Users From Campaign
 
+<!-- api-description -->
 Delete users associated with a specific campaign. Users are identified request body as an array of strings.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -807,6 +954,12 @@ Delete users associated with a specific campaign. Users are identified request b
         <td>Resource URI</td>
         <td>/push/campaign/${ID}/user/delete</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
         <td>Var ${ID} </td>
         <td>Campaign identifier</td>
@@ -825,18 +978,25 @@ Delete users associated with a specific campaign. Users are identified request b
 
 - list of users
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
-
+<!-- end -->
 ```json
 {
     "status": "OK"
 }
 ```
+<!-- end -->
 
-### Send Test Campaign
+<!-- begin api POST /push/campaign/send/test/${id} Send Test Message -->
+### Send Test Campaign Message
 
+<!-- api-description -->
 Send message from a specific campaign on test user to check rightness of that campaign.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -848,11 +1008,19 @@ Send message from a specific campaign on test user to check rightness of that ca
         <td>Resource URI</td>
         <td>/push/campaign/send/test/${ID}</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
         <td>Var ${ID}</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
+
+##### Request Body
 
 ```json
 {
@@ -864,20 +1032,28 @@ Send message from a specific campaign on test user to check rightness of that ca
 
 - `userId` - ID of test user, usually "1234567890"
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
     "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /push/campaign/send/live/${id} Send Campaign -->
 ### Send Campaign
 
+<!-- api-description -->
 Send message from a specific campaign to devices belonged to users associated with that campaign. Whereas each device gets a campaign only once.
 
 If sending was successful then `sent` parameter is set on _true_ and `timestampSent` is set on current time.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -889,6 +1065,11 @@ If sending was successful then `sent` parameter is set on _true_ and `timestampS
         <td>Resource URI</td>
         <td>/push/campaign/send/live/${ID}</td>
     </tr>
+</table>
+<!-- end -->
+##### Query Parameters
+
+<table>
     <tr>
         <td>Var ${ID} </td>
         <td>Campaign identifier</td>
@@ -897,20 +1078,27 @@ If sending was successful then `sent` parameter is set on _true_ and `timestampS
 
 - empty request body
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
     "status": "OK"
 }
 ```
+<!-- end -->
 
 ## Administration
 
+<!-- begin api GET /admin/app/list List Applications -->
 ### List Applications
 
+<!-- api-description -->
 Get list of all applications.
 
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -923,8 +1111,12 @@ Get list of all applications.
         <td>/admin/app/list</td>
     </tr>
 </table>
+<!-- end -->
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
@@ -942,11 +1134,15 @@ Get list of all applications.
   }
 }
 ```
+<!-- end -->
 
+<!-- begin api GET /admin/app/unconfigured/list List Unconfigured Applications -->
 ### List Unconfigured Applications
 
+<!-- api-description -->
 Get list of applications which have not been configured yet.
 
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -959,8 +1155,12 @@ Get list of applications which have not been configured yet.
         <td>/admin/app/unconfigured/list</td>
     </tr>
 </table>
+<!-- end -->
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
@@ -978,11 +1178,16 @@ Get list of applications which have not been configured yet.
   }
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /admin/app/detail Application Detail -->
 ### Application Detail
 
+<!-- api-description -->
 Get detail of an application.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -995,6 +1200,7 @@ Get detail of an application.
         <td>/admin/app/detail</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -1006,7 +1212,10 @@ Get detail of an application.
 }
 ```
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end remove -->
 
 ```json
 {
@@ -1026,11 +1235,16 @@ Get detail of an application.
   }
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /admin/app/create Create Application -->
 ### Create Application
 
+<!-- api-description -->
 Create a new supported application.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -1043,6 +1257,7 @@ Create a new supported application.
         <td>/admin/app/create</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -1052,7 +1267,10 @@ Create a new supported application.
 }
 ```
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
@@ -1062,11 +1280,16 @@ Create a new supported application.
   }
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /admin/app/ios/update -->
 ### Update iOS Configuration
 
+<!-- api-description -->
 Update an iOS configuration.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -1079,6 +1302,7 @@ Update an iOS configuration.
         <td>/admin/app/ios/update</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -1092,18 +1316,26 @@ Update an iOS configuration.
 }
 ```
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
   "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api DELETE /admin/app/ios/remove Remove iOS Configuration -->
 ### Remove iOS Configuration
 
+<!-- api-description -->
 Remove an iOS configuration.
 
+<!-- api-request -->
+<!-- begin-remove -->
 #### **Request**
 
 <table>
@@ -1116,6 +1348,7 @@ Remove an iOS configuration.
         <td>/admin/app/ios/remove</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -1124,19 +1357,25 @@ Remove an iOS configuration.
   }
 }
 ```
-
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
-
+<!-- end -->
 ```json
 {
   "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api PUT /admin/app/android/update Update Android Configuration -->
 ### Update Android Configuration
 
+<!-- api-description -->
 Update an Android configuration.
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -1149,6 +1388,7 @@ Update an Android configuration.
         <td>/admin/app/android/update</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -1160,16 +1400,22 @@ Update an Android configuration.
 }
 ```
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
-
+<!-- end -->
 ```json
 {
   "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api DELETE /admin/app/android/remove Remove Android Configuration -->
 ### Remove Android Configuration
 
+<!-- api-request -->
+<!-- begin remove -->
 #### **Request**
 
 <table>
@@ -1182,7 +1428,7 @@ Update an Android configuration.
         <td>/admin/app/android/remove</td>
     </tr>
 </table>
-
+<!-- end -->
 ```json
 {
   "requestObject": {
@@ -1191,10 +1437,14 @@ Update an Android configuration.
 }
 ```
 
+<!-- api-response 200 -->
+<!-- begin remove -->
 #### **Response**
+<!-- end -->
 
 ```json
 {
   "status": "OK"
 }
 ```
+<!-- end -->
