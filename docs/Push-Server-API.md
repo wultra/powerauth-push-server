@@ -83,11 +83,11 @@ All error responses that are produced by the PowerAuth Push Server have followin
 ```json
 
 {
-    "status": "ERROR",
-    "responseObject": {
-        "code": "ERROR_GENERIC",
-        "message": "Campaign with entered ID does not exist"
-    }
+  "status": "ERROR",
+  "responseObject": {
+    "code": "ERROR_GENERIC",
+    "message": "Campaign with entered ID does not exist"
+  }
 }
 ```
 
@@ -125,15 +125,15 @@ Send a system status response, with basic information about the running applicat
 
 ```json
 {
-    "status": "OK",
-    "responseObject": {
-        "applicationName": "powerauth-push",
-        "applicationDisplayName": "PowerAuth Push Server",
-        "applicationEnvironment": "",
-        "version": "0.21.0",
-        "buildTime": "2019-01-22T14:59:14.954+0000",
-        "timestamp": "2019-01-22T15:00:28.399+0000"
-    }
+  "status": "OK",
+  "responseObject": {
+    "applicationName": "powerauth-push",
+    "applicationDisplayName": "PowerAuth Push Server",
+    "applicationEnvironment": "",
+    "version": "0.21.0",
+    "buildTime": "2019-01-22T14:59:14.954+0000",
+    "timestamp": "2019-01-22T15:00:28.399+0000"
+  }
 }
 ```
 
@@ -178,12 +178,12 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 ```json
 {
-    "requestObject": {
-        "appId": 2,
-        "token": "1234567890987654321234567890",
-        "platform": "ios",
-        "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
-    }
+  "requestObject": {
+    "appId": 2,
+    "token": "1234567890987654321234567890",
+    "platform": "ios",
+    "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
+  }
 }
 ```
 
@@ -199,7 +199,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
 <!-- end -->
@@ -232,15 +232,15 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 ```json
 {
-    "requestObject": {
-        "appId": 2,
-        "token": "1234567890987654321234567890",
-        "platform": "ios",
-        "activationIds": [
-          "49414e31-f3df-4cea-87e6-f214ca3b8412",
-          "26c94bf8-f594-4bd8-9c51-93449926b644"
-        ]
-    }
+  "requestObject": {
+    "appId": 2,
+    "token": "1234567890987654321234567890",
+    "platform": "ios",
+    "activationIds": [
+      "49414e31-f3df-4cea-87e6-f214ca3b8412",
+      "26c94bf8-f594-4bd8-9c51-93449926b644"
+    ]
+  }
 }
 ```
 
@@ -256,7 +256,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
 <!-- end -->
@@ -287,10 +287,10 @@ Removes registered device based on the push token value.
 
 ```json
 {
-    "requestObject": {
-        "appId": 2,
-        "token": "12456789098321234567890"
-    }
+  "requestObject": {
+    "appId": 2,
+    "token": "12456789098321234567890"
+  }
 }
 ```
 
@@ -304,7 +304,7 @@ Removes registered device based on the push token value.
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
 <!-- end -->
@@ -335,7 +335,7 @@ Update the status of given device registration based on the associated activatio
 
 ```json
 {
-    "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
+  "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
 }
 ```
 
@@ -348,7 +348,7 @@ Update the status of given device registration based on the associated activatio
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
 <!-- end -->
@@ -383,30 +383,30 @@ Send a single push message to given user via provided application, optionally to
 
 ```json
 {
-    "requestObject": {
-        "appId": 2,
-        "message": {
-            "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
-            "userId": "123",
-            "attributes": {
-                "personal": true,
-                "silent": true
-            },
-            "body": {
-                "title": "Balance update",
-                "body": "Your balance is now $745.00",
-                "badge": 3,
-                "sound": "default",
-                "icon": "custom-icon",
-                "category": "balance-update",
-                "collapseKey": "balance-update",
-                "validUntil": "2017-12-11T21:22:29.923Z",
-                "extras": {
-                    "_comment": "Any custom data."
-                }
-            }
+  "requestObject": {
+    "appId": 2,
+    "message": {
+      "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
+      "userId": "123",
+      "attributes": {
+        "personal": true,
+        "silent": true
+      },
+      "body": {
+        "title": "Balance update",
+        "body": "Your balance is now $745.00",
+        "badge": 3,
+        "sound": "default",
+        "icon": "custom-icon",
+        "category": "balance-update",
+        "collapseKey": "balance-update",
+        "validUntil": "2017-12-11T21:22:29.923Z",
+        "extras": {
+          "_comment": "Any custom data."
         }
+      }
     }
+  }
 }
 
 ```
@@ -427,7 +427,7 @@ Send a single push message to given user via provided application, optionally to
 <!-- end -->
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
 <!-- end -->
@@ -458,53 +458,53 @@ Sends a message message batch - each item in the batch represents a message to g
 
 ```json
 {
-    "requestObject": {
-        "appId": 2,
-        "batch": [
-            {
-                "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
-                "userId": "123",
-                "attributes": {
-                    "personal": true,
-                    "silent": true
-                },
-                "body": {
-                    "title": "Balance update",
-                    "body": "Your balance is now $745.00",
-                    "badge": 3,
-                    "sound": "default",
-                    "icon": "custom-icon",
-                    "category": "balance-update",
-                    "collapseKey": "balance-update",
-                    "validUntil": "2017-12-11T21:22:29.923Z",
-                    "extras": {
-                        "_comment": "Any custom data."
-                    }
-                }
-            },
-            {
-                "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
-                "userId": "1234",
-                "attributes": {
-                    "personal": true,
-                    "silent": true
-                },
-                "body": {
-                    "title": "Balance update",
-                    "body": "Your balance is now $745.00",
-                    "badge": 3,
-                    "sound": "default",
-                    "icon": "custom-icon",
-                    "category": "balance-update",
-                    "collapseKey": "balance-update",
-                    "validUntil": "2017-12-11T21:22:29.923Z",
-                    "extras": {
-                        "_comment": "Any custom data."
-                    }
-                }
-            }
-        ]
-    }
+  "requestObject": {
+    "appId": 2,
+    "batch": [
+      {
+        "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
+        "userId": "123",
+        "attributes": {
+          "personal": true,
+          "silent": true
+        },
+        "body": {
+          "title": "Balance update",
+          "body": "Your balance is now $745.00",
+          "badge": 3,
+          "sound": "default",
+          "icon": "custom-icon",
+          "category": "balance-update",
+          "collapseKey": "balance-update",
+          "validUntil": "2017-12-11T21:22:29.923Z",
+          "extras": {
+            "_comment": "Any custom data."
+          }
+        }
+      },
+      {
+        "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
+        "userId": "1234",
+        "attributes": {
+          "personal": true,
+          "silent": true
+        },
+        "body": {
+          "title": "Balance update",
+          "body": "Your balance is now $745.00",
+          "badge": 3,
+          "sound": "default",
+          "icon": "custom-icon",
+          "category": "balance-update",
+          "collapseKey": "balance-update",
+          "validUntil": "2017-12-11T21:22:29.923Z",
+          "extras": {
+            "_comment": "Any custom data."
+          }
+        }
+      }
+    ]
+  }
 }
 
 ```
@@ -518,23 +518,23 @@ Sends a message message batch - each item in the batch represents a message to g
 <!-- end -->
 ```json
 {
-    "status": "OK",
-    "responseObject": {
-        "result": {
-            "ios": {
-                "sent": 1,
-                "pending": 0,
-                "failed": 0,
-                "total": 1
-            },
-            "android": {
-                "sent": 1,
-                "pending": 0,
-                "failed": 0,
-                "total": 1
-            }
-        }
+  "status": "OK",
+  "responseObject": {
+    "result": {
+      "ios": {
+        "sent": 1,
+        "pending": 0,
+        "failed": 0,
+        "total": 1
+      },
+      "android": {
+        "sent": 1,
+        "pending": 0,
+        "failed": 0,
+        "total": 1
+      }
     }
+  }
 }
 ```
 
@@ -581,22 +581,22 @@ Create a campaign with application that campaign is using and certain message th
 
 ```json
 {
-    "requestObject": {
-        "appId": "2",
-        "message": {
-            "title": "Balance update",
-            "body": "Your balance is now $745.00",
-            "badge": 3,
-            "sound": "default",
-            "icon": "custom-icon",
-            "category": "balance-update",
-            "collapseKey": "balance-update",
-            "validUntil": "2016-10-12T11:20:04Z",
-            "extras": {
-                "_comment": "Any custom data."
-            }      
-        }
+  "requestObject": {
+  "appId": "2",
+    "message": {
+      "title": "Balance update",
+      "body": "Your balance is now $745.00",
+      "badge": 3,
+      "sound": "default",
+      "icon": "custom-icon",
+      "category": "balance-update",
+      "collapseKey": "balance-update",
+      "validUntil": "2016-10-12T11:20:04Z",
+      "extras": {
+        "_comment": "Any custom data."
+      }      
     }
+  }
 }
 ```
 
@@ -612,10 +612,10 @@ _note: identifier of campaign is generated automatically_
 
 ```json
 {
-    "status": "OK",
-    "responseObject": {
-        "id": "123456789012345678901234567890"
-    }
+  "status": "OK",
+  "responseObject": {
+    "id": "123456789012345678901234567890"
+  }
 }
 ```
 
@@ -668,10 +668,10 @@ Delete a specific campaign. Also users associated with this campaign are going t
 
 ```json
 {
-    "status": "OK",
-    "responseObject" : {
-        "deleted" : true
-    }
+  "status": "OK",
+  "responseObject" : {
+    "deleted" : true
+  }
 }
 ```
 
@@ -716,25 +716,25 @@ Return details of a specific campaign.
 
 ```json
 {
-    "status": "OK",
-    "responseObject": {
-        "id": "10",
-        "appId": 2,
-        "sent": "false",
-        "message": {
-            "title": "Balance update",
-            "body": "Your balance is now $745.00",
-            "badge": 3,
-            "sound": "default",
-            "icon": "custom-icon",
-            "category": "balance-update",
-            "collapseKey": "balance-update",
-            "validUntil": "2016-10-12T11:20:04Z",
-            "extras": {
-                "_comment": "Any custom data."
-            }
-        }
+  "status": "OK",
+  "responseObject": {
+    "id": "10",
+    "appId": 2,
+    "sent": "false",
+    "message": {
+      "title": "Balance update",
+      "body": "Your balance is now $745.00",
+      "badge": 3,
+      "sound": "default",
+      "icon": "custom-icon",
+      "category": "balance-update",
+      "collapseKey": "balance-update",
+      "validUntil": "2016-10-12T11:20:04Z",
+      "extras": {
+        "_comment": "Any custom data."
+      }
     }
+  }
 }
 ```
 
@@ -772,45 +772,45 @@ Return list of actually registered campaigns, based on `all` parameter. This par
 
 ``` json
 {
-    "status": "OK",
-    "responseObject": [
-        {
-            "id": "10",
-            "appId": 2,
-            "sent": "false",
-            "message": {
-                "title": "Balance update",
-                "body": "Your balance is now $745.00",
-                "badge": 3,
-                "sound": "default",
-                "icon": "custom-icon",
-                "category": "balance-update",
-                "collapseKey": "balance-update",
-                "validUntil": "2016-10-12T11:20:04Z",
-                "extras": {
-                    "_comment": "Any custom data."
-                }
-            }
-            }, {
-                "id": "11",
-                "appId": 3,
-                "sent": "true",
-                "message": {
-                    "title": "Balance update",
-                    "body": "Your balance is now $300.00",
-                    "badge": 3,
-                    "sound": "default",
-                    "icon": "custom-icon",
-                    "category": "balance-update",
-                    "collapseKey": "balance-update",
-                    "validUntil": "2017-10-12T11:20:04Z",
-                    "extras": {
-                        "_comment": "Any custom data."
-                    }
-                }
-            }
-        ]
+  "status": "OK",
+  "responseObject": [
+    {
+      "id": "10",
+      "appId": 2,
+      "sent": "false",
+      "message": {
+        "title": "Balance update",
+        "body": "Your balance is now $745.00",
+        "badge": 3,
+        "sound": "default",
+        "icon": "custom-icon",
+        "category": "balance-update",
+        "collapseKey": "balance-update",
+        "validUntil": "2016-10-12T11:20:04Z",
+        "extras": {
+          "_comment": "Any custom data."
+        }
+      }
+    }, {
+      "id": "11",
+      "appId": 3,
+      "sent": "true",
+      "message": {
+        "title": "Balance update",
+        "body": "Your balance is now $300.00",
+        "badge": 3,
+        "sound": "default",
+        "icon": "custom-icon",
+        "category": "balance-update",
+        "collapseKey": "balance-update",
+        "validUntil": "2017-10-12T11:20:04Z",
+        "extras": {
+          "_comment": "Any custom data."
+        }
+      }
     }
+  ]
+}
 ```
 - array of campaigns
 - `id` - Identifier of campaign.
@@ -854,11 +854,11 @@ Associate users to a specific campaign. Users are identified in request body as 
 
 ```json
 {
-    "requestObject": [
-        "1234567890",
-        "1234567891",
-        "1234567893"
-    ]
+  "requestObject": [
+    "1234567890",
+    "1234567891",
+    "1234567893"
+  ]
 }
 ```
 
@@ -871,7 +871,7 @@ Associate users to a specific campaign. Users are identified in request body as 
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
 <!-- end -->
@@ -922,17 +922,17 @@ Return list users from a specific campaign. Users are shown in paginated format 
 
 ```json
 {
-    "status": "OK",
-    "page": 0,
-    "size": 4,
-    "responseObject": {
-        "campaignId": "1234",
-        "users": [
-            "1234567890",
-            "1234567892",
-            "1234567893"
-        ]
-    }
+  "status": "OK",
+  "page": 0,
+  "size": 4,
+  "responseObject": {
+    "campaignId": "1234",
+    "users": [
+      "1234567890",
+      "1234567892",
+      "1234567893"
+    ]
+  }
 }
 ```
 
@@ -975,11 +975,11 @@ Delete users associated with a specific campaign. Users are identified request b
 
 ```json
 {
-    "requestObject": [
-        "1234567890",
-        "1234567891",
-        "1234567893"
-    ]
+  "requestObject": [
+    "1234567890",
+    "1234567891",
+    "1234567893"
+  ]
 }
 ```
 
@@ -991,7 +991,7 @@ Delete users associated with a specific campaign. Users are identified request b
 <!-- end -->
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
 <!-- end -->
@@ -1031,9 +1031,9 @@ Send message from a specific campaign on test user to check rightness of that ca
 
 ```json
 {
-    "requestObject": {
-        "userId": "1234567890"
-    }
+  "requestObject": {
+    "userId": "1234567890"
+  }
 }
 ```
 
@@ -1046,7 +1046,7 @@ Send message from a specific campaign on test user to check rightness of that ca
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
 <!-- end -->
@@ -1092,7 +1092,7 @@ If sending was successful then `sent` parameter is set on _true_ and `timestampS
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
 <!-- end -->
