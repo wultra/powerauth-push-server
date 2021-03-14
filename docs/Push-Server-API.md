@@ -300,7 +300,7 @@ Removes registered device based on the push token value.
 <!-- api-response 200 -->
 <!-- begin remove -->
 #### **Response**
-<!-- end remove -->
+<!-- end -->
 
 ```json
 {
@@ -1222,7 +1222,7 @@ Get detail of an application.
 <!-- api-response 200 -->
 <!-- begin remove -->
 #### **Response**
-<!-- end remove -->
+<!-- end -->
 
 ```json
 {
