@@ -641,12 +641,19 @@ Delete a specific campaign. Also users associated with this campaign are going t
         <td>Resource URI</td>
         <td>/push/campaign/${ID}/delete</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
-<!-- end -->
+
+##### Request Body
 
 ```json
 {}
@@ -697,7 +704,7 @@ Return details of a specific campaign.
 
 <table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
@@ -838,7 +845,7 @@ Associate users to a specific campaign. Users are identified in request body as 
 
 <table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
@@ -961,7 +968,7 @@ Delete users associated with a specific campaign. Users are identified request b
 
 <table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
@@ -1015,7 +1022,7 @@ Send message from a specific campaign on test user to check rightness of that ca
 
 <table>
     <tr>
-        <td>Var ${ID}</td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
@@ -1071,7 +1078,7 @@ If sending was successful then `sent` parameter is set on _true_ and `timestampS
 
 <table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
