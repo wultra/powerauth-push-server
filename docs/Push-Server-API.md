@@ -935,7 +935,7 @@ Return list users from a specific campaign. Users are shown in paginated format 
 - `users` - Array of users based on pagination parameters
 <!-- end -->
 
-<!-- begin api DELETE /push/campaign/${id}/user/delete -->
+<!-- begin api DELETE /push/campaign/${id}/user/delete Delete Users From Campaign -->
 ### Delete Users From Campaign
 
 <!-- api-description -->
@@ -1282,7 +1282,7 @@ Create a new supported application.
 ```
 <!-- end -->
 
-<!-- begin api POST /admin/app/ios/update -->
+<!-- begin api POST /admin/app/ios/update Update iOS Configuration -->
 ### Update iOS Configuration
 
 <!-- api-description -->
