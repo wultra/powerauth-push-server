@@ -99,7 +99,7 @@ All error responses that are produced by the PowerAuth Push Server have followin
 
 Describes basic information of application.
 
-<!-- begin API GET /push/service/status -->
+<!-- begin api GET /push/service/status -->
 ### Service Status
 
 Send a system status response, with basic information about the running application.
@@ -578,9 +578,9 @@ _note: identifier of campaign is generated automatically_
 
 Delete a specific campaign. Also users associated with this campaign are going to be deleted. If deletion was applied then deleted status is true.
 
+<!-- begin remove -->
 #### Request
 
-<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
