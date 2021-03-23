@@ -1,10 +1,10 @@
 # Deploying Push Server on JBoss / Wildfly
 
-## JBoss Deployment Descriptor 
+## JBoss Deployment Descriptor
 
 Push Server contains the following configuration in `jboss-deployment-structure.xml` file for JBoss:
 
-```
+```xml
 <?xml version="1.0"?>
 <jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.2">
 	<deployment>
@@ -32,7 +32,8 @@ The files described below should be added into this folder.
 ### Main Module Configuration
 
 The `module.xml` configuration is used for module registration. It also adds resources from the module folder to classpath:
-```
+
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <module xmlns="urn:jboss:module:1.3" name="com.wultra.powerauth.push-server.conf">
     <resources>
@@ -44,7 +45,8 @@ The `module.xml` configuration is used for module registration. It also adds res
 ### Logging Configuration
 
 Use the `logback.xml` file to configure logging, for example:
-```
+
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
 
@@ -79,6 +81,7 @@ Use the `logback.xml` file to configure logging, for example:
 ### Application Configuration
 
 The `application-ext.properties` file is used to override default configuration properties, for example:
+
 ```
 # PowerAuth 2.0 Client configuration
 powerauth.service.url=http://[host]:[port]/powerauth-java-server/rest
@@ -90,5 +93,5 @@ Push Server Spring application uses the `ext` Spring profile which activates ove
 
 The Bouncy Castle module for JBoss / Wildfly needs to be enabled as a global module for Push Server.
 
-Follow the instructions in the [Installing Bouncy Castle](https://github.com/wultra/powerauth-server/blob/develop/docs/Installing-Bouncy-Castle.md) chapter of PowerAuth Server documentation. 
+Follow the instructions in the [Installing Bouncy Castle](https://github.com/wultra/powerauth-server/blob/develop/docs/Installing-Bouncy-Castle.md) chapter of PowerAuth Server documentation.
 Note that the instructions differ based on Java version and application server type.
