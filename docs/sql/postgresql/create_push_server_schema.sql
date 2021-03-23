@@ -25,7 +25,7 @@ CREATE TABLE push_app_credentials (
 );
 
 
--- Create table for registerd devices
+-- Create table for registered devices
 CREATE TABLE push_device_registration (
 	id INTEGER NOT NULL CONSTRAINT push_device_registration_pkey PRIMARY KEY,
 	activation_id VARCHAR(37),
