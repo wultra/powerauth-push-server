@@ -1,6 +1,6 @@
 # Push Server Administration
 
-PowerAuth Push Server can be administered using a RESTful API. 
+PowerAuth Push Server can be administered using a RESTful API.
 
 The RESTful API is documented in [a dedicated chapter](./Push-Server-API.md).
 
@@ -18,21 +18,21 @@ Curl is a command line HTTP client. You can get cURL from [https://curl.haxx.se]
 
 ### Retrieve Application List
 
-```
+```sh
 curl --request GET \
   --url http://localhost:8080/powerauth-push-server/admin/app/list
 ```
 
 ### Retrieve Unconfigured Application List
 
-```
+```sh
 curl --request GET \
   --url http://localhost:8080/powerauth-push-server/admin/app/unconfigured/list
 ```
 
 ### Create an Application
 
-```
+```sh
 curl --request POST \
   --url http://localhost:8080/powerauth-push-server/admin/app/create \
   --header 'content-type: application/json' \
@@ -47,7 +47,7 @@ Update the `appId` value with requested PowerAuth application ID. The value `id`
 
 ### Get Application Detail
 
-```
+```sh
 curl --request POST \
   --url http://localhost:8080/powerauth-push-server/admin/app/detail \
   --header 'content-type: application/json' \
@@ -64,7 +64,7 @@ Update the `id` value with requested Push Server application ID.
 
 ### Update APNs Configuration
 
-```
+```sh
 curl --request POST \
   --url http://localhost:8080/powerauth-push-server/admin/app/ios/update \
   --header 'content-type: application/json' \
@@ -85,13 +85,13 @@ Enter the base64-encoded value of APNs private key into `privateKeyBase64`.
 
 You can encode the file using `base64` command on Mac. You can also use `Certutil.exe` on Windows or OpenSSL on all platforms.
 
-```
+```sh
 base64 -i <in-file> -o <outfile>
 ```
- 
+
 ### Remove APNs Configuration
 
-```
+```sh
 curl --request DELETE \
   --url http://localhost:8080/powerauth-push-server/admin/app/ios/remove \
   --cookie JSESSIONID=76D3CE8C7F92E1FC090A79886E43B235 \
@@ -105,7 +105,8 @@ curl --request DELETE \
 Set the `id` value for the Push Server application ID you want to update.
 
 ### Update FCM Configuration
-```
+
+```sh
 curl --request POST \
   --url http://localhost:8080/powerauth-push-server/admin/app/android/update \
   --header 'content-type: application/json' \
@@ -123,12 +124,14 @@ Set the `id` value for Push Server application ID to want to update.
 Enter the base64-encoded value of FCM private key into `privateKeyBase64`.
 
 You can encode the file using `base64` command on Mac. You can also use `Certutil.exe` on Windows or OpenSSL on all platforms.
-```
+
+```sh
 base64 -i <in-file> -o <outfile>
 ```
- 
+
 ### Remove FCM Configuration
-```
+
+```sh
 curl --request DELETE \
   --url http://localhost:8080/powerauth-push-server/admin/app/android/remove \
   --header 'content-type: application/json' \
@@ -143,6 +146,6 @@ Set the `id` value for the Push Server application ID you want to update.
 
 ## Administration using SQL Database
 
-Push server can be also administered by updating the `push_app_credentials` table. 
+Push server can be also administered by updating the `push_app_credentials` table.
 
 See the [PowerAuth Push Server Database Structure](./Push-Server-Database.md) for more details.
