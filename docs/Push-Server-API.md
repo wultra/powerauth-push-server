@@ -28,7 +28,7 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 #### Device Management
 
 - `POST` [/push/device/create](#create-device) - Create new device registration
-- `POST` [/push/device/create/multi](#create-device-for-multiple-associated-activations) - Create new device registration for multiple activations
+- `POST` [/push/device/create/multi](#create-device-for-multiple-activations) - Create new device registration for multiple activations
 - `POST` / `DELETE` [/push/device/delete](#delete-device) - Remove registered device
 - `POST` / `PUT` [/push/device/status/update](#update-device-status) - Update the status of the activation so that when activation associated with given device is not active, no notifications are sent to the device.
 
