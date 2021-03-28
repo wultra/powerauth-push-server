@@ -1185,7 +1185,7 @@ Create a new supported application.
 ```
 <!-- end -->
 
-<!-- begin api POST /admin/app/ios/update -->
+<!-- begin api PUT /admin/app/ios/update -->
 ### Update iOS Configuration
 
 Update an iOS configuration.
@@ -1305,6 +1305,8 @@ Update an Android configuration.
 
 <!-- begin api DELETE /admin/app/android/remove -->
 ### Remove Android Configuration
+
+Remove FCM configuration for Android push messages.
 
 #### Request
 
