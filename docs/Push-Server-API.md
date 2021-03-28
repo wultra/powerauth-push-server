@@ -1013,6 +1013,8 @@ If sending was successful then `sent` parameter is set on _true_ and `timestampS
 
 ## Administration
 
+Services used for management of the push server instance.
+
 <!-- begin api GET /admin/app/list -->
 ### List Applications
 
