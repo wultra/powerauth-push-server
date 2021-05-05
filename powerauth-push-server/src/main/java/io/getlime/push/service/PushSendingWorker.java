@@ -386,11 +386,13 @@ public class PushSendingWorker {
      */
     private String buildApnsPayload(PushMessageBody push, boolean isSilent) {
         final ApnsPayloadBuilder payloadBuilder = new SimpleApnsPayloadBuilder();
-        payloadBuilder.setAlertTitle(push.getTitle());
-        payloadBuilder.setAlertBody(push.getBody());
+        if (!isSilent) { // include alert, body, sound and category only in case push message is not silent.
+            payloadBuilder.setAlertTitle(push.getTitle());
+            payloadBuilder.setAlertBody(push.getBody());
+            payloadBuilder.setSound(push.getSound());
+            payloadBuilder.setCategoryName(push.getCategory());
+        }
         payloadBuilder.setBadgeNumber(push.getBadge());
-        payloadBuilder.setCategoryName(push.getCategory());
-        payloadBuilder.setSound(push.getSound());
         payloadBuilder.setContentAvailable(isSilent);
         payloadBuilder.setThreadId(push.getCollapseKey());
         Map<String, Object> extras = push.getExtras();
