@@ -116,6 +116,12 @@ public class PushServiceConfiguration {
     private long idlePingInterval;
 
     /**
+     * Java security CA certs file password.
+     */
+    @Value("${powerauth.push.java.cacerts.password}")
+    private String javaCaCertificatesPassword;
+
+    /**
      * Get push server name.
      * @return Push server name.
      */
@@ -467,11 +473,35 @@ public class PushServiceConfiguration {
         this.concurrentConnections = concurrentConnections;
     }
 
+    /**
+     * Get idle ping interval.
+     * @return Idle ping interval.
+     */
     public long getIdlePingInterval() {
         return idlePingInterval;
     }
 
+    /**
+     * Set idle ping interval.
+     * @param idlePingInterval Idle ping interval.
+     */
     public void setIdlePingInterval(long idlePingInterval) {
         this.idlePingInterval = idlePingInterval;
+    }
+
+    /**
+     * Get Java security CA certs file password.
+     * @return Java security CA certs file password.
+     */
+    public String getJavaCaCertificatesPassword() {
+        return javaCaCertificatesPassword;
+    }
+
+    /**
+     * Set Java security CA certs file password.
+     * @param javaCaCertificatesPassword Java security CA certs file password.
+     */
+    public void setJavaCaCertificatesPassword(String javaCaCertificatesPassword) {
+        this.javaCaCertificatesPassword = javaCaCertificatesPassword;
     }
 }

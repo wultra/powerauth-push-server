@@ -17,12 +17,19 @@
 package io.getlime.push.util;
 
 import com.google.common.io.BaseEncoding;
+import io.getlime.push.configuration.PushServiceConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
 import sun.security.provider.X509Factory;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -33,10 +40,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Utility class for working with CA Certificates.
+ * Utility service class for working with CA Certificates.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Service
 public class CaCertUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(CaCertUtil.class);
@@ -48,16 +56,22 @@ public class CaCertUtil {
             "cacert/USERTrustRSAAAACA.pem"
     };
 
-    public static X509Certificate[] allCerts() {
+    private final PushServiceConfiguration pushServiceConfiguration;
+
+    @Autowired
+    public CaCertUtil(PushServiceConfiguration pushServiceConfiguration) {
+        this.pushServiceConfiguration = pushServiceConfiguration;
+    }
+
+    public X509Certificate[] allCerts() {
         // Prepare result list
         final List<X509Certificate> result = new ArrayList<>();
 
-        try {
+        final String filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar);
+        try (FileInputStream is = new FileInputStream(filename)) {
             // Load the JDK's cacerts keystore file
-            final String filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar);
-            final FileInputStream is = new FileInputStream(filename);
             final KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            final String password = "changeit";
+            final String password = pushServiceConfiguration.getJavaCaCertificatesPassword();
             keystore.load(is, password.toCharArray());
 
             // This class retrieves the most-trusted CAs from the keystore
@@ -78,7 +92,7 @@ public class CaCertUtil {
             try {
                 logger.info("Importing embedded certificate: {}", certPath);
                 final File resource = new ClassPathResource(certPath).getFile();
-                final String certString = new String(Files.readAllBytes(resource.toPath()));
+                final String certString = new String(Files.readAllBytes(resource.toPath()), StandardCharsets.UTF_8);
                 final X509Certificate cert = certificateFromPem(certString);
                 result.add(cert);
             } catch (CertificateException | IOException e) {
@@ -89,7 +103,7 @@ public class CaCertUtil {
         return result.toArray(new X509Certificate[0]);
     }
 
-    private static X509Certificate certificateFromPem(String pem) throws CertificateException {
+    private X509Certificate certificateFromPem(String pem) throws CertificateException {
         byte[] decoded = BaseEncoding.base64().decode(pem
                 .replaceAll(X509Factory.BEGIN_CERT, "")
                 .replaceAll(X509Factory.END_CERT, "")

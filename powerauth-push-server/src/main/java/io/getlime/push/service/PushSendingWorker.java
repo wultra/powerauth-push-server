@@ -27,7 +27,6 @@ import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
-import io.getlime.push.util.CaCertUtil;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
@@ -38,6 +37,7 @@ import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmModelConverter;
 import io.getlime.push.service.fcm.model.FcmErrorResponse;
 import io.getlime.push.service.fcm.model.FcmSuccessResponse;
+import io.getlime.push.util.CaCertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,11 +76,13 @@ public class PushSendingWorker {
 
     private final PushServiceConfiguration pushServiceConfiguration;
     private final FcmModelConverter fcmConverter;
+    private final CaCertUtil caCertUtil;
 
     @Autowired
-    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter) {
+    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter, CaCertUtil caCertUtil) {
         this.pushServiceConfiguration = pushServiceConfiguration;
         this.fcmConverter = fcmConverter;
+        this.caCertUtil = caCertUtil;
     }
 
     // Android related methods
@@ -269,7 +271,7 @@ public class PushSendingWorker {
                 .setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections())
                 .setConnectionTimeout(Duration.ofMillis(pushServiceConfiguration.getApnsConnectTimeout()))
                 .setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()))
-                .setTrustedServerCertificateChain(CaCertUtil.allCerts());
+                .setTrustedServerCertificateChain(caCertUtil.allCerts());
         if (pushServiceConfiguration.isApnsUseDevelopment()) {
             logger.info("Using APNs development host");
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
