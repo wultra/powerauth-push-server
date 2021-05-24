@@ -27,6 +27,7 @@ import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
+import com.wultra.core.rest.client.base.RestClientException;
 import io.getlime.push.util.CaCertUtil;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
@@ -135,7 +136,7 @@ public class PushSendingWorker {
         Message message = buildAndroidMessage(pushMessageBody, attributes, pushToken);
 
         // Extraction of FCM success response
-        Consumer<ResponseEntity<FcmSuccessResponse>> fcmConsumer = responseEntity -> {
+        Consumer<ResponseEntity<FcmSuccessResponse>> onSuccess = responseEntity -> {
             FcmSuccessResponse response = responseEntity.getBody();
             if (response != null && response.getName() != null && response.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
                 logger.info("Notification sent, response: {}", response.getName());
@@ -147,13 +148,10 @@ public class PushSendingWorker {
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         };
 
-        // Callback when FCM request succeeds
-        Consumer<ClientResponse> onSuccess = body -> body.toEntity(FcmSuccessResponse.class).subscribe(fcmConsumer);
-
         // Callback when FCM request fails
         Consumer<Throwable> onError = t -> {
-            if (t instanceof WebClientResponseException) {
-                String errorCode = fcmConverter.convertExceptionToErrorCode((WebClientResponseException) t);
+            if (t instanceof RestClientException) {
+                String errorCode = fcmConverter.convertExceptionToErrorCode((RestClientException) t);
                 switch (errorCode) {
                     case FcmErrorResponse.REGISTRATION_TOKEN_NOT_REGISTERED:
                         logger.error("Push message rejected by FCM gateway, device registration will be removed. Error: {}", errorCode);
