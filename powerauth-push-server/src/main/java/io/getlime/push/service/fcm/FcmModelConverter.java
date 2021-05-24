@@ -23,6 +23,7 @@ import com.google.api.client.json.JsonParser;
 import com.google.common.collect.ImmutableMap;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
+import com.wultra.core.rest.client.base.RestClientException;
 import io.getlime.push.service.fcm.model.FcmErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
@@ -71,16 +71,16 @@ public class FcmModelConverter {
     private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
 
     /**
-     * Converts WebClient Exception to FCM error code.
+     * Convert Rest client exception to FCM error code.
      *
-     * @param exception WebClient response exception.
+     * @param exception Rest client exception.
      * @return FCM error code.
      */
-    public String convertExceptionToErrorCode(WebClientResponseException exception) {
+    public String convertExceptionToErrorCode(RestClientException exception) {
         FcmErrorResponse response = new FcmErrorResponse();
         String code;
         try {
-            String error = exception.getResponseBodyAsString();
+            String error = exception.getResponse();
             JsonParser parser = jsonFactory.createJsonParser(error);
             parser.parseAndClose(response);
             code = FCM_ERROR_CODES.get(response.getErrorCode());
