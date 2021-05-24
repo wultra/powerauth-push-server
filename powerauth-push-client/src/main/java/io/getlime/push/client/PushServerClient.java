@@ -705,24 +705,6 @@ public class PushServerClient {
     }
 
     /**
-     * Prepare PUT object response.
-     *
-     * @param url specific url of method
-     * @param request request body
-     * @param responseType response type
-     * @return Object obtained after processing the response JSON.
-     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
-     */
-    private <T> ObjectResponse<T> putObjectImpl(String url, ObjectRequest<?> request, Class<T> responseType) throws PushServerClientException {
-        try {
-            return restClient.putObject(url, request, responseType);
-        } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
-            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP PUT request failed."));
-        }
-    }
-
-    /**
      * Mask push service token to avoid leaking tokens in log files.
      * @param token Push service token.
      * @return Masked push service token.

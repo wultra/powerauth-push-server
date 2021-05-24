@@ -39,6 +39,7 @@ import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmModelConverter;
 import io.getlime.push.service.fcm.model.FcmErrorResponse;
 import io.getlime.push.service.fcm.model.FcmSuccessResponse;
+import io.getlime.push.util.CaCertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,11 +78,13 @@ public class PushSendingWorker {
 
     private final PushServiceConfiguration pushServiceConfiguration;
     private final FcmModelConverter fcmConverter;
+    private final CaCertUtil caCertUtil;
 
     @Autowired
-    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter) {
+    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter, CaCertUtil caCertUtil) {
         this.pushServiceConfiguration = pushServiceConfiguration;
         this.fcmConverter = fcmConverter;
+        this.caCertUtil = caCertUtil;
     }
 
     // Android related methods
@@ -267,7 +270,7 @@ public class PushSendingWorker {
                 .setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections())
                 .setConnectionTimeout(Duration.ofMillis(pushServiceConfiguration.getApnsConnectTimeout()))
                 .setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()))
-                .setTrustedServerCertificateChain(CaCertUtil.allCerts());
+                .setTrustedServerCertificateChain(caCertUtil.allCerts());
         if (pushServiceConfiguration.isApnsUseDevelopment()) {
             logger.info("Using APNs development host");
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
@@ -384,11 +387,13 @@ public class PushSendingWorker {
      */
     private String buildApnsPayload(PushMessageBody push, boolean isSilent) {
         final ApnsPayloadBuilder payloadBuilder = new SimpleApnsPayloadBuilder();
-        payloadBuilder.setAlertTitle(push.getTitle());
-        payloadBuilder.setAlertBody(push.getBody());
+        if (!isSilent) { // include alert, body, sound and category only in case push message is not silent.
+            payloadBuilder.setAlertTitle(push.getTitle());
+            payloadBuilder.setAlertBody(push.getBody());
+            payloadBuilder.setSound(push.getSound());
+            payloadBuilder.setCategoryName(push.getCategory());
+        }
         payloadBuilder.setBadgeNumber(push.getBadge());
-        payloadBuilder.setCategoryName(push.getCategory());
-        payloadBuilder.setSound(push.getSound());
         payloadBuilder.setContentAvailable(isSilent);
         payloadBuilder.setThreadId(push.getCollapseKey());
         Map<String, Object> extras = push.getExtras();
