@@ -20,32 +20,32 @@ import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.shared.PowerAuthTestClient;
 import io.getlime.push.shared.PushServerTestClientFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Class used for testing multi-activation registrations.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource(locations = "classpath:application-test-multiple-activations.properties")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ActiveProfiles("test")
 public class PushServerMultipleActivationsTests {
 
     private static final String MOCK_PUSH_TOKEN = "1234567890987654321234567890";
@@ -66,7 +66,7 @@ public class PushServerMultipleActivationsTests {
     @MockBean
     private PowerAuthTestClient powerAuthTestClient;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         pushServerClient = testClientFactory.createPushServerClient("http://localhost:" + port);
         powerAuthTestClient = testClientFactory.createPowerAuthTestClient();
@@ -82,9 +82,11 @@ public class PushServerMultipleActivationsTests {
         pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN).forEach(pushDeviceRepository::delete);
     }
 
-    @Test(expected = PushServerClientException.class)
-    public void createDeviceWithMultipleActivationsInvalidTest() throws Exception {
-        pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, Collections.emptyList());
+    @Test
+    public void createDeviceWithMultipleActivationsInvalidTest() {
+        assertThrows(PushServerClientException.class, () -> {
+            pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, Collections.emptyList());
+        });
     }
 
     @Test
@@ -183,17 +185,19 @@ public class PushServerMultipleActivationsTests {
         pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN).forEach(pushDeviceRepository::delete);
     }
 
-    @Test(expected = PushServerClientException.class)
-    public void createDeviceMixedRegistrationEndpointsTest() throws PushServerClientException {
-        List<String> activationIds = new ArrayList<>();
-        activationIds.add(powerAuthTestClient.getActivationId());
-        activationIds.add(powerAuthTestClient.getActivationId2());
-        // This test tests refresh of a device registration
-        boolean actual = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds);
-        assertTrue(actual);
-        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
-        assertEquals(2, devices.size());
-        pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, powerAuthTestClient.getActivationId3());
+    @Test
+    public void createDeviceMixedRegistrationEndpointsTest() {
+        assertThrows(PushServerClientException.class, () -> {
+            List<String> activationIds = new ArrayList<>();
+            activationIds.add(powerAuthTestClient.getActivationId());
+            activationIds.add(powerAuthTestClient.getActivationId2());
+            // This test tests refresh of a device registration
+            boolean actual = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds);
+            assertTrue(actual);
+            List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
+            assertEquals(2, devices.size());
+            pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, powerAuthTestClient.getActivationId3());
+        });
     }
 
 }
