@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import sun.security.provider.X509Factory;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -48,6 +47,10 @@ import java.util.List;
 public class CaCertUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(CaCertUtil.class);
+
+    // Include those constants to remove dependency on X509Factory.BEGIN_CERT and X509Factory.END_CERT.
+    private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
+    private static final String END_CERT = "-----END CERTIFICATE-----";
 
     private static final String[] embeddedCertificates = {
             "cacert/GeoTrust_Global_CA.pem",
@@ -113,8 +116,8 @@ public class CaCertUtil {
 
     private X509Certificate certificateFromPem(String pem) throws CertificateException {
         byte[] decoded = BaseEncoding.base64().decode(pem
-                .replaceAll(X509Factory.BEGIN_CERT, "")
-                .replaceAll(X509Factory.END_CERT, "")
+                .replaceAll(BEGIN_CERT, "")
+                .replaceAll(END_CERT, "")
                 .replaceAll("\\s", "")
         );
         return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(decoded));
