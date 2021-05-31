@@ -57,12 +57,22 @@ public class PushMessageSenderService {
     private final AppCredentialStorageMap appRelatedPushClientMap;
     private final PushServiceConfiguration configuration;
 
+    /**
+     * Constructor with autowired dependencies.
+     * @param appCredentialsRepository App credentials repository.
+     * @param pushDeviceRepository Push sevice repository.
+     * @param pushMessageDAO Push message DAO.
+     * @param pushSendingWorker Push sending worker.
+     * @param appRelatedPushClientMap Map with cached push clients in a map.
+     * @param configuration Push service configuration.
+     */
     @Autowired
     public PushMessageSenderService(AppCredentialsRepository appCredentialsRepository,
                                     PushDeviceRepository pushDeviceRepository,
                                     PushMessageDAO pushMessageDAO,
                                     PushSendingWorker pushSendingWorker,
-                                    AppCredentialStorageMap appRelatedPushClientMap, PushServiceConfiguration configuration) {
+                                    AppCredentialStorageMap appRelatedPushClientMap,
+                                    PushServiceConfiguration configuration) {
         this.appCredentialsRepository = appCredentialsRepository;
         this.pushDeviceRepository = pushDeviceRepository;
         this.pushMessageDAO = pushMessageDAO;

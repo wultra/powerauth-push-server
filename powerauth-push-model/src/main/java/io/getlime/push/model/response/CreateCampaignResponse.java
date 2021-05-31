@@ -27,10 +27,18 @@ package io.getlime.push.model.response;
 public class CreateCampaignResponse {
     private Long id;
 
+    /**
+     * Get campaign ID.
+     * @return Campaign ID.
+     */
     public Long getId() {
         return id;
     }
 
+    /**
+     * Set campaign ID.
+     * @param id Campaign ID.
+     */
     public void setId(Long id) {
         this.id = id;
     }

@@ -41,26 +41,50 @@ public class AppRelatedPushClient {
      */
     private FcmClient fcmClient;
 
+    /**
+     * Get app credentials.
+     * @return App credentials.
+     */
     public AppCredentialsEntity getAppCredentials() {
         return appCredentials;
     }
 
+    /**
+     * Set app credentials.
+     * @param appCredentials App credentials.
+     */
     public void setAppCredentials(AppCredentialsEntity appCredentials) {
         this.appCredentials = appCredentials;
     }
 
+    /**
+     * Get APNs client.
+     * @return APNs client.
+     */
     public ApnsClient getApnsClient() {
         return apnsClient;
     }
 
+    /**
+     * Set APNs client.
+     * @param apnsClient APNs client.
+     */
     public void setApnsClient(ApnsClient apnsClient) {
         this.apnsClient = apnsClient;
     }
 
+    /**
+     * Get FCM client.
+     * @return FCM client.
+     */
     public FcmClient getFcmClient() {
         return fcmClient;
     }
 
+    /**
+     * Set FCM client.
+     * @param fcmClient FCM client.
+     */
     public void setFcmClient(FcmClient fcmClient) {
         this.fcmClient = fcmClient;
     }

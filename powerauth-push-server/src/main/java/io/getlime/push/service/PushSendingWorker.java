@@ -39,14 +39,11 @@ import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmModelConverter;
 import io.getlime.push.service.fcm.model.FcmErrorResponse;
 import io.getlime.push.service.fcm.model.FcmSuccessResponse;
-import io.getlime.push.util.CaCertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import javax.net.ssl.SSLException;
 import java.io.ByteArrayInputStream;
@@ -61,6 +58,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 
+/**
+ * Service responsible for sending push notifications.
+ *
+ * @author Petr Dvorak, petr@wulta.com
+ */
 @Service
 public class PushSendingWorker {
 
@@ -80,6 +82,12 @@ public class PushSendingWorker {
     private final FcmModelConverter fcmConverter;
     private final CaCertUtil caCertUtil;
 
+    /**
+     * Constructor with push service configuration, model converter and CA certificate utility class.
+     * @param pushServiceConfiguration Push service configuration.
+     * @param fcmConverter FCM converter class.
+     * @param caCertUtil CA certificate utility class.
+     */
     @Autowired
     public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter, CaCertUtil caCertUtil) {
         this.pushServiceConfiguration = pushServiceConfiguration;

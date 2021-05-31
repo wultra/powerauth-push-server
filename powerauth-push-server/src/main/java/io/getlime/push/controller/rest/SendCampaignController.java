@@ -62,6 +62,14 @@ public class SendCampaignController {
     private final PushMessageSenderService pushMessageSenderService;
     private final JsonSerialization jsonSerialization;
 
+    /**
+     * Constructor with autowired dependencies.
+     * @param jobLauncher Batch job launcher.
+     * @param job Job instance.
+     * @param pushCampaignRepository Push campaign repository.
+     * @param pushMessageSenderService Push message sender service.
+     * @param jsonSerialization Helper JSON serialization class.
+     */
     @Autowired
     public SendCampaignController(JobLauncher jobLauncher,
                                   Job job,

@@ -36,6 +36,11 @@ import java.util.Map;
 @StepScope
 public class UserDeviceItemReader extends JpaPagingItemReader<UserDevice> {
 
+    /**
+     * Constructor with autowired dependencies.
+     * @param entityManagerFactory Entity manager factory.
+     * @param configuration Push service configuration.
+     */
     @Autowired
     public UserDeviceItemReader(EntityManagerFactory entityManagerFactory, PushServiceConfiguration configuration) {
         // Configure queries and reader
@@ -48,9 +53,13 @@ public class UserDeviceItemReader extends JpaPagingItemReader<UserDevice> {
         this.setPageSize(configuration.getCampaignBatchSize());
     }
 
+    /**
+     * Setter for campaign ID.
+     * @param campaignId Campaign ID.
+     */
     @Value("#{jobParameters['campaignId']}")
     public void setCampaignId(Long campaignId) {
-        Map<String, Object> parameters = new HashMap<>();
+        final Map<String, Object> parameters = new HashMap<>();
         parameters.put("campaignId", campaignId);
         this.setParameterValues(parameters);
     }

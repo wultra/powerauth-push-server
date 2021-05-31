@@ -29,60 +29,115 @@ import java.util.Date;
 @Table(name = "push_campaign_user")
 public class PushCampaignUserEntity implements Serializable {
 
+    /**
+     * Campaign user ID.
+     */
     @Id
     @Column(name = "id")
     @SequenceGenerator(name = "push_campaign_user", sequenceName = "push_campaign_user_seq")
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_campaign_user")
     private Long id;
 
+    /**
+     * Campaign ID.
+     */
     @Column(name = "campaign_id", nullable = false, updatable = false)
     private Long campaignId;
 
+    /**
+     * User ID.
+     */
     @Column(name = "user_id", nullable = false, updatable = false)
     private String userId;
 
+    /**
+     * App ID.
+     */
     @Column(name = "app_id", nullable = false, updatable = false)
     private Long appId;
 
+    /**
+     * Timestamp created.
+     */
     @Column(name = "timestamp_created", nullable = false, updatable = false)
     private Date timestampCreated;
 
+    /**
+     * Get campaign user ID.
+     * @return Campaign user ID.
+     */
     public Long getId() {
         return id;
     }
 
+    /**
+     * Set campaign user ID.
+     * @param id Campaign user ID.
+     */
     public void setId(Long id) {
         this.id = id;
     }
 
+    /**
+     * Get campaign ID.
+     * @return Campaign ID.
+     */
     public Long getCampaignId() {
         return campaignId;
     }
 
+    /**
+     * Set campaign ID.
+     * @param campaignId Campaign ID.
+     */
     public void setCampaignId(Long campaignId) {
         this.campaignId = campaignId;
     }
 
+    /**
+     * Get app ID.
+     * @return App ID.
+     */
     public Long getAppId() {
         return appId;
     }
 
+    /**
+     * Set app ID.
+     * @param appId App ID.
+     */
     public void setAppId(Long appId) {
         this.appId = appId;
     }
 
+    /**
+     * Get user ID.
+     * @return User ID.
+     */
     public String getUserId() {
         return userId;
     }
 
+    /**
+     * Set user ID.
+     * @param userId User ID.
+     */
     public void setUserId(String userId) {
         this.userId = userId;
     }
 
+    /**
+     * Get timestamp created.
+     * @return Timestamp created.
+     */
     public Date getTimestampCreated() {
         return timestampCreated;
     }
 
+    /**
+     * Set timestamp created.
+     * @param timestampCreated Timestamp created.
+     */
     public void setTimestampCreated(Date timestampCreated) {
         this.timestampCreated = timestampCreated;
     }

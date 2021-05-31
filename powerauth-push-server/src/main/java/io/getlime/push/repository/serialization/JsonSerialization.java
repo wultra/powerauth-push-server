@@ -39,6 +39,10 @@ public class JsonSerialization {
 
     private final ObjectMapper objectMapper;
 
+    /**
+     * Constructor with ObjectMapper instance.
+     * @param objectMapper Object mapper.
+     */
     @Autowired
     public JsonSerialization(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;

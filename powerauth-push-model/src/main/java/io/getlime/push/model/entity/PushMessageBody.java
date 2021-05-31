@@ -173,10 +173,18 @@ public class PushMessageBody {
         this.extras = extras;
     }
 
+    /**
+     * Get icon.
+     * @return Icon.
+     */
     public String getIcon() {
         return icon;
     }
 
+    /**
+     * Set icon.
+     * @param icon Icon.
+     */
     public void setIcon(String icon) {
         this.icon = icon;
     }

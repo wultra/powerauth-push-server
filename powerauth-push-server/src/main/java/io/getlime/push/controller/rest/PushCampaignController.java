@@ -47,7 +47,6 @@ import java.util.Optional;
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-
 @RestController
 @RequestMapping(value = "push/campaign")
 public class PushCampaignController {
@@ -58,6 +57,13 @@ public class PushCampaignController {
     private final PushCampaignUserRepository pushCampaignUserRepository;
     private final JsonSerialization jsonSerialization;
 
+    /**
+     * Constructor with autowired dependencies.
+     *
+     * @param pushCampaignRepository Push campaign repository.
+     * @param pushCampaignUserRepository Push campaign user repository.
+     * @param jsonSerialization Helper for JSON serialization.
+     */
     @Autowired
     public PushCampaignController(PushCampaignRepository pushCampaignRepository,
                                   PushCampaignUserRepository pushCampaignUserRepository, JsonSerialization jsonSerialization) {

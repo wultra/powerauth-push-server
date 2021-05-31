@@ -27,42 +27,86 @@ import io.getlime.core.rest.model.base.entity.Error;
  */
 public class PushServerClientException extends Exception {
 
+    /**
+     * Error object.
+     */
     private Error error;
 
+    /**
+     * Constructor with message.
+     * @param message Message.
+     */
     public PushServerClientException(String message) {
         super(message);
         this.error = new PushServerClientError(message);
     }
 
+    /**
+     * Constructor with error object.
+     * @param error Error object.
+     */
     public PushServerClientException(Error error) {
         super(error != null ? error.getMessage() : null);
         this.error = error;
     }
 
+    /**
+     * Constructor with message and error object.
+     * @param message Message.
+     * @param error Error object.
+     */
     public PushServerClientException(String message, Error error) {
         super(message);
         this.error = error;
     }
 
+    /**
+     * Constructor with message, cause and error object.
+     * @param message Message.
+     * @param cause Cause.
+     * @param error Error object.
+     */
     public PushServerClientException(String message, Throwable cause, Error error) {
         super(message, cause);
         this.error = error;
     }
 
+    /**
+     * Constructor with cause and error object.
+     * @param cause Cause.
+     * @param error Error object.
+     */
     public PushServerClientException(Throwable cause, Error error) {
         super(cause);
         this.error = error;
     }
 
+    /**
+     * Constructor with message, cause, error object, that also contains
+     * flags if there is writable stack trace and if suppression is possible.
+     * @param message Message.
+     * @param cause Cause.
+     * @param enableSuppression Flag indicating if suppression is enabled.
+     * @param writableStackTrace Flag indicating if the stack trace is writable.
+     * @param error Error object.
+     */
     public PushServerClientException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, Error error) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.error = error;
     }
 
+    /**
+     * Set error object.
+     * @param error Error object.
+     */
     public void setError(Error error) {
         this.error = error;
     }
 
+    /**
+     * Get error object.
+     * @return Error object.
+     */
     public Error getError() {
         return error;
     }

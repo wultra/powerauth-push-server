@@ -40,6 +40,11 @@ public class PushMessageDAO {
     private final PushMessageRepository pushMessageRepository;
     private final JsonSerialization jsonSerialization;
 
+    /**
+     * Constructor with autowired dependencies.
+     * @param pushMessageRepository Push message repository.
+     * @param jsonSerialization Helper JSON serialization object.
+     */
     @Autowired
     public PushMessageDAO(PushMessageRepository pushMessageRepository, JsonSerialization jsonSerialization) {
         this.pushMessageRepository = pushMessageRepository;
@@ -76,6 +81,12 @@ public class PushMessageDAO {
         return pushMessageRepository.save(entity);
     }
 
+    /**
+     * Save the entity.
+     * @param s Original entity.
+     * @param <S> Generic type used for the call.
+     * @return Saved entity.
+     */
     public <S extends PushMessageEntity> S save(S s) {
         return pushMessageRepository.save(s);
     }
