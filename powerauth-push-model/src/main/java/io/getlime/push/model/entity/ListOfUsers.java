@@ -26,9 +26,16 @@ import java.util.List;
  */
 public class ListOfUsers extends ArrayList<String> {
 
+    /**
+     * Default constructor.
+     */
     public ListOfUsers() {
     }
 
+    /**
+     * Constructor with initialization with collection of users.
+     * @param users Collection of users.
+     */
     public ListOfUsers(List<String> users) {
         super(users);
     }

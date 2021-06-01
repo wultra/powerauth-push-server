@@ -23,14 +23,27 @@ package io.getlime.push.errorhandling.exceptions;
  */
 public class FcmMissingTokenException extends PushServerException {
 
+    /**
+     * Constructor with message.
+     * @param message Message.
+     */
     public FcmMissingTokenException(String message) {
         super(message);
     }
 
+    /**
+     * Constructor with message and cause.
+     * @param message Message.
+     * @param cause Cause.
+     */
     public FcmMissingTokenException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructor with cause.
+     * @param cause Cause.
+     */
     public FcmMissingTokenException(Throwable cause) {
         super(cause);
     }

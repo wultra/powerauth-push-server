@@ -48,6 +48,12 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
     // Non-autowired fields
     private final CampaignMessageStorageMap campaignStorageMap = new CampaignMessageStorageMap();
 
+    /**
+     * Constructor with autowired dependencies.
+     * @param pushMessageSenderService Push message sender service.
+     * @param pushCampaignRepository Push campaign repository.
+     * @param jsonSerialization Helper class for JSON serialization.
+     */
     @Autowired
     public UserDeviceItemWriter(PushMessageSenderService pushMessageSenderService,
                                 PushCampaignRepository pushCampaignRepository, JsonSerialization jsonSerialization) {
@@ -56,16 +62,21 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
         this.jsonSerialization = jsonSerialization;
     }
 
+    /**
+     * Write list of user devices into the campaign sender.
+     * @param list List of devices on which to send the campaign.
+     * @throws Exception In case of business logic error.
+     */
     @Override
     public void write(List<? extends UserDevice> list) throws Exception {
         for (UserDevice device: list) {
-            String platform = device.getPlatform();
-            String token = device.getToken();
-            String userID = device.getUserId();
-            Long appId = device.getAppId();
-            Long campaignId = device.getCampaignId();
-            Long deviceId = device.getDeviceId();
-            String activationId = device.getActivationId();
+            final String platform = device.getPlatform();
+            final String token = device.getToken();
+            final String userID = device.getUserId();
+            final Long appId = device.getAppId();
+            final Long campaignId = device.getCampaignId();
+            final Long deviceId = device.getDeviceId();
+            final String activationId = device.getActivationId();
 
             // Load and cache campaign information
             PushMessageBody messageBody = campaignStorageMap.get(campaignId);

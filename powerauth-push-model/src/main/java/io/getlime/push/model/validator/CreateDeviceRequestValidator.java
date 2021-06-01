@@ -53,6 +53,11 @@ public class CreateDeviceRequestValidator {
         return null;
     }
 
+    /**
+     * Validate request for device registration with multiple activations.
+     * @param request Request connecting device with multiple activations.
+     * @return Error message in case there was an error, null otherwise.
+     */
     public static String validate(CreateDeviceForActivationsRequest request) {
         if (request == null) {
             return "Request must not be empty.";

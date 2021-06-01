@@ -27,24 +27,44 @@ import java.util.Objects;
  */
 
 public class ListOfUsersFromCampaignResponse {
+
     private Long campaignId;
     private ListOfUsers users;
 
+    /**
+     * Default constructor.
+     */
     public ListOfUsersFromCampaignResponse() {
     }
 
+    /**
+     * Get campaign ID.
+     * @return Campaign ID.
+     */
     public Long getCampaignId() {
         return campaignId;
     }
 
+    /**
+     * Set campaign ID.
+     * @param campaignId Campaign ID.
+     */
     public void setCampaignId(Long campaignId) {
         this.campaignId = campaignId;
     }
 
+    /**
+     * Get list of users.
+     * @return List of users.
+     */
     public ListOfUsers getUsers() {
         return users;
     }
 
+    /**
+     * Set list of users.
+     * @param users List of users.
+     */
     public void setUsers(ListOfUsers users) {
         this.users = users;
     }

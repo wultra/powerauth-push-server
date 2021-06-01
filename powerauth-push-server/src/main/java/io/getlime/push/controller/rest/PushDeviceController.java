@@ -59,6 +59,12 @@ public class PushDeviceController {
     private final PowerAuthClient client;
     private final PushServiceConfiguration config;
 
+    /**
+     * Constructor with autowired dependencies.
+     * @param pushDeviceRepository Push device repository.
+     * @param client PowerAuth service client.
+     * @param config Push service configuration.
+     */
     @Autowired
     public PushDeviceController(PushDeviceRepository pushDeviceRepository, PowerAuthClient client, PushServiceConfiguration config) {
         this.pushDeviceRepository = pushDeviceRepository;

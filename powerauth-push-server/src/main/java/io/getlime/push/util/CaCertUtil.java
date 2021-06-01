@@ -61,11 +61,19 @@ public class CaCertUtil {
 
     private final PushServiceConfiguration pushServiceConfiguration;
 
+    /**
+     * Constructor with push service configuration.
+     * @param pushServiceConfiguration Push server configuration.
+     */
     @Autowired
     public CaCertUtil(PushServiceConfiguration pushServiceConfiguration) {
         this.pushServiceConfiguration = pushServiceConfiguration;
     }
 
+    /**
+     * Obtain all registered CA certificates.
+     * @return All registered CA certificates.
+     */
     public X509Certificate[] allCerts() {
         // Prepare result list
         final List<X509Certificate> result = new ArrayList<>();

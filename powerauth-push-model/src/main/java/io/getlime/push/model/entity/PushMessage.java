@@ -28,6 +28,9 @@ public class PushMessage {
     private PushMessageAttributes attributes;
     private PushMessageBody body;
 
+    /**
+     * Default constructor.
+     */
     public PushMessage() {
         attributes = new PushMessageAttributes();
     }

@@ -84,6 +84,13 @@ public class FcmClient {
     private String proxyUsername;
     private String proxyPassword;
 
+    /**
+     * Constructor with FCM specific attributes.
+     * @param projectId Android Project ID.
+     * @param privateKey Android Private Key.
+     * @param pushServiceConfiguration Push service configuration.
+     * @param fcmConverter FCM model converter helper.
+     */
     public FcmClient(String projectId, byte[] privateKey, PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter) {
         this.projectId = projectId;
         this.privateKey = privateKey;

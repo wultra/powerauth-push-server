@@ -48,6 +48,11 @@ import org.springframework.context.annotation.Configuration;
 )
 public class OpenApiConfiguration {
 
+    /**
+     * Produces push API group configuration.
+     *
+     * @return Grouped API configuration.
+     */
     @Bean
     public GroupedOpenApi pushApiGroup() {
         String[] packages = {"io.getlime.push.controller.rest"};

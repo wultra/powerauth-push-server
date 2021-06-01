@@ -21,12 +21,23 @@ import io.getlime.core.rest.model.base.entity.Error;
 /**
  * Exception for data integrity error.
  *
- * @author Roman Strobl, roman.strobl@wultracom
+ * @author Roman Strobl, roman.strobl@wultra.com
  */
 public class DataIntegrityError extends Error {
-    public class Code extends Error.Code {
+
+    /**
+     * Error code class.
+     */
+    public static class Code extends Error.Code {
+
+        /**
+         * Error code value.
+         */
         public static final String ERROR_DATA_INTEGRITY = "ERROR_DATA_INTEGRITY";
 
+        /**
+         * Default constructor.
+         */
         public Code() {
         }
     }

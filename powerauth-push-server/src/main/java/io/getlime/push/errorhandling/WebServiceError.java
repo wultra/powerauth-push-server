@@ -24,9 +24,20 @@ import io.getlime.core.rest.model.base.entity.Error;
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 public class WebServiceError extends Error {
-    public class Code extends Error.Code {
+
+    /**
+     * Error code class.
+     */
+    public static class Code extends Error.Code {
+
+        /**
+         * Error code value.
+         */
         public static final String ERROR_PA_SERVER_COMM = "ERROR_PA_SERVER_COMM";
 
+        /**
+         * Default constructor.
+         */
         public Code() {
         }
     }

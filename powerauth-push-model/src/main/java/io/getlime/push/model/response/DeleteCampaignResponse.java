@@ -24,10 +24,18 @@ package io.getlime.push.model.response;
 public class DeleteCampaignResponse {
     private boolean deleted;
 
+    /**
+     * Check if campaign is deleted.
+     * @return True if campaign is deleted, false otherwise.
+     */
     public boolean isDeleted() {
         return deleted;
     }
 
+    /**
+     * Set if the campaign is deleted.
+     * @param deleted True if campaign is deleted, false otherwise.
+     */
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }

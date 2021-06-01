@@ -72,6 +72,17 @@ public class BatchSendingConfiguration implements BatchConfigurer {
     private JobLauncher jobLauncher;
     private JobExplorer jobExplorer;
 
+    /**
+     * Constructor with autowired dependencies.
+     * @param jobBuilderFactory Job builder factory.
+     * @param stepBuilderFactory Step builder factory.
+     * @param pushServiceConfiguration Push service configuration.
+     * @param userDeviceItemReader Step user device item reader.
+     * @param userDeviceItemProcessor Step user device item processor.
+     * @param userDeviceItemWriter Step user device item writer.
+     * @param sendCampaignJobListener Batch job listener.
+     * @param entityManagerFactory Entity manager factory.
+     */
     @Autowired
     public BatchSendingConfiguration(JobBuilderFactory jobBuilderFactory,
                                      StepBuilderFactory stepBuilderFactory,
@@ -100,6 +111,10 @@ public class BatchSendingConfiguration implements BatchConfigurer {
                 .build();
     }
 
+    /**
+     * Bean producer for Tasklet with sending the campaign.
+     * @return Job.
+     */
     @Bean
     public Job sendCampaignJob() {
         final TaskletStep step = buildTaskletStep();
@@ -111,6 +126,10 @@ public class BatchSendingConfiguration implements BatchConfigurer {
                 .build();
     }
 
+    /**
+     * Autowire data source with setter injection.
+     * @param dataSource Data source.
+     */
     @Autowired(required = false)
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -141,6 +160,9 @@ public class BatchSendingConfiguration implements BatchConfigurer {
         return jobExplorer;
     }
 
+    /**
+     * Initialize the beans.
+     */
     @PostConstruct
     public void initialize() {
         try {

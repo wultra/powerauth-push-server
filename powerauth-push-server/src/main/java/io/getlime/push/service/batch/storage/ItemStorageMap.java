@@ -23,14 +23,36 @@ package io.getlime.push.service.batch.storage;
  */
 public interface ItemStorageMap<K,V> {
 
+    /**
+     * Get the value from the map.
+     * @param key Key.
+     * @return Value from the map for corresponding key.
+     */
     V get(K key);
 
+    /**
+     * Put a value for provided key.
+     * @param key Key.
+     * @param value Value.
+     */
     void put(K key, V value);
 
+    /**
+     * Check if storage contains value for given key.
+     * @param key Key.
+     * @return True if there is a value for given key, false otherwise.
+     */
     boolean contains(K key);
 
+    /**
+     * Clean all values from the storage.
+     */
     void cleanAll();
 
+    /**
+     * Clean value for provided key.
+     * @param key Key.
+     */
     void cleanByKey(K key);
 
 }

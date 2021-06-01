@@ -24,14 +24,27 @@ package io.getlime.push.errorhandling.exceptions;
  */
 public class PushServerException extends Exception {
 
+    /**
+     * Constructor with message.
+     * @param message Message.
+     */
     public PushServerException(String message) {
         super(message);
     }
 
+    /**
+     * Constructor with message and cause.
+     * @param message Message.
+     * @param cause Cause.
+     */
     public PushServerException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructor with cause.
+     * @param cause Cause.
+     */
     public PushServerException(Throwable cause) {
         super(cause);
     }

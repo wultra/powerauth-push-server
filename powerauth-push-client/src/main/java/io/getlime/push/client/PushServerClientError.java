@@ -30,7 +30,11 @@ public class PushServerClientError extends Error implements Serializable {
 
     private static final String ERROR_VALIDATION = "ERROR_VALIDATION";
 
-
+    /**
+     * Constructor with error message.
+     *
+     * @param message Error message.
+     */
     public PushServerClientError(String message) {
         super(ERROR_VALIDATION , message);
     }

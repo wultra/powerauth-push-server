@@ -24,75 +24,175 @@ package io.getlime.push.service.apns;
  */
 public enum ApnsRejectionReason {
 
+    /**
+     * BadDeviceToken
+     */
     BAD_DEVICE_TOKEN("BadDeviceToken"),
 
+    /**
+     * DeviceTokenNotForTopic
+     */
     DEVICE_TOKEN_NOT_FOR_TOPIC("DeviceTokenNotForTopic"),
 
+    /**
+     * TopicDisallowed
+     */
     TOPIC_DISALLOWED("TopicDisallowed"),
 
+    /**
+     * BadCollapseId
+     */
     BAD_COLLAPSE_ID("BadCollapseId"),
 
+    /**
+     * BadExpirationDate
+     */
     BAD_EXPIRATION_DATE("BadExpirationDate"),
 
+    /**
+     * BadMessageId
+     */
     BAD_MESSAGE_ID("BadMessageId"),
 
+    /**
+     * BadPriority
+     */
     BAD_PRIORITY("BadPriority"),
 
+    /**
+     * BadTopic
+     */
     BAD_TOPIC("BadTopic"),
 
+    /**
+     * DuplicateHeaders
+     */
     DUPLICATE_HEADERS("DuplicateHeaders"),
 
+    /**
+     * IdleTimeout
+     */
     IDLE_TIMEOUT("IdleTimeout"),
 
+    /**
+     * InvalidPushType
+     */
     INVALID_PUSH_TYPE("InvalidPushType"),
 
+    /**
+     * MissingDeviceToken
+     */
     MISSING_DEVICE_TOKEN("MissingDeviceToken"),
 
+    /**
+     * MissingTopic
+     */
     MISSING_TOPIC("MissingTopic"),
 
+    /**
+     * PayloadEmpty
+     */
     PAYLOAD_EMPTY("PayloadEmpty"),
 
+    /**
+     * BadCertificate
+     */
     BAD_CERTIFICATE("BadCertificate"),
 
+    /**
+     * BadCertificateEnvironment
+     */
     BAD_CERTIFICATE_ENVIRONMENT("BadCertificateEnvironment"),
 
+    /**
+     * ExpiredProviderToken
+     */
     EXPIRED_PROVIDER_TOKEN("ExpiredProviderToken"),
 
+    /**
+     * Forbidden
+     */
     FORBIDDEN("Forbidden"),
 
+    /**
+     * InvalidProviderToken
+     */
     INVALID_PROVIDER_TOKEN("InvalidProviderToken"),
 
+    /**
+     * MissingProviderToken
+     */
     MISSING_PROVIDER_TOKEN("MissingProviderToken"),
 
+    /**
+     * BadPath
+     */
     BAD_PATH("BadPath"),
 
+    /**
+     * MethodNotAllowed
+     */
     METHOD_NOT_ALLOWED("MethodNotAllowed"),
 
+    /**
+     * Unregistered
+     */
     UNREGISTERED("Unregistered"),
 
+    /**
+     * PayloadTooLarge
+     */
     PAYLOAD_TOO_LARGE("PayloadTooLarge"),
 
+    /**
+     * TooManyProviderTokenUpdates
+     */
     TOO_MANY_PROVIDER_TOKEN_UPDATES("TooManyProviderTokenUpdates"),
 
+    /**
+     * TooManyRequests
+     */
     TOO_MANY_REQUESTS("TooManyRequests"),
 
+    /**
+     * InternalServerError
+     */
     INTERNAL_SERVER_ERROR("InternalServerError"),
 
+    /**
+     * ServiceUnavailable
+     */
     SERVICE_UNAVAILABLE("ServiceUnavailable"),
 
+    /**
+     * Shutdown
+     */
     SHUTDOWN("Shutdown");
 
 
     private final String reasonText;
 
+    /**
+     * Constructor with the reason text.
+     * @param reasonText Reason text.
+     */
     ApnsRejectionReason(final String reasonText) {
         this.reasonText = reasonText;
     }
 
+    /**
+     * Get reason text.
+     * @return Reason text.
+     */
     public String getReasonText() {
         return this.reasonText;
     }
 
+    /**
+     * Check if the internal reason text is equal to provided string.
+     * @param reasonText Reason text to be checked.
+     * @return True if the internal reason text is equal to provided string, false otherwise.
+     */
     public boolean isEqualToText(String reasonText) {
         return this.reasonText.equals(reasonText);
     }

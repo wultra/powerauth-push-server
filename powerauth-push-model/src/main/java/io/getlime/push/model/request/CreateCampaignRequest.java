@@ -31,18 +31,34 @@ public class CreateCampaignRequest {
 
     private PushMessageBody message;
 
+    /**
+     * Get app ID.
+     * @return App ID.
+     */
     public Long getAppId() {
         return appId;
     }
 
+    /**
+     * Set app ID.
+     * @param appId App ID.
+     */
     public void setAppId(Long appId) {
         this.appId = appId;
     }
 
+    /**
+     * Get push message body.
+     * @return Push message body.
+     */
     public PushMessageBody getMessage() {
         return message;
     }
 
+    /**
+     * Set push message body.
+     * @param message Push message body.
+     */
     public void setMessage(PushMessageBody message) {
         this.message = message;
     }

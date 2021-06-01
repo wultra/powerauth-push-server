@@ -39,6 +39,11 @@ public class DefaultExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultExceptionHandler.class);
 
+    /**
+     * Handle any unexpected throwable errors.
+     * @param t Throwable.
+     * @return Error response.
+     */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)  // 500
     @ExceptionHandler(Throwable.class)
     @ResponseBody
@@ -47,6 +52,11 @@ public class DefaultExceptionHandler {
         return new ErrorResponse(Error.Code.ERROR_GENERIC, t);
     }
 
+    /**
+     * Handle exceptions related to push server operation.
+     * @param e {@link PushServerException}
+     * @return Error response.
+     */
     @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
     @ExceptionHandler(PushServerException.class)
     @ResponseBody
@@ -55,6 +65,11 @@ public class DefaultExceptionHandler {
         return new ErrorResponse(Error.Code.ERROR_GENERIC, e);
     }
 
+    /**
+     * Handle database errors in case entities are not fount.
+     * @param e Empty result returned.
+     * @return Error response.
+     */
     @ResponseStatus(HttpStatus.NOT_FOUND)  // 404
     @ExceptionHandler(EmptyResultDataAccessException.class)
     @ResponseBody
@@ -63,6 +78,11 @@ public class DefaultExceptionHandler {
         return new ErrorResponse(DatabaseError.Code.ERROR_DATABASE, e);
     }
 
+    /**
+     * Handle errors caused by entity collisions.
+     * @param e Data integrity violation occurred.
+     * @return Error response.
+     */
     @ResponseStatus(HttpStatus.CONFLICT) // 409
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseBody
@@ -71,6 +91,11 @@ public class DefaultExceptionHandler {
         return new ErrorResponse(DataIntegrityError.Code.ERROR_DATA_INTEGRITY, e);
     }
 
+    /**
+     * Handle errors related to communication with PowerAuth Server.
+     * @param e Error caused by issue when communication with PowerAuth Server.
+     * @return Error response.
+     */
     @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
     @ExceptionHandler(PowerAuthClientException.class)
     @ResponseBody
