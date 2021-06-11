@@ -29,6 +29,11 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Optional;
 
+/**
+ * Listener for the batch job execution.
+ *
+ * @author Petr Dvorak, petr@wultra.com
+ */
 @Component
 @JobScope
 public class SendCampaignJobListener implements JobExecutionListener {
@@ -38,6 +43,10 @@ public class SendCampaignJobListener implements JobExecutionListener {
     @Value("#{jobParameters['campaignId']}")
     private Long campaignId;
 
+    /**
+     * Constructor with push campaign repository.
+     * @param pushCampaignRepository Push campaign repository.
+     */
     @Autowired
     public SendCampaignJobListener(PushCampaignRepository pushCampaignRepository) {
         this.pushCampaignRepository = pushCampaignRepository;

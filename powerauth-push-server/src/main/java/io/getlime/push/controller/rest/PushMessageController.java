@@ -50,6 +50,10 @@ public class PushMessageController {
 
     private final PushMessageSenderService pushMessageSenderService;
 
+    /**
+     * Constructor with push message sender service.
+     * @param pushMessageSenderService Push message sender service.
+     */
     @Autowired
     public PushMessageController(PushMessageSenderService pushMessageSenderService) {
         this.pushMessageSenderService = pushMessageSenderService;

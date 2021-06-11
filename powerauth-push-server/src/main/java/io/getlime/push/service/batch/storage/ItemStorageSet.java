@@ -22,7 +22,17 @@ package io.getlime.push.service.batch.storage;
  */
 public interface ItemStorageSet<T> {
 
+    /**
+     * Check if item exists in the set.
+     * @param item Item to be checked.
+     * @return True if set contains given item, false otherwise.
+     */
     boolean exists(T item);
+
+    /**
+     * Put item in the set.
+     * @param item Item.
+     */
     void put(T item);
 
 }

@@ -33,13 +33,45 @@ public class FcmErrorResponse {
             "type.googleapis.com/google.firebase.fcm.v1.FcmErrorCode";
 
     // FCM error codes, see class com.google.firebase.messaging.FirebaseMessaging for original definition of error codes
+
+    /**
+     * Internal error.
+     */
     public static final String INTERNAL_ERROR = "internal-error";
+
+    /**
+     * Unknown error.
+     */
     public static final String UNKNOWN_ERROR = "unknown-error";
+
+    /**
+     * Error caused by the token not registered.
+     */
     public static final String REGISTRATION_TOKEN_NOT_REGISTERED = "registration-token-not-registered";
+
+    /**
+     * Error caused by invalid APNS credentials (when sending APNS messages via FCM).
+     */
     public static final String INVALID_APNS_CREDENTIALS = "invalid-apns-credentials";
+
+    /**
+     * Invalid argument.
+     */
     public static final String INVALID_ARGUMENT = "invalid-argument";
+
+    /**
+     * Message rate was exceeded.
+     */
     public static final String MESSAGE_RATE_EXCEEDED = "message-rate-exceeded";
+
+    /**
+     * Mismatched credentials.
+     */
     public static final String MISMATCHED_CREDENTIAL = "mismatched-credential";
+
+    /**
+     * Server is unavailable.
+     */
     public static final String SERVER_UNAVAILABLE = "server-unavailable";
 
     @Key("error")

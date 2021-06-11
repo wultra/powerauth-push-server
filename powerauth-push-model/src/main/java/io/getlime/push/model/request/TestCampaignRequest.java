@@ -26,10 +26,18 @@ public class TestCampaignRequest {
 
     private String userId;
 
+    /**
+     * Get user ID.
+     * @return User ID.
+     */
     public String getUserId() {
         return userId;
     }
 
+    /**
+     * Set user ID.
+     * @param userId User ID.
+     */
     public void setUserId(String userId) {
         this.userId = userId;
     }

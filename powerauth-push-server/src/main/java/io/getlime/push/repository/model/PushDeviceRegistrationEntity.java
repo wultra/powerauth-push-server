@@ -31,98 +31,195 @@ public class PushDeviceRegistrationEntity implements Serializable {
 
     private static final long serialVersionUID = 1530682530822178192L;
 
+    /**
+     * Platform of the registered device.
+     */
     public static class Platform {
+        /**
+         * iOS Platform
+         */
         public static final String iOS = "ios";
+        /**
+         * Android Platform
+         */
         public static final String Android = "android";
     }
 
+    /**
+     * Push device ID.
+     */
     @Id
     @Column(name = "id")
     @SequenceGenerator(name = "push_device_registration", sequenceName = "push_device_registration_seq")
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_device_registration")
     private Long id;
 
+    /**
+     * Activation ID.
+     */
     @Column(name = "activation_id")
     private String activationId;
 
+    /**
+     * User ID.
+     */
     @Column(name = "user_id")
     private String userId;
 
+    /**
+     * App ID.
+     */
     @Column(name = "app_id", nullable = false, updatable = false)
     private Long appId;
 
+    /**
+     * Platform.
+     */
     @Column(name = "platform", nullable = false, updatable = false)
     private String platform;
 
+    /**
+     * Push token.
+     */
     @Column(name = "push_token", nullable = false)
     private String pushToken;
 
+    /**
+     * Timestamp last registered.
+     */
     @Column(name = "timestamp_last_registered", nullable = false)
     private Date timestampLastRegistered;
 
+    /**
+     * Flag indicating if the device is active.
+     */
     @Column(name = "is_active")
     private Boolean active;
 
+    /**
+     * Get device registration ID.
+     * @return Device registration ID.
+     */
     public Long getId() {
         return id;
     }
 
+    /**
+     * Set device registration ID.
+     * @param id Device registration ID.
+     */
     public void setId(Long id) {
         this.id = id;
     }
 
+    /**
+     * Get activation ID.
+     * @return Activation ID.
+     */
     public String getActivationId() {
         return activationId;
     }
 
+    /**
+     * Set activation ID.
+     * @param activationId Activation ID.
+     */
     public void setActivationId(String activationId) {
         this.activationId = activationId;
     }
 
+    /**
+     * Get user ID.
+     * @return User ID.
+     */
     public String getUserId() {
         return userId;
     }
 
+    /**
+     * Set user ID.
+     * @param userId User ID.
+     */
     public void setUserId(String userId) {
         this.userId = userId;
     }
 
+    /**
+     * Get app ID.
+     * @return App ID.
+     */
     public Long getAppId() {
         return appId;
     }
 
+    /**
+     * Set app ID.
+     * @param appId App ID
+     */
     public void setAppId(Long appId) {
         this.appId = appId;
     }
 
+    /**
+     * Get platform.
+     * @return Platform.
+     */
     public String getPlatform() {
         return platform;
     }
 
+    /**
+     * Set platform.
+     * @param platform Platform.
+     */
     public void setPlatform(String platform) {
         this.platform = platform;
     }
 
+    /**
+     * Get push token.
+     * @return Push token.
+     */
     public String getPushToken() {
         return pushToken;
     }
 
+    /**
+     * Set push token.
+     * @param pushToken Push token.
+     */
     public void setPushToken(String pushToken) {
         this.pushToken = pushToken;
     }
 
+    /**
+     * Get timestamp last registered.
+     * @return Timestamp last registered.
+     */
     public Date getTimestampLastRegistered() {
         return timestampLastRegistered;
     }
 
+    /**
+     * Set timestamp last registered.
+     * @param timestampLastRegistered Timestamp last registered.
+     */
     public void setTimestampLastRegistered(Date timestampLastRegistered) {
         this.timestampLastRegistered = timestampLastRegistered;
     }
 
+    /**
+     * Get flag indicating if the device registration is active.
+     * @return True if the device is active, false otherwise.
+     */
     public Boolean getActive() {
         return active;
     }
 
+    /**
+     * Set flag indicating if the device registration is active.
+     * @param active True if the device is active, false otherwise.
+     */
     public void setActive(Boolean active) {
         this.active = active;
     }

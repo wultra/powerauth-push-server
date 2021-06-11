@@ -1,4 +1,5 @@
 # Push Server API
+<!-- template api -->
 
 Push Server provides a simple to use RESTful API for the 3rd party integration purposes. The API contains methods related with:
 
@@ -10,6 +11,7 @@ Push Server provides a simple to use RESTful API for the 3rd party integration p
 
 Following endpoints are published in PowerAuth Push Server RESTful API:
 
+<!-- begin remove -->
 ## Methods
 
 ##### **Request**
@@ -26,7 +28,7 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 #### Device Management
 
 - `POST` [/push/device/create](#create-device) - Create new device registration
-- `POST` [/push/device/create/multi](#create-device-for-multiple-associated-activations) - Create new device registration for multiple activations
+- `POST` [/push/device/create/multi](#create-device-for-multiple-activations) - Create new device registration for multiple activations
 - `POST` / `DELETE` [/push/device/delete](#delete-device) - Remove registered device
 - `POST` / `PUT` [/push/device/status/update](#update-device-status) - Update the status of the activation so that when activation associated with given device is not active, no notifications are sent to the device.
 
@@ -64,6 +66,7 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 #### Service Status
 
 - `GET` [/push/service/status](#service) - Return status of service
+<!-- end -->
 
 ### Error Handling
 
@@ -80,11 +83,11 @@ All error responses that are produced by the PowerAuth Push Server have followin
 ```json
 
 {
-    "status": "ERROR",
-    "responseObject": {
-        "code": "ERROR_GENERIC",
-        "message": "Campaign with entered ID does not exist"
-    }
+  "status": "ERROR",
+  "responseObject": {
+    "code": "ERROR_GENERIC",
+    "message": "Campaign with entered ID does not exist"
+  }
 }
 ```
 
@@ -96,11 +99,12 @@ All error responses that are produced by the PowerAuth Push Server have followin
 
 Describes basic information of application.
 
+<!-- begin api GET /push/service/status -->
 ### Service Status
-
 
 Send a system status response, with basic information about the running application.
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -111,20 +115,21 @@ Send a system status response, with basic information about the running applicat
         <td>/push/service/status</td>
     </tr>
 </table>
+<!-- end -->
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK",
-    "responseObject": {
-        "applicationName": "powerauth-push",
-        "applicationDisplayName": "PowerAuth Push Server",
-        "applicationEnvironment": "",
-        "version": "0.21.0",
-        "buildTime": "2019-01-22T14:59:14.954+0000",
-        "timestamp": "2019-01-22T15:00:28.399+0000"
-    }
+  "status": "OK",
+  "responseObject": {
+    "applicationName": "powerauth-push",
+    "applicationDisplayName": "PowerAuth Push Server",
+    "applicationEnvironment": "",
+    "version": "0.21.0",
+    "buildTime": "2019-01-22T14:59:14.954+0000",
+    "timestamp": "2019-01-22T15:00:28.399+0000"
+  }
 }
 ```
 
@@ -134,18 +139,21 @@ Send a system status response, with basic information about the running applicat
 - `version` - Version of Push server.
 - `buildTime` - Timestamp when the powerauth-push-server.war file was built.
 - `timestamp` - Current time on application.
+<!-- end -->
 
 ## Device
 
 Represents mobile device with iOS or Android that is capable to receive a push notification. Device has to first register with APNS or FCM to obtain push token.
 Then it has to forward the push token to the push server end-point. After that push server is able to send push notification to the device.
 
+<!-- begin api POST /push/device/create -->
 ### Create Device
 
 Create a new device push token (platform specific). The call must include `activationId`, so that the token is associated with given user in the PowerAuth Server.
 
 _Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID, so that there are no incorrect bindings._
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -156,17 +164,18 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
         <td>/push/device/create</td>
     </tr>
 </table>
+<!-- end -->
 
-#### **Request**
+#### Request
 
 ```json
 {
-    "requestObject": {
-        "appId": 2,
-        "token": "1234567890987654321234567890",
-        "platform": "ios",
-        "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
-    }
+  "requestObject": {
+    "appId": 2,
+    "token": "1234567890987654321234567890",
+    "platform": "ios",
+    "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
+  }
 }
 ```
 
@@ -175,20 +184,23 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 - `platform` - `ios`, `android`
 - `activationId` - Activation identifier
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
+<!-- end -->
 
-### Create Device for Multiple Associated Activations
+<!-- begin api POST /push/device/create/multi -->
+### Create Device for Multiple Activations
 
 Create a new device push token (platform specific). The call must include `activationIds` which contains list of activations to be associated with the registered device.
 
 _Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs, so that there are no incorrect bindings._
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -199,20 +211,21 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
         <td>/push/device/create/multi</td>
     </tr>
 </table>
+<!-- end -->
 
-#### **Request**
+#### Request
 
 ```json
 {
-    "requestObject": {
-        "appId": 2,
-        "token": "1234567890987654321234567890",
-        "platform": "ios",
-        "activationIds": [
-          "49414e31-f3df-4cea-87e6-f214ca3b8412",
-          "26c94bf8-f594-4bd8-9c51-93449926b644"
-        ]
-    }
+  "requestObject": {
+    "appId": 2,
+    "token": "1234567890987654321234567890",
+    "platform": "ios",
+    "activationIds": [
+      "49414e31-f3df-4cea-87e6-f214ca3b8412",
+      "26c94bf8-f594-4bd8-9c51-93449926b644"
+    ]
+  }
 }
 ```
 
@@ -221,18 +234,21 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 - `platform` - `ios`, `android`
 - `activationIds` - Associated activation identifiers
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
+<!-- end -->
 
-### Delete Device
+<!-- begin api DELETE /push/device/remove -->
+### Remove Device
 
 Removes registered device based on the push token value.
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -243,33 +259,37 @@ Removes registered device based on the push token value.
         <td>/push/device/remove</td>
     </tr>
 </table>
+<!-- end -->
 
-#### **Request**
+#### Request
 
 ```json
 {
-    "requestObject": {
-        "appId": 2,
-        "token": "12456789098321234567890"
-    }
+  "requestObject": {
+    "appId": 2,
+    "token": "12456789098321234567890"
+  }
 }
 ```
 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /push/device/status/update -->
 ### Update Device Status
 
 Update the status of given device registration based on the associated activation ID. This can help assure that registration is in non-active state and cannot receive personal messages.
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -280,33 +300,37 @@ Update the status of given device registration based on the associated activatio
         <td>/push/device/status/update</td>
     </tr>
 </table>
+<!-- end -->
 
-#### **Request**
+#### Request
 
 ```json
 {
-    "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
+  "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
 }
 ```
 
 - `activationId` - Identifier of activation.
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
+<!-- end -->
 
 ## Message
 
 Represents a single notification sent to the device. It provides an abstraction of APNS or FCM message payload.
 
+<!-- begin api POST /push/message/send -->
 ### Send Message
 
 Send a single push message to given user via provided application, optionally to the specific device represented by given `activationId`.
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -317,35 +341,36 @@ Send a single push message to given user via provided application, optionally to
         <td>/push/message/send</td>
     </tr>
 </table>
+<!-- end -->
 
-#### **Request**
+#### Request
 
 ```json
 {
-    "requestObject": {
-        "appId": 2,
-        "message": {
-            "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
-            "userId": "123",
-            "attributes": {
-                "personal": true,
-                "silent": true
-            },
-            "body": {
-                "title": "Balance update",
-                "body": "Your balance is now $745.00",
-                "badge": 3,
-                "sound": "default",
-                "icon": "custom-icon",
-                "category": "balance-update",
-                "collapseKey": "balance-update",
-                "validUntil": "2017-12-11T21:22:29.923Z",
-                "extras": {
-                    "_comment": "Any custom data."
-                }
-            }
+  "requestObject": {
+    "appId": 2,
+    "message": {
+      "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
+      "userId": "123",
+      "attributes": {
+        "personal": true,
+        "silent": true
+      },
+      "body": {
+        "title": "Balance update",
+        "body": "Your balance is now $745.00",
+        "badge": 3,
+        "sound": "default",
+        "icon": "custom-icon",
+        "category": "balance-update",
+        "collapseKey": "balance-update",
+        "validUntil": "2017-12-11T21:22:29.923Z",
+        "extras": {
+          "_comment": "Any custom data."
         }
+      }
     }
+  }
 }
 
 ```
@@ -360,18 +385,21 @@ Send a single push message to given user via provided application, optionally to
     - `body` - Body object is described in [here](./Push-Message-Payload-Mapping.md)
         - See [Push Message Payload Mapping](./Push-Message-Payload-Mapping.md) for details.
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /push/message/batch/send  -->
 ### Send Message Batch
 
 Sends a message message batch - each item in the batch represents a message to given user. The message is sent via provided application (optionally to the specific device represented by given `activationId`).
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -382,58 +410,59 @@ Sends a message message batch - each item in the batch represents a message to g
         <td>/push/message/batch/send</td>
     </tr>
 </table>
+<!-- end -->
 
-#### **Request**
+#### Request
 
 ```json
 {
-    "requestObject": {
-        "appId": 2,
-        "batch": [
-            {
-                "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
-                "userId": "123",
-                "attributes": {
-                    "personal": true,
-                    "silent": true
-                },
-                "body": {
-                    "title": "Balance update",
-                    "body": "Your balance is now $745.00",
-                    "badge": 3,
-                    "sound": "default",
-                    "icon": "custom-icon",
-                    "category": "balance-update",
-                    "collapseKey": "balance-update",
-                    "validUntil": "2017-12-11T21:22:29.923Z",
-                    "extras": {
-                        "_comment": "Any custom data."
-                    }
-                }
-            },
-            {
-                "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
-                "userId": "1234",
-                "attributes": {
-                    "personal": true,
-                    "silent": true
-                },
-                "body": {
-                    "title": "Balance update",
-                    "body": "Your balance is now $745.00",
-                    "badge": 3,
-                    "sound": "default",
-                    "icon": "custom-icon",
-                    "category": "balance-update",
-                    "collapseKey": "balance-update",
-                    "validUntil": "2017-12-11T21:22:29.923Z",
-                    "extras": {
-                        "_comment": "Any custom data."
-                    }
-                }
-            }
-        ]
-    }
+  "requestObject": {
+    "appId": 2,
+    "batch": [
+      {
+        "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
+        "userId": "123",
+        "attributes": {
+          "personal": true,
+          "silent": true
+        },
+        "body": {
+          "title": "Balance update",
+          "body": "Your balance is now $745.00",
+          "badge": 3,
+          "sound": "default",
+          "icon": "custom-icon",
+          "category": "balance-update",
+          "collapseKey": "balance-update",
+          "validUntil": "2017-12-11T21:22:29.923Z",
+          "extras": {
+            "_comment": "Any custom data."
+          }
+        }
+      },
+      {
+        "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
+        "userId": "1234",
+        "attributes": {
+          "personal": true,
+          "silent": true
+        },
+        "body": {
+          "title": "Balance update",
+          "body": "Your balance is now $745.00",
+          "badge": 3,
+          "sound": "default",
+          "icon": "custom-icon",
+          "category": "balance-update",
+          "collapseKey": "balance-update",
+          "validUntil": "2017-12-11T21:22:29.923Z",
+          "extras": {
+            "_comment": "Any custom data."
+          }
+        }
+      }
+    ]
+  }
 }
 
 ```
@@ -441,27 +470,27 @@ Sends a message message batch - each item in the batch represents a message to g
 - `appId` - Application that user is using.
 - `batch` - List of messages, see [documentation for sending a single message](#send-message) for details
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK",
-    "responseObject": {
-        "result": {
-            "ios": {
-                "sent": 1,
-                "pending": 0,
-                "failed": 0,
-                "total": 1
-            },
-            "android": {
-                "sent": 1,
-                "pending": 0,
-                "failed": 0,
-                "total": 1
-            }
-        }
+  "status": "OK",
+  "responseObject": {
+    "result": {
+      "ios": {
+        "sent": 1,
+        "pending": 0,
+        "failed": 0,
+        "total": 1
+      },
+      "android": {
+        "sent": 1,
+        "pending": 0,
+        "failed": 0,
+        "total": 1
+      }
     }
+  }
 }
 ```
 
@@ -469,6 +498,7 @@ Sends a message message batch - each item in the batch represents a message to g
 - `sent` - Number of sent notifications.
 - `failed` - Number of failed notifications.
 - `total` - Number of total notifications.
+<!-- end -->
 
 ## Campaign
 
@@ -483,12 +513,14 @@ Further campaign comes with:
 - sent status - Whether is sent or not.
 - devices - To prevent getting multiple messages on device. If there would be more than one user registered.
 
+<!-- begin api POST /push/campaign/create -->
 ### Create Campaign
 
 Create a campaign with application that campaign is using and certain message that contains parameters of message object.
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -499,25 +531,26 @@ Create a campaign with application that campaign is using and certain message th
         <td>/push/campaign/create</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
-    "requestObject": {
-        "appId": "2",
-        "message": {
-            "title": "Balance update",
-            "body": "Your balance is now $745.00",
-            "badge": 3,
-            "sound": "default",
-            "icon": "custom-icon",
-            "category": "balance-update",
-            "collapseKey": "balance-update",
-            "validUntil": "2016-10-12T11:20:04Z",
-            "extras": {
-                "_comment": "Any custom data."
-            }      
-        }
+  "requestObject": {
+  "appId": "2",
+    "message": {
+      "title": "Balance update",
+      "body": "Your balance is now $745.00",
+      "badge": 3,
+      "sound": "default",
+      "icon": "custom-icon",
+      "category": "balance-update",
+      "collapseKey": "balance-update",
+      "validUntil": "2016-10-12T11:20:04Z",
+      "extras": {
+        "_comment": "Any custom data."
+      }      
     }
+  }
 }
 ```
 
@@ -526,24 +559,27 @@ Create a campaign with application that campaign is using and certain message th
 
 _note: identifier of campaign is generated automatically_
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK",
-    "responseObject": {
-        "id": "123456789012345678901234567890"
-    }
+  "status": "OK",
+  "responseObject": {
+    "id": "123456789012345678901234567890"
+  }
 }
 ```
 
 - `id` - Assigned ID to campaign.
+<!-- end -->
 
+<!-- begin api DELETE /push/campaign/${id}/delete -->
 ### Delete Campaign
 
 Delete a specific campaign. Also users associated with this campaign are going to be deleted. If deletion was applied then deleted status is true.
 
-#### **Request**
+<!-- begin remove -->
+#### Request
 
 <table>
     <tr>
@@ -554,38 +590,48 @@ Delete a specific campaign. Also users associated with this campaign are going t
         <td>Resource URI</td>
         <td>/push/campaign/${ID}/delete</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
 
+##### Request Body
+
 ```json
-{
-}
+{}
 ```
 
 - empty request body
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK",
-    "responseObject" : {
-        "deleted" : true
-    }
+  "status": "OK",
+  "responseObject" : {
+    "deleted" : true
+  }
 }
 ```
 
 - `deleted` - Indicate if deletion was applied.
+<!-- end -->
 
+<!-- begin api GET /push/campaign/${id}/detail -->
 ### Get Campaign
 
 Return details of a specific campaign.
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -595,35 +641,41 @@ Return details of a specific campaign.
         <td>Resource URI</td>
         <td>/push/campaign/${ID}/detail</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK",
-    "responseObject": {
-        "id": "10",
-        "appId": 2,
-        "sent": "false",
-        "message": {
-            "title": "Balance update",
-            "body": "Your balance is now $745.00",
-            "badge": 3,
-            "sound": "default",
-            "icon": "custom-icon",
-            "category": "balance-update",
-            "collapseKey": "balance-update",
-            "validUntil": "2016-10-12T11:20:04Z",
-            "extras": {
-                "_comment": "Any custom data."
-            }
-        }
+  "status": "OK",
+  "responseObject": {
+    "id": "10",
+    "appId": 2,
+    "sent": "false",
+    "message": {
+      "title": "Balance update",
+      "body": "Your balance is now $745.00",
+      "badge": 3,
+      "sound": "default",
+      "icon": "custom-icon",
+      "category": "balance-update",
+      "collapseKey": "balance-update",
+      "validUntil": "2016-10-12T11:20:04Z",
+      "extras": {
+        "_comment": "Any custom data."
+      }
     }
+  }
 }
 ```
 
@@ -631,13 +683,16 @@ Return details of a specific campaign.
 - `appId` - Identifier of application that campaign is using.
 - `sent` - Indicator if campaign was sent.
 - `message` - parameters of message object are described [here](./Push-Message-Payload-Mapping.md).
+<!-- end -->
 
+<!-- begin api GET /push/campaign/list -->
 ### Get List Of Campaigns
 
 Return list of actually registered campaigns, based on `all` parameter. This parameter decides if return campaigns that are 'only sent'(statement _false_) or return all registered campaigns (statement _true_).
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -648,63 +703,67 @@ Return list of actually registered campaigns, based on `all` parameter. This par
         <td>/push/campaign/list/?all={true|false}</td>
     </tr>
 </table>
+<!-- end -->
 
-#### **Response**
+#### Response 200
 
 ``` json
 {
-    "status": "OK",
-    "responseObject": [
-        {
-            "id": "10",
-            "appId": 2,
-            "sent": "false",
-            "message": {
-                "title": "Balance update",
-                "body": "Your balance is now $745.00",
-                "badge": 3,
-                "sound": "default",
-                "icon": "custom-icon",
-                "category": "balance-update",
-                "collapseKey": "balance-update",
-                "validUntil": "2016-10-12T11:20:04Z",
-                "extras": {
-                    "_comment": "Any custom data."
-                }
-            }
-            }, {
-                "id": "11",
-                "appId": 3,
-                "sent": "true",
-                "message": {
-                    "title": "Balance update",
-                    "body": "Your balance is now $300.00",
-                    "badge": 3,
-                    "sound": "default",
-                    "icon": "custom-icon",
-                    "category": "balance-update",
-                    "collapseKey": "balance-update",
-                    "validUntil": "2017-10-12T11:20:04Z",
-                    "extras": {
-                        "_comment": "Any custom data."
-                    }
-                }
-            }
-        ]
+  "status": "OK",
+  "responseObject": [
+    {
+      "id": "10",
+      "appId": 2,
+      "sent": "false",
+      "message": {
+        "title": "Balance update",
+        "body": "Your balance is now $745.00",
+        "badge": 3,
+        "sound": "default",
+        "icon": "custom-icon",
+        "category": "balance-update",
+        "collapseKey": "balance-update",
+        "validUntil": "2016-10-12T11:20:04Z",
+        "extras": {
+          "_comment": "Any custom data."
+        }
+      }
+    }, {
+      "id": "11",
+      "appId": 3,
+      "sent": "true",
+      "message": {
+        "title": "Balance update",
+        "body": "Your balance is now $300.00",
+        "badge": 3,
+        "sound": "default",
+        "icon": "custom-icon",
+        "category": "balance-update",
+        "collapseKey": "balance-update",
+        "validUntil": "2017-10-12T11:20:04Z",
+        "extras": {
+          "_comment": "Any custom data."
+        }
+      }
     }
+  ]
+}
 ```
 - array of campaigns
 - `id` - Identifier of campaign.
 - `appId` - Identifier of application that campaign is using.
 - `sent` - Indicator if campaign was sent.
 - `message` - parameters of message object are described [here](./Push-Message-Payload-Mapping.md).
+<!-- end -->
 
+<!-- begin api PUT /push/campaign/${id}/user/add -->
 ### Add Users To Campaign
 
 Associate users to a specific campaign. Users are identified in request body as an array of strings.
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -714,38 +773,49 @@ Associate users to a specific campaign. Users are identified in request body as 
         <td>Resource URI</td>
         <td>/push/campaign/${ID}/user/add</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
 
+##### Request Body
+
 ```json
 {
-    "requestObject": [
-        "1234567890",
-        "1234567891",
-        "1234567893"
-    ]
+  "requestObject": [
+    "1234567890",
+    "1234567891",
+    "1234567893"
+  ]
 }
 ```
 
 - list of users
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api GET /push/campaign/${ID}/user/list -->
 ### Get Users From Campaign
 
 Return list users from a specific campaign. Users are shown in paginated format based on parameters assigned in URI.
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -755,35 +825,41 @@ Return list users from a specific campaign. Users are shown in paginated format 
         <td>Resource URI</td>
         <td>/push/campaign/${ID}/user/list?page=${PAGE}&size=${SIZE}</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
     <tr>
-        <td>Var ${PAGE} </td>
-        <td>Nubmer of page to show</td>
+        <td>page</td>
+        <td>Number of page to show</td>
     </tr>
     <tr>
-        <td>Var ${SIZE}</td>
+        <td>size</td>
         <td>Number of elements per page</td>
     </tr>
 </table>
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK",
-    "page": 0,
-    "size": 4,
-    "responseObject": {
-        "campaignId": "1234",
-        "users": [
-            "1234567890",
-            "1234567892",
-            "1234567893"
-        ]
-    }
+  "status": "OK",
+  "page": 0,
+  "size": 4,
+  "responseObject": {
+    "campaignId": "1234",
+    "users": [
+      "1234567890",
+      "1234567892",
+      "1234567893"
+    ]
+  }
 }
 ```
 
@@ -791,13 +867,16 @@ Return list users from a specific campaign. Users are shown in paginated format 
 - `size` - Chosen number of users per page
 - `campaignId` - ID of a chosen campaign
 - `users` - Array of users based on pagination parameters
+<!-- end -->
 
+<!-- begin api DELETE /push/campaign/${id}/user/delete -->
 ### Delete Users From Campaign
 
 Delete users associated with a specific campaign. Users are identified request body as an array of strings.
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -807,38 +886,47 @@ Delete users associated with a specific campaign. Users are identified request b
         <td>Resource URI</td>
         <td>/push/campaign/${ID}/user/delete</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
 
 ```json
 {
-    "requestObject": [
-        "1234567890",
-        "1234567891",
-        "1234567893"
-    ]
+  "requestObject": [
+    "1234567890",
+    "1234567891",
+    "1234567893"
+  ]
 }
 ```
 
 - list of users
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
+<!-- end -->
 
-### Send Test Campaign
+<!-- begin api POST /push/campaign/send/test/${id} -->
+### Send Test Campaign Message
 
 Send message from a specific campaign on test user to check rightness of that campaign.
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -848,38 +936,49 @@ Send message from a specific campaign on test user to check rightness of that ca
         <td>Resource URI</td>
         <td>/push/campaign/send/test/${ID}</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
-        <td>Var ${ID}</td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
 
+##### Request Body
+
 ```json
 {
-    "requestObject": {
-        "userId": "1234567890"
-    }
+  "requestObject": {
+    "userId": "1234567890"
+  }
 }
 ```
 
 - `userId` - ID of test user, usually "1234567890"
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /push/campaign/send/live/${id} -->
 ### Send Campaign
 
 Send message from a specific campaign to devices belonged to users associated with that campaign. Whereas each device gets a campaign only once.
 
 If sending was successful then `sent` parameter is set on _true_ and `timestampSent` is set on current time.
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -889,29 +988,40 @@ If sending was successful then `sent` parameter is set on _true_ and `timestampS
         <td>Resource URI</td>
         <td>/push/campaign/send/live/${ID}</td>
     </tr>
+</table>
+<!-- end -->
+
+##### Query Parameters
+
+<table>
     <tr>
-        <td>Var ${ID} </td>
+        <td>id</td>
         <td>Campaign identifier</td>
     </tr>
 </table>
 
 - empty request body
 
-#### **Response**
+#### Response 200
 
 ```json
 {
-    "status": "OK"
+  "status": "OK"
 }
 ```
+<!-- end -->
 
 ## Administration
 
+Services used for management of the push server instance.
+
+<!-- begin api GET /admin/app/list -->
 ### List Applications
 
 Get list of all applications.
 
-#### **Request**
+<!-- begin remove -->
+#### Request
 
 <table>
     <tr>
@@ -923,8 +1033,9 @@ Get list of all applications.
         <td>/admin/app/list</td>
     </tr>
 </table>
+<!-- end -->
 
-#### **Response**
+#### Response 200
 
 ```json
 {
@@ -942,12 +1053,15 @@ Get list of all applications.
   }
 }
 ```
+<!-- end -->
 
+<!-- begin api GET /admin/app/unconfigured/list -->
 ### List Unconfigured Applications
 
 Get list of applications which have not been configured yet.
 
-#### **Request**
+<!-- begin remove -->
+#### Request
 
 <table>
     <tr>
@@ -959,8 +1073,9 @@ Get list of applications which have not been configured yet.
         <td>/admin/app/unconfigured/list</td>
     </tr>
 </table>
+<!-- end -->
 
-#### **Response**
+#### Response 200
 
 ```json
 {
@@ -978,13 +1093,16 @@ Get list of applications which have not been configured yet.
   }
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /admin/app/detail -->
 ### Application Detail
 
 Get detail of an application.
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -995,6 +1113,7 @@ Get detail of an application.
         <td>/admin/app/detail</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -1006,7 +1125,7 @@ Get detail of an application.
 }
 ```
 
-#### **Response**
+#### Response 200
 
 ```json
 {
@@ -1026,13 +1145,16 @@ Get detail of an application.
   }
 }
 ```
+<!-- end -->
 
+<!-- begin api POST /admin/app/create -->
 ### Create Application
 
 Create a new supported application.
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -1043,6 +1165,7 @@ Create a new supported application.
         <td>/admin/app/create</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -1052,7 +1175,7 @@ Create a new supported application.
 }
 ```
 
-#### **Response**
+#### Response 200
 
 ```json
 {
@@ -1062,13 +1185,16 @@ Create a new supported application.
   }
 }
 ```
+<!-- end -->
 
+<!-- begin api PUT /admin/app/ios/update -->
 ### Update iOS Configuration
 
 Update an iOS configuration.
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -1079,6 +1205,7 @@ Update an iOS configuration.
         <td>/admin/app/ios/update</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -1092,20 +1219,23 @@ Update an iOS configuration.
 }
 ```
 
-#### **Response**
+#### Response 200
 
 ```json
 {
   "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api DELETE /admin/app/ios/remove -->
 ### Remove iOS Configuration
 
 Remove an iOS configuration.
 
-#### **Request**
+#### Request
 
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -1116,6 +1246,7 @@ Remove an iOS configuration.
         <td>/admin/app/ios/remove</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -1125,20 +1256,24 @@ Remove an iOS configuration.
 }
 ```
 
-#### **Response**
+#### Response 200
 
 ```json
 {
   "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api PUT /admin/app/android/update -->
 ### Update Android Configuration
 
 Update an Android configuration.
 
-#### **Request**
 
+#### Request
+
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -1149,6 +1284,7 @@ Update an Android configuration.
         <td>/admin/app/android/update</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -1160,18 +1296,23 @@ Update an Android configuration.
 }
 ```
 
-#### **Response**
+#### Response 200
 
 ```json
 {
   "status": "OK"
 }
 ```
+<!-- end -->
 
+<!-- begin api DELETE /admin/app/android/remove -->
 ### Remove Android Configuration
 
-#### **Request**
+Remove FCM configuration for Android push messages.
 
+#### Request
+
+<!-- begin remove -->
 <table>
     <tr>
         <td>Method</td>
@@ -1182,6 +1323,7 @@ Update an Android configuration.
         <td>/admin/app/android/remove</td>
     </tr>
 </table>
+<!-- end -->
 
 ```json
 {
@@ -1191,10 +1333,11 @@ Update an Android configuration.
 }
 ```
 
-#### **Response**
+#### Response 200
 
 ```json
 {
   "status": "OK"
 }
 ```
+<!-- end -->

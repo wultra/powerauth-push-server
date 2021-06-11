@@ -28,12 +28,14 @@ import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmInitializationFailedException;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.service.fcm.model.FcmSuccessResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Flux;
 
 import java.io.ByteArrayInputStream;
@@ -82,6 +84,13 @@ public class FcmClient {
     private String proxyUsername;
     private String proxyPassword;
 
+    /**
+     * Constructor with FCM specific attributes.
+     * @param projectId Android Project ID.
+     * @param privateKey Android Private Key.
+     * @param pushServiceConfiguration Push service configuration.
+     * @param fcmConverter FCM model converter helper.
+     */
     public FcmClient(String projectId, byte[] privateKey, PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter) {
         this.projectId = projectId;
         this.privateKey = privateKey;
@@ -202,7 +211,7 @@ public class FcmClient {
      * @param onError Callback called when request fails.
      * @throws FcmMissingTokenException Thrown when FCM is not configured.
      */
-    public void exchange(Message message, boolean validationOnly, Consumer<ClientResponse> onSuccess, Consumer<Throwable> onError) throws FcmMissingTokenException {
+    public void exchange(Message message, boolean validationOnly, Consumer<ResponseEntity<FcmSuccessResponse>> onSuccess, Consumer<Throwable> onError) throws FcmMissingTokenException {
         if (restClient == null) {
             logger.error("Push message delivery failed because RestClient is not initialized.");
             return;
@@ -229,7 +238,8 @@ public class FcmClient {
         }
 
         try {
-            restClient.postNonBlocking(fcmSendMessageUrl, body, null, headers, onSuccess, onError);
+            ParameterizedTypeReference<FcmSuccessResponse> responseType = new ParameterizedTypeReference<FcmSuccessResponse>(){};
+            restClient.postNonBlocking(fcmSendMessageUrl, body, null, headers, responseType, onSuccess, onError);
         } catch (RestClientException ex) {
             logger.debug(ex.getMessage(), ex);
             logger.error("Push message delivery failed because of a RestClient error: " + ex.getMessage());

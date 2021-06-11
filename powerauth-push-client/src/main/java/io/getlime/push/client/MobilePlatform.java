@@ -23,9 +23,20 @@ package io.getlime.push.client;
  */
 public enum MobilePlatform {
 
+    /**
+     * iOS Platform.
+     */
     iOS,
+
+    /**
+     * Android Platform.
+     */
     Android;
 
+    /**
+     * Converter convenience method for obtaining String from enum.
+     * @return String representation of the enum.
+     */
     public String value() {
         if (this.equals(MobilePlatform.iOS)) {
             return "ios";

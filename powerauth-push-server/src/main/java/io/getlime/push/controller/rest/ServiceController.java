@@ -40,11 +40,19 @@ public class ServiceController {
     private final PushServiceConfiguration pushServiceConfiguration;
     private BuildProperties buildProperties;
 
+    /**
+     * Constructor with push service configuration.
+     * @param pushServiceConfiguration Push service configuration.
+     */
     @Autowired
     public ServiceController(PushServiceConfiguration pushServiceConfiguration) {
         this.pushServiceConfiguration = pushServiceConfiguration;
     }
 
+    /**
+     * Set build properties, if available.
+     * @param buildProperties Build properties.
+     */
     @Autowired(required = false) // otherwise Unit tests will fail ...
     public void setBuildProperties(BuildProperties buildProperties) {
         this.buildProperties = buildProperties;

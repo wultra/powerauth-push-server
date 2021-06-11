@@ -27,6 +27,8 @@ import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
+import com.wultra.core.rest.client.base.RestClientException;
+import io.getlime.push.util.CaCertUtil;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
@@ -42,8 +44,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import javax.net.ssl.SSLException;
 import java.io.ByteArrayInputStream;
@@ -58,6 +58,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 
+/**
+ * Service responsible for sending push notifications.
+ *
+ * @author Petr Dvorak, petr@wulta.com
+ */
 @Service
 public class PushSendingWorker {
 
@@ -75,11 +80,19 @@ public class PushSendingWorker {
 
     private final PushServiceConfiguration pushServiceConfiguration;
     private final FcmModelConverter fcmConverter;
+    private final CaCertUtil caCertUtil;
 
+    /**
+     * Constructor with push service configuration, model converter and CA certificate utility class.
+     * @param pushServiceConfiguration Push service configuration.
+     * @param fcmConverter FCM converter class.
+     * @param caCertUtil CA certificate utility class.
+     */
     @Autowired
-    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter) {
+    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter, CaCertUtil caCertUtil) {
         this.pushServiceConfiguration = pushServiceConfiguration;
         this.fcmConverter = fcmConverter;
+        this.caCertUtil = caCertUtil;
     }
 
     // Android related methods
@@ -134,7 +147,7 @@ public class PushSendingWorker {
         Message message = buildAndroidMessage(pushMessageBody, attributes, pushToken);
 
         // Extraction of FCM success response
-        Consumer<ResponseEntity<FcmSuccessResponse>> fcmConsumer = responseEntity -> {
+        Consumer<ResponseEntity<FcmSuccessResponse>> onSuccess = responseEntity -> {
             FcmSuccessResponse response = responseEntity.getBody();
             if (response != null && response.getName() != null && response.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
                 logger.info("Notification sent, response: {}", response.getName());
@@ -146,13 +159,10 @@ public class PushSendingWorker {
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         };
 
-        // Callback when FCM request succeeds
-        Consumer<ClientResponse> onSuccess = body -> body.toEntity(FcmSuccessResponse.class).subscribe(fcmConsumer);
-
         // Callback when FCM request fails
         Consumer<Throwable> onError = t -> {
-            if (t instanceof WebClientResponseException) {
-                String errorCode = fcmConverter.convertExceptionToErrorCode((WebClientResponseException) t);
+            if (t instanceof RestClientException) {
+                String errorCode = fcmConverter.convertExceptionToErrorCode((RestClientException) t);
                 switch (errorCode) {
                     case FcmErrorResponse.REGISTRATION_TOKEN_NOT_REGISTERED:
                         logger.error("Push message rejected by FCM gateway, device registration will be removed. Error: {}", errorCode);
@@ -263,11 +273,12 @@ public class PushSendingWorker {
      *   to APNs service due to SSL issue, ...).
      */
     ApnsClient prepareApnsClient(String teamId, String keyId, byte[] apnsPrivateKey) throws PushServerException {
-        final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
-        apnsClientBuilder.setProxyHandlerFactory(apnsClientProxy());
-        apnsClientBuilder.setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections());
-        apnsClientBuilder.setConnectionTimeout(Duration.ofMillis(pushServiceConfiguration.getApnsConnectTimeout()));
-        apnsClientBuilder.setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()));
+        final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder()
+                .setProxyHandlerFactory(apnsClientProxy())
+                .setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections())
+                .setConnectionTimeout(Duration.ofMillis(pushServiceConfiguration.getApnsConnectTimeout()))
+                .setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()))
+                .setTrustedServerCertificateChain(caCertUtil.allCerts());
         if (pushServiceConfiguration.isApnsUseDevelopment()) {
             logger.info("Using APNs development host");
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
@@ -384,11 +395,13 @@ public class PushSendingWorker {
      */
     private String buildApnsPayload(PushMessageBody push, boolean isSilent) {
         final ApnsPayloadBuilder payloadBuilder = new SimpleApnsPayloadBuilder();
-        payloadBuilder.setAlertTitle(push.getTitle());
-        payloadBuilder.setAlertBody(push.getBody());
+        if (!isSilent) { // include alert, body, sound and category only in case push message is not silent.
+            payloadBuilder.setAlertTitle(push.getTitle());
+            payloadBuilder.setAlertBody(push.getBody());
+            payloadBuilder.setSound(push.getSound());
+            payloadBuilder.setCategoryName(push.getCategory());
+        }
         payloadBuilder.setBadgeNumber(push.getBadge());
-        payloadBuilder.setCategoryName(push.getCategory());
-        payloadBuilder.setSound(push.getSound());
         payloadBuilder.setContentAvailable(isSilent);
         payloadBuilder.setThreadId(push.getCollapseKey());
         Map<String, Object> extras = push.getExtras();

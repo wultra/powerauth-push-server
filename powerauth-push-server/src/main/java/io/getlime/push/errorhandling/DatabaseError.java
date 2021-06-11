@@ -24,9 +24,20 @@ import io.getlime.core.rest.model.base.entity.Error;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 public class DatabaseError extends Error{
-    public class Code extends Error.Code {
+
+    /**
+     * Error code class.
+     */
+    public static class Code extends Error.Code {
+
+        /**
+         * Error code value.
+         */
         public static final String ERROR_DATABASE = "ERROR_DATABASE";
 
+        /**
+         * Default constructor.
+         */
         public Code() {
         }
     }

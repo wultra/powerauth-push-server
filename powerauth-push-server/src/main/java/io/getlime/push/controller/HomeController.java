@@ -33,11 +33,20 @@ public class HomeController {
 
     private BuildProperties buildProperties;
 
+    /**
+     * Autowire build properties, if available.
+     * @param buildProperties Build properties.
+     */
     @Autowired(required = false)
     public void setBuildProperties(BuildProperties buildProperties) {
         this.buildProperties = buildProperties;
     }
 
+    /**
+     * Get mapping for home page.
+     * @param model Model for the page presenting.
+     * @return Always returns the "home" template.
+     */
     @GetMapping("/")
     public String home(Model model) {
         // Add build information

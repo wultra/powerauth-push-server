@@ -24,39 +24,72 @@ import io.getlime.push.model.entity.PushMessageBody;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 public class CampaignResponse {
+
     private Long id;
     private Long appId;
     private boolean sent;
     private PushMessageBody message;
 
+    /**
+     * Get campaign ID.
+     * @return Campaign ID.
+     */
     public Long getId() {
         return id;
     }
 
+    /**
+     * Set campaign ID.
+     * @param id Campaign ID.
+     */
     public void setId(Long id) {
         this.id = id;
     }
 
+    /**
+     * Get app ID.
+     * @return App ID.
+     */
     public Long getAppId() {
         return appId;
     }
 
+    /**
+     * Set app ID.
+     * @param appId App ID.
+     */
     public void setAppId(Long appId) {
         this.appId = appId;
     }
 
+    /**
+     * Check if the message is sent.
+     * @return True if sent, false otherwise.
+     */
     public boolean isSent() {
         return sent;
     }
 
+    /**
+     * Set if the message was sent.
+     * @param sent True if sent, false otherwise.
+     */
     public void setSent(boolean sent) {
         this.sent = sent;
     }
 
+    /**
+     * Get push message body.
+     * @return Push message body.
+     */
     public PushMessageBody getMessage() {
         return message;
     }
 
+    /**
+     * Set push message body.
+     * @param message Push message body.
+     */
     public void setMessage(PushMessageBody message) {
         this.message = message;
     }

@@ -23,14 +23,27 @@ package io.getlime.push.errorhandling.exceptions;
  */
 public class FcmInitializationFailedException extends PushServerException {
 
+    /**
+     * Constructor with message.
+     * @param message Message.
+     */
     public FcmInitializationFailedException(String message) {
         super(message);
     }
 
+    /**
+     * Constructor with message and cause.
+     * @param message Message.
+     * @param cause Cause.
+     */
     public FcmInitializationFailedException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Constructor with cause.
+     * @param cause Cause.
+     */
     public FcmInitializationFailedException(Throwable cause) {
         super(cause);
     }

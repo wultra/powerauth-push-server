@@ -23,6 +23,9 @@ package io.getlime.push.model.entity;
  */
 public class PushMessageSendResult {
 
+    /**
+     * Result for the iOS platform.
+     */
     public static class iOS {
 
         private int sent;
@@ -117,6 +120,9 @@ public class PushMessageSendResult {
         }
     }
 
+    /**
+     * Result for the Android platform.
+     */
     public static class Android {
 
         private int sent;
@@ -214,6 +220,9 @@ public class PushMessageSendResult {
     private final iOS ios;
     private final Android android;
 
+    /**
+     * Default constructor.
+     */
     public PushMessageSendResult() {
         this.ios = new iOS();
         this.android = new Android();
