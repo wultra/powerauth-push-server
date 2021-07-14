@@ -23,12 +23,13 @@ package io.getlime.push.model.enumeration;
  */
 public enum Priority {
     /**
-     * Default push message priority. Maps to "DEFAULT" on Android and "CONSERVE_POWER" on iOS.
+     * Normal push message priority. Maps to "DEFAULT" on Android and "CONSERVE_POWER" on iOS.
      */
-    DEFAULT,
+    NORMAL,
 
     /**
-     * High push message priority. Maps to "HIGH" on Android and "IMMEDIATE" on iOS.
+     * High push message priority. Maps to "HIGH" on Android and "IMMEDIATE" on iOS. The system
+     * uses this value as a default to assure faster delivery of push messages.
      */
     HIGH
 }

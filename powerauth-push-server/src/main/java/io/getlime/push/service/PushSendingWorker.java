@@ -242,7 +242,7 @@ public class PushSendingWorker {
             }
         }
 
-        final AndroidNotification.Priority deliveryPriority = (Priority.DEFAULT == priority) ?
+        final AndroidNotification.Priority deliveryPriority = (Priority.NORMAL == priority) ?
                 AndroidNotification.Priority.DEFAULT : AndroidNotification.Priority.HIGH;
 
         final AndroidNotification notification = AndroidNotification.builder()
@@ -348,7 +348,7 @@ public class PushSendingWorker {
         final String payload = buildApnsPayload(pushMessageBody, isSilent);
         final Instant validUntil = pushMessageBody.getValidUntil();
         final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set
-        final DeliveryPriority deliveryPriority = (Priority.DEFAULT == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
+        final DeliveryPriority deliveryPriority = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
         final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, deliveryPriority, pushType, pushMessageBody.getCollapseKey());
         final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
