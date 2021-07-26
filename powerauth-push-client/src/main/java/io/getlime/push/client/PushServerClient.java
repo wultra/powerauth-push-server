@@ -29,6 +29,7 @@ import io.getlime.push.model.entity.ListOfUsers;
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.entity.PushMessageSendResult;
+import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.request.*;
 import io.getlime.push.model.response.*;
 import io.getlime.push.model.validator.*;
