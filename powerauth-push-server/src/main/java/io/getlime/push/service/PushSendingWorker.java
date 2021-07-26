@@ -28,6 +28,7 @@ import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
 import com.wultra.core.rest.client.base.RestClientException;
+import io.getlime.push.model.enumeration.Priority;
 import io.getlime.push.util.CaCertUtil;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
@@ -105,7 +106,7 @@ public class PushSendingWorker {
      * @return A new instance of FCM client.
      */
     FcmClient prepareFcmClient(String projectId, byte[] privateKey) throws PushServerException {
-        FcmClient fcmClient = new FcmClient(projectId, privateKey, pushServiceConfiguration, fcmConverter);
+        final FcmClient fcmClient = new FcmClient(projectId, privateKey, pushServiceConfiguration, fcmConverter);
         if (pushServiceConfiguration.isFcmProxyEnabled()) {
             String proxyHost = pushServiceConfiguration.getFcmProxyHost();
             int proxyPort = pushServiceConfiguration.getFcmProxyPort();
@@ -120,7 +121,7 @@ public class PushSendingWorker {
             fcmClient.setProxySettings(proxyHost, proxyPort, proxyUsername, proxyPassword);
         }
         fcmClient.initializeRestClient();
-        String fcmUrl = pushServiceConfiguration.getFcmSendMessageUrl();
+        final String fcmUrl = pushServiceConfiguration.getFcmSendMessageUrl();
         if (fcmUrl.contains("projects/%s/")) {
             // Initialize Google Credential for production FCM URL
             fcmClient.initializeGoogleCredential();
@@ -138,17 +139,18 @@ public class PushSendingWorker {
      * @param fcmClient Instance of the FCM client used for sending the notifications.
      * @param pushMessageBody Push message contents.
      * @param attributes Push message attributes.
+     * @param priority Push message priority.
      * @param pushToken Push token used to deliver the message.
      * @param callback Callback that is called after the asynchronous executions is completed.
      */
-    void sendMessageToAndroid(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final PushSendingCallback callback) {
+    void sendMessageToAndroid(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) {
 
         // Build Android message
-        Message message = buildAndroidMessage(pushMessageBody, attributes, pushToken);
+        final Message message = buildAndroidMessage(pushMessageBody, attributes, priority, pushToken);
 
         // Extraction of FCM success response
-        Consumer<ResponseEntity<FcmSuccessResponse>> onSuccess = responseEntity -> {
-            FcmSuccessResponse response = responseEntity.getBody();
+        final Consumer<ResponseEntity<FcmSuccessResponse>> onSuccess = responseEntity -> {
+            final FcmSuccessResponse response = responseEntity.getBody();
             if (response != null && response.getName() != null && response.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
                 logger.info("Notification sent, response: {}", response.getName());
                 callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
@@ -160,9 +162,9 @@ public class PushSendingWorker {
         };
 
         // Callback when FCM request fails
-        Consumer<Throwable> onError = t -> {
+        final Consumer<Throwable> onError = t -> {
             if (t instanceof RestClientException) {
-                String errorCode = fcmConverter.convertExceptionToErrorCode((RestClientException) t);
+                final String errorCode = fcmConverter.convertExceptionToErrorCode((RestClientException) t);
                 switch (errorCode) {
                     case FcmErrorResponse.REGISTRATION_TOKEN_NOT_REGISTERED:
                         logger.error("Push message rejected by FCM gateway, device registration will be removed. Error: {}", errorCode);
@@ -211,35 +213,40 @@ public class PushSendingWorker {
      * Build Android Message object from Push message body.
      * @param pushMessageBody Push message body.
      * @param attributes Push message attributes.
+     * @param priority Push message priority.
      * @param pushToken Push token.
      * @return Android Message object.
      */
-    private Message buildAndroidMessage(final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken) {
+    private Message buildAndroidMessage(final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken) {
         // convert data from Map<String, Object> to Map<String, String>
-        Map<String, Object> extras = pushMessageBody.getExtras();
-        Map<String, String> data = new LinkedHashMap<>();
+        final Map<String, Object> extras = pushMessageBody.getExtras();
+        final Map<String, String> data = new LinkedHashMap<>();
         if (extras != null) {
             for (Map.Entry<String, Object> entry : extras.entrySet()) {
                 data.put(entry.getKey(), entry.getValue().toString());
             }
         }
 
-        AndroidConfig.Builder androidConfigBuilder = AndroidConfig.builder()
+        final AndroidConfig.Builder androidConfigBuilder = AndroidConfig.builder()
                 .setCollapseKey(pushMessageBody.getCollapseKey());
 
         // Calculate TTL and set it if the TTL is within reasonable limits
-        Instant validUntil = pushMessageBody.getValidUntil();
+        final Instant validUntil = pushMessageBody.getValidUntil();
         if (validUntil != null) {
-            long validUntilMs = validUntil.toEpochMilli();
-            long currentTimeMs = System.currentTimeMillis();
-            long ttlInSeconds = (validUntilMs - currentTimeMs) / 1000;
+            final long validUntilMs = validUntil.toEpochMilli();
+            final long currentTimeMs = System.currentTimeMillis();
+            final long ttlInSeconds = (validUntilMs - currentTimeMs) / 1000;
 
             if (ttlInSeconds > 0 && ttlInSeconds < ANDROID_TTL_SECONDS_MAX) {
                 androidConfigBuilder.setTtl(ttlInSeconds);
             }
         }
 
-        AndroidNotification notification = AndroidNotification.builder()
+        final AndroidNotification.Priority deliveryPriority = (Priority.NORMAL == priority) ?
+                AndroidNotification.Priority.DEFAULT : AndroidNotification.Priority.HIGH;
+
+        final AndroidNotification notification = AndroidNotification.builder()
+                .setPriority(deliveryPriority)
                 .setTitle(pushMessageBody.getTitle())
                 .setBody(pushMessageBody.getBody())
                 .setIcon(pushMessageBody.getIcon())
@@ -287,7 +294,7 @@ public class PushSendingWorker {
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
         }
         try {
-            ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);
+            final ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);
             apnsClientBuilder.setSigningKey(key);
         } catch (InvalidKeyException | NoSuchAlgorithmException | IOException e) {
             logger.error(e.getMessage(), e);
@@ -308,8 +315,8 @@ public class PushSendingWorker {
      */
     private HttpProxyHandlerFactory apnsClientProxy() {
         if (pushServiceConfiguration.isApnsProxyEnabled()) {
-            String proxyUrl = pushServiceConfiguration.getApnsProxyHost();
-            int proxyPort = pushServiceConfiguration.getApnsProxyPort();
+            final String proxyUrl = pushServiceConfiguration.getApnsProxyHost();
+            final int proxyPort = pushServiceConfiguration.getApnsProxyPort();
             String proxyUsername = pushServiceConfiguration.getApnsProxyUsername();
             String proxyPassword = pushServiceConfiguration.getApnsProxyPassword();
             if (proxyUsername != null && proxyUsername.isEmpty()) {
@@ -329,18 +336,20 @@ public class PushSendingWorker {
      * @param apnsClient APNs client used for sending the push message.
      * @param pushMessageBody Push message content.
      * @param attributes Push message attributes.
+     * @param priority Push message priority.
      * @param pushToken Push token.
      * @param iosTopic APNs topic, usually same as bundle ID.
      * @param callback Callback that is called after the asynchronous executions is completed.
      */
-    void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
+    void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
         final boolean isSilent = attributes != null && attributes.getSilent(); // In case there are no attributes, the message is not silent
         final String payload = buildApnsPayload(pushMessageBody, isSilent);
         final Instant validUntil = pushMessageBody.getValidUntil();
         final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set
-        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, DeliveryPriority.IMMEDIATE, pushType, pushMessageBody.getCollapseKey());
+        final DeliveryPriority deliveryPriority = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
+        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, deliveryPriority, pushType, pushMessageBody.getCollapseKey());
         final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
         sendNotificationFuture.whenCompleteAsync((response, cause) -> {
@@ -404,7 +413,7 @@ public class PushSendingWorker {
         payloadBuilder.setBadgeNumber(push.getBadge());
         payloadBuilder.setContentAvailable(isSilent);
         payloadBuilder.setThreadId(push.getCollapseKey());
-        Map<String, Object> extras = push.getExtras();
+        final Map<String, Object> extras = push.getExtras();
         if (extras != null) {
             for (Map.Entry<String, Object> entry : extras.entrySet()) {
                 payloadBuilder.addCustomProperty(entry.getKey(), entry.getValue());

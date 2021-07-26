@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.entity.*;
+import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.request.CreateCampaignRequest;
 import io.getlime.push.model.request.SendPushMessageBatchRequest;
 import io.getlime.push.model.request.SendPushMessageRequest;

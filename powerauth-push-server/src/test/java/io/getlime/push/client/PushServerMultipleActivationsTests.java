@@ -16,6 +16,7 @@
 
 package io.getlime.push.client;
 
+import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.shared.PowerAuthTestClient;
