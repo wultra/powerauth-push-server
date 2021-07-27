@@ -77,11 +77,11 @@ public class FcmModelConverter {
      * @return FCM error code.
      */
     public String convertExceptionToErrorCode(RestClientException exception) {
-        FcmErrorResponse response = new FcmErrorResponse();
+        final FcmErrorResponse response = new FcmErrorResponse();
         String code;
         try {
-            String error = exception.getResponse();
-            JsonParser parser = jsonFactory.createJsonParser(error);
+            final String error = exception.getResponse();
+            final JsonParser parser = jsonFactory.createJsonParser(error);
             parser.parseAndClose(response);
             code = FCM_ERROR_CODES.get(response.getErrorCode());
             if (code == null) {
@@ -105,8 +105,8 @@ public class FcmModelConverter {
             return null;
         }
         try {
-            StringWriter writer = new StringWriter();
-            JsonGenerator gen = jsonFactory.createJsonGenerator(writer);
+            final StringWriter writer = new StringWriter();
+            final JsonGenerator gen = jsonFactory.createJsonGenerator(writer);
             gen.serialize(notification);
             gen.close();
             return writer.toString();

@@ -56,6 +56,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 
@@ -165,6 +166,7 @@ public class PushSendingWorker {
         final Consumer<Throwable> onError = t -> {
             if (t instanceof RestClientException) {
                 final String errorCode = fcmConverter.convertExceptionToErrorCode((RestClientException) t);
+                logger.error("FCM server returned error response: {}", ((RestClientException) t).getResponse());
                 switch (errorCode) {
                     case FcmErrorResponse.REGISTRATION_TOKEN_NOT_REGISTERED:
                         logger.error("Push message rejected by FCM gateway, device registration will be removed. Error: {}", errorCode);
@@ -354,12 +356,14 @@ public class PushSendingWorker {
 
         sendNotificationFuture.whenCompleteAsync((response, cause) -> {
             if (response != null) {
+                final UUID apnsId = response.getApnsId();
                 if (response.isAccepted()) {
-                    logger.info("Notification sent, APNs ID: {}", response.getApnsId());
+                    logger.info("Notification sent, APNs ID: {}", apnsId);
                     callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                 } else {
                     final String rejectionReason = response.getRejectionReason();
                     logger.info("Notification rejected by the APNs gateway: {}", rejectionReason);
+                    logger.info("Notification APNs ID: {}", response.getApnsId());
 
                     // Determine if the push token should be deleted.
                     if (ApnsRejectionReason.BAD_DEVICE_TOKEN.isEqualToText(rejectionReason)) {
