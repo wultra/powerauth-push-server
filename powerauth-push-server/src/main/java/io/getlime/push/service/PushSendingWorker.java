@@ -54,6 +54,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -250,7 +251,11 @@ public class PushSendingWorker {
         final AndroidNotification notification = AndroidNotification.builder()
                 .setPriority(deliveryPriority)
                 .setTitle(pushMessageBody.getTitle())
+                .setTitleLocalizationKey(pushMessageBody.getTitleLocKey())
+                .addAllTitleLocalizationArgs(Arrays.asList(pushMessageBody.getTitleLocArgs()))
                 .setBody(pushMessageBody.getBody())
+                .setBodyLocalizationKey(pushMessageBody.getBodyLocKey())
+                .addAllBodyLocalizationArgs(Arrays.asList(pushMessageBody.getBodyLocArgs()))
                 .setIcon(pushMessageBody.getIcon())
                 .setSound(pushMessageBody.getSound())
                 .setTag(pushMessageBody.getCategory())
@@ -409,14 +414,18 @@ public class PushSendingWorker {
     private String buildApnsPayload(PushMessageBody push, boolean isSilent) {
         final ApnsPayloadBuilder payloadBuilder = new SimpleApnsPayloadBuilder();
         if (!isSilent) { // include alert, body, sound and category only in case push message is not silent.
-            payloadBuilder.setAlertTitle(push.getTitle());
-            payloadBuilder.setAlertBody(push.getBody());
-            payloadBuilder.setSound(push.getSound());
-            payloadBuilder.setCategoryName(push.getCategory());
+            payloadBuilder
+                    .setAlertTitle(push.getTitle())
+                    .setLocalizedAlertTitle(push.getTitleLocKey(), push.getTitleLocArgs())
+                    .setAlertBody(push.getBody())
+                    .setLocalizedAlertMessage(push.getBodyLocKey(), push.getBodyLocArgs())
+                    .setSound(push.getSound())
+                    .setCategoryName(push.getCategory());
         }
-        payloadBuilder.setBadgeNumber(push.getBadge());
-        payloadBuilder.setContentAvailable(isSilent);
-        payloadBuilder.setThreadId(push.getCollapseKey());
+        payloadBuilder
+                .setBadgeNumber(push.getBadge())
+                .setContentAvailable(isSilent)
+                .setThreadId(push.getCollapseKey());
         final Map<String, Object> extras = push.getExtras();
         if (extras != null) {
             for (Map.Entry<String, Object> entry : extras.entrySet()) {
