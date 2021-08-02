@@ -94,12 +94,12 @@
         <dependency>
             <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-push-model</artifactId>
-            <version>${powerauth.version}</version>
+            <version>${powerauth.push.version}</version>
         </dependency>
         <dependency>
             <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-push-client</artifactId>
-            <version>${powerauth.version}</version>
+            <version>${powerauth.push.version}</version>
         </dependency>
         <dependency>
             <groupId>io.getlime.security</groupId>
