@@ -248,18 +248,24 @@ public class PushSendingWorker {
         final AndroidNotification.Priority deliveryPriority = (Priority.NORMAL == priority) ?
                 AndroidNotification.Priority.DEFAULT : AndroidNotification.Priority.HIGH;
 
-        final AndroidNotification notification = AndroidNotification.builder()
+        final AndroidNotification.Builder builder = AndroidNotification.builder()
                 .setPriority(deliveryPriority)
                 .setTitle(pushMessageBody.getTitle())
                 .setTitleLocalizationKey(pushMessageBody.getTitleLocKey())
-                .addAllTitleLocalizationArgs(Arrays.asList(pushMessageBody.getTitleLocArgs()))
                 .setBody(pushMessageBody.getBody())
                 .setBodyLocalizationKey(pushMessageBody.getBodyLocKey())
-                .addAllBodyLocalizationArgs(Arrays.asList(pushMessageBody.getBodyLocArgs()))
                 .setIcon(pushMessageBody.getIcon())
                 .setSound(pushMessageBody.getSound())
-                .setTag(pushMessageBody.getCategory())
-                .build();
+                .setTag(pushMessageBody.getCategory());
+
+        if (pushMessageBody.getTitleLocArgs() != null) {
+            builder.addAllTitleLocalizationArgs(Arrays.asList(pushMessageBody.getTitleLocArgs()));
+        }
+        if (pushMessageBody.getBodyLocArgs() != null) {
+            builder.addAllBodyLocalizationArgs(Arrays.asList(pushMessageBody.getBodyLocArgs()));
+        }
+
+        final AndroidNotification notification = builder.build();
 
         if (pushServiceConfiguration.isFcmDataNotificationOnly()) { // notification only through data map
             data.put(FCM_NOTIFICATION_KEY, fcmConverter.convertNotificationToString(notification));
