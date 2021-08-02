@@ -29,7 +29,11 @@ import java.util.Objects;
 public class PushMessageBody {
 
     private String title;
+    private String titleLocKey;
+    private String[] titleLocArgs;
     private String body;
+    private String bodyLocKey;
+    private String[] bodyLocArgs;
     private String icon;
     private Integer badge;
     private String sound;
@@ -56,6 +60,38 @@ public class PushMessageBody {
     }
 
     /**
+     * Get the title localized key.
+     * @return Title localized key.
+     */
+    public String getTitleLocKey() {
+        return titleLocKey;
+    }
+
+    /**
+     * Set the title localized key.
+     * @param titleLocKey Title localized key.
+     */
+    public void setTitleLocKey(String titleLocKey) {
+        this.titleLocKey = titleLocKey;
+    }
+
+    /**
+     * Get the title localized args.
+     * @return Title localized args.
+     */
+    public String[] getTitleLocArgs() {
+        return titleLocArgs;
+    }
+
+    /**
+     * Set the title localized args.
+     * @param titleLocArgs Title localized args.
+     */
+    public void setTitleLocArgs(String[] titleLocArgs) {
+        this.titleLocArgs = titleLocArgs;
+    }
+
+    /**
      * Get long message text, used as a notification body. Place your message to this property,
      * for example "Your today's balance is $782.40".
      * @return Notification body text.
@@ -71,6 +107,38 @@ public class PushMessageBody {
      */
     public void setBody(String body) {
         this.body = body;
+    }
+
+    /**
+     * Get the body localized key.
+     * @return Body localized key.
+     */
+    public String getBodyLocKey() {
+        return bodyLocKey;
+    }
+
+    /**
+     * Set the body localized key.
+     * @param bodyLocKey Body localized key.
+     */
+    public void setBodyLocKey(String bodyLocKey) {
+        this.bodyLocKey = bodyLocKey;
+    }
+
+    /**
+     * Get the body localized args.
+     * @return Body localized args.
+     */
+    public String[] getBodyLocArgs() {
+        return bodyLocArgs;
+    }
+
+    /**
+     * Set the body localized args.
+     * @param bodyLocArgs Body localized args.
+     */
+    public void setBodyLocArgs(String[] bodyLocArgs) {
+        this.bodyLocArgs = bodyLocArgs;
     }
 
     /**
