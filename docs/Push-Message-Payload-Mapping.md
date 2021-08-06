@@ -10,7 +10,11 @@ Abstract push message payload is represented using this object:
 public class PushMessageBody {
 
     private String title;
+    private String titleLocKey;
+    private String[] titleLocArgs;
     private String body;
+    private String bodyLocKey;
+    private String[] bodyLocArgs;
     private Integer badge;
     private String sound;
     private String icon;
@@ -27,21 +31,25 @@ public class PushMessageBody {
 Attributes of the abstract push message object are mapped to APNS payload in following way:
 
 
-| Abstract Message Attributes | APNS Mapped Attributes  |
-|-----------------------------|-------------------------|
-| `title`                     | `aps.alert.title`       |
-| `body`                      | `aps.alert.body`        |
-| `badge`                     | `aps.badge`             |
-| `category`                  | `aps.category`          |
-| `sound`                     | `aps.sound`             |
-| `icon`                      | _ignored_               |
-| `extras`                    | `[key:value]` custom data|
-| `collapseKey`               | `aps.thread-id`         |
-| `validUntil`                | Message expiration time on APNS servers (technical attribute), mapped to apns-expiration HTTP header.|
+| Abstract Message Attributes | APNS Mapped Attributes     |
+|-----------------------------|----------------------------|
+| `title`                     | `aps.alert.title`          |
+| `titleLocKey`               | `aps.alert.title-loc-key`  |
+| `titleLocArgs`              | `aps.alert.title-loc-args` |
+| `body`                      | `aps.alert.body`           |
+| `bodyLocKey`                | `aps.alert.loc-key`        |
+| `bodyLocArgs`               | `aps.alert.loc-args`       |
+| `badge`                     | `aps.badge`                |
+| `category`                  | `aps.category`             |
+| `sound`                     | `aps.sound`                |
+| `icon`                      | _ignored_                  |
+| `extras`                    | `[key:value]` custom data  |
+| `collapseKey`               | `aps.thread-id`            |
+| `validUntil`                | Message expiration time on APNS servers (technical attribute), mapped to `apns-expiration` HTTP header.|
 
 For the documentation of the APNS payload reference, please read the official Apple documentation:
 
-- [Local and Remote Notification Programming Guide](https://developer.apple.com/library/content/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/APNSOverview.html#//apple_ref/doc/uid/TP40008194-CH8-SW1)
+- [Local and Remote Notification Programming Guide](https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/PayloadKeyReference.html)
 
 ### Silent Messages
 
@@ -51,17 +59,21 @@ In case a push message is marked with the `silent` flag, we add `content-availab
 
 Attributes of the abstract push message object are mapped to FCM payload in following way:
 
-| Abstract Message Attribute      | FCM Mapped Attributes |
-|---------------------------------|------------------------|
-| `title`                         | `notification.title`   |
-| `body`                          | `notification.body`    |
-| `badge`                         | _ignored_              |
-| `category`                      | `notification.tag`     |
-| `sound`                         | `notification.sound`   |
-| `icon`                          | `notification.icon`
-| `collapseKey`                   | `collapse_key`         |
-| `validUntil`                    | _ignored_              |
-| `extras`                        | `data`                 |
+| Abstract Message Attribute      | FCM Mapped Attributes         |
+|---------------------------------|-------------------------------|
+| `title`                         | `notification.title`          |
+| `titleLocKey`                   | `notification.title_loc_key`  |
+| `titleLocArgs`                  | `notification.title_loc_args` |
+| `body`                          | `notification.body`           |
+| `bodyLocKey`                    | `notification.body_loc_key`   |
+| `bodyLocArgs`                   | `notification.body_loc_args`  |
+| `badge`                         | _ignored_                     |
+| `category`                      | `notification.tag`            |
+| `sound`                         | `notification.sound`          |
+| `icon`                          | `notification.icon`           |
+| `collapseKey`                   | `collapse_key`                |
+| `validUntil`                    | _ignored_                     |
+| `extras`                        | `data`                        |
 
 For the documentation of the FCM payload reference, please read the official Google documentation:
 

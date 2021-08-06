@@ -86,7 +86,9 @@ public class DeviceRegistrationController {
 
 The code checks for `PowerAuthApiAuthentication` instance in the security context and if it is present, it binds the activation ID with the push service token.
 
-**Note: We are using 'dummy' request (Map<String,String>) and response (String) objects. Replace them with your proprietary classes.**
+<!-- begin box info -->
+Note: We are using 'dummy' request (`Map<String,String>`) and response (`String`) objects. Replace them with your proprietary classes.
+<!-- end -->
 
 ## Integrate with Push Producer Applications
 
