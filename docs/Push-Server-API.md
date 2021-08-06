@@ -352,13 +352,18 @@ Send a single push message to given user via provided application, optionally to
     "message": {
       "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
       "userId": "123",
+      "priority": "HIGH",
       "attributes": {
         "personal": true,
         "silent": true
       },
       "body": {
         "title": "Balance update",
+        "titleLocKey": "balance.update.title",
+        "titleLocArgs": [],
         "body": "Your balance is now $745.00",
+        "bodyLocKey": "balance.update.body",
+        "bodyLocArgs": [],
         "badge": 3,
         "sound": "default",
         "icon": "custom-icon",
@@ -377,9 +382,10 @@ Send a single push message to given user via provided application, optionally to
 
 - `appId` - Application that user/s is/are using.
 - `message` - Body for notification creating.
-    - `userId` - Identifier of user.
     - `activationId` - Identifier of specific activation, that usually corresponds to the device.
-    - `attributes` - Set of boolean variables
+    - `userId` - Identifier of user.
+    - `priority` - Priority of the message, `NORMAL` or `HIGH` (default).
+    - `attributes` - Set of boolean variables:
         - `silent` - Sent silent push notification (If _true_, no system UI is displayed).
         - `personal` - If _true_ and activation is not in `ACTIVE` state the message is not sent.
     - `body` - Body object is described in [here](./Push-Message-Payload-Mapping.md)
@@ -422,13 +428,18 @@ Sends a message message batch - each item in the batch represents a message to g
       {
         "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
         "userId": "123",
+        "priority": "HIGH",
         "attributes": {
           "personal": true,
           "silent": true
         },
         "body": {
           "title": "Balance update",
+          "titleLocKey": "balance.update.title",
+          "titleLocArgs": [],
           "body": "Your balance is now $745.00",
+          "bodyLocKey": "balance.update.body",
+          "bodyLocArgs": [],
           "badge": 3,
           "sound": "default",
           "icon": "custom-icon",
@@ -443,13 +454,18 @@ Sends a message message batch - each item in the batch represents a message to g
       {
         "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
         "userId": "1234",
+        "priority": "HIGH",
         "attributes": {
           "personal": true,
           "silent": true
         },
         "body": {
           "title": "Balance update",
+          "titleLocKey": "balance.update.title",
+          "titleLocArgs": [],
           "body": "Your balance is now $745.00",
+          "bodyLocKey": "balance.update.body",
+          "bodyLocArgs": [],
           "badge": 3,
           "sound": "default",
           "icon": "custom-icon",
@@ -536,10 +552,14 @@ Create a campaign with application that campaign is using and certain message th
 ```json
 {
   "requestObject": {
-  "appId": "2",
+    "appId": "2",
     "message": {
       "title": "Balance update",
+      "titleLocKey": "balance.update.title",
+      "titleLocArgs": [],
       "body": "Your balance is now $745.00",
+      "bodyLocKey": "balance.update.body",
+      "bodyLocArgs": [],
       "badge": 3,
       "sound": "default",
       "icon": "custom-icon",
@@ -664,7 +684,11 @@ Return details of a specific campaign.
     "sent": "false",
     "message": {
       "title": "Balance update",
+      "titleLocKey": "balance.update.title",
+      "titleLocArgs": [],
       "body": "Your balance is now $745.00",
+      "bodyLocKey": "balance.update.body",
+      "bodyLocArgs": [],
       "badge": 3,
       "sound": "default",
       "icon": "custom-icon",
@@ -717,7 +741,11 @@ Return list of actually registered campaigns, based on `all` parameter. This par
       "sent": "false",
       "message": {
         "title": "Balance update",
+        "titleLocKey": "balance.update.title",
+        "titleLocArgs": [],
         "body": "Your balance is now $745.00",
+        "bodyLocKey": "balance.update.body",
+        "bodyLocArgs": [],
         "badge": 3,
         "sound": "default",
         "icon": "custom-icon",
@@ -734,7 +762,11 @@ Return list of actually registered campaigns, based on `all` parameter. This par
       "sent": "true",
       "message": {
         "title": "Balance update",
+        "titleLocKey": "balance.update.title",
+        "titleLocArgs": [],
         "body": "Your balance is now $300.00",
+        "bodyLocKey": "balance.update.body",
+        "bodyLocArgs": [],
         "badge": 3,
         "sound": "default",
         "icon": "custom-icon",
