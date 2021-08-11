@@ -153,14 +153,19 @@ public class PushSendingWorker {
         // Extraction of FCM success response
         final Consumer<ResponseEntity<FcmSuccessResponse>> onSuccess = responseEntity -> {
             final FcmSuccessResponse response = responseEntity.getBody();
-            if (response != null && response.getName() != null && response.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
-                logger.info("Notification sent, response: {}", response.getName());
-                callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
-                return;
+            if (response != null && response.getName() != null) {
+                if (response.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
+                    logger.info("Notification sent, response: {}", response.getName());
+                    callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
+                } else {
+                    logger.error("Invalid response received from FCM, notification sending failed - unexpected response name: {}", response.getName());
+                    callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
+                }
+            } else {
+                // This state should not happen, only in case when response from server is invalid
+                logger.error("Invalid response received from FCM, notification sending failed - empty or invalid response");
+                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
             }
-            // This state should not happen, only in case when response from server is invalid
-            logger.error("Invalid response received from FCM, notification sending failed");
-            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         };
 
         // Callback when FCM request fails
