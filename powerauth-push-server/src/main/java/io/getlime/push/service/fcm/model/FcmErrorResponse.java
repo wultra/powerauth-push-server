@@ -17,6 +17,8 @@
 package io.getlime.push.service.fcm.model;
 
 import com.google.api.client.util.Key;
+import com.google.common.collect.ImmutableMap;
+import com.google.firebase.messaging.MessagingErrorCode;
 
 import java.util.List;
 import java.util.Map;
@@ -28,82 +30,51 @@ import java.util.Map;
  */
 public class FcmErrorResponse {
 
-    // FCM error type
+    // See class com.google.firebase.messaging.internal.MessagingServiceErrorResponse
+    private static final Map<String, MessagingErrorCode> MESSAGING_ERROR_CODES =
+            ImmutableMap.<String, MessagingErrorCode>builder()
+                    .put("APNS_AUTH_ERROR", MessagingErrorCode.THIRD_PARTY_AUTH_ERROR)
+                    .put("INTERNAL", MessagingErrorCode.INTERNAL)
+                    .put("INVALID_ARGUMENT", MessagingErrorCode.INVALID_ARGUMENT)
+                    .put("QUOTA_EXCEEDED", MessagingErrorCode.QUOTA_EXCEEDED)
+                    .put("SENDER_ID_MISMATCH", MessagingErrorCode.SENDER_ID_MISMATCH)
+                    .put("THIRD_PARTY_AUTH_ERROR", MessagingErrorCode.THIRD_PARTY_AUTH_ERROR)
+                    .put("UNAVAILABLE", MessagingErrorCode.UNAVAILABLE)
+                    .put("UNREGISTERED", MessagingErrorCode.UNREGISTERED)
+                    .build();
+
     private static final String FCM_ERROR_TYPE =
-            "type.googleapis.com/google.firebase.fcm.v1.FcmErrorCode";
-
-    // FCM error codes, see class com.google.firebase.messaging.FirebaseMessaging for original definition of error codes
-
-    /**
-     * Internal error.
-     */
-    public static final String INTERNAL_ERROR = "internal-error";
-
-    /**
-     * Unknown error.
-     */
-    public static final String UNKNOWN_ERROR = "unknown-error";
-
-    /**
-     * Error caused by the token not registered.
-     */
-    public static final String REGISTRATION_TOKEN_NOT_REGISTERED = "registration-token-not-registered";
-
-    /**
-     * Error caused by invalid APNS credentials (when sending APNS messages via FCM).
-     */
-    public static final String INVALID_APNS_CREDENTIALS = "invalid-apns-credentials";
-
-    /**
-     * Invalid argument.
-     */
-    public static final String INVALID_ARGUMENT = "invalid-argument";
-
-    /**
-     * Message rate was exceeded.
-     */
-    public static final String MESSAGE_RATE_EXCEEDED = "message-rate-exceeded";
-
-    /**
-     * Mismatched credentials.
-     */
-    public static final String MISMATCHED_CREDENTIAL = "mismatched-credential";
-
-    /**
-     * Server is unavailable.
-     */
-    public static final String SERVER_UNAVAILABLE = "server-unavailable";
+            "type.googleapis.com/google.firebase.fcm.v1.FcmError";
 
     @Key("error")
     private Map<String, Object> error;
 
-    /**
-     * Get FCM error code.
-     * @return FCM error code.
-     */
-    public String getErrorCode() {
+    public String getStatus() {
+        if (error == null) {
+            return null;
+        }
+        return (String) error.get("status");
+    }
+
+    public MessagingErrorCode getMessagingErrorCode() {
         if (error == null) {
             return null;
         }
         Object details = error.get("details");
         if (details instanceof List) {
-            for (Object detail : (List) details) {
+            for (Object detail : (List<?>) details) {
                 if (detail instanceof Map) {
-                    Map detailMap = (Map) detail;
+                    Map<?,?> detailMap = (Map<?,?>) detail;
                     if (FCM_ERROR_TYPE.equals(detailMap.get("@type"))) {
-                        return (String) detailMap.get("errorCode");
+                        String errorCode = (String) detailMap.get("errorCode");
+                        return MESSAGING_ERROR_CODES.get(errorCode);
                     }
                 }
             }
         }
-        return (String) error.get("status");
+        return null;
     }
 
-    /**
-     * Get FCM error message.
-     *
-     * @return FCM error message.
-     */
     public String getErrorMessage() {
         if (error != null) {
             return (String) error.get("message");

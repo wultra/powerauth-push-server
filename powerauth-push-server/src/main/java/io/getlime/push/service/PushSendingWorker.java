@@ -27,6 +27,7 @@ import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.MessagingErrorCode;
 import com.wultra.core.rest.client.base.RestClientException;
 import io.getlime.push.model.enumeration.Priority;
 import io.getlime.push.util.CaCertUtil;
@@ -38,7 +39,6 @@ import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.service.apns.ApnsRejectionReason;
 import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmModelConverter;
-import io.getlime.push.service.fcm.model.FcmErrorResponse;
 import io.getlime.push.service.fcm.model.FcmSuccessResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,27 +166,26 @@ public class PushSendingWorker {
         // Callback when FCM request fails
         final Consumer<Throwable> onError = t -> {
             if (t instanceof RestClientException) {
-                final String errorCode = fcmConverter.convertExceptionToErrorCode((RestClientException) t);
+                final MessagingErrorCode errorCode = fcmConverter.convertExceptionToErrorCode((RestClientException) t);
                 logger.error("FCM server returned error response: {}", ((RestClientException) t).getResponse());
                 switch (errorCode) {
-                    case FcmErrorResponse.REGISTRATION_TOKEN_NOT_REGISTERED:
+                    case UNREGISTERED:
                         logger.error("Push message rejected by FCM gateway, device registration will be removed. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                         return;
 
-                    case FcmErrorResponse.SERVER_UNAVAILABLE:
-                    case FcmErrorResponse.INTERNAL_ERROR:
-                    case FcmErrorResponse.MESSAGE_RATE_EXCEEDED:
+                    case UNAVAILABLE:
+                    case INTERNAL:
+                    case QUOTA_EXCEEDED:
                         // TODO - implement throttling of messages, see:
                         // https://firebase.google.com/docs/cloud-messaging/admin/errors
                         logger.error("Push message rejected by FCM gateway, message status set to PENDING. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
                         return;
 
-                    case FcmErrorResponse.MISMATCHED_CREDENTIAL:
-                    case FcmErrorResponse.INVALID_APNS_CREDENTIALS:
-                    case FcmErrorResponse.INVALID_ARGUMENT:
-                    case FcmErrorResponse.UNKNOWN_ERROR:
+                    case SENDER_ID_MISMATCH:
+                    case THIRD_PARTY_AUTH_ERROR:
+                    case INVALID_ARGUMENT:
                         logger.error("Push message rejected by FCM gateway, error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         return;

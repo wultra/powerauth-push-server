@@ -23,6 +23,7 @@ import com.google.api.client.json.JsonParser;
 import com.google.common.collect.ImmutableMap;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.MessagingErrorCode;
 import com.wultra.core.rest.client.base.RestClientException;
 import io.getlime.push.service.fcm.model.FcmErrorResponse;
 import org.slf4j.Logger;
@@ -49,24 +50,6 @@ public class FcmModelConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(FcmModelConverter.class);
 
-    // See class com.google.firebase.messaging.FirebaseMessaging
-    private static final Map<String, String> FCM_ERROR_CODES = ImmutableMap.<String, String>builder()
-            // FCM v1 canonical error codes
-            .put("NOT_FOUND", FcmErrorResponse.REGISTRATION_TOKEN_NOT_REGISTERED)
-            .put("PERMISSION_DENIED", FcmErrorResponse.MISMATCHED_CREDENTIAL)
-            .put("RESOURCE_EXHAUSTED", FcmErrorResponse.MESSAGE_RATE_EXCEEDED)
-            .put("UNAUTHENTICATED", FcmErrorResponse.INVALID_APNS_CREDENTIALS)
-
-            // FCM v1 new error codes
-            .put("APNS_AUTH_ERROR", FcmErrorResponse.INVALID_APNS_CREDENTIALS)
-            .put("INTERNAL", FcmErrorResponse.INTERNAL_ERROR)
-            .put("INVALID_ARGUMENT", FcmErrorResponse.INVALID_ARGUMENT)
-            .put("QUOTA_EXCEEDED", FcmErrorResponse.MESSAGE_RATE_EXCEEDED)
-            .put("SENDER_ID_MISMATCH", FcmErrorResponse.MISMATCHED_CREDENTIAL)
-            .put("UNAVAILABLE", FcmErrorResponse.SERVER_UNAVAILABLE)
-            .put("UNREGISTERED", FcmErrorResponse.REGISTRATION_TOKEN_NOT_REGISTERED)
-            .build();
-
     // Google Json Factory (FCM model classes are not compatible with Jackson)
     private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
 
@@ -76,20 +59,20 @@ public class FcmModelConverter {
      * @param exception Rest client exception.
      * @return FCM error code.
      */
-    public String convertExceptionToErrorCode(RestClientException exception) {
+    public MessagingErrorCode convertExceptionToErrorCode(RestClientException exception) {
         final FcmErrorResponse response = new FcmErrorResponse();
-        String code;
+        MessagingErrorCode code;
         try {
             final String error = exception.getResponse();
             final JsonParser parser = jsonFactory.createJsonParser(error);
             parser.parseAndClose(response);
-            code = FCM_ERROR_CODES.get(response.getErrorCode());
+            code = response.getMessagingErrorCode();
             if (code == null) {
-                code = FcmErrorResponse.UNKNOWN_ERROR;
+                code = MessagingErrorCode.INTERNAL;
             }
         } catch (IOException ex) {
             logger.error("Error occurred while parsing error response: {}", ex.getMessage(), ex);
-            code = FcmErrorResponse.UNKNOWN_ERROR;
+            code = MessagingErrorCode.INTERNAL;
         }
         return code;
     }
