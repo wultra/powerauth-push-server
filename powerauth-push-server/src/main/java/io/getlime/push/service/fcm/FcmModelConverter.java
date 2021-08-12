@@ -66,6 +66,9 @@ public class FcmModelConverter {
             final String error = exception.getResponse();
             final JsonParser parser = jsonFactory.createJsonParser(error);
             parser.parseAndClose(response);
+            logger.debug("FCM messaging error code: {}", response.getMessagingErrorCode());
+            logger.debug("FCM status: {}", response.getStatus());
+            logger.debug("FCM error message: {}", response.getErrorMessage());
             code = response.getMessagingErrorCode();
             if (code == null) {
                 code = MessagingErrorCode.INTERNAL;
