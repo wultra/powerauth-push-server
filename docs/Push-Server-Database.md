@@ -29,14 +29,14 @@ Stores push tokens specific for a given device.
 
 ```sql
 CREATE TABLE push_device_registration (
-	id INTEGER NOT NULL CONSTRAINT push_device_registration_pkey PRIMARY KEY,
-	activation_id VARCHAR(37),
-	user_id VARCHAR(255),
-	app_id INTEGER NOT NULL,
-	platform VARCHAR(255) NOT NULL,
-	push_token VARCHAR(255) NOT NULL,
-	timestamp_last_registered TIMESTAMP(6) NOT NULL,
-	is_active BOOLEAN
+    id INTEGER NOT NULL CONSTRAINT push_device_registration_pkey PRIMARY KEY,
+    activation_id VARCHAR(37),
+    user_id VARCHAR(255),
+    app_id INTEGER NOT NULL,
+    platform VARCHAR(255) NOT NULL,
+    push_token VARCHAR(255) NOT NULL,
+    timestamp_last_registered TIMESTAMP(6) NOT NULL,
+    is_active BOOLEAN
 );
 
 CREATE INDEX push_device_app_token ON push_device_registration (app_id, push_token);
@@ -83,15 +83,15 @@ Stores per-app credentials used for communication with APNs / FCM.
 
 ```sql
 CREATE TABLE push_app_credentials (
-	id INTEGER NOT NULL CONSTRAINT push_app_credentials_pkey PRIMARY KEY,
-	app_id INTEGER NOT NULL,
-	ios_key_id VARCHAR(255),
-	ios_private_key BYTEA,
-	ios_team_id VARCHAR(255),
-	ios_bundle VARCHAR(255),
-	ios_environment VARCHAR(32),
-	android_private_key BYTEA,
-	android_project_id VARCHAR(255)
+    id INTEGER NOT NULL CONSTRAINT push_app_credentials_pkey PRIMARY KEY,
+    app_id INTEGER NOT NULL,
+    ios_key_id VARCHAR(255),
+    ios_private_key BYTEA,
+    ios_team_id VARCHAR(255),
+    ios_bundle VARCHAR(255),
+    ios_environment VARCHAR(32),
+    android_private_key BYTEA,
+    android_project_id VARCHAR(255)
 );
 
 CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials (app_id);
@@ -133,15 +133,15 @@ Stores individual messages that were sent by the push server and their sent stat
 
 ```sql
 CREATE TABLE push_message (
-	id INTEGER NOT NULL CONSTRAINT push_message_pkey PRIMARY KEY,
-	device_registration_id INTEGER NOT NULL,
-	user_id VARCHAR(255) NOT NULL,
-	activation_id VARCHAR(37),
-	is_silent BOOLEAN DEFAULT false NOT NULL,
-	is_personal BOOLEAN DEFAULT false NOT NULL,
-	message_body VARCHAR(2048) NOT NULL,
-	timestamp_created TIMESTAMP(6) NOT NULL,
-	status INTEGER NOT NULL
+    id INTEGER NOT NULL CONSTRAINT push_message_pkey PRIMARY KEY,
+    device_registration_id INTEGER NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    activation_id VARCHAR(37),
+    is_silent BOOLEAN DEFAULT false NOT NULL,
+    is_personal BOOLEAN DEFAULT false NOT NULL,
+    message_body VARCHAR(2048) NOT NULL,
+    timestamp_created TIMESTAMP(6) NOT NULL,
+    status INTEGER NOT NULL
 );
 
 CREATE INDEX push_message_status ON push_message (status);
@@ -183,13 +183,13 @@ Stores particular campaigns together with notification messages.
 
 ```sql
 CREATE TABLE push_campaign (
-	id INTEGER NOT NULL CONSTRAINT push_campaign_pkey PRIMARY KEY,
-	app_id INTEGER NOT NULL,
-	message VARCHAR(4000) NOT NULL,
-	is_sent BOOLEAN DEFAULT false NOT NULL,
-	timestamp_created TIMESTAMP(6) NOT NULL,
-	timestamp_sent TIMESTAMP(6),
-	timestamp_completed TIMESTAMP(6)
+    id INTEGER NOT NULL CONSTRAINT push_campaign_pkey PRIMARY KEY,
+    app_id INTEGER NOT NULL,
+    message VARCHAR(4000) NOT NULL,
+    is_sent BOOLEAN DEFAULT false NOT NULL,
+    timestamp_created TIMESTAMP(6) NOT NULL,
+    timestamp_sent TIMESTAMP(6),
+    timestamp_completed TIMESTAMP(6)
 );
 
 CREATE INDEX push_campaign_sent ON push_campaign (is_sent);
@@ -229,10 +229,10 @@ Stores users who are going to get notification from specific campaign.
 
 ```sql
 CREATE TABLE push_campaign_user (
-	id INTEGER NOT NULL CONSTRAINT push_campaign_user_pkey PRIMARY KEY,
-	campaign_id INTEGER NOT NULL,
-	user_id INTEGER NOT NULL,
-	timestamp_created TIMESTAMP(6) NOT NULL
+    id INTEGER NOT NULL CONSTRAINT push_campaign_user_pkey PRIMARY KEY,
+    campaign_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    timestamp_created TIMESTAMP(6) NOT NULL
 );
 
 CREATE INDEX push_campaign_user_campaign ON push_campaign_user (campaign_id, user_id);
