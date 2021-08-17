@@ -19,7 +19,7 @@ ALTER TABLE push_app_credentials ADD ios_environment VARCHAR(32) NULL;
 #### Oracle
 
 ```sql
-ALTER TABLE push_app_credentials ADD ios_environment VARCHAR2(32) NULL;
+ALTER TABLE push_app_credentials ADD ios_environment VARCHAR2(32 CHAR) NULL;
 ```
 
 #### MySQL
