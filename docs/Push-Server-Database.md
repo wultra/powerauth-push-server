@@ -6,8 +6,9 @@ PowerAuth Push Server requires several database tables in order to work.
 
 You can download DDL scripts for supported databases:
 
-- [Oracle - Create Database Schema](./sql/oracle/create_push_server_schema.sql)
-- [MySQL - Create Database Schema](./sql/mysql/create_push_server_schema.sql)
+- [PostgreSQL](./sql/postgresql/create_push_server_schema.sql)
+- [Oracle](./sql/oracle/create_push_server_schema.sql)
+- [MySQL](./sql/mysql/create_push_server_schema.sql)
 
 ## Tables
 
