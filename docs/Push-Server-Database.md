@@ -268,6 +268,8 @@ CREATE INDEX push_campaign_user_detail ON push_campaign_user (user_id);
 
 Sequence for application credentials registered in the system.
 
+#### Schema
+
 ```sql
 CREATE SEQUENCE push_credentials_seq;
 ```
@@ -277,6 +279,8 @@ CREATE SEQUENCE push_credentials_seq;
 ### Push Device Registration Sequence
 
 Sequence for device registrations in the system.
+
+#### Schema
 
 ```sql
 CREATE SEQUENCE push_device_registration_seq;
@@ -288,6 +292,8 @@ CREATE SEQUENCE push_device_registration_seq;
 
 Sequence for push messages sent by the system.
 
+#### Schema
+
 ```sql
 CREATE SEQUENCE push_message_seq;
 ```
@@ -298,6 +304,8 @@ CREATE SEQUENCE push_message_seq;
 
 Sequence for push campaigns that are created in the system.
 
+#### Schema
+
 ```sql
 CREATE SEQUENCE push_campaign_seq;
 ```
@@ -307,6 +315,8 @@ CREATE SEQUENCE push_campaign_seq;
 ### Push Campaign User Sequence
 
 Sequence for user assignments to campaigns.
+
+#### Schema
 
 ```sql
 CREATE SEQUENCE push_campaign_user_seq;
