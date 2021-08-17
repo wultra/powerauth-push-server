@@ -26,6 +26,7 @@ public class UpdateIosRequest {
     private String bundle;
     private String keyId;
     private String teamId;
+    private String environment;
     private String privateKeyBase64;
 
     /**
@@ -40,13 +41,15 @@ public class UpdateIosRequest {
      * @param bundle The iOS bundle record.
      * @param keyId The iOS key ID record.
      * @param teamId The iOS team ID record.
+     * @param environment The APNs environment (per-app config).
      * @param privateKeyBase64 Base64 encoded private key.
      */
-    public UpdateIosRequest(Long id, String bundle, String keyId, String teamId, String privateKeyBase64) {
+    public UpdateIosRequest(Long id, String bundle, String keyId, String teamId, String environment, String privateKeyBase64) {
         this.id = id;
         this.bundle = bundle;
         this.keyId = keyId;
         this.teamId = teamId;
+        this.environment = environment;
         this.privateKeyBase64 = privateKeyBase64;
     }
 
@@ -112,6 +115,22 @@ public class UpdateIosRequest {
      */
     public void setTeamId(String teamId) {
         this.teamId = teamId;
+    }
+
+    /**
+     * Get APNs environment.
+     * @return APNs environment.
+     */
+    public String getEnvironment() {
+        return environment;
+    }
+
+    /**
+     * Set APNs environment.
+     * @param environment APNs environment.
+     */
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 
     /**

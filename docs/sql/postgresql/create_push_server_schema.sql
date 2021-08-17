@@ -20,6 +20,7 @@ CREATE TABLE push_app_credentials (
 	ios_private_key BYTEA,
 	ios_team_id VARCHAR(255),
 	ios_bundle VARCHAR(255),
+	ios_environment VARCHAR(32),
 	android_private_key BYTEA,
 	android_project_id VARCHAR(255)
 );

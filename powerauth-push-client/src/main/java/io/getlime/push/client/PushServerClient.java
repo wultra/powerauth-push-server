@@ -537,13 +537,14 @@ public class PushServerClient {
      * @param bundle The iOS bundle record.
      * @param keyId The iOS key record.
      * @param teamId The iOS team ID record.
+     * @param environment The APNs environment.
      * @param privateKey The iOS private key bytes.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public Response updateIos(Long id, String bundle, String keyId, String teamId, byte[] privateKey) throws PushServerClientException {
+    public Response updateIos(Long id, String bundle, String keyId, String teamId, String environment, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
-        final UpdateIosRequest request = new UpdateIosRequest(id, bundle, keyId, teamId, privateKeyBase64);
+        final UpdateIosRequest request = new UpdateIosRequest(id, bundle, keyId, teamId, environment, privateKeyBase64);
         logger.info("Calling push server to update iOS, ID: {} - start", id);
         final Response response = putObjectImpl("/admin/app/ios/update", new ObjectRequest<>(request));
         logger.info("Calling push server to update iOS, ID: {} - finish", id);

@@ -1,5 +1,7 @@
 # Push Server Database
 
+<!-- TEMPLATE database -->
+
 PowerAuth Push Server requires several database tables in order to work.
 
 You can download DDL scripts for supported databases:
@@ -9,20 +11,40 @@ You can download DDL scripts for supported databases:
 
 ## Tables
 
+<!-- begin remove -->
 - [Push devices](#push-devices-table)
 - [Push service credentials](#push-service-credentials-table)
 - [Push messages](#push-messages-table)
 - [Push campaigns](#push-campaigns-table)
 - [Push campaign users](#push-campaign-users-table)
+<!-- end -->
 
+<!-- begin database table push_device_registration -->
 ### Push Devices Table
 
+Stores push tokens specific for a given device.
 
-**Table name**: `push_device_registration`
+#### Schema
 
-**Purpose**: Stores push tokens specific for a given device.
+```sql
+CREATE TABLE push_device_registration (
+	id INTEGER NOT NULL CONSTRAINT push_device_registration_pkey PRIMARY KEY,
+	activation_id VARCHAR(37),
+	user_id VARCHAR(255),
+	app_id INTEGER NOT NULL,
+	platform VARCHAR(255) NOT NULL,
+	push_token VARCHAR(255) NOT NULL,
+	timestamp_last_registered TIMESTAMP(6) NOT NULL,
+	is_active BOOLEAN
+);
 
-**Columns**:
+CREATE INDEX push_device_app_token ON push_device_registration (app_id, push_token);
+CREATE INDEX push_device_user_app ON push_device_registration (user_id, app_id);
+CREATE UNIQUE INDEX push_device_activation ON push_device_registration (activation_id);
+CREATE UNIQUE INDEX push_device_activation_token ON push_device_registration (activation_id, push_token);
+```
+
+#### Columns
 
 | Name | Type | Info | Note |
 |---|---|---|---|
@@ -35,13 +57,46 @@ You can download DDL scripts for supported databases:
 | `timestamp_last_registered` | TIMESTAMP | - | Timestamp of the last device registration. |
 | `is_active` | INT(11) | - | PowerAuth activation status (boolean), used as an activation status cache so that communication with PowerAuth Server can be minimal. |
 
+#### Keys
+
+| Name | Primary | References | Description |
+|---|---|---|---|
+| `push_device_registration_pkey` | Y | `id` | Primary key for table records |
+
+#### Indexes
+
+| Name | Unique | Columns | Description |
+|---|---|---|---|
+| `push_device_app_token`        | N | `app_id, push_token` | Index for faster lookup by push token for given app. |
+| `push_device_user_app`         | N | `user_id, app_id` | Index for faster lookup by user ID for given app. |
+| `push_device_activation`       | Y | `activation_id` | Index for faster lookup by activation ID. |
+| `push_device_activation_token` | Y | `activation_id, push_token` | Index for faster lookup by push token with constraints to activation ID. |
+<!-- end -->
+
+<!-- begin database table push_app_credentials -->
 ### Push Service Credentials Table
 
-**Table name**: `push_app_credentials`
+Stores per-app credentials used for communication with APNs / FCM.
 
-**Purpose**: Stores per-app credentials used for communication with APNs / FCM.
+#### Schema
 
-**Columns**:
+```sql
+CREATE TABLE push_app_credentials (
+	id INTEGER NOT NULL CONSTRAINT push_app_credentials_pkey PRIMARY KEY,
+	app_id INTEGER NOT NULL,
+	ios_key_id VARCHAR(255),
+	ios_private_key BYTEA,
+	ios_team_id VARCHAR(255),
+	ios_bundle VARCHAR(255),
+	ios_environment VARCHAR(32),
+	android_private_key BYTEA,
+	android_project_id VARCHAR(255)
+);
+
+CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials (app_id);
+```
+
+#### Columns
 
 | Name | Type | Info | Note |
 |---|---|---|---|
@@ -51,16 +106,47 @@ You can download DDL scripts for supported databases:
 | `ios_private_key` | BLOB | - | Binary representation of P8 file with private key used for Apple's APNs service. |
 | `ios_team_id` | VARCHAR(255) | - | Team ID used for sending push notifications. |
 | `ios_bundle` | VARCHAR(255) | - | Application bundle ID, used as a APNs "topic". |
+| `ios_environment` | VARCHAR(32) | - | Per-application APNs environment setting. `NULL` or unknown value inherits from global server configuration, values `development` or `production` override the settings. |
 | `android_private_key` | BLOB | - | Firebase service account private key used when obtaining access tokens for FCM HTTP v1 API. |
 | `android_project_id` | VARCHAR(255) | - | Firebase project ID, used when sending push messages using FCM. |
 
+#### Keys
+
+| Name | Primary | References | Description |
+|---|---|---|---|
+| `push_app_credentials_pkey` | Y | `id` | Primary key for table records |
+
+#### Indexes
+
+| Name | Unique | Columns | Description |
+|---|---|---|---|
+| `push_app_cred_app` | Y | `app_id` | Index for faster lookup by application. |
+<!-- end -->
+
+<!-- begin database table push_message -->
 ### Push Messages Table
 
-**Table name**: `push_message`
+Stores individual messages that were sent by the push server and their sent status.
 
-**Purpose**: Stores individual messages that were sent by the push server and their sent status.
+#### Schema
 
-**Columns**:
+```sql
+CREATE TABLE push_message (
+	id INTEGER NOT NULL CONSTRAINT push_message_pkey PRIMARY KEY,
+	device_registration_id INTEGER NOT NULL,
+	user_id VARCHAR(255) NOT NULL,
+	activation_id VARCHAR(37),
+	is_silent BOOLEAN DEFAULT false NOT NULL,
+	is_personal BOOLEAN DEFAULT false NOT NULL,
+	message_body VARCHAR(2048) NOT NULL,
+	timestamp_created TIMESTAMP(6) NOT NULL,
+	status INTEGER NOT NULL
+);
+
+CREATE INDEX push_message_status ON push_message (status);
+```
+
+#### Columns
 
 | Name | Type | Info | Note |
 |---|---|---|---|
@@ -74,13 +160,41 @@ You can download DDL scripts for supported databases:
 | `timestamp_created` | TIMESTAMP | - | Date and time when the record was created. |
 | `status` | INT | - | Value indicating message send status. (-1 = FAILED, 0 = PENDING, 1 = SENT). |
 
+#### Keys
+
+| Name | Primary | References | Description |
+|---|---|---|---|
+| `push_message_pkey` | Y | `id` | Primary key for table records |
+
+#### Indexes
+
+| Name | Unique | Columns | Description |
+|---|---|---|---|
+| `push_message_status` | N | `status` | Index for easier data split by the push sending status. |
+<!-- end -->
+
+<!-- begin database table push_campaign -->
 ### Push Campaigns Table
 
-**Table name**: `push_campaign`
+Stores particular campaigns together with notification messages.
 
-**Purpose**: Stores particular campaigns together with notification messages
+#### Schema
 
-**Columns**:
+```sql
+CREATE TABLE push_campaign (
+	id INTEGER NOT NULL CONSTRAINT push_campaign_pkey PRIMARY KEY,
+	app_id INTEGER NOT NULL,
+	message VARCHAR(4000) NOT NULL,
+	is_sent BOOLEAN DEFAULT false NOT NULL,
+	timestamp_created TIMESTAMP(6) NOT NULL,
+	timestamp_sent TIMESTAMP(6),
+	timestamp_completed TIMESTAMP(6)
+);
+
+CREATE INDEX push_campaign_sent ON push_campaign (is_sent);
+```
+
+#### Columns
 
 | Name | Type | Info | Note |
 |---|---|---|---|
@@ -92,13 +206,39 @@ You can download DDL scripts for supported databases:
 | `timestamp_sent` | TIMESTAMP | - | Timestamp of campaign sending initiation. |
 | `timestamp_completed` | TIMESTAMP | - | Timestamp of campaign successful sending (all messages sent). |
 
+#### Keys
+
+| Name | Primary | References | Description |
+|---|---|---|---|
+| `push_campaign_pkey` | Y | `id` | Primary key for table records |
+
+#### Indexes
+
+| Name | Unique | Columns | Description |
+|---|---|---|---|
+| `push_campaign_sent` | N | `is_sent` | Index for easier data split by the push campaign sending status. |
+<!-- end -->
+
+<!-- begin database table push_campaign_user -->
 ### Push Campaign Users Table
 
-**Table name**: `push_campaign_user`
+Stores users who are going to get notification from specific campaign.
 
-**Purpose**: Stores users who are going to get notification from specific campaign
+#### Schema
 
-**Columns**:
+```sql
+CREATE TABLE push_campaign_user (
+	id INTEGER NOT NULL CONSTRAINT push_campaign_user_pkey PRIMARY KEY,
+	campaign_id INTEGER NOT NULL,
+	user_id INTEGER NOT NULL,
+	timestamp_created TIMESTAMP(6) NOT NULL
+);
+
+CREATE INDEX push_campaign_user_campaign ON push_campaign_user (campaign_id, user_id);
+CREATE INDEX push_campaign_user_detail ON push_campaign_user (user_id);
+```
+
+#### Columns
 
 | Name | Type | Info | Note |
 |---|---|---|---|
@@ -106,3 +246,69 @@ You can download DDL scripts for supported databases:
 | `campaign_id` | BIGINT(20) | index | Identifier of campaign that is user related to. |
 | `user_id` | BIGINT(20) | index | Identifier of user, can occur multiple times in different campaigns. |
 | `timestamp_created` | TIMESTAMP | - | Timestamp of user creation (assignment to the campaign). |
+
+#### Keys
+
+| Name | Primary | References | Description |
+|---|---|---|---|
+| `push_campaign_user_pkey` | Y | `id` | Primary key for table records |
+
+#### Indexes
+
+| Name | Unique | Columns | Description |
+|---|---|---|---|
+| `push_campaign_user_campaign` | N | `campaign_id, user_id` | Index for easier campaign lookup for user by campaign ID. |
+| `push_campaign_user_detail`   | N | `user_id` | Index for easier lookup by user ID. |
+<!-- end -->
+
+## Sequences
+
+<!-- begin database sequence push_credentials_seq -->
+### Push Credentials Sequence
+
+Sequence for application credentials registered in the system.
+
+```sql
+CREATE SEQUENCE push_credentials_seq;
+```
+<!-- end -->
+
+<!-- begin database sequence push_device_registration_seq -->
+### Push Device Registration Sequence
+
+Sequence for device registrations in the system.
+
+```sql
+CREATE SEQUENCE push_device_registration_seq;
+```
+<!-- end -->
+
+<!-- begin database sequence push_message_seq -->
+### Push Message Sequence
+
+Sequence for push messages sent by the system.
+
+```sql
+CREATE SEQUENCE push_message_seq;
+```
+<!-- end -->
+
+<!-- begin database sequence push_campaign_seq -->
+### Push Campaign Sequence
+
+Sequence for push campaigns that are created in the system.
+
+```sql
+CREATE SEQUENCE push_campaign_seq;
+```
+<!-- end -->
+
+<!-- begin database sequence push_campaign_user_seq -->
+### Push Campaign User Sequence
+
+Sequence for user assignments to campaigns.
+
+```sql
+CREATE SEQUENCE push_campaign_user_seq;
+```
+<!-- end -->
