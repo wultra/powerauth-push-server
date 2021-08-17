@@ -5,6 +5,7 @@ CREATE TABLE `push_app_credentials` (
   `ios_team_id` varchar(255) DEFAULT NULL,
   `ios_key_id` varchar(255) DEFAULT NULL,
   `ios_bundle` varchar(255) DEFAULT NULL,
+  `ios_environment` varchar(32) DEFAULT NULL,
   `android_private_key` blob DEFAULT NULL,
   `android_project_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)

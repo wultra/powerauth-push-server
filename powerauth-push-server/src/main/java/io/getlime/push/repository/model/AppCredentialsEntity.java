@@ -69,6 +69,12 @@ public class AppCredentialsEntity implements Serializable {
     private String iosBundle;
 
     /**
+     * iOS APNs environment.
+     */
+    @Column(name = "ios_environment")
+    private String iosEnvironment;
+
+    /**
      * Android private key.
      */
     @Column(name = "android_private_key")
@@ -126,6 +132,22 @@ public class AppCredentialsEntity implements Serializable {
      */
     public void setIosBundle(String iosBundle) {
         this.iosBundle = iosBundle;
+    }
+
+    /**
+     * Get APNs environment.
+     * @return APNs environment.
+     */
+    public String getIosEnvironment() {
+        return iosEnvironment;
+    }
+
+    /**
+     * Set APNs environment.
+     * @param iosEnvironment APNs environment.
+     */
+    public void setIosEnvironment(String iosEnvironment) {
+        this.iosEnvironment = iosEnvironment;
     }
 
     /**

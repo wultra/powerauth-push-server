@@ -327,11 +327,11 @@ public class PushMessageSenderService {
                 final AppCredentialsEntity credentials = getAppCredentials(appId);
                 pushClient = new AppRelatedPushClient();
                 if (credentials.getIosPrivateKey() != null) {
-                    ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosTeamId(), credentials.getIosKeyId(), credentials.getIosPrivateKey());
+                    final ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosTeamId(), credentials.getIosKeyId(), credentials.getIosPrivateKey(), credentials.getIosEnvironment());
                     pushClient.setApnsClient(apnsClient);
                 }
                 if (credentials.getAndroidPrivateKey() != null) {
-                    FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
+                    final FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
                     pushClient.setFcmClient(fcmClient);
                 }
                 pushClient.setAppCredentials(credentials);
@@ -345,7 +345,7 @@ public class PushMessageSenderService {
 
     // Use validator to check there are no errors in push message
     private void validatePushMessage(PushMessage pushMessage) throws PushServerException {
-        String error = PushMessageValidator.validatePushMessage(pushMessage);
+        final String error = PushMessageValidator.validatePushMessage(pushMessage);
         if (error != null) {
             logger.warn(error);
             throw new PushServerException(error);

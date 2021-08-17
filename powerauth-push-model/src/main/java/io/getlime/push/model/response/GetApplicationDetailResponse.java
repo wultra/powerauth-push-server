@@ -28,6 +28,7 @@ public class GetApplicationDetailResponse {
     private String iosBundle;
     private String iosKeyId;
     private String iosTeamId;
+    private String iosEnvironment;
     private String androidProjectId;
 
     /**
@@ -98,6 +99,22 @@ public class GetApplicationDetailResponse {
      */
     public void setIosTeamId(String iosTeamId) {
         this.iosTeamId = iosTeamId;
+    }
+
+    /**
+     * Get the APNs environment.
+     * @return APNs environment.
+     */
+    public String getIosEnvironment() {
+        return iosEnvironment;
+    }
+
+    /**
+     * Set the APNs environment.
+     * @param iosEnvironment APNs environment.
+     */
+    public void setIosEnvironment(String iosEnvironment) {
+        this.iosEnvironment = iosEnvironment;
     }
 
     /**
