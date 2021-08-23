@@ -54,10 +54,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 
@@ -395,8 +392,12 @@ public class PushSendingWorker {
                     logger.info("Notification sent, APNs ID: {}", apnsId);
                     callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                 } else {
-                    final String rejectionReason = response.getRejectionReason();
-                    logger.info("Notification rejected by the APNs gateway: {}", rejectionReason);
+                    final Optional<String> rejectionReasonOptional = response.getRejectionReason();
+                    String rejectionReason = null;
+                    if (rejectionReasonOptional.isPresent()) {
+                        rejectionReason = rejectionReasonOptional.get();
+                    }
+                    logger.info("Notification rejected by the APNs gateway: {}", rejectionReason != null ? rejectionReason : "UnknownReason");
                     logger.info("Notification APNs ID: {}", response.getApnsId());
 
                     // Determine if the push token should be deleted.
