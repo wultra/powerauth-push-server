@@ -16,6 +16,10 @@
 
 package io.getlime.push.model.entity;
 
+import io.getlime.push.model.enumeration.Priority;
+
+import javax.validation.constraints.NotNull;
+
 /**
  * Class representing a single push message payload.
  *
@@ -25,6 +29,7 @@ public class PushMessage {
 
     private String userId;
     private String activationId;
+    private Priority priority = Priority.HIGH;
     private PushMessageAttributes attributes;
     private PushMessageBody body;
 
@@ -52,7 +57,7 @@ public class PushMessage {
     }
 
     /**
-     * Get PowerAuth 2.0 activation ID.
+     * Get PowerAuth activation ID.
      * @return Activation ID.
      */
     public String getActivationId() {
@@ -60,11 +65,27 @@ public class PushMessage {
     }
 
     /**
-     * Set PowerAuth 2.0 activation ID.
+     * Set PowerAuth activation ID.
      * @param activationId Activation ID.
      */
     public void setActivationId(String activationId) {
         this.activationId = activationId;
+    }
+
+    /**
+     * Get push message priority.
+     * @return Priority.
+     */
+    public Priority getPriority() {
+        return priority;
+    }
+
+    /**
+     * Set push message priority.
+     * @param priority Priority.
+     */
+    public void setPriority(@NotNull Priority priority) {
+        this.priority = priority;
     }
 
     /**

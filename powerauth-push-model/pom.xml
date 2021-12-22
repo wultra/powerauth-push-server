@@ -6,13 +6,13 @@
 
     <artifactId>powerauth-push-model</artifactId>
     <description>PowerAuth Push Server RESTful Model Classes</description>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
 
     <parent>
         <artifactId>powerauth-push-server-parent</artifactId>
         <groupId>io.getlime.security</groupId>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
     </parent>
 
     <dependencies>
@@ -25,6 +25,12 @@
             <groupId>io.getlime.core</groupId>
             <artifactId>rest-client-base</artifactId>
             <version>${rest-base.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j-to-slf4j</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.getlime.security</groupId>

@@ -17,9 +17,10 @@ CREATE TABLE push_app_credentials (
 	id INTEGER NOT NULL CONSTRAINT push_app_credentials_pkey PRIMARY KEY,
 	app_id INTEGER NOT NULL,
 	ios_key_id VARCHAR(255),
-	ios_private_key VARCHAR(255),
+	ios_private_key BYTEA,
 	ios_team_id VARCHAR(255),
 	ios_bundle VARCHAR(255),
+	ios_environment VARCHAR(32),
 	android_private_key BYTEA,
 	android_project_id VARCHAR(255)
 );

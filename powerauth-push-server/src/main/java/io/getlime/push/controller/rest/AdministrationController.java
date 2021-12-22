@@ -77,7 +77,7 @@ public class AdministrationController {
             final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
             final List<PushServerApplication> appList = new ArrayList<>();
             for (AppCredentialsEntity appCredentialsEntity : appCredentials) {
-                PushServerApplication app = new PushServerApplication();
+                final PushServerApplication app = new PushServerApplication();
                 app.setId(appCredentialsEntity.getId());
                 app.setAppId(appCredentialsEntity.getAppId());
                 app.setAppName(powerAuthClient.getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
@@ -103,7 +103,8 @@ public class AdministrationController {
     public ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() throws PushServerException {
         try {
             logger.debug("Received listUnconfiguredApplications request");
-            GetApplicationListResponse response = new GetApplicationListResponse();
+            final GetApplicationListResponse response = new GetApplicationListResponse();
+
             // Get all applications in PA Server
             final List<com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications> applicationList = powerAuthClient.getApplicationList();
 
@@ -111,13 +112,13 @@ public class AdministrationController {
             final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
 
             // Compute intersection by app ID
-            Set<Long> identifiers = new HashSet<>();
+            final Set<Long> identifiers = new HashSet<>();
             for (AppCredentialsEntity appCred: appCredentials) {
                 identifiers.add(appCred.getAppId());
             }
             for (com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications app : applicationList) {
                 if (!identifiers.contains(app.getId())) {
-                    PushServerApplication applicationToAdd = new PushServerApplication();
+                    final PushServerApplication applicationToAdd = new PushServerApplication();
                     applicationToAdd.setId(app.getId());
                     applicationToAdd.setAppName(app.getApplicationName());
                     // add apps in intersection
@@ -143,7 +144,7 @@ public class AdministrationController {
         try {
             logger.debug("Received getApplicationDetail request");
             final GetApplicationDetailRequest requestObject = request.getRequestObject();
-            String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
+            final String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
             if (errorMessage != null) {
                 throw new PushServerException(errorMessage);
             }
@@ -160,6 +161,7 @@ public class AdministrationController {
                 response.setIosBundle(appCredentialsEntity.getIosBundle());
                 response.setIosKeyId(appCredentialsEntity.getIosKeyId());
                 response.setIosTeamId(appCredentialsEntity.getIosTeamId());
+                response.setIosEnvironment(appCredentialsEntity.getIosEnvironment());
             }
             if (requestObject.getIncludeAndroid()) {
                 response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
@@ -186,7 +188,7 @@ public class AdministrationController {
         }
         logger.info("Received createApplication request, application ID: {}", requestObject.getAppId());
         String errorMessage = CreateApplicationRequestValidator.validate(requestObject);
-        AppCredentialsEntity existingAppCredentialsEntity = appCredentialsRepository.findFirstByAppId(requestObject.getAppId());
+        final AppCredentialsEntity existingAppCredentialsEntity = appCredentialsRepository.findFirstByAppId(requestObject.getAppId());
         if (existingAppCredentialsEntity != null) {
             errorMessage = "Application already exists";
         }
@@ -195,7 +197,7 @@ public class AdministrationController {
         }
         final AppCredentialsEntity appCredentialsEntity = new AppCredentialsEntity();
         appCredentialsEntity.setAppId(requestObject.getAppId());
-        AppCredentialsEntity newAppCredentialsEntity = appCredentialsRepository.save(appCredentialsEntity);
+        final AppCredentialsEntity newAppCredentialsEntity = appCredentialsRepository.save(appCredentialsEntity);
         final CreateApplicationResponse response = new CreateApplicationResponse(newAppCredentialsEntity.getId());
         logger.info("The createApplication request succeeded, application ID: {}", requestObject.getAppId());
         return new ObjectResponse<>(response);
@@ -214,16 +216,17 @@ public class AdministrationController {
             throw new PushServerException("Request object must not be empty");
         }
         logger.info("Received updateIos request, application credentials entity ID: {}", requestObject.getId());
-        String errorMessage = UpdateIosRequestValidator.validate(requestObject);
+        final String errorMessage = UpdateIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
-        byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
+        final byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
         appCredentialsEntity.setIosPrivateKey(privateKeyBytes);
         appCredentialsEntity.setIosTeamId(requestObject.getTeamId());
         appCredentialsEntity.setIosKeyId(requestObject.getKeyId());
         appCredentialsEntity.setIosBundle(requestObject.getBundle());
+        appCredentialsEntity.setIosEnvironment(requestObject.getEnvironment());
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
         logger.info("The updateIos request succeeded, application credentials entity ID: {}", requestObject.getId());
@@ -252,6 +255,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosTeamId(null);
         appCredentialsEntity.setIosKeyId(null);
         appCredentialsEntity.setIosBundle(null);
+        appCredentialsEntity.setIosEnvironment(null);
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(requestObject.getId());
         logger.info("The removeIos request succeeded, application credentials entity ID: {}", requestObject.getId());

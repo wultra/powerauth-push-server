@@ -23,6 +23,7 @@ import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.entity.PushMessageAttributes;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.entity.PushMessageSendResult;
+import io.getlime.push.model.enumeration.Priority;
 import io.getlime.push.model.validator.PushMessageValidator;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushDeviceRepository;
@@ -91,7 +92,7 @@ public class PushMessageSenderService {
      */
     public PushMessageSendResult sendPushMessage(final Long appId, List<PushMessage> pushMessageList) throws PushServerException {
         // Prepare clients
-        AppRelatedPushClient pushClient = prepareClients(appId);
+        final AppRelatedPushClient pushClient = prepareClients(appId);
 
         // Prepare synchronization primitive for parallel push message sending
         final Phaser phaser = new Phaser(1);
@@ -106,7 +107,7 @@ public class PushMessageSenderService {
             validatePushMessage(pushMessage);
 
             // Fetch connected devices
-            List<PushDeviceRegistrationEntity> devices = getPushDevices(appId, pushMessage.getUserId(), pushMessage.getActivationId());
+            final List<PushDeviceRegistrationEntity> devices = getPushDevices(appId, pushMessage.getUserId(), pushMessage.getActivationId());
 
             // Iterate over all devices for given user
             for (final PushDeviceRegistrationEntity device : devices) {
@@ -115,22 +116,22 @@ public class PushMessageSenderService {
 
                 // Check if given push is not personal, or if it is, that device is in active state.
                 // This avoids sending personal notifications to devices that are blocked or removed.
-                boolean isMessagePersonal = pushMessage.getAttributes() != null && pushMessage.getAttributes().getPersonal();
-                boolean isDeviceActive = device.getActive();
+                final boolean isMessagePersonal = pushMessage.getAttributes() != null && pushMessage.getAttributes().getPersonal();
+                final boolean isDeviceActive = device.getActive();
                 if (!isMessagePersonal || isDeviceActive) {
 
                     // Register phaser for synchronization
                     phaser.register();
 
                     // Decide if the device is iOS or Android and send message accordingly
-                    String platform = device.getPlatform();
+                    final String platform = device.getPlatform();
                     if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
                         if (pushClient.getApnsClient() == null) {
                             logger.error("Push message cannot be sent to APNS because APNS is not configured in push server.");
                             phaser.arriveAndDeregister();
                             continue;
                         }
-                        pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), (result) -> {
+                        pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), (result) -> {
                             try {
                                 switch (result) {
                                     case OK: {
@@ -169,7 +170,7 @@ public class PushMessageSenderService {
                             continue;
                         }
                         final String token = device.getPushToken();
-                        pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), token, (sendingResult) -> {
+                        pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, (sendingResult) -> {
                             try {
                                 switch (sendingResult) {
                                     case OK: {
@@ -224,7 +225,7 @@ public class PushMessageSenderService {
      *                             the error can be found in exception message.
      */
     public void sendCampaignMessage(Long appId, String platform, String token, PushMessageBody pushMessageBody, String userId, Long deviceId, String activationId) throws PushServerException {
-        sendCampaignMessage(appId, platform, token, pushMessageBody, null, userId, deviceId, activationId);
+        sendCampaignMessage(appId, platform, token, pushMessageBody, null, Priority.HIGH, userId, deviceId, activationId);
     }
 
     /**
@@ -236,20 +237,21 @@ public class PushMessageSenderService {
      * @param token Push message token.
      * @param pushMessageBody Push message body.
      * @param attributes Push message attributes.
+     * @param priority Push message priority.
      * @param userId User to be notified by the campaign message (used for logging purpose).
      * @param deviceId Device owned by the user to be notified about the campaign message (used for logging purpose).
      * @param activationId Activation ID associated with the device (used for logging purpose).
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      * the error can be found in exception message.
      */
-    public void sendCampaignMessage(final Long appId, String platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, String userId, Long deviceId, String activationId) throws PushServerException {
+    public void sendCampaignMessage(final Long appId, String platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, Priority priority, String userId, Long deviceId, String activationId) throws PushServerException {
 
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
         final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, activationId, deviceId);
 
         if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
-            pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, token, pushClient.getAppCredentials().getIosBundle(), (result) -> {
+            pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getIosBundle(), (result) -> {
                 switch (result) {
                     case OK: {
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
@@ -271,7 +273,7 @@ public class PushMessageSenderService {
                 }
             });
         } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
-            pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, token, (result) -> {
+            pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, priority, token, (result) -> {
                 switch (result) {
                     case OK: {
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
@@ -297,7 +299,7 @@ public class PushMessageSenderService {
 
     // Lookup application credentials by appID and throw exception in case application is not found.
     private AppCredentialsEntity getAppCredentials(Long appId) throws PushServerException {
-        AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(appId);
+        final AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(appId);
         if (credentials == null) {
             throw new PushServerException("Application not found");
         }
@@ -310,13 +312,11 @@ public class PushMessageSenderService {
             logger.error("No userId was specified");
             throw new PushServerException("No userId was specified");
         }
-        List<PushDeviceRegistrationEntity> devices;
         if (activationId != null) { // in case the message should go to the specific device
-            devices = pushDeviceRepository.findByUserIdAndAppIdAndActivationId(userId, appId, activationId);
+            return pushDeviceRepository.findByUserIdAndAppIdAndActivationId(userId, appId, activationId);
         } else {
-            devices = pushDeviceRepository.findByUserIdAndAppId(userId, appId);
+            return pushDeviceRepository.findByUserIdAndAppId(userId, appId);
         }
-        return devices;
     }
 
     // Prepare and cache APNS and FCM clients for provided app
@@ -327,11 +327,11 @@ public class PushMessageSenderService {
                 final AppCredentialsEntity credentials = getAppCredentials(appId);
                 pushClient = new AppRelatedPushClient();
                 if (credentials.getIosPrivateKey() != null) {
-                    ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosTeamId(), credentials.getIosKeyId(), credentials.getIosPrivateKey());
+                    final ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosTeamId(), credentials.getIosKeyId(), credentials.getIosPrivateKey(), credentials.getIosEnvironment());
                     pushClient.setApnsClient(apnsClient);
                 }
                 if (credentials.getAndroidPrivateKey() != null) {
-                    FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
+                    final FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
                     pushClient.setFcmClient(fcmClient);
                 }
                 pushClient.setAppCredentials(credentials);
@@ -345,7 +345,7 @@ public class PushMessageSenderService {
 
     // Use validator to check there are no errors in push message
     private void validatePushMessage(PushMessage pushMessage) throws PushServerException {
-        String error = PushMessageValidator.validatePushMessage(pushMessage);
+        final String error = PushMessageValidator.validatePushMessage(pushMessage);
         if (error != null) {
             logger.warn(error);
             throw new PushServerException(error);
