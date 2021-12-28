@@ -76,7 +76,7 @@
         <guava.version>31.0.1-jre</guava.version>
         <h2.version>1.4.199</h2.version> <!-- CAUTION WHEN UPDATING - https://github.com/h2database/h2database/issues/2078 -->
         <jackson.version>2.13.0</jackson.version>
-        <jackson-databind.version>2.13.0</jackson-databind.version>
+        <jackson-databind.version>2.13.1</jackson-databind.version>
         <javax.interceptor-api.version>1.2.2</javax.interceptor-api.version>
         <rest-base.version>1.4.0</rest-base.version>
         <powerauth.version>1.2.0</powerauth.version>
