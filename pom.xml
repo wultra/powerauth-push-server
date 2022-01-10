@@ -81,7 +81,7 @@
         <rest-base.version>1.4.0</rest-base.version>
         <powerauth.version>1.2.0</powerauth.version>
         <pushy.version>0.15.0</pushy.version>
-        <springdoc-openapi.version>1.6.0</springdoc-openapi.version>
+        <springdoc-openapi.version>1.6.3</springdoc-openapi.version>
         <google-api-client.version>1.32.2</google-api-client.version>
         <firebase-admin.version>8.1.0</firebase-admin.version>
         <bc.version>1.69</bc.version>
