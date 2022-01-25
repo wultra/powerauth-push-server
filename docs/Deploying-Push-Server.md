@@ -20,13 +20,16 @@ The new tables may or may not reside in the same database that you use for your 
 
 ### Connecting Server to Database
 
-The default database connectivity parameters in `powerauth-push-server.war` are following (MySQL defaults):
+The default database connectivity parameters in `powerauth-push-server.war` are following (PostgreSQL defaults):
 
 ```sh
-spring.datasource.url=jdbc:mysql://localhost:3306/powerauth
+spring.datasource.url=jdbc:postgresql://localhost:5432/powerauth
 spring.datasource.username=powerauth
 spring.datasource.password=
-spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
+spring.jpa.properties.hibernate.connection.characterEncoding=utf8
+spring.jpa.properties.hibernate.connection.useUnicode=true
 spring.jpa.hibernate.ddl-auto=none
 ```
 
