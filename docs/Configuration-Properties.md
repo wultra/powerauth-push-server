@@ -48,7 +48,7 @@ The Push Server uses the following public configuration properties:
 
 | Property | Default | Note |
 |---|---|---|
-| `powerauth.push.service.apns.useDevelopment` | `false` | Flag indicating that the development instance of APNS service should be use. |
+| `powerauth.push.service.apns.useDevelopment` | `false` | Flag indicating that the development instance of APNS service should be used |
 | `powerauth.push.service.apns.proxy.enabled` | `false` | Flag indicating if the communication needs to go through proxy |
 | `powerauth.push.service.apns.proxy.host` | `127.0.0.1` | Proxy host |
 | `powerauth.push.service.apns.proxy.port` | `8080` | Proxy port |

@@ -1252,6 +1252,11 @@ Update an iOS configuration.
 }
 ```
 
+You can use following `environment` values in request:
+- `null` - environment is decided by configuration of server property `powerauth.push.service.apns.useDevelopment`
+- `development` - use APNs development environment
+- `production` - use APNs production environment
+
 #### Response 200
 
 ```json
