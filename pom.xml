@@ -8,7 +8,7 @@
 
     <groupId>io.getlime.security</groupId>
     <artifactId>powerauth-push-server-parent</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <packaging>pom</packaging>
 
     <parent>
@@ -78,7 +78,7 @@
         <jackson.version>2.13.0</jackson.version>
         <jackson-databind.version>2.13.0</jackson-databind.version>
         <javax.interceptor-api.version>1.2.2</javax.interceptor-api.version>
-        <rest-base.version>1.4.0</rest-base.version>
+        <rest-base.version>1.4.1</rest-base.version>
         <powerauth.version>1.2.0</powerauth.version>
         <pushy.version>0.15.0</pushy.version>
         <springdoc-openapi.version>1.6.0</springdoc-openapi.version>
