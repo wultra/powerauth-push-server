@@ -6,13 +6,13 @@
     <name>powerauth-push-server</name>
     <description>PowerAuth Push Server</description>
     <artifactId>powerauth-push-server</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.5</version>
     <packaging>war</packaging>
 
     <parent>
         <groupId>io.getlime.security</groupId>
         <artifactId>powerauth-push-server-parent</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -100,12 +100,12 @@
         <dependency>
             <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-push-model</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.5</version>
         </dependency>
         <dependency>
             <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-push-client</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.5</version>
         </dependency>
         <dependency>
             <groupId>io.getlime.security</groupId>
@@ -146,7 +146,7 @@
         <dependency>
             <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-java-crypto</artifactId>
-            <version>${powerauth.version}</version>
+            <version>${powerauth-crypto.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
