@@ -70,3 +70,12 @@ The Push Server uses the following public configuration properties:
 | `powerauth.push.service.fcm.dataNotificationOnly` | `false` | Flag indicating that FCM service should never use "notification" format, only a data format with extra payload representing the notification |
 | `powerauth.push.service.fcm.sendMessageUrl` | `https://fcm.googleapis.com/v1/projects/%s/messages:send` | Default URL for the FCM service |
 | `powerauth.push.service.fcm.connect.timeout` | `5000` | Push message gateway connect timeout in milliseconds | 
+
+## Correlation HTTP Header Configuration
+
+| Property | Default | Note |
+|---|---|---|
+| `powerauth.service.correlation-header.enabled` | `false` | Whether correlation header is enabled |
+| `powerauth.service.correlation-header.name` | `X-Correlation-ID` | Correlation header name |
+| `powerauth.service.correlation-header.value.validation-regexp` | `[a-zA-Z0-9\\-]{8,1024}` | Regular expression for correlation header value validation |
+| `logging.pattern.console` | [See application.properties](https://github.com/wultra/powerauth-push-server/blob/develop/powerauth-push-server/src/main/resources/application.properties#L105) | Logging pattern for console which includes the correlation header value |
