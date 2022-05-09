@@ -78,8 +78,8 @@
         <jackson.version>2.13.2</jackson.version>
         <jackson-databind.version>2.13.2.2</jackson-databind.version>
         <javax.interceptor-api.version>1.2.2</javax.interceptor-api.version>
-        <rest-base.version>1.4.1</rest-base.version>
-        <powerauth.version>1.2.5</powerauth.version>
+        <rest-base.version>1.5.0-SNAPSHOT</rest-base.version>
+        <powerauth.version>1.3.0-SNAPSHOT</powerauth.version>
         <powerauth-crypto.version>1.2.0</powerauth-crypto.version>
         <pushy.version>0.15.1</pushy.version>
         <springdoc-openapi.version>1.6.6</springdoc-openapi.version>
