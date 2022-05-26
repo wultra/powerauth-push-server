@@ -6,7 +6,7 @@
 
 Push server now uses `String` application ID instead of numeric one. Therefore, you need to transfer the correct application name to the `push_app_credentials` table. In case you use the same schema to run PowerAuth Server and PowerAuth Push Server, you can use the following script to do it:
 
-```postgresql
+```sql
 -- rename the original app_id column to app_id_orig 
 ALTER TABLE push_app_credentials RENAME COLUMN app_id TO app_id_orig;
 
