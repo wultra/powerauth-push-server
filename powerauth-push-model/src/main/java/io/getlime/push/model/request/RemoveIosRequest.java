@@ -22,7 +22,7 @@ package io.getlime.push.model.request;
  */
 public class RemoveIosRequest {
 
-    private Long id;
+    private String appId;
 
     /**
      * Default constructor.
@@ -32,26 +32,26 @@ public class RemoveIosRequest {
 
     /**
      * Constructor with application credentials entity ID.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      */
-    public RemoveIosRequest(Long id) {
-        this.id = id;
+    public RemoveIosRequest(String appId) {
+        this.appId = appId;
     }
 
     /**
      * Get application credentials entity ID.
      * @return Application credentials entity ID.
      */
-    public Long getId() {
-        return id;
+    public String getAppId() {
+        return appId;
     }
 
     /**
      * Set application credentials entity ID.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      */
-    public void setId(Long id) {
-        this.id = id;
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 
 }

@@ -22,14 +22,14 @@ package io.getlime.push.model.request;
  */
 public class DeleteDeviceRequest {
 
-    private Long appId;
+    private String appId;
     private String token;
 
     /**
      * Get app ID.
      * @return App ID.
      */
-    public Long getAppId() {
+    public String getAppId() {
         return appId;
     }
 
@@ -37,7 +37,7 @@ public class DeleteDeviceRequest {
      * Set app ID.
      * @param appId App ID.
      */
-    public void setAppId(Long appId) {
+    public void setAppId(String appId) {
         this.appId = appId;
     }
 

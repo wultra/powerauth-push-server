@@ -16,7 +16,7 @@
 
 package io.getlime.push.service.batch.storage;
 
-import io.getlime.push.model.entity.PushMessageBody;
+import io.getlime.push.repository.model.PushCampaignEntity;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -28,17 +28,17 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-public class CampaignMessageStorageMap implements ItemStorageMap<Long, PushMessageBody> {
+public class CampaignMessageStorageMap implements ItemStorageMap<Long, PushCampaignEntity> {
 
-    private final ConcurrentMap<Long, PushMessageBody> mapStorage = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, PushCampaignEntity> mapStorage = new ConcurrentHashMap<>();
 
     @Override
-    public PushMessageBody get(Long key) {
+    public PushCampaignEntity get(Long key) {
         return mapStorage.get(key);
     }
 
     @Override
-    public void put(Long key, PushMessageBody value) {
+    public void put(Long key, PushCampaignEntity value) {
         mapStorage.put(key, value);
     }
 

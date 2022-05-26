@@ -88,7 +88,7 @@ public class PushMessageController {
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        final Long appId = requestObject.getAppId();
+        final String appId = requestObject.getAppId();
         final List<PushMessage> pushMessageList = new ArrayList<>();
         pushMessageList.add(requestObject.getMessage());
         PushMessageSendResult result;
@@ -122,7 +122,7 @@ public class PushMessageController {
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        final Long appId = requestObject.getAppId();
+        final String appId = requestObject.getAppId();
         final List<PushMessage> batch = requestObject.getBatch();
         PushMessageSendResult result;
         result = pushMessageSenderService.sendPushMessage(appId, batch);

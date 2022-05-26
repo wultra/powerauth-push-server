@@ -39,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Phaser;
 
 /**
@@ -61,7 +62,7 @@ public class PushMessageSenderService {
     /**
      * Constructor with autowired dependencies.
      * @param appCredentialsRepository App credentials repository.
-     * @param pushDeviceRepository Push sevice repository.
+     * @param pushDeviceRepository Push service repository.
      * @param pushMessageDAO Push message DAO.
      * @param pushSendingWorker Push sending worker.
      * @param appRelatedPushClientMap Map with cached push clients in a map.
@@ -90,7 +91,7 @@ public class PushMessageSenderService {
      * @return Result of this batch sending.
      * @throws PushServerException In case push message sending fails.
      */
-    public PushMessageSendResult sendPushMessage(final Long appId, List<PushMessage> pushMessageList) throws PushServerException {
+    public PushMessageSendResult sendPushMessage(final String appId, List<PushMessage> pushMessageList) throws PushServerException {
         // Prepare clients
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
@@ -107,7 +108,7 @@ public class PushMessageSenderService {
             validatePushMessage(pushMessage);
 
             // Fetch connected devices
-            final List<PushDeviceRegistrationEntity> devices = getPushDevices(appId, pushMessage.getUserId(), pushMessage.getActivationId());
+            final List<PushDeviceRegistrationEntity> devices = getPushDevices(pushClient.getAppCredentials().getId(), pushMessage.getUserId(), pushMessage.getActivationId());
 
             // Iterate over all devices for given user
             for (final PushDeviceRegistrationEntity device : devices) {
@@ -224,7 +225,7 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      *                             the error can be found in exception message.
      */
-    public void sendCampaignMessage(Long appId, String platform, String token, PushMessageBody pushMessageBody, String userId, Long deviceId, String activationId) throws PushServerException {
+    public void sendCampaignMessage(String appId, String platform, String token, PushMessageBody pushMessageBody, String userId, Long deviceId, String activationId) throws PushServerException {
         sendCampaignMessage(appId, platform, token, pushMessageBody, null, Priority.HIGH, userId, deviceId, activationId);
     }
 
@@ -244,7 +245,7 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      * the error can be found in exception message.
      */
-    public void sendCampaignMessage(final Long appId, String platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, Priority priority, String userId, Long deviceId, String activationId) throws PushServerException {
+    public void sendCampaignMessage(final String appId, String platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, Priority priority, String userId, Long deviceId, String activationId) throws PushServerException {
 
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
@@ -267,7 +268,7 @@ public class PushMessageSenderService {
                     }
                     case FAILED_DELETE: {
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
-                        pushDeviceRepository.deleteAll(pushDeviceRepository.findByAppIdAndPushToken(appId, token));
+                        pushDeviceRepository.deleteAllByAppCredentialsIdAndPushToken(pushClient.getAppCredentials().getId(), token);
                         break;
                     }
                 }
@@ -289,7 +290,7 @@ public class PushMessageSenderService {
                     }
                     case FAILED_DELETE: {
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
-                        pushDeviceRepository.deleteAll(pushDeviceRepository.findByAppIdAndPushToken(appId, token));
+                        pushDeviceRepository.deleteAllByAppCredentialsIdAndPushToken(pushClient.getAppCredentials().getId(), token);
                         break;
                     }
                 }
@@ -298,29 +299,29 @@ public class PushMessageSenderService {
     }
 
     // Lookup application credentials by appID and throw exception in case application is not found.
-    private AppCredentialsEntity getAppCredentials(Long appId) throws PushServerException {
-        final AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(appId);
-        if (credentials == null) {
-            throw new PushServerException("Application not found");
+    private AppCredentialsEntity getAppCredentials(String appId) throws PushServerException {
+        final Optional<AppCredentialsEntity> credentials = appCredentialsRepository.findFirstByAppId(appId);
+        if (!credentials.isPresent()) {
+            throw new PushServerException("Application not found: " + appId);
         }
-        return credentials;
+        return credentials.get();
     }
 
     // Return list of devices related to given user or activation ID (if present). List of devices is related to particular application as well.
-    private List<PushDeviceRegistrationEntity> getPushDevices(Long appId, String userId, String activationId) throws PushServerException {
+    private List<PushDeviceRegistrationEntity> getPushDevices(Long id, String userId, String activationId) throws PushServerException {
         if (userId == null || userId.isEmpty()) {
             logger.error("No userId was specified");
             throw new PushServerException("No userId was specified");
         }
         if (activationId != null) { // in case the message should go to the specific device
-            return pushDeviceRepository.findByUserIdAndAppIdAndActivationId(userId, appId, activationId);
+            return pushDeviceRepository.findByUserIdAndAppCredentialsIdAndActivationId(userId, id, activationId);
         } else {
-            return pushDeviceRepository.findByUserIdAndAppId(userId, appId);
+            return pushDeviceRepository.findByUserIdAndAppCredentialsId(userId, id);
         }
     }
 
     // Prepare and cache APNS and FCM clients for provided app
-    private AppRelatedPushClient prepareClients(Long appId) throws PushServerException {
+    private AppRelatedPushClient prepareClients(String appId) throws PushServerException {
         synchronized (this) {
             AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
             if (pushClient == null) {

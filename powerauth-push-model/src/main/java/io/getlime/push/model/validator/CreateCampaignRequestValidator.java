@@ -38,9 +38,6 @@ public class CreateCampaignRequestValidator {
         if (request.getAppId() == null) {
             return "App ID must not be null.";
         }
-        if (request.getAppId() < 1) {
-            return "App ID must be a positive number.";
-        }
         if (request.getMessage() == null) {
             return "You must specify a push campaign message payload.";
         }

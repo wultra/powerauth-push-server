@@ -15,6 +15,7 @@
  */
 package io.getlime.push.configuration;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -43,13 +44,14 @@ public class WebApplicationConfig implements WebMvcConfigurer {
      */
     @Bean
     public ObjectMapper objectMapper() {
-        Jackson2ObjectMapperFactoryBean bean = new Jackson2ObjectMapperFactoryBean();
+        final Jackson2ObjectMapperFactoryBean bean = new Jackson2ObjectMapperFactoryBean();
         bean.setIndentOutput(true);
         bean.setDateFormat(new StdDateFormat());
         bean.afterPropertiesSet();
-        ObjectMapper objectMapper = bean.getObject();
+        final ObjectMapper objectMapper = bean.getObject();
         if (objectMapper != null) {
             objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         }
         return objectMapper;
     }
@@ -60,7 +62,7 @@ public class WebApplicationConfig implements WebMvcConfigurer {
      * @return New custom converter with a correct object mapper.
      */
     private MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setObjectMapper(objectMapper());
         return converter;
     }

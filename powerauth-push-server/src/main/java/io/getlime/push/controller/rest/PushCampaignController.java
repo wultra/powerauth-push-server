@@ -26,8 +26,10 @@ import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.request.CreateCampaignRequest;
 import io.getlime.push.model.response.*;
 import io.getlime.push.model.validator.CreateCampaignRequestValidator;
+import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.PushCampaignUserRepository;
+import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.PushCampaignUserEntity;
 import io.getlime.push.repository.serialization.JsonSerialization;
@@ -53,6 +55,7 @@ public class PushCampaignController {
 
     private static final Logger logger = LoggerFactory.getLogger(PushCampaignController.class);
 
+    private final AppCredentialsRepository appCredentialsRepository;
     private final PushCampaignRepository pushCampaignRepository;
     private final PushCampaignUserRepository pushCampaignUserRepository;
     private final JsonSerialization jsonSerialization;
@@ -60,13 +63,15 @@ public class PushCampaignController {
     /**
      * Constructor with autowired dependencies.
      *
+     * @param appCredentialsRepository App credentials repository.
      * @param pushCampaignRepository Push campaign repository.
      * @param pushCampaignUserRepository Push campaign user repository.
      * @param jsonSerialization Helper for JSON serialization.
      */
     @Autowired
-    public PushCampaignController(PushCampaignRepository pushCampaignRepository,
+    public PushCampaignController(AppCredentialsRepository appCredentialsRepository, PushCampaignRepository pushCampaignRepository,
                                   PushCampaignUserRepository pushCampaignUserRepository, JsonSerialization jsonSerialization) {
+        this.appCredentialsRepository = appCredentialsRepository;
         this.pushCampaignRepository = pushCampaignRepository;
         this.pushCampaignUserRepository = pushCampaignUserRepository;
         this.jsonSerialization = jsonSerialization;
@@ -84,26 +89,30 @@ public class PushCampaignController {
                   description = "Creating a campaign requires in request body an application id to be related with " +
                           "and a certain message that users will receive")
     public ObjectResponse<CreateCampaignResponse> createCampaign(@RequestBody ObjectRequest<CreateCampaignRequest> request) throws PushServerException {
-        CreateCampaignRequest requestObject = request.getRequestObject();
+        final CreateCampaignRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received createCampaign request, app ID: {}", requestObject.getAppId());
-        String errorMessage = CreateCampaignRequestValidator.validate(requestObject);
+        final String appId = requestObject.getAppId();
+        logger.info("Received createCampaign request, app ID: {}", appId);
+        final String errorMessage = CreateCampaignRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
+
+        final AppCredentialsEntity applicationCredentials = findApplicationCredentials(appId);
+
         PushCampaignEntity campaign = new PushCampaignEntity();
-        PushMessageBody message = requestObject.getMessage();
-        String messageString = jsonSerialization.serializePushMessageBody(message);
-        campaign.setAppId(requestObject.getAppId());
+        final PushMessageBody message = requestObject.getMessage();
+        final String messageString = jsonSerialization.serializePushMessageBody(message);
+        campaign.setAppCredentials(applicationCredentials);
         campaign.setSent(false);
         campaign.setTimestampCreated(new Date());
         campaign.setMessage(messageString);
         campaign = pushCampaignRepository.save(campaign);
-        CreateCampaignResponse response = new CreateCampaignResponse();
+        final CreateCampaignResponse response = new CreateCampaignResponse();
         response.setId(campaign.getId());
-        logger.info("The createCampaign request succeeded, app ID: {}, campaign ID: {}", requestObject.getAppId(), campaign.getId());
+        logger.info("The createCampaign request succeeded, app ID: {}, campaign ID: {}", appId, campaign.getId());
         return new ObjectResponse<>(response);
     }
 
@@ -118,7 +127,7 @@ public class PushCampaignController {
                   description = "Specified with id. Also users associated with this campaign are going to be deleted. If deletion was applied then deleted status is true. False if such campaign does not exist")
     public ObjectResponse<DeleteCampaignResponse> deleteCampaign(@PathVariable(value = "id") Long campaignId) {
         logger.info("Received deleteCampaign request, campaign ID: {}", campaignId);
-        DeleteCampaignResponse deleteCampaignResponse = new DeleteCampaignResponse();
+        final DeleteCampaignResponse deleteCampaignResponse = new DeleteCampaignResponse();
         final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
         if (!campaignEntityOptional.isPresent()) {
             deleteCampaignResponse.setDeleted(false);
@@ -144,11 +153,11 @@ public class PushCampaignController {
     public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
         logger.debug("Received getCampaign request, campaign ID: {}", campaignId);
         final PushCampaignEntity campaign = findPushCampaignById(campaignId);
-        CampaignResponse campaignResponse = new CampaignResponse();
+        final CampaignResponse campaignResponse = new CampaignResponse();
         campaignResponse.setId(campaign.getId());
         campaignResponse.setSent(campaign.isSent());
-        campaignResponse.setAppId(campaign.getAppId());
-        PushMessageBody message = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
+        campaignResponse.setAppId(campaign.getAppCredentials().getAppId());
+        final PushMessageBody message = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
         campaignResponse.setMessage(message);
         logger.debug("The getCampaign request succeeded, campaign ID: {}", campaignId);
         return new ObjectResponse<>(campaignResponse);
@@ -169,20 +178,20 @@ public class PushCampaignController {
     public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(@RequestParam(value = "all", required = false) boolean all) throws PushServerException {
         logger.debug("Received getListOfCampaigns request");
         // Fetch campaigns from the repository
-        Iterable<PushCampaignEntity> campaignList;
+        final Iterable<PushCampaignEntity> campaignList;
         if (all) {
             campaignList = pushCampaignRepository.findAll();
         } else {
             campaignList = pushCampaignRepository.findAllBySent(false);
         }
         // Prepare response with list of campaigns
-        ListOfCampaignsResponse listOfCampaignsResponse = new ListOfCampaignsResponse();
+        final ListOfCampaignsResponse listOfCampaignsResponse = new ListOfCampaignsResponse();
         for (PushCampaignEntity campaign : campaignList) {
-            CampaignResponse campaignResponse = new CampaignResponse();
+            final CampaignResponse campaignResponse = new CampaignResponse();
             campaignResponse.setId(campaign.getId());
-            campaignResponse.setAppId(campaign.getAppId());
+            campaignResponse.setAppId(campaign.getAppCredentials().getAppId());
             campaignResponse.setSent(campaign.isSent());
-            PushMessageBody pushMessageBody = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
+            final PushMessageBody pushMessageBody = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
             campaignResponse.setMessage(pushMessageBody);
             listOfCampaignsResponse.add(campaignResponse);
         }
@@ -194,7 +203,7 @@ public class PushCampaignController {
     /**
      * Add specific request to specific campaign
      *
-     * @param campaignId ID of certain campaign
+     * @param id ID of certain campaign
      * @param request List of IDs referred to request
      * @return Response status
      * @throws PushServerException In case campaign with given ID does not exist.
@@ -202,20 +211,19 @@ public class PushCampaignController {
     @RequestMapping(value = "{id}/user/add", method = { RequestMethod.POST, RequestMethod.PUT })
     @Operation(summary = "Associate users to campaign",
                   description = "Users are identified in request body as an array of strings in request body.")
-    public Response addUsersToCampaign(@PathVariable(value = "id") Long campaignId, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
+    public Response addUsersToCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
         checkRequestNullity(request);
-        logger.info("Received addUsersToCampaign request, campaign ID: {}, users: {}", campaignId, request.getRequestObject());
-        final PushCampaignEntity campaignEntity = findPushCampaignById(campaignId);
-        ListOfUsers listOfUsers = request.getRequestObject();
+        logger.info("Received addUsersToCampaign request, campaign ID: {}, users: {}", id, request.getRequestObject());
+        assureExistsPushCampaignById(id);
+        final ListOfUsers listOfUsers = request.getRequestObject();
         for (String user : listOfUsers) {
-            if (pushCampaignUserRepository.findFirstByUserIdAndCampaignId(user, campaignId) == null) {
-                PushCampaignUserEntity pushCampaignUserEntity = new PushCampaignUserEntity();
-                pushCampaignUserEntity.setCampaignId(campaignId);
+            if (pushCampaignUserRepository.findFirstByUserIdAndCampaignId(user, id) == null) {
+                final PushCampaignUserEntity pushCampaignUserEntity = new PushCampaignUserEntity();
+                pushCampaignUserEntity.setCampaignId(id);
                 pushCampaignUserEntity.setUserId(user);
-                pushCampaignUserEntity.setAppId(campaignEntity.getAppId());
                 pushCampaignUserEntity.setTimestampCreated(new Date());
                 pushCampaignUserRepository.save(pushCampaignUserEntity);
-                logger.info("The addUsersToCampaign request succeeded, campaign ID: {}", campaignId);
+                logger.info("The addUsersToCampaign request succeeded, campaign ID: {}", id);
             } else {
                 logger.warn("Duplicate user entry for push campaign: {}", user);
             }
@@ -274,6 +282,20 @@ public class PushCampaignController {
     }
 
     /**
+     * Find application credentials by PowerAuth app ID.
+     * @param powerAuthAppId PowerAuth App ID.
+     * @return Application credentials.
+     * @throws PushServerException In case the application credentials do not exist for provided PowerAuth app ID.
+     */
+    private AppCredentialsEntity findApplicationCredentials(String powerAuthAppId) throws PushServerException {
+        final Optional<AppCredentialsEntity> credentialsEntityOptional = appCredentialsRepository.findFirstByAppId(powerAuthAppId);
+        if (!credentialsEntityOptional.isPresent()) {
+            throw new PushServerException("Application with a provided PowerAuth app ID does not exist: " + powerAuthAppId);
+        }
+        return credentialsEntityOptional.get();
+    }
+
+    /**
      * Method used for checking exception about nullity of http request
      *
      * @param request An object request to check the nullity
@@ -289,7 +311,7 @@ public class PushCampaignController {
      * Find push campaign entity by ID.
      * @param campaignId Campaign ID.
      * @return Push campaign entity.
-     * @throws PushServerException Thrown when campaign entity does not exists.
+     * @throws PushServerException Thrown when campaign entity does not exist.
      */
     private PushCampaignEntity findPushCampaignById(Long campaignId) throws PushServerException {
         final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
@@ -297,5 +319,17 @@ public class PushCampaignController {
             throw new PushServerException("Campaign with entered ID does not exist");
         }
         return campaignEntityOptional.get();
+    }
+
+    /**
+     * Assure that a campaign by given ID exists campaign entity by ID.
+     * @param campaignId Campaign ID.
+     * @throws PushServerException Thrown when campaign entity does not exist.
+     */
+    private void assureExistsPushCampaignById(Long campaignId) throws PushServerException {
+        final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
+        if (!campaignEntityOptional.isPresent()) {
+            throw new PushServerException("Campaign with entered ID does not exist");
+        }
     }
 }

@@ -95,7 +95,7 @@ public class PushServerClient {
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    public boolean createDevice(Long appId, String token, MobilePlatform platform) throws PushServerClientException {
+    public boolean createDevice(String appId, String token, MobilePlatform platform) throws PushServerClientException {
         return createDevice(appId, token, platform, null);
     }
 
@@ -109,7 +109,7 @@ public class PushServerClient {
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    public boolean createDevice(Long appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
+    public boolean createDevice(String appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setAppId(appId);
         request.setToken(token);
@@ -139,7 +139,7 @@ public class PushServerClient {
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    public boolean createDeviceForActivations(Long appId, String token, MobilePlatform platform, List<String> activationIds) throws PushServerClientException {
+    public boolean createDeviceForActivations(String appId, String token, MobilePlatform platform, List<String> activationIds) throws PushServerClientException {
         CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
         request.setAppId(appId);
         request.setToken(token);
@@ -167,7 +167,7 @@ public class PushServerClient {
      * @return True if device removal was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    public boolean deleteDevice(Long appId, String token) throws PushServerClientException {
+    public boolean deleteDevice(String appId, String token) throws PushServerClientException {
         DeleteDeviceRequest request = new DeleteDeviceRequest();
         request.setAppId(appId);
         request.setToken(token);
@@ -219,7 +219,7 @@ public class PushServerClient {
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    public ObjectResponse<PushMessageSendResult> sendPushMessage(Long appId, PushMessage pushMessage) throws PushServerClientException {
+    public ObjectResponse<PushMessageSendResult> sendPushMessage(String appId, PushMessage pushMessage) throws PushServerClientException {
         SendPushMessageRequest request = new SendPushMessageRequest();
         request.setAppId(appId);
         request.setMessage(pushMessage);
@@ -245,7 +245,7 @@ public class PushServerClient {
      * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(Long appId, List<PushMessage> batch) throws PushServerClientException {
+    public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(String appId, List<PushMessage> batch) throws PushServerClientException {
         SendPushMessageBatchRequest request = new SendPushMessageBatchRequest();
         request.setAppId(appId);
         request.setBatch(batch);
@@ -271,7 +271,7 @@ public class PushServerClient {
      * @return ID of new created campaign.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    public ObjectResponse<CreateCampaignResponse> createCampaign(Long appId, PushMessageBody message) throws PushServerClientException {
+    public ObjectResponse<CreateCampaignResponse> createCampaign(String appId, PushMessageBody message) throws PushServerClientException {
         CreateCampaignRequest request = new CreateCampaignRequest();
         request.setAppId(appId);
         request.setMessage(message);
@@ -503,17 +503,17 @@ public class PushServerClient {
 
     /**
      * Get detail for an application credentials entity.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      * @param includeIos Whether to include iOS details.
      * @param includeAndroid Whether to include Android details.
      * @return Application credentials entity detail.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(Long id, boolean includeIos, boolean includeAndroid) throws PushServerClientException {
-        GetApplicationDetailRequest request = new GetApplicationDetailRequest(id, includeIos, includeAndroid);
-        logger.info("Calling push server to retrieve application detail, ID: {} - start", id);
+    public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(String appId, boolean includeIos, boolean includeAndroid) throws PushServerClientException {
+        GetApplicationDetailRequest request = new GetApplicationDetailRequest(appId, includeIos, includeAndroid);
+        logger.info("Calling push server to retrieve application detail, ID: {} - start", appId);
         final ObjectResponse<GetApplicationDetailResponse> response = postObjectImpl("/admin/app/detail", new ObjectRequest<>(request), GetApplicationDetailResponse.class);
-        logger.info("Calling push server to retrieve application detail, ID: {} - finish", id);
+        logger.info("Calling push server to retrieve application detail, ID: {} - finish", appId);
         return response;
     }
 
@@ -523,7 +523,7 @@ public class PushServerClient {
      * @return Response with ID of created application credentials entity.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public ObjectResponse<CreateApplicationResponse> createApplication(Long appId) throws PushServerClientException {
+    public ObjectResponse<CreateApplicationResponse> createApplication(String appId) throws PushServerClientException {
         final CreateApplicationRequest request = new CreateApplicationRequest(appId);
         logger.info("Calling push server to create application, app ID: {} - start", appId);
         final ObjectResponse<CreateApplicationResponse> response = postObjectImpl("/admin/app/create", new ObjectRequest<>(request), CreateApplicationResponse.class);
@@ -533,7 +533,7 @@ public class PushServerClient {
 
     /**
      * Update iOS details for an application credentials entity.
-     * @param id ID of application credentials entity.
+     * @param appId ID of application credentials entity.
      * @param bundle The iOS bundle record.
      * @param keyId The iOS key record.
      * @param teamId The iOS team ID record.
@@ -542,57 +542,57 @@ public class PushServerClient {
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public Response updateIos(Long id, String bundle, String keyId, String teamId, String environment, byte[] privateKey) throws PushServerClientException {
+    public Response updateIos(String appId, String bundle, String keyId, String teamId, String environment, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
-        final UpdateIosRequest request = new UpdateIosRequest(id, bundle, keyId, teamId, environment, privateKeyBase64);
-        logger.info("Calling push server to update iOS, ID: {} - start", id);
+        final UpdateIosRequest request = new UpdateIosRequest(appId, bundle, keyId, teamId, environment, privateKeyBase64);
+        logger.info("Calling push server to update iOS, ID: {} - start", appId);
         final Response response = putObjectImpl("/admin/app/ios/update", new ObjectRequest<>(request));
-        logger.info("Calling push server to update iOS, ID: {} - finish", id);
+        logger.info("Calling push server to update iOS, ID: {} - finish", appId);
         return response;
     }
 
     /**
      * Remove iOS record from an application credentials entity.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public Response removeIos(Long id) throws PushServerClientException {
-        final RemoveIosRequest request = new RemoveIosRequest(id);
-        logger.info("Calling push server to remove iOS, ID: {} - start", id);
+    public Response removeIos(String appId) throws PushServerClientException {
+        final RemoveIosRequest request = new RemoveIosRequest(appId);
+        logger.info("Calling push server to remove iOS, ID: {} - start", appId);
         final Response response = postObjectImpl("/admin/app/ios/remove", new ObjectRequest<>(request));
-        logger.info("Calling push server to remove iOS, ID: {} - finish", id);
+        logger.info("Calling push server to remove iOS, ID: {} - finish", appId);
         return response;
     }
 
     /**
      * Update Android details for an application credentials entity.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      * @param projectId The Android project ID record.
      * @param privateKey The Android private key bytes.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public Response updateAndroid(Long id, String projectId, byte[] privateKey) throws PushServerClientException {
+    public Response updateAndroid(String appId, String projectId, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
-        final UpdateAndroidRequest request = new UpdateAndroidRequest(id, projectId, privateKeyBase64);
-        logger.info("Calling push server to update android, ID: {} - start", id);
+        final UpdateAndroidRequest request = new UpdateAndroidRequest(appId, projectId, privateKeyBase64);
+        logger.info("Calling push server to update android, ID: {} - start", appId);
         final Response response = putObjectImpl("/admin/app/android/update", new ObjectRequest<>(request));
-        logger.info("Calling push server to update android, ID: {} - finish", id);
+        logger.info("Calling push server to update android, ID: {} - finish", appId);
         return response;
     }
 
     /**
      * Remove Android record from an application credentials entity.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public Response removeAndroid(Long id) throws PushServerClientException {
-        final RemoveAndroidRequest request = new RemoveAndroidRequest(id);
-        logger.info("Calling push server to remove android, ID: {} - start", id);
+    public Response removeAndroid(String appId) throws PushServerClientException {
+        final RemoveAndroidRequest request = new RemoveAndroidRequest(appId);
+        logger.info("Calling push server to remove android, ID: {} - start", appId);
         final Response response = postObjectImpl("/admin/app/android/remove", new ObjectRequest<>(request));
-        logger.info("Calling push server to remove android, ID: {} - finish", id);
+        logger.info("Calling push server to remove android, ID: {} - finish", appId);
         return response;
     }
 

@@ -42,7 +42,7 @@ public class AppCredentialsEntity implements Serializable {
      * App ID.
      */
     @Column(name = "app_id", nullable = false, updatable = false)
-    private Long appId;
+    private String appId;
 
     /**
      * iOS private key.
@@ -103,19 +103,19 @@ public class AppCredentialsEntity implements Serializable {
     }
 
     /**
-     * Get app ID.
-     * @return App ID.
+     * Get PowerAuth app ID.
+     * @return PowerAuth App ID.
      */
-    public Long getAppId() {
+    public String getAppId() {
         return appId;
     }
 
     /**
-     * Set app ID.
-     * @param appId App ID.
+     * Set PowerAuth app ID.
+     * @param powerAuthAppId PowerAuth App ID.
      */
-    public void setAppId(Long appId) {
-        this.appId = appId;
+    public void setAppId(String powerAuthAppId) {
+        this.appId = powerAuthAppId;
     }
 
     /**
