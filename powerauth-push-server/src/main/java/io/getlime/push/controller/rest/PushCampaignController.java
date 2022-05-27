@@ -283,6 +283,7 @@ public class PushCampaignController {
 
     /**
      * Find application credentials by PowerAuth app ID.
+     *
      * @param powerAuthAppId PowerAuth App ID.
      * @return Application credentials.
      * @throws PushServerException In case the application credentials do not exist for provided PowerAuth app ID.

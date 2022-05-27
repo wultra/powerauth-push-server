@@ -17,7 +17,7 @@ ALTER TABLE push_app_credentials ADD COLUMN IF NOT EXISTS app_id VARCHAR(255);
 UPDATE push_app_credentials
 SET app_id = pa.name
 FROM (SELECT id, name FROM pa_application) AS pa
-WHERE pa.id=push_app_credentials.app_id_orig;
+WHERE pa.id = push_app_credentials.app_id_orig;
 
 -- remove the original column with numeric app ID value 
 ALTER TABLE push_app_credentials DROP COLUMN app_id_orig;
@@ -51,11 +51,11 @@ spring.batch.jdbc.initialize-schema=always
 
 Alternatively, you can create the tables manually by following the Spring Batch documentation:
 
-- [https://docs.spring.io/spring-boot/docs/2.0.0.M7/reference/htmlsingle/#howto-initialize-a-spring-batch-database](https://docs.spring.io/spring-boot/docs/2.0.0.M7/reference/htmlsingle/#howto-initialize-a-spring-batch-database)
+- [https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto.data-initialization.batch](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto.data-initialization.batch)
 
 ## RESTful API Changes
 
-The RESTful API now uses the string identifier of the PowerAuth application instead of a numeric one. As a result, wherever you relly on the embedded numeric identifier of the app, you should replace it by a string value.
+The RESTful API now uses the string identifier of the PowerAuth application instead of a numeric one. As a result, wherever you rely on the embedded numeric identifier of the app, you should replace it by a string value.
 
 Also, in several API calls, the `id` variable was renamed to `appId`, to maintain consistency. These calls are:
 

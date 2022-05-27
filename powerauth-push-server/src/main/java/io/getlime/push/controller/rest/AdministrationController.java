@@ -172,8 +172,8 @@ public class AdministrationController {
         }
         logger.info("Received createApplication request, application ID: {}", requestObject.getAppId());
         String errorMessage = CreateApplicationRequestValidator.validate(requestObject);
-        final Optional<AppCredentialsEntity> existingAppCredentialsEntity = appCredentialsRepository.findFirstByAppId(requestObject.getAppId());
-        if (existingAppCredentialsEntity.isPresent()) {
+        final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findFirstByAppId(requestObject.getAppId());
+        if (appCredentialsEntityOptional.isPresent()) {
             errorMessage = "Application already exists";
         }
         if (errorMessage != null) {
