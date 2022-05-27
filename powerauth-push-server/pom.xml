@@ -146,7 +146,7 @@
         <dependency>
             <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-java-crypto</artifactId>
-            <version>${powerauth.version}</version>
+            <version>${powerauth-crypto.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -31,6 +31,7 @@ import io.getlime.push.model.validator.*;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
+import io.getlime.push.service.http.HttpCustomizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,18 +51,21 @@ public class AdministrationController {
     private final PowerAuthClient powerAuthClient;
     private final AppCredentialsRepository appCredentialsRepository;
     private final AppCredentialStorageMap appCredentialStorageMap;
+    private final HttpCustomizationService httpCustomizationService;
 
     /**
      * Constructor with injected fields.
      * @param powerAuthClient PowerAuth service client.
      * @param appCredentialsRepository Application credentials repository.
      * @param appCredentialStorageMap Application credentials storage map.
+     * @param httpCustomizationService HTTP customization service.
      */
     @Autowired
-    public AdministrationController(PowerAuthClient powerAuthClient, AppCredentialsRepository appCredentialsRepository, AppCredentialStorageMap appCredentialStorageMap) {
+    public AdministrationController(PowerAuthClient powerAuthClient, AppCredentialsRepository appCredentialsRepository, AppCredentialStorageMap appCredentialStorageMap, HttpCustomizationService httpCustomizationService) {
         this.powerAuthClient = powerAuthClient;
         this.appCredentialsRepository = appCredentialsRepository;
         this.appCredentialStorageMap = appCredentialStorageMap;
+        this.httpCustomizationService = httpCustomizationService;
     }
 
     /**
@@ -98,7 +102,7 @@ public class AdministrationController {
             final GetApplicationListResponse response = new GetApplicationListResponse();
 
             // Get all applications in PA Server
-            final List<com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications> applicationList = powerAuthClient.getApplicationList();
+            final List<com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications> applicationList = getApplicationList().getApplications();
 
             // Get all applications that are already set up
             final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
@@ -311,5 +315,24 @@ public class AdministrationController {
             throw new PushServerException("Application credentials with entered ID does not exist");
         }
         return appCredentialsEntityOptional.get();
+    }
+
+    private com.wultra.security.powerauth.client.v3.GetApplicationDetailResponse getApplicationDetail(Long applicationId) throws PowerAuthClientException {
+        final com.wultra.security.powerauth.client.v3.GetApplicationDetailRequest detailRequest = new com.wultra.security.powerauth.client.v3.GetApplicationDetailRequest();
+        detailRequest.setApplicationId(applicationId);
+        return powerAuthClient.getApplicationDetail(
+                detailRequest,
+                httpCustomizationService.getQueryParams(),
+                httpCustomizationService.getHttpHeaders()
+        );
+    }
+
+    private com.wultra.security.powerauth.client.v3.GetApplicationListResponse getApplicationList() throws PowerAuthClientException {
+        final com.wultra.security.powerauth.client.v3.GetApplicationListRequest listRequest = new com.wultra.security.powerauth.client.v3.GetApplicationListRequest();
+        return powerAuthClient.getApplicationList(
+                listRequest,
+                httpCustomizationService.getQueryParams(),
+                httpCustomizationService.getHttpHeaders()
+        );
     }
 }
