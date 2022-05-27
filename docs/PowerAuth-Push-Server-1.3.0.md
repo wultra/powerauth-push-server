@@ -68,7 +68,7 @@ Also, in several API calls, the `id` variable was renamed to `appId`, to maintai
 - Remove iOS configuration for APNs
   - `POST /admin/app/ios/remove`
   - `DELETE /admin/app/ios/remove`
-- Update Android configuration for APNs
+- Update Android configuration for FCM
   - `POST /admin/app/android/update`
   - `PUT /admin/app/android/update`
 - Remove Android configuration for FCM
