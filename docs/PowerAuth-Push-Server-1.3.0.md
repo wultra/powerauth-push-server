@@ -4,7 +4,7 @@
 
 ### Fixing Incorrect Table Type
 
-In Oracle and Postgres databases, the `push_campaign_user.user_id` column used incorrect numeric type `INTEGER`/`NUMBER(19)` instead of `VARCHAR(255)`. To fix the issue, run the following scripts.
+In Oracle and Postgres databases, the `push_campaign_user.user_id` column uses incorrect numeric type `INTEGER`/`NUMBER(19)` instead of `VARCHAR(255)`. To fix the issue, run the following scripts.
 
 #### PostgreSQL
 
