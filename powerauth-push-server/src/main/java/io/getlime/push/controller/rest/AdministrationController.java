@@ -317,16 +317,6 @@ public class AdministrationController {
         return appCredentialsEntityOptional.get();
     }
 
-    private com.wultra.security.powerauth.client.v3.GetApplicationDetailResponse getApplicationDetail(Long applicationId) throws PowerAuthClientException {
-        final com.wultra.security.powerauth.client.v3.GetApplicationDetailRequest detailRequest = new com.wultra.security.powerauth.client.v3.GetApplicationDetailRequest();
-        detailRequest.setApplicationId(applicationId);
-        return powerAuthClient.getApplicationDetail(
-                detailRequest,
-                httpCustomizationService.getQueryParams(),
-                httpCustomizationService.getHttpHeaders()
-        );
-    }
-
     private com.wultra.security.powerauth.client.v3.GetApplicationListResponse getApplicationList() throws PowerAuthClientException {
         final com.wultra.security.powerauth.client.v3.GetApplicationListRequest listRequest = new com.wultra.security.powerauth.client.v3.GetApplicationListRequest();
         return powerAuthClient.getApplicationList(
