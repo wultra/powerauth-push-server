@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 /**
  * Service for converting FCM model classes.

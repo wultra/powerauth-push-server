@@ -40,9 +40,6 @@ public class SendPushMessageBatchRequestValidator {
         if (pushMessageBatch.getAppId() == null) {
             return "App ID must not be null.";
         }
-        if (pushMessageBatch.getAppId() < 1) {
-            return "App ID must be a positive number.";
-        }
         if (pushMessageBatch.getBatch() == null) {
             return "Batch with push messages must not be null.";
         }

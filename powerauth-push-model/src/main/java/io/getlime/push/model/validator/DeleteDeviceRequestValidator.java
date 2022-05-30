@@ -36,9 +36,6 @@ public class DeleteDeviceRequestValidator {
         if (request.getAppId() == null) {
             return "App ID must not be null.";
         }
-        if (request.getAppId() < 1) {
-            return "App ID must be a positive number.";
-        }
         if (request.getToken() == null || request.getToken().isEmpty()) {
             return "Push token must not be null or empty.";
         }

@@ -41,8 +41,9 @@ public class PushCampaignEntity implements Serializable {
     /**
      * App ID.
      */
-    @Column(name = "app_id", nullable = false, updatable = false)
-    private Long appId;
+    @ManyToOne
+    @JoinColumn(name = "app_id", referencedColumnName = "id", nullable = false, updatable = false)
+    private AppCredentialsEntity appCredentials;
 
     /**
      * Message.
@@ -95,16 +96,16 @@ public class PushCampaignEntity implements Serializable {
      * Get app ID.
      * @return App ID.
      */
-    public Long getAppId() {
-        return appId;
+    public AppCredentialsEntity getAppCredentials() {
+        return appCredentials;
     }
 
     /**
-     * Set app ID.
-     * @param appId App ID.
+     * Set app credentials.
+     * @param appCredentials App credentials.
      */
-    public void setAppId(Long appId) {
-        this.appId = appId;
+    public void setAppCredentials(AppCredentialsEntity appCredentials) {
+        this.appCredentials = appCredentials;
     }
 
     /**

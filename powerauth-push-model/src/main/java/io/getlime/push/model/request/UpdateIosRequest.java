@@ -22,7 +22,7 @@ package io.getlime.push.model.request;
  */
 public class UpdateIosRequest {
 
-    private Long id;
+    private String appId;
     private String bundle;
     private String keyId;
     private String teamId;
@@ -37,15 +37,15 @@ public class UpdateIosRequest {
 
     /**
      * Constructor with details.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      * @param bundle The iOS bundle record.
      * @param keyId The iOS key ID record.
      * @param teamId The iOS team ID record.
      * @param environment The APNs environment (per-app config).
      * @param privateKeyBase64 Base64 encoded private key.
      */
-    public UpdateIosRequest(Long id, String bundle, String keyId, String teamId, String environment, String privateKeyBase64) {
-        this.id = id;
+    public UpdateIosRequest(String appId, String bundle, String keyId, String teamId, String environment, String privateKeyBase64) {
+        this.appId = appId;
         this.bundle = bundle;
         this.keyId = keyId;
         this.teamId = teamId;
@@ -57,16 +57,16 @@ public class UpdateIosRequest {
      * Get application credentials entity ID.
      * @return Application credentials entity ID.
      */
-    public Long getId() {
-        return id;
+    public String getAppId() {
+        return appId;
     }
 
     /**
      * Set application credentials entity ID.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      */
-    public void setId(Long id) {
-        this.id = id;
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 
     /**

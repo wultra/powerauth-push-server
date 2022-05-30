@@ -147,7 +147,7 @@ public class SendCampaignController {
         pushMessage.setBody(jsonSerialization.deserializePushMessageBody(campaign.getMessage()));
         List<PushMessage> message = new ArrayList<>();
         message.add(pushMessage);
-        pushMessageSenderService.sendPushMessage(campaign.getAppId(), message);
+        pushMessageSenderService.sendPushMessage(campaign.getAppCredentials().getAppId(), message);
         logger.info("The sendTestCampaign request succeeded, campaign ID: {}", id);
         return new Response();
     }

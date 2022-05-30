@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class CreateDeviceForActivationsRequest {
 
-    private Long appId;
+    private String appId;
     private String token;
     private String platform;
     private final List<String> activationIds = new ArrayList<>();
@@ -34,7 +34,7 @@ public class CreateDeviceForActivationsRequest {
      * Get app ID associated with given device registration.
      * @return App ID.
      */
-    public Long getAppId() {
+    public String getAppId() {
         return appId;
     }
 
@@ -42,7 +42,7 @@ public class CreateDeviceForActivationsRequest {
      * Set app ID associated with given device registration.
      * @param appId App ID.
      */
-    public void setAppId(Long appId) {
+    public void setAppId(String appId) {
         this.appId = appId;
     }
 

@@ -25,14 +25,14 @@ import io.getlime.push.model.entity.PushMessage;
  */
 public class SendPushMessageRequest {
 
-    private Long appId;
+    private String appId;
     private PushMessage message;
 
     /**
      * Get app ID.
      * @return App ID.
      */
-    public Long getAppId() {
+    public String getAppId() {
         return appId;
     }
 
@@ -40,7 +40,7 @@ public class SendPushMessageRequest {
      * Set app ID.
      * @param appId App ID.
      */
-    public void setAppId(Long appId) {
+    public void setAppId(String appId) {
         this.appId = appId;
     }
 

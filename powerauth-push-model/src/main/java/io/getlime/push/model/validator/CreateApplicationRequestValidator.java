@@ -37,9 +37,6 @@ public class CreateApplicationRequestValidator {
         if (request.getAppId() == null) {
             return "App ID must not be null.";
         }
-        if (request.getAppId() < 1) {
-            return "App ID must be a positive number.";
-        }
         return null;
     }
 

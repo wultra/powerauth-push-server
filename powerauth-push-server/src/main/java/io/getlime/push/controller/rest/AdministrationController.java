@@ -71,31 +71,23 @@ public class AdministrationController {
     /**
      * List applications configured in Push Server.
      * @return Application list response.
-     * @throws PushServerException Throw in case communication with PowerAuth server fails.
      */
     @GetMapping(value = "list")
-    public ObjectResponse<GetApplicationListResponse> listApplications() throws PushServerException {
-        try {
-            logger.debug("Received listApplications request");
-            final GetApplicationListResponse response = new GetApplicationListResponse();
-            final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
-            final List<PushServerApplication> appList = new ArrayList<>();
-            for (AppCredentialsEntity appCredentialsEntity : appCredentials) {
-                final PushServerApplication app = new PushServerApplication();
-                app.setId(appCredentialsEntity.getId());
-                app.setAppId(appCredentialsEntity.getAppId());
-                app.setAppName(getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
-                app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-                app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
-                appList.add(app);
-            }
-            response.setApplicationList(appList);
-            logger.debug("The listApplications request succeeded");
-            return new ObjectResponse<>(response);
-        } catch (PowerAuthClientException ex) {
-            logger.warn(ex.getMessage(), ex);
-            throw new PushServerException("Application list failed because application name could not be retrieved");
+    public ObjectResponse<GetApplicationListResponse> listApplications() {
+        logger.debug("Received listApplications request");
+        final GetApplicationListResponse response = new GetApplicationListResponse();
+        final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
+        final List<PushServerApplication> appList = new ArrayList<>();
+        for (AppCredentialsEntity appCredentialsEntity : appCredentials) {
+            final PushServerApplication app = new PushServerApplication();
+            app.setAppId(appCredentialsEntity.getAppId());
+            app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
+            app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
+            appList.add(app);
         }
+        response.setApplicationList(appList);
+        logger.debug("The listApplications request succeeded");
+        return new ObjectResponse<>(response);
     }
 
     /**
@@ -116,15 +108,14 @@ public class AdministrationController {
             final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
 
             // Compute intersection by app ID
-            final Set<Long> identifiers = new HashSet<>();
+            final Set<String> identifiers = new HashSet<>();
             for (AppCredentialsEntity appCred: appCredentials) {
                 identifiers.add(appCred.getAppId());
             }
             for (com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications app : applicationList) {
-                if (!identifiers.contains(app.getId())) {
+                if (!identifiers.contains(app.getApplicationId())) {
                     final PushServerApplication applicationToAdd = new PushServerApplication();
-                    applicationToAdd.setId(app.getId());
-                    applicationToAdd.setAppName(app.getApplicationName());
+                    applicationToAdd.setAppId(app.getApplicationId());
                     // add apps in intersection
                     response.getApplicationList().add(applicationToAdd);
                 }
@@ -145,37 +136,30 @@ public class AdministrationController {
      */
     @PostMapping(value = "detail")
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(@RequestBody ObjectRequest<GetApplicationDetailRequest> request) throws PushServerException {
-        try {
-            logger.debug("Received getApplicationDetail request");
-            final GetApplicationDetailRequest requestObject = request.getRequestObject();
-            final String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
-            if (errorMessage != null) {
-                throw new PushServerException(errorMessage);
-            }
-            final GetApplicationDetailResponse response = new GetApplicationDetailResponse();
-            final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
-            final PushServerApplication app = new PushServerApplication();
-            app.setId(appCredentialsEntity.getId());
-            app.setAppId(appCredentialsEntity.getAppId());
-            app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-            app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
-            app.setAppName(getApplicationDetail(appCredentialsEntity.getAppId()).getApplicationName());
-            response.setApplication(app);
-            if (requestObject.getIncludeIos()) {
-                response.setIosBundle(appCredentialsEntity.getIosBundle());
-                response.setIosKeyId(appCredentialsEntity.getIosKeyId());
-                response.setIosTeamId(appCredentialsEntity.getIosTeamId());
-                response.setIosEnvironment(appCredentialsEntity.getIosEnvironment());
-            }
-            if (requestObject.getIncludeAndroid()) {
-                response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
-            }
-            logger.debug("The getApplicationDetail request succeeded");
-            return new ObjectResponse<>(response);
-        } catch (PowerAuthClientException ex) {
-            logger.warn(ex.getMessage(), ex);
-            throw new PushServerException("Application detail failed because application name could not be retrieved");
+        logger.debug("Received getApplicationDetail request");
+        final GetApplicationDetailRequest requestObject = request.getRequestObject();
+        final String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
+        if (errorMessage != null) {
+            throw new PushServerException(errorMessage);
         }
+        final GetApplicationDetailResponse response = new GetApplicationDetailResponse();
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
+        final PushServerApplication app = new PushServerApplication();
+        app.setAppId(appCredentialsEntity.getAppId());
+        app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
+        app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
+        response.setApplication(app);
+        if (requestObject.getIncludeIos()) {
+            response.setIosBundle(appCredentialsEntity.getIosBundle());
+            response.setIosKeyId(appCredentialsEntity.getIosKeyId());
+            response.setIosTeamId(appCredentialsEntity.getIosTeamId());
+            response.setIosEnvironment(appCredentialsEntity.getIosEnvironment());
+        }
+        if (requestObject.getIncludeAndroid()) {
+            response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
+        }
+        logger.debug("The getApplicationDetail request succeeded");
+        return new ObjectResponse<>(response);
     }
 
     /**
@@ -192,8 +176,8 @@ public class AdministrationController {
         }
         logger.info("Received createApplication request, application ID: {}", requestObject.getAppId());
         String errorMessage = CreateApplicationRequestValidator.validate(requestObject);
-        final AppCredentialsEntity existingAppCredentialsEntity = appCredentialsRepository.findFirstByAppId(requestObject.getAppId());
-        if (existingAppCredentialsEntity != null) {
+        final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findFirstByAppId(requestObject.getAppId());
+        if (appCredentialsEntityOptional.isPresent()) {
             errorMessage = "Application already exists";
         }
         if (errorMessage != null) {
@@ -202,7 +186,7 @@ public class AdministrationController {
         final AppCredentialsEntity appCredentialsEntity = new AppCredentialsEntity();
         appCredentialsEntity.setAppId(requestObject.getAppId());
         final AppCredentialsEntity newAppCredentialsEntity = appCredentialsRepository.save(appCredentialsEntity);
-        final CreateApplicationResponse response = new CreateApplicationResponse(newAppCredentialsEntity.getId());
+        final CreateApplicationResponse response = new CreateApplicationResponse(newAppCredentialsEntity.getAppId());
         logger.info("The createApplication request succeeded, application ID: {}", requestObject.getAppId());
         return new ObjectResponse<>(response);
     }
@@ -219,12 +203,12 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received updateIos request, application credentials entity ID: {}", requestObject.getId());
+        logger.info("Received updateIos request, application credentials entity ID: {}", requestObject.getAppId());
         final String errorMessage = UpdateIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
         final byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
         appCredentialsEntity.setIosPrivateKey(privateKeyBytes);
         appCredentialsEntity.setIosTeamId(requestObject.getTeamId());
@@ -233,7 +217,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosEnvironment(requestObject.getEnvironment());
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        logger.info("The updateIos request succeeded, application credentials entity ID: {}", requestObject.getId());
+        logger.info("The updateIos request succeeded, application credentials entity ID: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -249,20 +233,20 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received removeIos request, application credentials entity ID: {}", requestObject.getId());
+        logger.info("Received removeIos request, application credentials entity ID: {}", requestObject.getAppId());
         String errorMessage = RemoveIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
         appCredentialsEntity.setIosPrivateKey(null);
         appCredentialsEntity.setIosTeamId(null);
         appCredentialsEntity.setIosKeyId(null);
         appCredentialsEntity.setIosBundle(null);
         appCredentialsEntity.setIosEnvironment(null);
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(requestObject.getId());
-        logger.info("The removeIos request succeeded, application credentials entity ID: {}", requestObject.getId());
+        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        logger.info("The removeIos request succeeded, application credentials entity ID: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -278,18 +262,18 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received updateAndroid request, application credentials entity ID: {}", requestObject.getId());
+        logger.info("Received updateAndroid request, application credentials entity ID: {}", requestObject.getAppId());
         String errorMessage = UpdateAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
         byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
         appCredentialsEntity.setAndroidPrivateKey(privateKeyBytes);
         appCredentialsEntity.setAndroidProjectId(requestObject.getProjectId());
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        logger.info("The updateAndroid request succeeded, application credentials entity ID: {}", requestObject.getId());
+        logger.info("The updateAndroid request succeeded, application credentials entity ID: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -305,28 +289,28 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received removeAndroid request, application credentials entity ID: {}", requestObject.getId());
+        logger.info("Received removeAndroid request, application credentials entity ID: {}", requestObject.getAppId());
         String errorMessage = RemoveAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getId());
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
         appCredentialsEntity.setAndroidPrivateKey(null);
         appCredentialsEntity.setAndroidProjectId(null);
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(requestObject.getId());
-        logger.info("The removeAndroid request succeeded, application credentials entity ID: {}", requestObject.getId());
+        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        logger.info("The removeAndroid request succeeded, application credentials entity ID: {}", requestObject.getAppId());
         return new Response();
     }
 
     /**
      * Find app credentials entity by ID.
-     * @param id App credentials ID.
+     * @param powerAuthAppId App credentials ID.
      * @return App credentials entity.
      * @throws PushServerException Thrown when application credentials entity does not exists.
      */
-    private AppCredentialsEntity findAppCredentialsEntityById(Long id) throws PushServerException {
-        final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findById(id);
+    private AppCredentialsEntity findAppCredentialsEntityById(String powerAuthAppId) throws PushServerException {
+        final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findFirstByAppId(powerAuthAppId);
         if (!appCredentialsEntityOptional.isPresent()) {
             throw new PushServerException("Application credentials with entered ID does not exist");
         }

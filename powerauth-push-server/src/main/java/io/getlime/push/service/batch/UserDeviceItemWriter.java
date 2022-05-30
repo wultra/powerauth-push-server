@@ -72,26 +72,25 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
         for (UserDevice device: list) {
             final String platform = device.getPlatform();
             final String token = device.getToken();
-            final String userID = device.getUserId();
-            final Long appId = device.getAppId();
+            final String userId = device.getUserId();
             final Long campaignId = device.getCampaignId();
             final Long deviceId = device.getDeviceId();
             final String activationId = device.getActivationId();
 
             // Load and cache campaign information
-            PushMessageBody messageBody = campaignStorageMap.get(campaignId);
-            if (messageBody == null) {
+            PushCampaignEntity campaign = campaignStorageMap.get(campaignId);
+            if (campaign == null) {
                 final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
                 if (!campaignEntityOptional.isPresent()) {
                     throw new PushServerException("Campaign with entered ID does not exist");
                 }
-                final PushCampaignEntity campaignEntity = campaignEntityOptional.get();
-                messageBody = jsonSerialization.deserializePushMessageBody(campaignEntity.getMessage());
-                campaignStorageMap.put(campaignId, messageBody);
+                campaign = campaignEntityOptional.get();
+                campaignStorageMap.put(campaignId, campaign);
             }
+            final PushMessageBody messageBody = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
 
             // Send the push message using push sender service
-            pushMessageSenderService.sendCampaignMessage(appId, platform, token, messageBody, userID, deviceId, activationId);
+            pushMessageSenderService.sendCampaignMessage(campaign.getAppCredentials().getAppId(), platform, token, messageBody, userId, deviceId, activationId);
         }
     }
 }
