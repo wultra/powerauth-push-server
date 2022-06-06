@@ -2,7 +2,7 @@
 
 ## Default APNs Environment Change
 
-For practical reasons, the default value for the APNs environment was set so that the push server connects to the development environment. Since most of the environments do not use production setup, and initial development is usually done with a testing iOS apps, the default value change should provide a smoother initial experience.
+For practical reasons, the default value for the APNs environment was set so that the push server connects to the development environment. Since most of the environments do not use production setup, and initial development is usually done with a testing iOS app, the default value change should provide a smoother initial experience for developers.
 
 To use the production environment, set the following property:
 
