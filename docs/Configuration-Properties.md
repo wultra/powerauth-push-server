@@ -46,17 +46,17 @@ The Push Server uses the following public configuration properties:
 
 ## APNs Configuration
 
-| Property | Default | Note |
-|---|---|---|
-| `powerauth.push.service.apns.useDevelopment` | `false` | Flag indicating that the development instance of APNS service should be used |
-| `powerauth.push.service.apns.proxy.enabled` | `false` | Flag indicating if the communication needs to go through proxy |
+| Property | Default     | Note |
+|---|-------------|---|
+| `powerauth.push.service.apns.useDevelopment` | `true`      | Flag indicating that the development instance of APNS service should be used |
+| `powerauth.push.service.apns.proxy.enabled` | `false`     | Flag indicating if the communication needs to go through proxy |
 | `powerauth.push.service.apns.proxy.host` | `127.0.0.1` | Proxy host |
-| `powerauth.push.service.apns.proxy.port` | `8080` | Proxy port |
-| `powerauth.push.service.apns.proxy.username` | `_empty_` | Proxy username | 
-| `powerauth.push.service.apns.proxy.password` | `_empty_` | Proxy password |
-| `powerauth.push.service.apns.connect.timeout` | `5000` | Push message gateway connect timeout in milliseconds |
-| `powerauth.push.service.apns.idlePingInterval` | `60000` | Interval in milliseconds specifying the frequency of APNS ping calls in idle state |
-| `powerauth.push.service.apns.concurrentConnections` | `1` | Push message concurrency settings |
+| `powerauth.push.service.apns.proxy.port` | `8080`      | Proxy port |
+| `powerauth.push.service.apns.proxy.username` | `_empty_`   | Proxy username | 
+| `powerauth.push.service.apns.proxy.password` | `_empty_`   | Proxy password |
+| `powerauth.push.service.apns.connect.timeout` | `5000`      | Push message gateway connect timeout in milliseconds |
+| `powerauth.push.service.apns.idlePingInterval` | `60000`     | Interval in milliseconds specifying the frequency of APNS ping calls in idle state |
+| `powerauth.push.service.apns.concurrentConnections` | `1`         | Push message concurrency settings |
 
 # FCM Configuration
 
