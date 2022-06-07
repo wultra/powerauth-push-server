@@ -73,7 +73,7 @@ powerauth.push.service.registration.multipleActivations.enabled=true
 
 ### APNS Environment Configuration
 
-In order to separate development and production environment on APNS, you may want to set following property:
+In order to separate development and production environment on APNS, you may want to set the following property (`false` value represents the production environment):
 
 ```
 powerauth.push.service.apns.useDevelopment=false
