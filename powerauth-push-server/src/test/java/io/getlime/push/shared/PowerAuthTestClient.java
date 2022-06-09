@@ -119,7 +119,7 @@ public class PowerAuthTestClient {
         String nonce = BaseEncoding.base64().encode(eciesCryptogramL2.getNonce());
 
         // Prepare activation
-        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, ephemeralPublicKey, encryptedData, mac, nonce);
+        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, null, ephemeralPublicKey, encryptedData, mac, nonce);
         assertNotNull(prepareResponse.getActivationId());
 
         // Commit activation
