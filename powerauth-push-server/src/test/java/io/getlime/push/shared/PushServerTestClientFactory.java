@@ -27,7 +27,7 @@ public class PushServerTestClientFactory {
 
         PowerAuthTestClient powerAuthTestClient = new PowerAuthTestClient();
         powerAuthTestClient.initializeClient(powerAuthRestUrl);
-        Long applicationId = powerAuthTestClient.initializeApplication(TEST_APPLICATION_NAME, TEST_APPLICATION_VERSION);
+        String applicationId = powerAuthTestClient.initializeApplication(TEST_APPLICATION_NAME, TEST_APPLICATION_VERSION);
         String activationId = powerAuthTestClient.createActivation(TEST_USER_ID);
         String activationId2 = powerAuthTestClient.createActivation(TEST_USER_ID);
         String activationId3 = powerAuthTestClient.createActivation(TEST_USER_ID);

@@ -51,12 +51,6 @@ public class PushCampaignUserEntity implements Serializable {
     private String userId;
 
     /**
-     * App ID.
-     */
-    @Column(name = "app_id", nullable = false, updatable = false)
-    private Long appId;
-
-    /**
      * Timestamp created.
      */
     @Column(name = "timestamp_created", nullable = false, updatable = false)
@@ -92,22 +86,6 @@ public class PushCampaignUserEntity implements Serializable {
      */
     public void setCampaignId(Long campaignId) {
         this.campaignId = campaignId;
-    }
-
-    /**
-     * Get app ID.
-     * @return App ID.
-     */
-    public Long getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set app ID.
-     * @param appId App ID.
-     */
-    public void setAppId(Long appId) {
-        this.appId = appId;
     }
 
     /**

@@ -26,22 +26,22 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-public class AppCredentialStorageMap implements ItemStorageMap<Long, AppRelatedPushClient> {
+public class AppCredentialStorageMap implements ItemStorageMap<String, AppRelatedPushClient> {
 
-    private final ConcurrentMap<Long, AppRelatedPushClient> map = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, AppRelatedPushClient> map = new ConcurrentHashMap<>();
 
     @Override
-    public AppRelatedPushClient get(Long key) {
+    public AppRelatedPushClient get(String key) {
         return map.get(key);
     }
 
     @Override
-    public void put(Long key, AppRelatedPushClient value) {
+    public void put(String key, AppRelatedPushClient value) {
         map.put(key, value);
     }
 
     @Override
-    public boolean contains(Long key) {
+    public boolean contains(String key) {
         return map.containsKey(key);
     }
 
@@ -51,7 +51,7 @@ public class AppCredentialStorageMap implements ItemStorageMap<Long, AppRelatedP
     }
 
     @Override
-    public void cleanByKey(Long key) {
+    public void cleanByKey(String key) {
         map.remove(key);
     }
 }

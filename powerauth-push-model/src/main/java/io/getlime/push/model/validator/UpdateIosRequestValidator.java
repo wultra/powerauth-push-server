@@ -34,11 +34,8 @@ public class UpdateIosRequestValidator {
         if (request == null) {
             return "Request must not be null.";
         }
-        if (request.getId() == null) {
-            return "ID must not be null.";
-        }
-        if (request.getId() < 1) {
-            return "ID must be a positive number.";
+        if (request.getAppId() == null) {
+            return "App ID must not be null.";
         }
         if (request.getBundle() == null || request.getBundle().isEmpty()) {
             return "Bundle must not be empty.";

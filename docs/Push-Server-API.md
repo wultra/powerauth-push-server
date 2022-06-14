@@ -1246,10 +1246,16 @@ Update an iOS configuration.
     "bundle": "some.bundle.id",
     "keyId": "KEYID123456",
     "teamId": "TEAMID123456",
+    "environment": null,
     "privateKeyBase64": "LS0tLS1CRUdJT..."
   }
 }
 ```
+
+You can use following `environment` values in request:
+- `null` - environment is decided by configuration of server property `powerauth.push.service.apns.useDevelopment`
+- `development` - use APNs development environment
+- `production` - use APNs production environment
 
 #### Response 200
 

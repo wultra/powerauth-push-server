@@ -69,8 +69,9 @@ public class PushDeviceRegistrationEntity implements Serializable {
     /**
      * App ID.
      */
-    @Column(name = "app_id", nullable = false, updatable = false)
-    private Long appId;
+    @ManyToOne
+    @JoinColumn(name = "app_id", referencedColumnName = "id", nullable = false, updatable = false)
+    private AppCredentialsEntity appCredentials;
 
     /**
      * Platform.
@@ -145,19 +146,19 @@ public class PushDeviceRegistrationEntity implements Serializable {
     }
 
     /**
-     * Get app ID.
-     * @return App ID.
+     * Get app credentials.
+     * @return App credentials.
      */
-    public Long getAppId() {
-        return appId;
+    public AppCredentialsEntity getAppCredentials() {
+        return appCredentials;
     }
 
     /**
-     * Set app ID.
-     * @param appId App ID
+     * Set app credentials.
+     * @param appCredentials App credentials
      */
-    public void setAppId(Long appId) {
-        this.appId = appId;
+    public void setAppCredentials(AppCredentialsEntity appCredentials) {
+        this.appCredentials = appCredentials;
     }
 
     /**

@@ -22,7 +22,7 @@ package io.getlime.push.model.request;
  */
 public class GetApplicationDetailRequest {
 
-    private Long id;
+    private String appId;
     private boolean includeIos;
     private boolean includeAndroid;
 
@@ -34,20 +34,20 @@ public class GetApplicationDetailRequest {
 
     /**
      * Constructor with application credentials entity ID.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      */
-    public GetApplicationDetailRequest(Long id) {
-        this.id = id;
+    public GetApplicationDetailRequest(String appId) {
+        this.appId = appId;
     }
 
     /**
      * Constructor with details.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      * @param includeIos Whether to include iOS details.
      * @param includeAndroid Whether to include Android details.
      */
-    public GetApplicationDetailRequest(Long id, boolean includeIos, boolean includeAndroid) {
-        this.id = id;
+    public GetApplicationDetailRequest(String appId, boolean includeIos, boolean includeAndroid) {
+        this.appId = appId;
         this.includeIos = includeIos;
         this.includeAndroid = includeAndroid;
     }
@@ -56,16 +56,16 @@ public class GetApplicationDetailRequest {
      * Get application credentials entity ID.
      * @return Application credentials entity ID.
      */
-    public Long getId() {
-        return id;
+    public String getAppId() {
+        return appId;
     }
 
     /**
      * Set application credentials entity ID.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      */
-    public void setId(Long id) {
-        this.id = id;
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 
     /**

@@ -22,7 +22,7 @@ package io.getlime.push.model.request;
  */
 public class UpdateAndroidRequest {
 
-    private Long id;
+    private String appId;
     private String projectId;
     private String privateKeyBase64;
 
@@ -34,12 +34,12 @@ public class UpdateAndroidRequest {
 
     /**
      * Constructor with details.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      * @param projectId Android project ID record.
      * @param privateKeyBase64 Base 64 encoded Android private key.
      */
-    public UpdateAndroidRequest(Long id, String projectId, String privateKeyBase64) {
-        this.id = id;
+    public UpdateAndroidRequest(String appId, String projectId, String privateKeyBase64) {
+        this.appId = appId;
         this.projectId = projectId;
         this.privateKeyBase64 = privateKeyBase64;
     }
@@ -48,16 +48,16 @@ public class UpdateAndroidRequest {
      * Get application credentials entity ID.
      * @return Application credentials entity ID.
      */
-    public Long getId() {
-        return id;
+    public String getAppId() {
+        return appId;
     }
 
     /**
      * Set application credentials entity ID.
-     * @param id Application credentials entity ID.
+     * @param appId Application credentials entity ID.
      */
-    public void setId(Long id) {
-        this.id = id;
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 
     /**

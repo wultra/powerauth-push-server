@@ -69,7 +69,7 @@ CREATE TABLE push_campaign (
 CREATE TABLE push_campaign_user (
 	id INTEGER NOT NULL CONSTRAINT push_campaign_user_pkey PRIMARY KEY,
 	campaign_id INTEGER NOT NULL,
-	user_id INTEGER NOT NULL,
+	user_id VARCHAR(255) NOT NULL,
 	timestamp_created TIMESTAMP(6) NOT NULL
 );
 

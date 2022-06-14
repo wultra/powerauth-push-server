@@ -32,7 +32,7 @@ public class PowerAuthTestClient {
     private final KeyConvertor keyConvertor = new KeyConvertor();
     private PowerAuthClient powerAuthClient;
 
-    private Long applicationId;
+    private String applicationId;
     private String applicationKey;
     private String applicationSecret;
     private String masterPublicKey;
@@ -48,14 +48,14 @@ public class PowerAuthTestClient {
         powerAuthClient = new PowerAuthRestClient(powerAuthRestUrl);
     }
 
-    public Long initializeApplication(String applicationName, String applicationVersion) throws PowerAuthClientException {
+    public String initializeApplication(String applicationName, String applicationVersion) throws PowerAuthClientException {
         // Create application if it does not exist
         List<GetApplicationListResponse.Applications> applications = powerAuthClient.getApplicationList();
         boolean applicationExists = false;
         for (com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications app: applications) {
-            if (app.getApplicationName().equals(applicationName)) {
+            if (app.getApplicationId().equals(applicationName)) {
                 applicationExists = true;
-                applicationId = app.getId();
+                applicationId = app.getApplicationId();
             }
         }
         if (!applicationExists) {
@@ -68,12 +68,12 @@ public class PowerAuthTestClient {
         masterPublicKey = detail.getMasterPublicKey();
         boolean versionExists = false;
         for (GetApplicationDetailResponse.Versions appVersion: detail.getVersions()) {
-            if (appVersion.getApplicationVersionName().equals(applicationVersion)) {
+            if (appVersion.getApplicationVersionId().equals(applicationVersion)) {
                 versionExists = true;
                 applicationKey = appVersion.getApplicationKey();
                 applicationSecret = appVersion.getApplicationSecret();
                 if (!appVersion.isSupported()) {
-                    powerAuthClient.supportApplicationVersion(appVersion.getApplicationVersionId());
+                    powerAuthClient.supportApplicationVersion(applicationId, appVersion.getApplicationVersionId());
                 }
             }
         }
@@ -119,7 +119,7 @@ public class PowerAuthTestClient {
         String nonce = BaseEncoding.base64().encode(eciesCryptogramL2.getNonce());
 
         // Prepare activation
-        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, ephemeralPublicKey, encryptedData, mac, nonce);
+        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, null, ephemeralPublicKey, encryptedData, mac, nonce);
         assertNotNull(prepareResponse.getActivationId());
 
         // Commit activation
@@ -137,11 +137,11 @@ public class PowerAuthTestClient {
         powerAuthClient.unblockActivation(activationId, "test");
     }
 
-    public Long getApplicationId() {
+    public String getApplicationId() {
         return applicationId;
     }
 
-    public void setApplicationId(Long applicationId) {
+    public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
 

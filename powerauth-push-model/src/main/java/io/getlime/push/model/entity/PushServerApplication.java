@@ -22,34 +22,16 @@ package io.getlime.push.model.entity;
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 public class PushServerApplication {
-    
-    private Long id;
-    private Long appId;
-    private String appName;
+
+    private String appId;
     private Boolean ios;
     private Boolean android;
-
-    /**
-     * Get application credentials entity ID.
-     * @return Application credentials entity ID.
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Set application credentials entity ID.
-     * @param id Application credentials entity ID.
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     /**
      * Get application ID.
      * @return Application ID.
      */
-    public Long getAppId() {
+    public String getAppId() {
         return appId;
     }
 
@@ -57,24 +39,8 @@ public class PushServerApplication {
      * Set application ID.
      * @param appId Application ID.
      */
-    public void setAppId(Long appId) {
+    public void setAppId(String appId) {
         this.appId = appId;
-    }
-
-    /**
-     * Get application name.
-     * @return Application name.
-     */
-    public String getAppName() {
-        return appName;
-    }
-
-    /**
-     * Set application name.
-     * @param appName Application name.
-     */
-    public void setAppName(String appName) {
-        this.appName = appName;
     }
 
     /**

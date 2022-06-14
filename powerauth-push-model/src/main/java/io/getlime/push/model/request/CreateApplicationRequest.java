@@ -22,7 +22,7 @@ package io.getlime.push.model.request;
  */
 public class CreateApplicationRequest {
 
-    private Long appId;
+    private String appId;
 
     /**
      * Default constructor.
@@ -34,7 +34,7 @@ public class CreateApplicationRequest {
      * Constructor with PowerAuth server application ID.
      * @param appId  PowerAuth server application ID.
      */
-    public CreateApplicationRequest(Long appId) {
+    public CreateApplicationRequest(String appId) {
         this.appId = appId;
     }
 
@@ -42,7 +42,7 @@ public class CreateApplicationRequest {
      * Get PowerAuth server application ID.
      * @return PowerAuth server application ID.
      */
-    public Long getAppId() {
+    public String getAppId() {
         return appId;
     }
 
@@ -50,7 +50,7 @@ public class CreateApplicationRequest {
      * Set PowerAuth server application ID.
      * @param appId PowerAuth server application ID.
      */
-    public void setAppId(Long appId) {
+    public void setAppId(String appId) {
         this.appId = appId;
     }
 }

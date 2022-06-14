@@ -20,13 +20,16 @@ The new tables may or may not reside in the same database that you use for your 
 
 ### Connecting Server to Database
 
-The default database connectivity parameters in `powerauth-push-server.war` are following (MySQL defaults):
+The default database connectivity parameters in `powerauth-push-server.war` are following (PostgreSQL defaults):
 
 ```sh
-spring.datasource.url=jdbc:mysql://localhost:3306/powerauth
+spring.datasource.url=jdbc:postgresql://localhost:5432/powerauth
 spring.datasource.username=powerauth
 spring.datasource.password=
-spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
+spring.jpa.properties.hibernate.connection.characterEncoding=utf8
+spring.jpa.properties.hibernate.connection.useUnicode=true
 spring.jpa.hibernate.ddl-auto=none
 ```
 
@@ -70,7 +73,7 @@ powerauth.push.service.registration.multipleActivations.enabled=true
 
 ### APNS Environment Configuration
 
-In order to separate development and production environment on APNS, you may want to set following property:
+In order to separate development and production environment on APNS, you may want to set the following property (`false` value represents the production environment):
 
 ```
 powerauth.push.service.apns.useDevelopment=false
@@ -130,6 +133,23 @@ PowerAuth Push Server uses [Pushy](https://github.com/relayrides/pushy) to send 
 ### APNL and Tomcat 8.0
 
 Put `alpn-boot` library (available [here](https://mvnrepository.com/artifact/org.mortbay.jetty.alpn/alpn-boot)) in `${CATALINA_HOME}/lib` folder and make sure to start Tomcat with `-Xbootclasspath/p:${CATALINA_HOME}/lib/alpn-boot.jar` parameters, so that the library is on classpath.
+
+## Correlation Header Configuration (Optional)
+
+You can enable correlation header logging in Push server by enabling the following properties:
+
+```properties
+powerauth.service.correlation-header.enabled=true
+powerauth.service.correlation-header.name=X-Correlation-ID
+powerauth.service.correlation-header.value.validation-regexp=[a-zA-Z0-9\\-]{8,1024}
+logging.pattern.console=%clr(%d{${LOG_DATEFORMAT_PATTERN:yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:%5p}) [%X{X-Correlation-ID}] %clr(%5p) %clr(${PID: }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:%wEx}
+```
+
+Update the correlation header name in case you want to use a different HTTP header than `X-Correlation-ID`. You can also update the regular expression for correlation header value validation to match the exact format of correlation header value that will be used.
+
+The logging pattern for console is the Spring default logging pattern with the addition of `%X{X-Correlation-ID}`. This variable is used to log the actual value of the correlation header.
+
+For best traceability, the correlation headers should be enabled in the whole PowerAuth stack, so enable the correlation headers in other deployed applications, too. The configuration property names are the same in all PowerAuth applications: `powerauth.service.correlation-header.*`. The correlation header values are passed through the stack, so the requests can be traced easily across multiple components.
 
 ## Deploying Push Server
 

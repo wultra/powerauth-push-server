@@ -38,7 +38,7 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceRegistrat
      * @param pushToken Push token.
      * @return Device registrations matching provided values.
      */
-    List<PushDeviceRegistrationEntity> findByAppIdAndPushToken(Long appId, String pushToken);
+    List<PushDeviceRegistrationEntity> findByAppCredentialsAppIdAndPushToken(String appId, String pushToken);
 
     /**
      * Find all device registrations for given activation ID and push token.
@@ -59,19 +59,26 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceRegistrat
      * Find all device registrations by given user ID and app ID. This list represents all devices that a single user
      * has registered.
      * @param userId User ID.
-     * @param appId App ID.
+     * @param rid Credentials database record ID.
      * @return List of device registrations.
      */
-    List<PushDeviceRegistrationEntity> findByUserIdAndAppId(String userId, Long appId);
+    List<PushDeviceRegistrationEntity> findByUserIdAndAppCredentialsId(String userId, Long rid);
 
     /**
      * Find all device registrations by given user ID, app ID and activation ID. This list should contain one record
      * only under normal circumstances.
      * @param userId User ID.
-     * @param appId App ID.
+     * @param rid Credentials database record ID.
      * @param activationId Activation ID.
      * @return List of device registrations.
      */
-    List<PushDeviceRegistrationEntity> findByUserIdAndAppIdAndActivationId(String userId, Long appId, String activationId);
+    List<PushDeviceRegistrationEntity> findByUserIdAndAppCredentialsIdAndActivationId(String userId, Long rid, String activationId);
+
+    /**
+     * Delete all records by app ID and push token.
+     * @param rid Credentials database record ID.
+     * @param pushToken Push Token.
+     */
+    void deleteAllByAppCredentialsIdAndPushToken(Long rid, String pushToken);
 
 }

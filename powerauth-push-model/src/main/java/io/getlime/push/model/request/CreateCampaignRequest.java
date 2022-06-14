@@ -27,7 +27,7 @@ import io.getlime.push.model.entity.PushMessageBody;
 
 public class CreateCampaignRequest {
 
-    private Long appId;
+    private String appId;
 
     private PushMessageBody message;
 
@@ -35,7 +35,7 @@ public class CreateCampaignRequest {
      * Get app ID.
      * @return App ID.
      */
-    public Long getAppId() {
+    public String getAppId() {
         return appId;
     }
 
@@ -43,7 +43,7 @@ public class CreateCampaignRequest {
      * Set app ID.
      * @param appId App ID.
      */
-    public void setAppId(Long appId) {
+    public void setAppId(String appId) {
         this.appId = appId;
     }
 

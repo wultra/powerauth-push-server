@@ -26,14 +26,14 @@ import java.util.List;
  */
 public class SendPushMessageBatchRequest {
 
-    private Long appId;
+    private String appId;
     private List<PushMessage> batch;
 
     /**
      * Get app ID.
      * @return App ID.
      */
-    public Long getAppId() {
+    public String getAppId() {
         return appId;
     }
 
@@ -41,7 +41,7 @@ public class SendPushMessageBatchRequest {
      * Set app ID.
      * @param appId App ID.
      */
-    public void setAppId(Long appId) {
+    public void setAppId(String appId) {
         this.appId = appId;
     }
 

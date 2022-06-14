@@ -34,9 +34,12 @@ public class PowerAuthPushConfiguration {
 
   @Bean
   public PushServerClient pushServerClient() {
-    PushServerClient client = new PushServerClient();
-    client.setServiceBaseUrl("http://localhost:8080/powerauth-push-server");
-    return client;
+      try {
+          return new PushServerClient(powerAuthPushServiceUrl);
+      } catch (PushServerClientException ex) {
+          logger.error(ex.getMessage(), ex);
+          return null;
+      }
   }
 
 }

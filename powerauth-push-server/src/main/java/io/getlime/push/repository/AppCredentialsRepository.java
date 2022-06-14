@@ -21,6 +21,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 /**
  * Repository interface used to access app credentials database.
@@ -33,9 +34,9 @@ public interface AppCredentialsRepository extends CrudRepository<AppCredentialsE
 
     /**
      * Find app push service credentials for given app ID.
-     * @param appId App ID.
+     * @param appId App ID (PowerAuth).
      * @return Push service app credentials.
      */
-    AppCredentialsEntity findFirstByAppId(Long appId);
+    Optional<AppCredentialsEntity> findFirstByAppId(String appId);
 
 }

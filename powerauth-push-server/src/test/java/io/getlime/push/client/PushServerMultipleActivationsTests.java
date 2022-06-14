@@ -80,7 +80,7 @@ public class PushServerMultipleActivationsTests {
         activationIds.add(powerAuthTestClient.getActivationId2());
         boolean result = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds);
         assertTrue(result);
-        pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN).forEach(pushDeviceRepository::delete);
+        pushDeviceRepository.deleteAll(pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN));
     }
 
     @Test
@@ -98,18 +98,18 @@ public class PushServerMultipleActivationsTests {
         // This test tests refresh of a device registration
         boolean actual = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds);
         assertTrue(actual);
-        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
+        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         assertEquals(2, devices.size());
         Set<Long> rowIds = new HashSet<>();
         devices.forEach(device -> rowIds.add(device.getId()));
         boolean actual2 = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds);
         assertTrue(actual2);
-        List<PushDeviceRegistrationEntity> devices2 = pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
+        List<PushDeviceRegistrationEntity> devices2 = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         assertEquals(2, devices2.size());
         Set<Long> rowIds2 = new HashSet<>();
         devices2.forEach(device -> rowIds2.add(device.getId()));
         assertEquals(rowIds, rowIds2);
-        pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN).forEach(pushDeviceRepository::delete);
+        pushDeviceRepository.deleteAll(pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN));
     }
 
     @Test
@@ -120,18 +120,18 @@ public class PushServerMultipleActivationsTests {
         // This test tests refresh of a device registration
         boolean actual = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds);
         assertTrue(actual);
-        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
+        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         assertEquals(2, devices.size());
         Set<Long> rowIds = new HashSet<>();
         devices.forEach(device -> rowIds.add(device.getId()));
         boolean actual2 = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN_2, MobilePlatform.iOS, activationIds);
         assertTrue(actual2);
-        List<PushDeviceRegistrationEntity> devices2 = pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN_2);
+        List<PushDeviceRegistrationEntity> devices2 = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN_2);
         assertEquals(2, devices2.size());
         Set<Long> rowIds2 = new HashSet<>();
         devices2.forEach(device -> rowIds2.add(device.getId()));
         assertEquals(rowIds, rowIds2);
-        pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN_2).forEach(pushDeviceRepository::delete);
+        pushDeviceRepository.deleteAll(pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN_2));
     }
 
     @Test
@@ -142,7 +142,7 @@ public class PushServerMultipleActivationsTests {
         // This test tests refresh of a device registration
         boolean actual = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds);
         assertTrue(actual);
-        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
+        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         assertEquals(2, devices.size());
         Set<Long> rowIds = new HashSet<>();
         devices.forEach(device -> rowIds.add(device.getId()));
@@ -151,13 +151,13 @@ public class PushServerMultipleActivationsTests {
         activationIds2.add(powerAuthTestClient.getActivationId4());
         boolean actual2 = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds2);
         assertTrue(actual2);
-        List<PushDeviceRegistrationEntity> devices2 = pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
+        List<PushDeviceRegistrationEntity> devices2 = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         assertEquals(2, devices2.size());
         Set<Long> rowIds2 = new HashSet<>();
         devices2.forEach(device -> rowIds2.add(device.getId()));
         // Row IDs do not match, because the activations are different
         assertNotEquals(rowIds, rowIds2);
-        pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN).forEach(pushDeviceRepository::delete);
+        pushDeviceRepository.deleteAll(pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN));
     }
 
     @Test
@@ -168,7 +168,7 @@ public class PushServerMultipleActivationsTests {
         // This test tests refresh of a device registration
         boolean actual = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds);
         assertTrue(actual);
-        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
+        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         assertEquals(2, devices.size());
         Set<Long> rowIds = new HashSet<>();
         devices.forEach(device -> rowIds.add(device.getId()));
@@ -177,13 +177,13 @@ public class PushServerMultipleActivationsTests {
         activationIds2.add(powerAuthTestClient.getActivationId4());
         boolean actual2 = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds2);
         assertTrue(actual2);
-        List<PushDeviceRegistrationEntity> devices2 = pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
+        List<PushDeviceRegistrationEntity> devices2 = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         assertEquals(2, devices2.size());
         Set<Long> rowIds2 = new HashSet<>();
         devices2.forEach(device -> rowIds2.add(device.getId()));
         // Row IDs do not match, because the one of activations is different
         assertNotEquals(rowIds, rowIds2);
-        pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN).forEach(pushDeviceRepository::delete);
+        pushDeviceRepository.deleteAll(pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN));
     }
 
     @Test
@@ -195,7 +195,7 @@ public class PushServerMultipleActivationsTests {
             // This test tests refresh of a device registration
             boolean actual = pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, activationIds);
             assertTrue(actual);
-            List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
+            List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
             assertEquals(2, devices.size());
             pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, powerAuthTestClient.getActivationId3());
         });

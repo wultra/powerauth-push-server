@@ -38,9 +38,6 @@ public class CreateDeviceRequestValidator {
         if (request.getAppId() == null) {
             return "App ID must not be null.";
         }
-        if (request.getAppId() < 1) {
-            return "App ID must be a positive number.";
-        }
         if (request.getActivationId() == null) {
             return "Activation ID must not be null.";
         }
@@ -64,9 +61,6 @@ public class CreateDeviceRequestValidator {
         }
         if (request.getAppId() == null) {
             return "App ID must not be null.";
-        }
-        if (request.getAppId() < 1) {
-            return "App ID must be a positive number.";
         }
         if (request.getActivationIds() == null) {
             return "Activation ID list must not be null.";
