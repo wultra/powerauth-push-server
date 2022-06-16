@@ -152,15 +152,15 @@ public class PushSendingWorker {
             final FcmSuccessResponse response = responseEntity.getBody();
             if (response != null && response.getName() != null) {
                 if (response.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
-                    logger.info("Notification sent, response: {}", response.getName());
+                    logger.info("Notification sent successfully, response: {}.", response.getName());
                     callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                 } else {
-                    logger.error("Invalid response received from FCM, notification sending failed - unexpected response name: {}", response.getName());
+                    logger.error("Invalid response received from FCM, notification sending failed - unexpected response name: {}.", response.getName());
                     callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                 }
             } else {
                 // This state should not happen, only in case when response from server is invalid
-                logger.error("Invalid response received from FCM, notification sending failed - empty or invalid response");
+                logger.error("Invalid response received from FCM, notification sending failed - empty or invalid response.");
                 callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
             }
         };
@@ -169,10 +169,10 @@ public class PushSendingWorker {
         final Consumer<Throwable> onError = t -> {
             if (t instanceof RestClientException) {
                 final MessagingErrorCode errorCode = fcmConverter.convertExceptionToErrorCode((RestClientException) t);
-                logger.error("FCM server returned error response: {}", ((RestClientException) t).getResponse());
+                logger.warn("FCM server returned error response: {}.", ((RestClientException) t).getResponse());
                 switch (errorCode) {
                     case UNREGISTERED:
-                        logger.error("Push message rejected by FCM gateway, device registration will be removed. Error: {}", errorCode);
+                        logger.info("Push message rejected by FCM gateway, device registration for token: {} is invalid and will be removed. Error: {}", pushToken, errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                         return;
 
@@ -181,26 +181,27 @@ public class PushSendingWorker {
                     case QUOTA_EXCEEDED:
                         // TODO - implement throttling of messages, see:
                         // https://firebase.google.com/docs/cloud-messaging/admin/errors
-                        logger.error("Push message rejected by FCM gateway, message status set to PENDING. Error: {}", errorCode);
+                        logger.warn("Push message rejected by FCM gateway, message status set to PENDING. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
                         return;
 
                     case SENDER_ID_MISMATCH:
                     case THIRD_PARTY_AUTH_ERROR:
                     case INVALID_ARGUMENT:
-                        logger.error("Push message rejected by FCM gateway, error: {}", errorCode);
+                        logger.warn("Push message rejected by FCM gateway. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         return;
 
                     default:
-                        logger.error("Unexpected error code received from FCM gateway: {}", errorCode);
+                        logger.error("Unexpected error code received from FCM gateway. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         return;
                 }
             }
 
             // Unexpected errors
-            logger.error("Unexpected error occurred while sending push message: {}", t.getMessage(), t);
+            logger.error("Unexpected error occurred while sending push message: {}.", t.getMessage());
+            logger.debug("Exception details:", t);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         };
 
@@ -208,7 +209,8 @@ public class PushSendingWorker {
         try {
             fcmClient.exchange(message, false, onSuccess, onError);
         } catch (FcmMissingTokenException ex) {
-            logger.error(ex.getMessage(), ex);
+            logger.error("Error occurred: {}", ex.getMessage());
+            logger.debug("Exception detail:", ex);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         }
     }
@@ -308,20 +310,20 @@ public class PushSendingWorker {
         // if-else branches are performed quickly (we do not need to worry about the fact that "null" will likely be
         // the most common value there).
         if ("development".equalsIgnoreCase(environment)) {
-            logger.info("Using APNs development host");
+            logger.info("Using APNs development host.");
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
         } else if ("production".equalsIgnoreCase(environment)) {
-            logger.info("Using APNs production host");
+            logger.info("Using APNs production host.");
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
         } else {
             if (environment != null) {
                 logger.warn("Invalid APNS host environment specified: \"{}\". Use \"development\" or \"production\".", environment);
             }
             if (pushServiceConfiguration.isApnsUseDevelopment()) {
-                logger.info("Using APNs development host by applying the global push server configuration");
+                logger.info("Using APNs development host by applying the global push server configuration.");
                 apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
             } else {
-                logger.info("Using APNs production host by applying the global push server configuration");
+                logger.info("Using APNs production host by applying the global push server configuration.");
                 apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
             }
         }
@@ -330,14 +332,16 @@ public class PushSendingWorker {
             final ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);
             apnsClientBuilder.setSigningKey(key);
         } catch (InvalidKeyException | NoSuchAlgorithmException | IOException e) {
-            logger.error(e.getMessage(), e);
-            throw new PushServerException("Invalid private key", e);
+            logger.error("Error occurred: {}", e.getMessage());
+            logger.debug("Exception detail:", e);
+            throw new PushServerException("Invalid private key.", e);
         }
         try {
             return apnsClientBuilder.build();
         } catch (SSLException e) {
-            logger.error(e.getMessage(), e);
-            throw new PushServerException("SSL problem", e);
+            logger.error("Error occurred: {}", e.getMessage());
+            logger.debug("Exception detail:", e);
+            throw new PushServerException("SSL problem occurred.", e);
         }
     }
 
@@ -389,7 +393,7 @@ public class PushSendingWorker {
             if (response != null) {
                 final UUID apnsId = response.getApnsId();
                 if (response.isAccepted()) {
-                    logger.info("Notification sent, APNs ID: {}", apnsId);
+                    logger.info("Notification sent successfully, APNs ID: {}.", apnsId);
                     callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                 } else {
                     final Optional<String> rejectionReasonOptional = response.getRejectionReason();
@@ -397,38 +401,45 @@ public class PushSendingWorker {
                     if (rejectionReasonOptional.isPresent()) {
                         rejectionReason = rejectionReasonOptional.get();
                     }
-                    logger.info("Notification rejected by the APNs gateway: {}", rejectionReason != null ? rejectionReason : "UnknownReason");
-                    logger.info("Notification APNs ID: {}", response.getApnsId());
+
+                    if (ApnsRejectionReason.EXPIRED_PROVIDER_TOKEN.isEqualToText(rejectionReason)) {
+                        logger.info("Notification rejected by the APNs gateway due to expired push token, APNs ID: {}.", response.getApnsId());
+                    } else {
+                        logger.info("Notification rejected by the APNs gateway: {}, APNs ID: {}.", rejectionReason != null ? rejectionReason : "UnknownReason", response.getApnsId());
+                    }
 
                     // Determine if the push token should be deleted.
                     if (ApnsRejectionReason.BAD_DEVICE_TOKEN.isEqualToText(rejectionReason)) {
-                        logger.debug("Deleting push token: {}", pushToken);
+                        logger.debug("Deleting push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.DEVICE_TOKEN_NOT_FOR_TOPIC.isEqualToText(rejectionReason)) {
+                        logger.warn("Notification was sent to incorrect topic: {}.", iosTopic);
                         logger.debug("Deleting push token: {}", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.TOPIC_DISALLOWED.isEqualToText(rejectionReason)) {
-                        logger.debug("Deleting push token: {}", pushToken);
+                        logger.warn("Notification was sent to incorrect topic: {}.", iosTopic);
+                        logger.debug("Deleting push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.EXPIRED_PROVIDER_TOKEN.isEqualToText(rejectionReason)) {
-                        logger.debug("Deleting push token: {}", pushToken);
+                        logger.debug("Deleting push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.INVALID_PROVIDER_TOKEN.isEqualToText(rejectionReason)) {
-                        logger.debug("Deleting push token: {}", pushToken);
+                        logger.debug("Deleting push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (response.getTokenInvalidationTimestamp().isPresent()) {
-                        logger.info("Push token is invalid as of: {}", response.getTokenInvalidationTimestamp().get());
-                        logger.debug("Deleting push token: {}", pushToken);
+                        logger.info("Push token is invalid as of: {}.", response.getTokenInvalidationTimestamp().get());
+                        logger.debug("Deleting push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else {
-                        logger.debug("Sending the push message failed with push token: {}", pushToken);
+                        logger.debug("Sending the push message failed with push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                     }
                 }
             } else {
                 // In this case, the delivery failed because the future failed, not because APNs rejected the
                 // notification payload. This means that we should be able to attempt resending the message.
-                logger.error("Push Message Sending Failed", cause);
+                logger.error("Push message sending failed. Error: {}", cause.getMessage());
+                logger.debug("Exception detail:", cause);
                 callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
             }
         });
