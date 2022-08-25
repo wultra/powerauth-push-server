@@ -73,6 +73,17 @@ CREATE TABLE push_campaign_user (
 	timestamp_created TIMESTAMP(6) NOT NULL
 );
 
+-- Create table for message inbox
+CREATE TABLE push_inbox (
+    id VARCHAR(37) CONSTRAINT push_inbox_pk PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    subject TEXT NOT NULL,
+    body TEXT NOT NULL,
+    read BOOLEAN DEFAULT false,
+    timestamp_created TIMESTAMP NOT NULL,
+    timestamp_read TIMESTAMP
+);
+
 --
 -- DB Indexes (recommended for better performance)
 --
@@ -94,3 +105,6 @@ CREATE INDEX push_campaign_sent ON push_campaign (is_sent);
 CREATE INDEX push_campaign_user_campaign ON push_campaign_user (campaign_id, user_id);
 
 CREATE INDEX push_campaign_user_detail ON push_campaign_user (user_id);
+
+CREATE INDEX push_inbox_user ON push_inbox (user_id);
+CREATE INDEX push_inbox_user_read ON push_inbox (user_id, timestamp_created, read);

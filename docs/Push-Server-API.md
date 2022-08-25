@@ -1379,3 +1379,280 @@ Remove FCM configuration for Android push messages.
 }
 ```
 <!-- end -->
+
+## Message Inbox
+
+When communicating with your users, you can use the message inbox to store messages for users. Inbox is not responsible
+for sending push notifications, but it is responsible for handling messages that should be read by the user later
+and for marking the messages as read, while marking a timestamp.
+
+<!-- begin box info -->
+To notify the user about a new message in the inbox, call the `POST /message/send` (or other push message sending API)
+right after you post a message in the inbox.
+<!-- end -->
+
+<!-- begin api POST /inbox/${userId} -->
+### Post Message to Inbox
+
+Post provided message to an inbox of a given user.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>POST</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/${userId}</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Path Variables
+
+<table>
+    <tr>
+        <td>userId</td>
+        <td>User ID</td>
+    </tr>
+</table>
+
+##### Request Body
+
+```json
+{
+  "requestObject": {
+    "subject": "Example subject",
+    "body": "Example message body"
+  }
+}
+```
+
+#### Response 200
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "id": "ae641389-d37a-4425-bd14-41c29484596f",
+    "subject": "Example subject",
+    "body": "Example message body",
+    "read": false,
+    "timestampCreated": "2022-08-25T22:34:58.702+00:00"
+  }
+}
+```
+<!-- end -->
+
+<!-- begin api GET /inbox/${userId} -->
+### Get User Messages
+
+Get messages from an inbox of a given user.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/${userId}</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Path Variables
+
+<table>
+    <tr>
+        <td>userId</td>
+        <td>User ID</td>
+    </tr>
+</table>
+
+##### Query Params
+
+<table>
+    <tr>
+        <td>onlyUnread</td>
+        <td>Set to true to return only unread messages.</td>
+    </tr>
+    <tr>
+        <td>page</td>
+        <td>Page index, zero based. Default: 0.</td>
+    </tr>
+    <tr>
+        <td>size</td>
+        <td>Page size. Default: 100.</td>
+    </tr>
+</table>
+
+#### Response 200
+
+```json
+{
+  "status": "OK",
+  "page": 0,
+  "size": 20,
+  "responseObject": [
+    {
+      "id": "059b3a83-c025-45be-b815-497d39222024",
+      "subject": "Hello, how are you?",
+      "read": true,
+      "timestampCreated": "2022-08-25T20:35:01.067+00:00"
+    },
+    {
+      "id": "ae641389-d37a-4425-bd14-41c29484596f",
+      "subject": "Example subject",
+      "read": false,
+      "timestampCreated": "2022-08-25T22:34:58.702+00:00"
+    }
+  ]
+}
+```
+<!-- end -->
+
+<!-- begin api GET /inbox/${userId}/count -->
+### Get Count of Unread Messages
+
+Get number of unread messages in an inbox of a given user.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/${userId}/count</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Path Variables
+
+<table>
+    <tr>
+        <td>userId</td>
+        <td>User ID</td>
+    </tr>
+</table>
+
+#### Response 200
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "count": 1
+  }
+}
+```
+<!-- end -->
+
+<!-- begin api GET /inbox/${userId}/message/${messageId} -->
+### Get Message Detail
+
+Get full message detail from an inbox of a given user, based on a message ID.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/${userId}/message/${messageId}</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Path Variables
+
+<table>
+    <tr>
+        <td>userId</td>
+        <td>User ID</td>
+    </tr>
+    <tr>
+        <td>messageId</td>
+        <td>Message ID</td>
+    </tr>
+</table>
+
+#### Response 200
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "id": "ae641389-d37a-4425-bd14-41c29484596f",
+    "subject": "Example subject",
+    "body": "Example message body",
+    "read": false,
+    "timestampCreated": "2022-08-25T22:34:58.702+00:00"
+  }
+}
+```
+<!-- end -->
+
+<!-- begin api PUT /inbox/${userId}/message/${messageId}/read -->
+### Mark Message as Read
+
+Mark a message in an inbox of a given user as read. In case the message is already read, this call is a no-op.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/${userId}/message/${messageId}/read</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Path Variables
+
+<table>
+    <tr>
+        <td>userId</td>
+        <td>User ID</td>
+    </tr>
+    <tr>
+        <td>messageId</td>
+        <td>Message ID</td>
+    </tr>
+</table>
+
+#### Response 200
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "id": "ae641389-d37a-4425-bd14-41c29484596f",
+    "subject": "Example subject",
+    "body": "Example message body",
+    "read": true,
+    "timestampCreated": "2022-08-25T22:34:58.702+00:00"
+  }
+}
+```
+<!-- end -->

@@ -18,6 +18,7 @@ package io.getlime.push.errorhandling;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.core.rest.model.base.response.ErrorResponse;
+import io.getlime.push.errorhandling.exceptions.InboxMessageNotFoundException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,4 +104,19 @@ public class DefaultExceptionHandler {
         logger.error(e.getMessage(), e);
         return new ErrorResponse(WebServiceError.Code.ERROR_PA_SERVER_COMM, e);
     }
+
+    /**
+     * Handle exceptions related to inbox.
+     * @param e {@link InboxMessageNotFoundException}
+     * @return Error response.
+     */
+    @ResponseStatus(HttpStatus.NOT_FOUND)  // 404
+    @ExceptionHandler(InboxMessageNotFoundException.class)
+    @ResponseBody
+    public ErrorResponse handleInboxMessageNotFoundException(InboxMessageNotFoundException e) {
+        logger.info("Message was not found in the inbox. " + e.getMessage());
+        logger.debug("Exception detail: ", e);
+        return new ErrorResponse(InboxError.Code.ERROR_MESSAGE_NOT_FOUND, e);
+    }
+
 }
