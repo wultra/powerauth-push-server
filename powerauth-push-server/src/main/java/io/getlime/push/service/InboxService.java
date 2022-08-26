@@ -27,8 +27,8 @@ import io.getlime.push.repository.model.InboxMessageEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -58,6 +58,7 @@ public class InboxService {
         return inboxMessageConverter.convertResponse(savedMessageEntity);
     }
 
+    @Transactional(readOnly=true)
     public ListOfInboxMessages fetchMessageListForUser(String userId, boolean onlyUnread, Pageable pageable) {
         final List<InboxMessageEntity> messageEntities;
         if (onlyUnread) {
@@ -68,6 +69,7 @@ public class InboxService {
         return inboxMessageConverter.convert(messageEntities, pageable.getPageNumber(), pageable.getPageSize());
     }
 
+    @Transactional(readOnly=true)
     public GetInboxMessageDetailResponse fetchMessageDetail(String userId, String id) throws InboxMessageNotFoundException {
         final Optional<InboxMessageEntity> messageEntity = inboxRepository.findFirstByIdAndUserId(id, userId);
         if (!messageEntity.isPresent()) {
@@ -76,6 +78,7 @@ public class InboxService {
         return inboxMessageConverter.convertResponse(messageEntity.get());
     }
 
+    @Transactional(readOnly=true)
     public GetInboxMessageCountResponse fetchMessageCountForUser(String userId) {
         final long count = inboxRepository.countAllByUserIdAndRead(userId, false);
         return new GetInboxMessageCountResponse(count);

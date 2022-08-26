@@ -110,7 +110,7 @@ public class DefaultExceptionHandler {
      * @param e {@link InboxMessageNotFoundException}
      * @return Error response.
      */
-    @ResponseStatus(HttpStatus.NOT_FOUND)  // 404
+    @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
     @ExceptionHandler(InboxMessageNotFoundException.class)
     @ResponseBody
     public ErrorResponse handleInboxMessageNotFoundException(InboxMessageNotFoundException e) {

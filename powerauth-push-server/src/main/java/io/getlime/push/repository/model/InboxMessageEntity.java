@@ -19,10 +19,7 @@ package io.getlime.push.repository.model;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
@@ -51,6 +48,7 @@ public class InboxMessageEntity implements Serializable {
     private String subject;
 
     @Column(name = "body", nullable = false)
+    @Lob
     private String body;
 
     @Column(name = "read")

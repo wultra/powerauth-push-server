@@ -79,7 +79,7 @@ CREATE TABLE push_inbox (
     user_id VARCHAR(255) NOT NULL,
     subject TEXT NOT NULL,
     body TEXT NOT NULL,
-    read BOOLEAN DEFAULT false,
+    read BOOLEAN DEFAULT false NOT NULL,
     timestamp_created TIMESTAMP NOT NULL,
     timestamp_read TIMESTAMP
 );
@@ -107,4 +107,4 @@ CREATE INDEX push_campaign_user_campaign ON push_campaign_user (campaign_id, use
 CREATE INDEX push_campaign_user_detail ON push_campaign_user (user_id);
 
 CREATE INDEX push_inbox_user ON push_inbox (user_id);
-CREATE INDEX push_inbox_user_read ON push_inbox (user_id, timestamp_created, read);
+CREATE INDEX push_inbox_user_read ON push_inbox (user_id, read);

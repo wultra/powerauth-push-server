@@ -18,6 +18,7 @@ package io.getlime.push.model.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -36,8 +37,9 @@ public class CreateInboxMessageRequest {
     private String subject;
 
     @NotNull
-    @Size(min = 8)
+    @Size(min = 8, max = 65536)
     @Schema(type = "string", example = "Example message body")
+    @ToString.Exclude
     private String body;
 
 }
