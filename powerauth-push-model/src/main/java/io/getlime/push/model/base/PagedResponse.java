@@ -44,6 +44,18 @@ public class PagedResponse<T> extends ObjectResponse<T> {
     }
 
     /**
+     * Typed constructor.
+     * @param t Type of generic parameter.
+     * @param page Page number.
+     * @param size Page size.
+     */
+    public PagedResponse(T t, int page, int size) {
+        super(t);
+        this.page = page;
+        this.size = size;
+    }
+
+    /**
      * Get page number.
      * @return Page number.
      */
