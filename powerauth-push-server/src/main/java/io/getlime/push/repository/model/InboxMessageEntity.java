@@ -37,7 +37,15 @@ import java.util.Objects;
 @Table(name = "push_inbox")
 public class InboxMessageEntity implements Serializable {
 
+    /**
+     * Entity ID.
+     */
     @Id
+    @Column(name = "rid")
+    @SequenceGenerator(name = "push_app_inbox", sequenceName = "push_inbox_seq")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_app_inbox")
+    private Long rid;
+
     @Column(name = "id", nullable = false)
     private String id;
 

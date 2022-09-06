@@ -18,6 +18,7 @@ package io.getlime.push.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Response object for count of messages in inbox.
@@ -25,9 +26,10 @@ import lombok.Data;
  * @author Petr Dvorak, petr@wultra.com
  */
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class GetInboxMessageCountResponse {
 
-    private long count;
+    private Long count;
 
 }

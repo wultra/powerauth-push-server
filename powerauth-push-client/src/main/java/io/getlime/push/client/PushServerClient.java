@@ -601,8 +601,9 @@ public class PushServerClient {
     public ObjectResponse<GetInboxMessageDetailResponse> postMessage(String userId, CreateInboxMessageRequest request) throws PushServerClientException {
         try {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
+            final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
             logger.info("Calling push server to send message to inbox of: {}, subject: {} - start", userId, request.getSubject());
-            final ObjectResponse<GetInboxMessageDetailResponse> response = postObjectImpl("/inbox/" + userIdSanitized, new ObjectRequest<>(request), GetInboxMessageDetailResponse.class);
+            final ObjectResponse<GetInboxMessageDetailResponse> response = postImpl("/inbox/" + userIdSanitized, new ObjectRequest<>(request), typeReference);
             logger.info("Calling push server to send message to inbox of: {}, subject: {} - finish", userId, request.getSubject());
             return response;
         } catch (UnsupportedEncodingException e) {
@@ -644,8 +645,9 @@ public class PushServerClient {
         try {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
 
+            final ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>>() {};
             logger.info("Calling push server fetch message count for user: {} - start", userId);
-            final ObjectResponse<GetInboxMessageCountResponse> result = getObjectImpl("/inbox/" + userIdSanitized + "/count", null, GetInboxMessageCountResponse.class);
+            final ObjectResponse<GetInboxMessageCountResponse> result = getImpl("/inbox/" + userIdSanitized + "/count", null, typeReference);
             logger.info("Calling push server fetch message count for user: {} - finish", userId);
 
             return result;
@@ -689,8 +691,10 @@ public class PushServerClient {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
             final String messageIdSanitized = URLEncoder.encode(String.valueOf(messageId), "UTF-8");
 
+            final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
+
             logger.info("Calling push server to read message to inbox of: {}, user: {} - start", messageId, userId);
-            final ObjectResponse<GetInboxMessageDetailResponse> response = putObjectImpl("/inbox/" + userIdSanitized + "/messages/" + messageIdSanitized, null, GetInboxMessageDetailResponse.class);
+            final ObjectResponse<GetInboxMessageDetailResponse> response = putImpl("/inbox/" + userIdSanitized + "/messages/" + messageIdSanitized, null, typeReference);
             logger.info("Calling push server to read message to inbox of: {}, user: {} - finish", messageId, userId);
             return response;
         } catch (UnsupportedEncodingException e) {
@@ -785,6 +789,24 @@ public class PushServerClient {
     private <T> ObjectResponse<T> postObjectImpl(String url, ObjectRequest<?> request, Class<T> responseType) throws PushServerClientException {
         try {
             return restClient.postObject(url, request, responseType);
+        } catch (RestClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
+        }
+    }
+
+    /**
+     * Prepare a generic PUT response.
+     *
+     * @param url specific url of method
+     * @param request request body
+     * @param typeReference type reference
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    private <T> T putImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        try {
+            return restClient.put(url, request, typeReference).getBody();
         } catch (RestClientException ex) {
             logger.warn(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
