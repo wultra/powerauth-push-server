@@ -84,7 +84,7 @@ Stores per-app credentials used for communication with APNs / FCM.
 ```sql
 CREATE TABLE push_app_credentials (
     id INTEGER NOT NULL CONSTRAINT push_app_credentials_pkey PRIMARY KEY,
-    app_id INTEGER NOT NULL,
+    app_id VARCHAR(255) NOT NULL,
     ios_key_id VARCHAR(255),
     ios_private_key BYTEA,
     ios_team_id VARCHAR(255),
@@ -102,7 +102,7 @@ CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials (app_id);
 | Name | Type | Info | Note |
 |---|---|---|---|
 | `id` | BIGINT(20) | primary key, index, autoincrement | Unique credential record ID. |
-| `app_id` | BIGINT(20) | index | Associated application ID. |
+| `app_id` | VARCHAR(255) | index | Associated application ID. |
 | `ios_key_id` | VARCHAR(255) | - | Key ID used for identifying a private key in APNs service. |
 | `ios_private_key` | BLOB | - | Binary representation of P8 file with private key used for Apple's APNs service. |
 | `ios_team_id` | VARCHAR(255) | - | Team ID used for sending push notifications. |

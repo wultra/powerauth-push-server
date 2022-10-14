@@ -15,7 +15,7 @@ CREATE SEQUENCE push_campaign_user_seq;
 -- Create table for application credentials used for APNS and FCM
 CREATE TABLE push_app_credentials (
 	id INTEGER NOT NULL CONSTRAINT push_app_credentials_pkey PRIMARY KEY,
-	app_id INTEGER NOT NULL,
+	app_id VARCHAR(255) NOT NULL,
 	ios_key_id VARCHAR(255),
 	ios_private_key BYTEA,
 	ios_team_id VARCHAR(255),
