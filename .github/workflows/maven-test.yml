@@ -1,0 +1,19 @@
+name: Test with Maven
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+     - 'develop'
+     - 'master'
+     - 'releases/**'
+     - 'test/ci'
+  pull_request:
+    branches:
+      - 'develop'
+      - 'master'
+      - 'releases/**'
+
+jobs:
+  maven-tests:
+    uses: wultra/wultra-infrastructure/.github/workflows/maven-test.yml@develop
