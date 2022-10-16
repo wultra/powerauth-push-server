@@ -1,6 +1,6 @@
 CREATE TABLE `push_app_credentials` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `app_id` bigint(20) NOT NULL,
+  `app_id` varchar(255) NOT NULL,
   `ios_private_key` blob DEFAULT NULL,
   `ios_team_id` varchar(255) DEFAULT NULL,
   `ios_key_id` varchar(255) DEFAULT NULL,
