@@ -26,7 +26,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
- * Test application test.
+ * Verify test application start.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
