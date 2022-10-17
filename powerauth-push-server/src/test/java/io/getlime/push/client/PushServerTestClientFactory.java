@@ -42,9 +42,8 @@ public class PushServerTestClientFactory {
     }
 
     public PowerAuthTestClient createPowerAuthTestClient() throws Exception {
-        final PowerAuthTestClient powerAuthTestClient;
+        final PowerAuthTestClient powerAuthTestClient = new PowerAuthTestClientRest();
         Security.addProvider(new BouncyCastleProvider());
-        powerAuthTestClient = new PowerAuthTestClientRest();
         powerAuthTestClient.initializeClient(powerAuthRestUrl);
         String applicationId = powerAuthTestClient.initializeApplication(TEST_APPLICATION_NAME, TEST_APPLICATION_VERSION);
         String activationId = powerAuthTestClient.createActivation(TEST_USER_ID);
