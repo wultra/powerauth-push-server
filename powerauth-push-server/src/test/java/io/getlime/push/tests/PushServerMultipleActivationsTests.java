@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package io.getlime.push.client;
+package io.getlime.push.tests;
 
+import io.getlime.push.api.PowerAuthTestClient;
+import io.getlime.push.client.PushServerClient;
+import io.getlime.push.client.PushServerClientException;
+import io.getlime.push.client.PushServerTestClientFactory;
+import io.getlime.push.configuration.PushServerAppCredentialConfiguration;
 import io.getlime.push.model.enumeration.MobilePlatform;
+import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushDeviceRepository;
+import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
-import io.getlime.push.shared.PowerAuthTestClient;
-import io.getlime.push.shared.PushServerTestClientFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -61,16 +66,18 @@ public class PushServerMultipleActivationsTests {
     @Autowired
     private PushServerTestClientFactory testClientFactory;
 
-    @MockBean
+    @Autowired
+    private PushServerAppCredentialConfiguration appCredentialConfig;
+
     private PushServerClient pushServerClient;
 
-    @MockBean
     private PowerAuthTestClient powerAuthTestClient;
 
     @BeforeEach
     public void setUp() throws Exception {
         pushServerClient = testClientFactory.createPushServerClient("http://localhost:" + port);
         powerAuthTestClient = testClientFactory.createPowerAuthTestClient();
+        appCredentialConfig.configure(powerAuthTestClient.getApplicationId());
     }
 
     @Test

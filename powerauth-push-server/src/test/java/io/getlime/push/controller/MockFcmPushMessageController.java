@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.rest;
+package io.getlime.push.controller;
 
 import io.getlime.push.service.fcm.model.FcmSuccessResponse;
 import org.springframework.context.annotation.Profile;
@@ -24,10 +24,12 @@ import java.security.SecureRandom;
 
 /**
  * Push message controller for testing push message delivery.
+ *
+ * @author Roman Strobl, roman.strobl@wultra.com
  */
 @RestController
 @Profile("test")
-public class TestPushMessageController {
+public class MockFcmPushMessageController {
 
     @PostMapping("/mockfcm/message:send")
     public FcmSuccessResponse testSendMessage() {
