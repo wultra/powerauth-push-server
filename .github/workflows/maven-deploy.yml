@@ -10,7 +10,7 @@ on:
     inputs:
       release_type:
         type: choice
-        description:
+        description: releasing to snapshot or release
         default: snapshot
         options:
           - snapshot
