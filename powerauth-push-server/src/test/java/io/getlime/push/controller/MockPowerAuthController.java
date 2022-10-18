@@ -23,6 +23,8 @@ import io.getlime.push.client.PushServerTestClientFactory;
 import io.getlime.security.powerauth.crypto.lib.generator.KeyGenerator;
 import io.getlime.security.powerauth.crypto.lib.model.exception.CryptoProviderException;
 import io.getlime.security.powerauth.crypto.lib.util.KeyConvertor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +43,8 @@ import java.util.*;
 @RequestMapping("powerauth-java-server/rest/v3")
 @Profile("test")
 public class MockPowerAuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(MockPowerAuthController.class);
 
     private final Set<String> blockedActivations = new HashSet<>();
 
@@ -74,7 +78,8 @@ public class MockPowerAuthController {
             final KeyConvertor keyConvertor = new KeyConvertor();
             response.setMasterPublicKey(BaseEncoding.base64().encode(keyConvertor.convertPublicKeyToBytes(keyPair.getPublic())));
         } catch (CryptoProviderException e) {
-            // Ignore error in mock endpoint
+            // Exception cannot occur when cryptography provider is set correctly
+            logger.error(e.getMessage(), e);
         }
         return new ObjectResponse<>(response);
     }
