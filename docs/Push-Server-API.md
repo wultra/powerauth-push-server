@@ -1420,6 +1420,15 @@ Post provided message to an inbox of a given user.
     </tr>
 </table>
 
+##### Query Params
+
+<table>
+    <tr>
+        <td>appId</td>
+        <td>Application ID</td>
+    </tr>
+</table>
+
 ##### Request Body
 
 ```json
@@ -1479,6 +1488,10 @@ Get messages from an inbox of a given user.
 ##### Query Params
 
 <table>
+    <tr>
+        <td>appId</td>
+        <td>Application ID</td>
+    </tr>
     <tr>
         <td>onlyUnread</td>
         <td>Set to true to return only unread messages.</td>
@@ -1547,6 +1560,15 @@ Get number of unread messages in an inbox of a given user.
     </tr>
 </table>
 
+##### Query Params
+
+<table>
+    <tr>
+        <td>appId</td>
+        <td>Application ID</td>
+    </tr>
+</table>
+
 #### Response 200
 
 ```json
@@ -1589,6 +1611,15 @@ Get full message detail from an inbox of a given user, based on a message ID.
     <tr>
         <td>messageId</td>
         <td>Message ID</td>
+    </tr>
+</table>
+
+##### Query Params
+
+<table>
+    <tr>
+        <td>appId</td>
+        <td>Application ID</td>
     </tr>
 </table>
 
@@ -1638,6 +1669,15 @@ Mark a message in an inbox of a given user as read. In case the message is alrea
     <tr>
         <td>messageId</td>
         <td>Message ID</td>
+    </tr>
+</table>
+
+##### Query Params
+
+<table>
+    <tr>
+        <td>appId</td>
+        <td>Application ID</td>
     </tr>
 </table>
 
