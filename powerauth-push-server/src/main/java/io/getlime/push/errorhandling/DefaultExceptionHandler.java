@@ -18,6 +18,7 @@ package io.getlime.push.errorhandling;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.core.rest.model.base.response.ErrorResponse;
+import io.getlime.push.errorhandling.exceptions.AppNotFoundException;
 import io.getlime.push.errorhandling.exceptions.InboxMessageNotFoundException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import org.slf4j.Logger;
@@ -114,9 +115,23 @@ public class DefaultExceptionHandler {
     @ExceptionHandler(InboxMessageNotFoundException.class)
     @ResponseBody
     public ErrorResponse handleInboxMessageNotFoundException(InboxMessageNotFoundException e) {
-        logger.info("Message was not found in the inbox. " + e.getMessage());
+        logger.info("Message was not found in the inbox, error: {}", e.getMessage());
         logger.debug("Exception detail: ", e);
         return new ErrorResponse(InboxError.Code.ERROR_MESSAGE_NOT_FOUND, e);
+    }
+
+    /**
+     * Handle exception for case when application is not found.
+     * @param e {@link AppNotFoundException}
+     * @return Error response.
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
+    @ExceptionHandler(AppNotFoundException.class)
+    @ResponseBody
+    public ErrorResponse handleAppNotFoundException(AppNotFoundException e) {
+        logger.info("Application was not found, error: {}", e.getMessage());
+        logger.debug("Exception detail: ", e);
+        return new ErrorResponse(AppError.Code.ERROR_MESSAGE_NOT_FOUND, e);
     }
 
 }

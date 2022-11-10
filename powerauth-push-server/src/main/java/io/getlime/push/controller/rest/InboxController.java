@@ -17,6 +17,7 @@ package io.getlime.push.controller.rest;
 
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
+import io.getlime.push.errorhandling.exceptions.AppNotFoundException;
 import io.getlime.push.errorhandling.exceptions.InboxMessageNotFoundException;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.request.CreateInboxMessageRequest;
@@ -54,31 +55,41 @@ public class InboxController {
     @PostMapping("{userId}")
     public ObjectResponse<GetInboxMessageDetailResponse> postMessage(
             @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
-            @Valid @RequestBody ObjectRequest<CreateInboxMessageRequest> request) {
-        return new ObjectResponse<>(inboxService.postMessage(userId, request.getRequestObject()));
+            @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId,
+            @Valid @RequestBody ObjectRequest<CreateInboxMessageRequest> request) throws AppNotFoundException {
+        return new ObjectResponse<>(inboxService.postMessage(userId, appId, request.getRequestObject()));
     }
 
     @GetMapping("{userId}")
     public PagedResponse<ListOfInboxMessages> fetchMessageListForUser(
-            @PathVariable("userId") String userId,
+            @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
+            @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId,
             @RequestParam(value = "onlyUnread", required = false, defaultValue = "false") boolean onlyUnread,
-            @ParameterObject Pageable pageable) {
-        return new PagedResponse<>(inboxService.fetchMessageListForUser(userId, onlyUnread, pageable), pageable.getPageNumber(), pageable.getPageSize());
+            @ParameterObject Pageable pageable) throws AppNotFoundException {
+        return new PagedResponse<>(inboxService.fetchMessageListForUser(userId, appId, onlyUnread, pageable), pageable.getPageNumber(), pageable.getPageSize());
     }
 
     @GetMapping("{userId}/count")
-    public ObjectResponse<GetInboxMessageCountResponse> fetchMessageCountForUser(@PathVariable("userId") String userId) {
-        return new ObjectResponse<>(inboxService.fetchMessageCountForUser(userId));
+    public ObjectResponse<GetInboxMessageCountResponse> fetchMessageCountForUser(
+            @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
+            @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId) throws AppNotFoundException {
+        return new ObjectResponse<>(inboxService.fetchMessageCountForUser(userId, appId));
     }
 
     @GetMapping("{userId}/messages/{id}")
-    public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(@PathVariable("userId") String userId, @PathVariable("id") String id) throws InboxMessageNotFoundException {
-        return new ObjectResponse<>(inboxService.fetchMessageDetail(userId, id));
+    public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(
+            @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
+            @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId,
+            @NotNull @PathVariable("id") String inboxId) throws InboxMessageNotFoundException, AppNotFoundException {
+        return new ObjectResponse<>(inboxService.fetchMessageDetail(userId, appId, inboxId));
     }
 
     @PutMapping("{userId}/messages/{id}/read")
-    public ObjectResponse<GetInboxMessageDetailResponse> readMessage(@PathVariable("userId") String userId, @PathVariable("id") String id) throws InboxMessageNotFoundException {
-        return new ObjectResponse<>(inboxService.readMessage(userId, id));
+    public ObjectResponse<GetInboxMessageDetailResponse> readMessage(
+            @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
+            @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId,
+            @NotNull @Size(min = 1, max = 255) @PathVariable("id") String inboxId) throws InboxMessageNotFoundException, AppNotFoundException {
+        return new ObjectResponse<>(inboxService.readMessage(userId, appId, inboxId));
     }
 
 }
