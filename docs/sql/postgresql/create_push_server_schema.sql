@@ -76,8 +76,8 @@ CREATE TABLE push_campaign_user (
 
 -- Create table for message inbox
 CREATE TABLE push_inbox (
-    rid INTEGER NOT NULL CONSTRAINT push_inbox_pk PRIMARY KEY,
-    id VARCHAR(37),
+    id INTEGER NOT NULL CONSTRAINT push_inbox_pk PRIMARY KEY,
+    inbox_id VARCHAR(37),
     user_id VARCHAR(255) NOT NULL,
     subject TEXT NOT NULL,
     body TEXT NOT NULL,
@@ -108,6 +108,6 @@ CREATE INDEX push_campaign_user_campaign ON push_campaign_user (campaign_id, use
 
 CREATE INDEX push_campaign_user_detail ON push_campaign_user (user_id);
 
-CREATE INDEX push_inbox_id ON push_inbox (id);
+CREATE INDEX push_inbox_id ON push_inbox (inbox_id);
 CREATE INDEX push_inbox_user ON push_inbox (user_id);
 CREATE INDEX push_inbox_user_read ON push_inbox (user_id, read);

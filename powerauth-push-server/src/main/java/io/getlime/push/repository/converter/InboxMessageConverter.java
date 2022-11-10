@@ -23,7 +23,6 @@ import io.getlime.push.model.response.GetInboxMessageDetailResponse;
 import io.getlime.push.repository.model.InboxMessageEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +49,7 @@ public class InboxMessageConverter {
             return null;
         }
         final InboxMessageEntity destination = new InboxMessageEntity();
-        destination.setId(id.toString());
+        destination.setInboxId(id.toString());
         destination.setUserId(userId);
         destination.setSubject(source.getSubject());
         destination.setBody(source.getBody());
@@ -69,7 +68,7 @@ public class InboxMessageConverter {
             return null;
         }
         final GetInboxMessageDetailResponse destination = new GetInboxMessageDetailResponse();
-        destination.setId(source.getId());
+        destination.setId(source.getInboxId());
         destination.setSubject(source.getSubject());
         destination.setBody(source.getBody());
         destination.setRead(source.isRead());
@@ -88,7 +87,7 @@ public class InboxMessageConverter {
             return null;
         }
         final InboxMessage destination = new InboxMessage();
-        destination.setId(source.getId());
+        destination.setId(source.getInboxId());
         destination.setSubject(source.getSubject());
         destination.setRead(source.isRead());
         destination.setTimestampCreated(source.getTimestampCreated());

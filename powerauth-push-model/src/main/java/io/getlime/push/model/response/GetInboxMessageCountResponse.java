@@ -30,6 +30,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetInboxMessageCountResponse {
 
-    private Long count;
+    private long countUnread;
 
 }

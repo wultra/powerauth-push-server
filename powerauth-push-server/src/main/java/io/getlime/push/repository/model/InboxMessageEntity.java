@@ -17,7 +17,6 @@
 package io.getlime.push.repository.model;
 
 import lombok.*;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -41,13 +40,13 @@ public class InboxMessageEntity implements Serializable {
      * Entity ID.
      */
     @Id
-    @Column(name = "rid")
+    @Column(name = "id")
     @SequenceGenerator(name = "push_app_inbox", sequenceName = "push_inbox_seq")
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_app_inbox")
-    private Long rid;
+    private Long id;
 
-    @Column(name = "id", nullable = false)
-    private String id;
+    @Column(name = "inbox_id", nullable = false)
+    private String inboxId;
 
     @Column(name = "user_id", nullable = false)
     private String userId;
@@ -56,7 +55,6 @@ public class InboxMessageEntity implements Serializable {
     private String subject;
 
     @Column(name = "body", nullable = false)
-    @Lob
     private String body;
 
     @Column(name = "read")
@@ -72,8 +70,8 @@ public class InboxMessageEntity implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof InboxMessageEntity)) return false;
-        InboxMessageEntity that = (InboxMessageEntity) o;
-        return id.equals(that.id)
+        final InboxMessageEntity that = (InboxMessageEntity) o;
+        return inboxId.equals(that.inboxId)
                 && userId.equals(that.userId)
                 && subject.equals(that.subject)
                 && body.equals(that.body)
@@ -82,6 +80,6 @@ public class InboxMessageEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, subject, body, timestampCreated);
+        return Objects.hash(inboxId, userId, subject, body, timestampCreated);
     }
 }

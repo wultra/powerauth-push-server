@@ -80,8 +80,8 @@ public class InboxService {
 
     @Transactional(readOnly=true)
     public GetInboxMessageCountResponse fetchMessageCountForUser(String userId) {
-        final long count = inboxRepository.countAllByUserIdAndRead(userId, false);
-        return new GetInboxMessageCountResponse(count);
+        final long countUnread = inboxRepository.countAllByUserIdAndRead(userId, false);
+        return new GetInboxMessageCountResponse(countUnread);
     }
 
     @Transactional
