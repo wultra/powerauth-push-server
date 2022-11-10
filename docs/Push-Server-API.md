@@ -1553,7 +1553,7 @@ Get number of unread messages in an inbox of a given user.
 {
   "status": "OK",
   "responseObject": {
-    "count": 1
+    "countUnread": 1
   }
 }
 ```
