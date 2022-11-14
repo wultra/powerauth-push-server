@@ -26,6 +26,7 @@ import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.InboxRepository;
 import io.getlime.push.repository.converter.InboxMessageConverter;
 import io.getlime.push.repository.model.InboxMessageEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ import java.util.UUID;
  * @author Petr Dvorak, petr@wultra.com
  */
 @Service
+@Slf4j
 public class InboxService {
 
     private final InboxRepository inboxRepository;
@@ -60,6 +62,7 @@ public class InboxService {
         checkAppId(appId);
         final InboxMessageEntity messageEntity = inboxMessageConverter.convert(UUID.randomUUID(), userId, appId, request, new Date());
         final InboxMessageEntity savedMessageEntity = inboxRepository.save(messageEntity);
+        logger.info("Posted new inbox message for user: {}, message ID: {}", userId, messageEntity.getInboxId());
         return inboxMessageConverter.convertResponse(savedMessageEntity);
     }
 
@@ -102,11 +105,18 @@ public class InboxService {
         final InboxMessageEntity inboxMessage = messageEntity.get();
         if (!inboxMessage.isRead()) { // do not call repository save if there is no change.
             inboxMessage.setRead(true);
+            logger.info("Marked inbox message as read for user: {}, message ID: {}", userId, inboxId);
             final InboxMessageEntity savedInboxMessage = inboxRepository.save(inboxMessage);
             return inboxMessageConverter.convertResponse(savedInboxMessage);
         } else {
             return inboxMessageConverter.convertResponse(inboxMessage);
         }
+    }
+
+    @Transactional
+    public void readAllMessages(String userId) {
+        int countRead = inboxRepository.markAllAsRead(userId);
+        logger.info("Marked all inbox messages as read for user: {}, count: {}", userId, countRead);
     }
 
     private void checkAppId(String appId) throws AppNotFoundException {

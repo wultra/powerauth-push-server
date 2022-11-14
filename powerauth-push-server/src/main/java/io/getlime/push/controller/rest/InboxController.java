@@ -18,6 +18,7 @@ package io.getlime.push.controller.rest;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.push.errorhandling.exceptions.AppNotFoundException;
+import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.InboxMessageNotFoundException;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.request.CreateInboxMessageRequest;
@@ -90,6 +91,12 @@ public class InboxController {
             @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId,
             @NotNull @Size(min = 1, max = 255) @PathVariable("id") String inboxId) throws InboxMessageNotFoundException, AppNotFoundException {
         return new ObjectResponse<>(inboxService.readMessage(userId, appId, inboxId));
+    }
+
+    @PutMapping("{userId}/messages/read-all")
+    public Response readAllMessages(@PathVariable("userId") String userId) {
+        inboxService.readAllMessages(userId);
+        return new Response();
     }
 
 }

@@ -1581,7 +1581,7 @@ Get number of unread messages in an inbox of a given user.
 ```
 <!-- end -->
 
-<!-- begin api GET /inbox/${userId}/message/${messageId} -->
+<!-- begin api GET /inbox/${userId}/messages/${messageId} -->
 ### Get Message Detail
 
 Get full message detail from an inbox of a given user, based on a message ID.
@@ -1596,7 +1596,7 @@ Get full message detail from an inbox of a given user, based on a message ID.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/${userId}/message/${messageId}</td>
+        <td>/inbox/${userId}/messages/${messageId}</td>
     </tr>
 </table>
 <!-- end -->
@@ -1639,7 +1639,7 @@ Get full message detail from an inbox of a given user, based on a message ID.
 ```
 <!-- end -->
 
-<!-- begin api PUT /inbox/${userId}/message/${messageId}/read -->
+<!-- begin api PUT /inbox/${userId}/messages/${messageId}/read -->
 ### Mark Message as Read
 
 Mark a message in an inbox of a given user as read. In case the message is already read, this call is a no-op.
@@ -1654,7 +1654,7 @@ Mark a message in an inbox of a given user as read. In case the message is alrea
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/${userId}/message/${messageId}/read</td>
+        <td>/inbox/${userId}/messages/${messageId}/read</td>
     </tr>
 </table>
 <!-- end -->
@@ -1693,6 +1693,53 @@ Mark a message in an inbox of a given user as read. In case the message is alrea
     "read": true,
     "timestampCreated": "2022-08-25T22:34:58.702+00:00"
   }
+}
+```
+<!-- end -->
+
+<!-- begin api PUT /inbox/${userId}/messages/${messageId}/read -->
+### Mark All Unread Messages as Read for User
+
+Mark all unread messages in an inbox of a given user as read.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/${userId}/messages/read-all</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Path Variables
+
+<table>
+    <tr>
+        <td>userId</td>
+        <td>User ID</td>
+    </tr>
+</table>
+
+##### Query Params
+
+<table>
+    <tr>
+        <td>appId</td>
+        <td>Application ID</td>
+    </tr>
+</table>
+
+#### Response 200
+
+```json
+{
+  "status": "OK"
 }
 ```
 <!-- end -->

@@ -702,6 +702,26 @@ public class PushServerClient {
         }
     }
 
+    /**
+     * Read all unread messages in inbox of provided user.
+     * @param userId User ID.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response readAllMessages(String userId) throws PushServerClientException {
+        try {
+            final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
+
+            final ParameterizedTypeReference<Response> typeReference = new ParameterizedTypeReference<Response>() {};
+
+            logger.info("Calling push server to mark all messages read in inbox of user: {} - start", userId);
+            final Response response = putImpl("/inbox/" + userIdSanitized + "/messages/read-all", null, typeReference);
+            logger.info("Calling push server to mark all messages read in inbox of user: {} - finish", userId);
+            return response;
+        } catch (UnsupportedEncodingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        }
+    }
+
     // Generic HTTP client methods
 
     /**
