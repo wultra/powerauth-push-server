@@ -62,7 +62,7 @@ public class InboxService {
         checkAppId(appId);
         final InboxMessageEntity messageEntity = inboxMessageConverter.convert(UUID.randomUUID(), userId, appId, request, new Date());
         final InboxMessageEntity savedMessageEntity = inboxRepository.save(messageEntity);
-        logger.info("Posted new inbox message for user: {}", userId);
+        logger.info("Posted new inbox message for user: {}, message ID: {}", userId, messageEntity.getInboxId());
         return inboxMessageConverter.convertResponse(savedMessageEntity);
     }
 
@@ -105,7 +105,7 @@ public class InboxService {
         final InboxMessageEntity inboxMessage = messageEntity.get();
         if (!inboxMessage.isRead()) { // do not call repository save if there is no change.
             inboxMessage.setRead(true);
-            logger.info("Marked imbox message as read for user: {}, ID: {}", userId, inboxId);
+            logger.info("Marked inbox message as read for user: {}, message ID: {}", userId, inboxId);
             final InboxMessageEntity savedInboxMessage = inboxRepository.save(inboxMessage);
             return inboxMessageConverter.convertResponse(savedInboxMessage);
         } else {
