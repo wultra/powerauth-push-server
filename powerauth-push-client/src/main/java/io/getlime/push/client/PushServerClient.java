@@ -602,11 +602,12 @@ public class PushServerClient {
     public ObjectResponse<GetInboxMessageDetailResponse> postMessage(String userId, String appId, CreateInboxMessageRequest request) throws PushServerClientException {
         try {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
-            final String appIdSanitized = URLEncoder.encode(String.valueOf(appId), "UTF-8");
+            final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("appId", appId);
 
             final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
             logger.info("Calling push server to send message to inbox of: {}, subject: {} - start", userId, request.getSubject());
-            final ObjectResponse<GetInboxMessageDetailResponse> response = postImpl("/inbox/" + userIdSanitized + "?appId=" + appIdSanitized, new ObjectRequest<>(request), typeReference);
+            final ObjectResponse<GetInboxMessageDetailResponse> response = postImpl("/inbox/" + userIdSanitized, new ObjectRequest<>(request), params, null, typeReference);
             logger.info("Calling push server to send message to inbox of: {}, subject: {} - finish", userId, request.getSubject());
             return response;
         } catch (UnsupportedEncodingException e) {
@@ -628,10 +629,11 @@ public class PushServerClient {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
             final String appIdSanitized = URLEncoder.encode(String.valueOf(appId), "UTF-8");
             final MultiValueMap<String, String> params = buildPages(page, size);
+            params.add("appId", appId);
 
             final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>>() {};
             logger.info("Calling push server fetch messages for user: {} - start", userId);
-            final PagedResponse<ListOfInboxMessages> result = getImpl("/inbox/" + userIdSanitized + "?appId=" + appIdSanitized, params, typeReference);
+            final PagedResponse<ListOfInboxMessages> result = getImpl("/inbox/" + userIdSanitized, params, typeReference);
             logger.info("Calling push server fetch messages for user: {} - finish", userId);
 
             return result;
@@ -650,11 +652,12 @@ public class PushServerClient {
     public ObjectResponse<GetInboxMessageCountResponse> fetchMessageCountForUser(String userId, String appId) throws PushServerClientException {
         try {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
-            final String appIdSanitized = URLEncoder.encode(String.valueOf(appId), "UTF-8");
+            final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("appId", appId);
 
             final ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>>() {};
             logger.info("Calling push server fetch message count for user: {} - start", userId);
-            final ObjectResponse<GetInboxMessageCountResponse> result = getImpl("/inbox/" + userIdSanitized + "/count" + "?appId=" + appIdSanitized, null, typeReference);
+            final ObjectResponse<GetInboxMessageCountResponse> result = getImpl("/inbox/" + userIdSanitized + "/count", params, typeReference);
             logger.info("Calling push server fetch message count for user: {} - finish", userId);
 
             return result;
@@ -675,11 +678,12 @@ public class PushServerClient {
         try {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
             final String messageIdSanitized = URLEncoder.encode(String.valueOf(messageId), "UTF-8");
-            final String appIdSanitized = URLEncoder.encode(String.valueOf(appId), "UTF-8");
+            final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("appId", appId);
 
             final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
             logger.info("Calling push server fetch message ID: {}, for user: {} - start", messageId, userId);
-            final ObjectResponse<GetInboxMessageDetailResponse> result = getImpl("/inbox/" + userIdSanitized + "/messages/" + messageIdSanitized + "?appId=" + appIdSanitized, null, typeReference);
+            final ObjectResponse<GetInboxMessageDetailResponse> result = getImpl("/inbox/" + userIdSanitized + "/messages/" + messageIdSanitized, params, typeReference);
             logger.info("Calling push server fetch message ID: {}, for user: {} - finish", messageId, userId);
 
             return result;
@@ -700,12 +704,13 @@ public class PushServerClient {
         try {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
             final String messageIdSanitized = URLEncoder.encode(String.valueOf(messageId), "UTF-8");
-            final String appIdSanitized = URLEncoder.encode(String.valueOf(appId), "UTF-8");
+            final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("appId", appId);
 
             final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
 
             logger.info("Calling push server to read message to inbox of: {}, user: {} - start", messageId, userId);
-            final ObjectResponse<GetInboxMessageDetailResponse> response = putImpl("/inbox/" + userIdSanitized + "/messages/" + messageIdSanitized + "?appId=" + appIdSanitized, null, typeReference);
+            final ObjectResponse<GetInboxMessageDetailResponse> response = putImpl("/inbox/" + userIdSanitized + "/messages/" + messageIdSanitized, params, typeReference);
             logger.info("Calling push server to read message to inbox of: {}, user: {} - finish", messageId, userId);
             return response;
         } catch (UnsupportedEncodingException e) {
@@ -722,12 +727,13 @@ public class PushServerClient {
     public Response readAllMessages(String userId, String appId) throws PushServerClientException {
         try {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
-            final String appIdSanitized = URLEncoder.encode(String.valueOf(appId), "UTF-8");
+            final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("appId", appId);
 
             final ParameterizedTypeReference<Response> typeReference = new ParameterizedTypeReference<Response>() {};
 
             logger.info("Calling push server to mark all messages read in inbox of user: {} - start", userId);
-            final Response response = putImpl("/inbox/" + userIdSanitized + "/messages/read-all?appId=" + appIdSanitized, null, typeReference);
+            final Response response = putImpl("/inbox/" + userIdSanitized + "/messages/read-all", null, params, null, typeReference);
             logger.info("Calling push server to mark all messages read in inbox of user: {} - finish", userId);
             return response;
         } catch (UnsupportedEncodingException e) {
@@ -794,6 +800,26 @@ public class PushServerClient {
     }
 
     /**
+     * Prepare a generic POST response.
+     *
+     * @param url specific url of method
+     * @param request request body
+     * @param queryParams query parameters
+     * @param headers HTTP headers
+     * @param typeReference type reference
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    private <T> T postImpl(String url, Object request, MultiValueMap<String, String> queryParams, MultiValueMap<String, String> headers, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        try {
+            return restClient.post(url, request, queryParams, headers, typeReference).getBody();
+        } catch (RestClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
+        }
+    }
+
+    /**
      * Prepare POST object response. Uses default {@link Response} type reference for response.
      *
      * @param url specific url of method
@@ -840,6 +866,26 @@ public class PushServerClient {
     private <T> T putImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
         try {
             return restClient.put(url, request, typeReference).getBody();
+        } catch (RestClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
+        }
+    }
+
+    /**
+     * Prepare a generic PUT response.
+     *
+     * @param url specific url of method
+     * @param request request body
+     * @param queryParams query parameters
+     * @param headers HTTP headers
+     * @param typeReference type reference
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    private <T> T putImpl(String url, Object request, MultiValueMap<String, String> queryParams, MultiValueMap<String, String> headers, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        try {
+            return restClient.put(url, request, queryParams, headers, typeReference).getBody();
         } catch (RestClientException ex) {
             logger.warn(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
