@@ -74,9 +74,10 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
     /**
      * Mark all user messages as read.
      * @param userId User ID.
+     * @param appId Application ID.
      */
-    @Query("UPDATE InboxMessageEntity i SET i.read = true WHERE i.userId = :userId AND i.read = false")
+    @Query("UPDATE InboxMessageEntity i SET i.read = true WHERE i.userId = :userId AND i.appId = :appId AND i.read = false")
     @Modifying
-    int markAllAsRead(String userId);
+    int markAllAsRead(String userId, String appId);
 
 }
