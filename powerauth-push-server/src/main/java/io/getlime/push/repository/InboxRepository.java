@@ -18,6 +18,7 @@ package io.getlime.push.repository;
 
 import io.getlime.push.repository.model.InboxMessageEntity;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
@@ -75,6 +76,7 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      * @param userId User ID.
      */
     @Query("UPDATE InboxMessageEntity i SET i.read = true WHERE i.userId = :userId AND i.read = false")
+    @Modifying
     int markAllAsRead(String userId);
 
 }
