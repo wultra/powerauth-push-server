@@ -1696,3 +1696,50 @@ Mark a message in an inbox of a given user as read. In case the message is alrea
 }
 ```
 <!-- end -->
+
+<!-- begin api PUT /inbox/${userId}/message/${messageId}/read -->
+### Mark All Unread Messages as Read for User
+
+Mark all unread messages in an inbox of a given user as read.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/${userId}/message/read-all</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Path Variables
+
+<table>
+    <tr>
+        <td>userId</td>
+        <td>User ID</td>
+    </tr>
+</table>
+
+##### Query Params
+
+<table>
+    <tr>
+        <td>appId</td>
+        <td>Application ID</td>
+    </tr>
+</table>
+
+#### Response 200
+
+```json
+{
+  "status": "OK"
+}
+```
+<!-- end -->
