@@ -17,6 +17,7 @@ package io.getlime.push.controller.rest;
 
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
+import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.InboxMessageNotFoundException;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.request.CreateInboxMessageRequest;
@@ -79,6 +80,12 @@ public class InboxController {
     @PutMapping("{userId}/messages/{id}/read")
     public ObjectResponse<GetInboxMessageDetailResponse> readMessage(@PathVariable("userId") String userId, @PathVariable("id") String id) throws InboxMessageNotFoundException {
         return new ObjectResponse<>(inboxService.readMessage(userId, id));
+    }
+
+    @PutMapping("{userId}/messages/read-all")
+    public Response readAllMessages(@PathVariable("userId") String userId) {
+        inboxService.readAllMessages(userId);
+        return new Response();
     }
 
 }

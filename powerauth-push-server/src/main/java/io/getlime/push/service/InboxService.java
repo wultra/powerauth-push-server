@@ -24,6 +24,7 @@ import io.getlime.push.model.response.GetInboxMessageDetailResponse;
 import io.getlime.push.repository.InboxRepository;
 import io.getlime.push.repository.converter.InboxMessageConverter;
 import io.getlime.push.repository.model.InboxMessageEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ import java.util.UUID;
  * @author Petr Dvorak, petr@wultra.com
  */
 @Service
+@Slf4j
 public class InboxService {
 
     private final InboxRepository inboxRepository;
@@ -55,6 +57,7 @@ public class InboxService {
     public GetInboxMessageDetailResponse postMessage(String userId, CreateInboxMessageRequest request) {
         final InboxMessageEntity messageEntity = inboxMessageConverter.convert(UUID.randomUUID(), userId, request, new Date());
         final InboxMessageEntity savedMessageEntity = inboxRepository.save(messageEntity);
+        logger.info("Posted new inbox message for user: {}", userId);
         return inboxMessageConverter.convertResponse(savedMessageEntity);
     }
 
@@ -71,7 +74,7 @@ public class InboxService {
 
     @Transactional(readOnly=true)
     public GetInboxMessageDetailResponse fetchMessageDetail(String userId, String id) throws InboxMessageNotFoundException {
-        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findFirstByIdAndUserId(id, userId);
+        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findFirstByInboxIdAndUserId(id, userId);
         if (!messageEntity.isPresent()) {
             throw new InboxMessageNotFoundException("Unable to fetch message: " + id + ", for user: " + userId + ".");
         }
@@ -86,17 +89,24 @@ public class InboxService {
 
     @Transactional
     public GetInboxMessageDetailResponse readMessage(String userId, String id) throws InboxMessageNotFoundException {
-        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findFirstByIdAndUserId(id, userId);
+        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findFirstByInboxIdAndUserId(id, userId);
         if (!messageEntity.isPresent()) {
             throw new InboxMessageNotFoundException("Unable to mark message: " + id + ", for user: " + userId + " as read.");
         }
         final InboxMessageEntity inboxMessage = messageEntity.get();
         if (!inboxMessage.isRead()) { // do not call repository save if there is no change.
             inboxMessage.setRead(true);
+            logger.info("Marked imbox message as read for user: {}, ID: {}", userId, id);
             final InboxMessageEntity savedInboxMessage = inboxRepository.save(inboxMessage);
             return inboxMessageConverter.convertResponse(savedInboxMessage);
         } else {
             return inboxMessageConverter.convertResponse(inboxMessage);
         }
+    }
+
+    @Transactional
+    public void readAllMessages(String userId) {
+        int countRead = inboxRepository.markAllAsRead(userId);
+        logger.info("Marked all inbox messages as read for user: {}, count: {}", userId, countRead);
     }
 }

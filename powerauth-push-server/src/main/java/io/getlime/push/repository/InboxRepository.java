@@ -18,6 +18,7 @@ package io.getlime.push.repository;
 
 import io.getlime.push.repository.model.InboxMessageEntity;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
@@ -55,7 +56,7 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      * @param userId User ID.
      * @return First message matching ID and user ID.
      */
-    Optional<InboxMessageEntity> findFirstByIdAndUserId(String id, String userId);
+    Optional<InboxMessageEntity> findFirstByInboxIdAndUserId(String id, String userId);
 
     /**
      * Return how many there are records for given user ID with provided read state.
@@ -64,5 +65,12 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      * @return Count of messages for given user in provided read state.
      */
     long countAllByUserIdAndRead(String userId, boolean read);
+
+    /**
+     * Mark all user messages as read.
+     * @param userId User ID.
+     */
+    @Query("UPDATE InboxMessageEntity i SET i.read = true WHERE i.userId = :userId AND i.read = false")
+    int markAllAsRead(String userId);
 
 }
