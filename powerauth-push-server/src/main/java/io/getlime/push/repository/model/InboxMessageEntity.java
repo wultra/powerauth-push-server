@@ -51,6 +51,9 @@ public class InboxMessageEntity implements Serializable {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
+    @Column(name = "app_id", nullable = false)
+    private String appId;
+
     @Column(name = "subject", nullable = false)
     private String subject;
 
@@ -73,6 +76,7 @@ public class InboxMessageEntity implements Serializable {
         final InboxMessageEntity that = (InboxMessageEntity) o;
         return inboxId.equals(that.inboxId)
                 && userId.equals(that.userId)
+                && appId.equals(that.appId)
                 && subject.equals(that.subject)
                 && body.equals(that.body)
                 && timestampCreated.equals(that.timestampCreated);
@@ -80,6 +84,6 @@ public class InboxMessageEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(inboxId, userId, subject, body, timestampCreated);
+        return Objects.hash(inboxId, userId, appId, subject, body, timestampCreated);
     }
 }
