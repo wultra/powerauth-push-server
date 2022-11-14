@@ -18,6 +18,8 @@ package io.getlime.push.repository;
 
 import io.getlime.push.repository.model.InboxMessageEntity;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
@@ -35,34 +37,46 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
     /**
      * Find all messages for given user ID.
      * @param userId User ID.
+     * @param appId Application ID.
      * @param pageable Paging parameters.
      * @return List of messages for user ID.
      */
-    List<InboxMessageEntity> findAllByUserIdOrderByTimestampCreatedDesc(String userId, Pageable pageable);
+    List<InboxMessageEntity> findAllByUserIdAndAppIdOrderByTimestampCreatedDesc(String userId, String appId, Pageable pageable);
 
     /**
      * Find messages for given user ID in a given read state.
      * @param userId User ID.
+     * @param appId Application ID.
      * @param read Should the query return read messages, or those that are not read?
      * @param pageable Paging parameters.
      * @return List of messages for user ID with provided read state.
      */
-    List<InboxMessageEntity> findAllByUserIdAndReadOrderByTimestampCreatedDesc(String userId, boolean read, Pageable pageable);
+    List<InboxMessageEntity> findAllByUserIdAndAppIdAndReadOrderByTimestampCreatedDesc(String userId, String appId, boolean read, Pageable pageable);
 
     /**
      * Find first message with given ID and user ID.
-     * @param id Message ID.
+     * @param inboxId Message ID.
      * @param userId User ID.
+     * @param appId Application ID.
      * @return First message matching ID and user ID.
      */
-    Optional<InboxMessageEntity> findFirstByIdAndUserId(String id, String userId);
+    Optional<InboxMessageEntity> findFirstByInboxIdAndUserIdAndAppId(String inboxId, String userId, String appId);
 
     /**
      * Return how many there are records for given user ID with provided read state.
      * @param userId User ID.
+     * @param appId Application ID.
      * @param read Read status.
      * @return Count of messages for given user in provided read state.
      */
-    long countAllByUserIdAndRead(String userId, boolean read);
+    long countAllByUserIdAndAppIdAndRead(String userId, String appId, boolean read);
+
+    /**
+     * Mark all user messages as read.
+     * @param userId User ID.
+     */
+    @Query("UPDATE InboxMessageEntity i SET i.read = true WHERE i.userId = :userId AND i.read = false")
+    @Modifying
+    int markAllAsRead(String userId);
 
 }

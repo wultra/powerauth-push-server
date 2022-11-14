@@ -40,17 +40,19 @@ public class InboxMessageConverter {
      *
      * @param id Random UUID identifier.
      * @param userId User ID.
+     * @param appId Application ID.
      * @param source Request model.
      * @param date Date on which the message should be created.
      * @return Database entity.
      */
-    public InboxMessageEntity convert(UUID id, String userId, CreateInboxMessageRequest source, Date date) {
+    public InboxMessageEntity convert(UUID id, String userId, String appId, CreateInboxMessageRequest source, Date date) {
         if (source == null) {
             return null;
         }
         final InboxMessageEntity destination = new InboxMessageEntity();
         destination.setInboxId(id.toString());
         destination.setUserId(userId);
+        destination.setAppId(appId);
         destination.setSubject(source.getSubject());
         destination.setBody(source.getBody());
         destination.setTimestampCreated(date);
