@@ -114,8 +114,9 @@ public class InboxService {
     }
 
     @Transactional
-    public void readAllMessages(String userId) {
-        int countRead = inboxRepository.markAllAsRead(userId);
+    public void readAllMessages(String userId, String appId) throws AppNotFoundException {
+        checkAppId(appId);
+        int countRead = inboxRepository.markAllAsRead(userId, appId);
         logger.info("Marked all inbox messages as read for user: {}, count: {}", userId, countRead);
     }
 

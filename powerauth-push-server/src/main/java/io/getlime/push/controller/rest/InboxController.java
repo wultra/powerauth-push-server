@@ -94,8 +94,10 @@ public class InboxController {
     }
 
     @PutMapping("{userId}/messages/read-all")
-    public Response readAllMessages(@PathVariable("userId") String userId) {
-        inboxService.readAllMessages(userId);
+    public Response readAllMessages(
+            @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
+            @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId) throws AppNotFoundException {
+        inboxService.readAllMessages(userId, appId);
         return new Response();
     }
 
