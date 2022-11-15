@@ -757,7 +757,7 @@ public class PushServerClient {
         try {
             return restClient.get(url, params, null, typeReference).getBody();
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP GET request failed."));
         }
     }
@@ -776,7 +776,7 @@ public class PushServerClient {
         try {
             return restClient.getObject(url, params, null, responseType);
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP GET request failed."));
         }
     }
@@ -794,7 +794,7 @@ public class PushServerClient {
         try {
             return restClient.post(url, request, typeReference).getBody();
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
@@ -814,7 +814,7 @@ public class PushServerClient {
         try {
             return restClient.post(url, request, queryParams, headers, typeReference).getBody();
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
@@ -831,7 +831,7 @@ public class PushServerClient {
         try {
             return restClient.postObject(url, request);
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
@@ -849,7 +849,7 @@ public class PushServerClient {
         try {
             return restClient.postObject(url, request, responseType);
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
@@ -867,7 +867,7 @@ public class PushServerClient {
         try {
             return restClient.put(url, request, typeReference).getBody();
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
@@ -887,7 +887,7 @@ public class PushServerClient {
         try {
             return restClient.put(url, request, queryParams, headers, typeReference).getBody();
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
@@ -904,7 +904,7 @@ public class PushServerClient {
         try {
             return restClient.putObject(url, request);
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
@@ -922,7 +922,7 @@ public class PushServerClient {
         try {
             return restClient.putObject(url, request, responseType);
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
