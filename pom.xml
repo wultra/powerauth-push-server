@@ -140,7 +140,7 @@
                             <rules>
                                 <bannedDependencies>
                                     <excludes>
-                                        <exclude>org.apache.tomcat.embed:tomcat-embed-el:*:*:compile</exclude>
+                                        <exclude>org.apache.tomcat.embed:*:*:*:compile</exclude>
                                     </excludes>
                                 </bannedDependencies>
                             </rules>
