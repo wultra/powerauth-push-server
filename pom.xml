@@ -78,7 +78,7 @@
         <jackson.version>2.13.4</jackson.version>
         <jackson-databind.version>2.13.4</jackson-databind.version>
         <javax.interceptor-api.version>1.2.2</javax.interceptor-api.version>
-        <rest-base.version>1.5.0</rest-base.version>
+        <rest-base.version>1.6.0-SNAPSHOT</rest-base.version>
         <powerauth.version>1.4.0-SNAPSHOT</powerauth.version>
         <powerauth-crypto.version>1.4.0-SNAPSHOT</powerauth-crypto.version>
         <pushy.version>0.15.1</pushy.version>
