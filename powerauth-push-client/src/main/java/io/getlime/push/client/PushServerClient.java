@@ -619,17 +619,18 @@ public class PushServerClient {
      * Fetch the list of messages for a given user.
      * @param userId User ID.
      * @param appId Application ID.
+     * @param onlyUnread Indication if only unread messages should be returneed.
      * @param page Page index.
      * @param size Page size.
      * @return List of inbox messages.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public PagedResponse<ListOfInboxMessages> fetchMessageListForUser(String userId, String appId, Integer page, Integer size) throws PushServerClientException {
+    public PagedResponse<ListOfInboxMessages> fetchMessageListForUser(String userId, String appId, boolean onlyUnread, Integer page, Integer size) throws PushServerClientException {
         try {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
-            final String appIdSanitized = URLEncoder.encode(String.valueOf(appId), "UTF-8");
             final MultiValueMap<String, String> params = buildPages(page, size);
             params.add("appId", appId);
+            params.add("onlyUnread", onlyUnread ? "true" : "false");
 
             final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>>() {};
             logger.info("Calling push server fetch messages for user: {} - start", userId);
