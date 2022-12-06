@@ -711,7 +711,7 @@ public class PushServerClient {
             final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
 
             logger.info("Calling push server to read message to inbox of: {}, user: {} - start", messageId, userId);
-            final ObjectResponse<GetInboxMessageDetailResponse> response = putImpl("/inbox/" + userIdSanitized + "/messages/" + messageIdSanitized, params, typeReference);
+            final ObjectResponse<GetInboxMessageDetailResponse> response = putImpl("/inbox/" + userIdSanitized + "/messages/" + messageIdSanitized + "/read", params, typeReference);
             logger.info("Calling push server to read message to inbox of: {}, user: {} - finish", messageId, userId);
             return response;
         } catch (UnsupportedEncodingException e) {
