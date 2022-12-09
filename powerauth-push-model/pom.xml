@@ -6,7 +6,6 @@
 
     <artifactId>powerauth-push-model</artifactId>
     <description>PowerAuth Push Server RESTful Model Classes</description>
-    <version>1.4.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <parent>
