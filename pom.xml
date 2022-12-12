@@ -88,6 +88,23 @@
         <bc.version>1.70</bc.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Project Dependencies -->
+            <dependency>
+                <groupId>io.getlime.security</groupId>
+                <artifactId>powerauth-push-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.getlime.security</groupId>
+                <artifactId>powerauth-push-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <build>
         <plugins>
             <plugin>
