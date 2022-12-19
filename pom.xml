@@ -74,7 +74,7 @@
 
         <!-- Library Versions -->
         <guava.version>31.1-jre</guava.version>
-        <h2.version>2.1.212</h2.version>
+        <h2.version>2.1.214</h2.version>
         <javax.interceptor-api.version>1.2.2</javax.interceptor-api.version>
         <rest-base.version>1.6.0-SNAPSHOT</rest-base.version>
         <powerauth.version>1.4.0-SNAPSHOT</powerauth.version>
@@ -83,7 +83,12 @@
         <springdoc-openapi.version>1.6.9</springdoc-openapi.version>
         <google-api-client.version>1.35.1</google-api-client.version>
         <firebase-admin.version>8.2.0</firebase-admin.version>
-        <bc.version>1.70</bc.version>
+        <bc.version>1.72</bc.version>
+
+        <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
+        <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
+        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+        <maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -108,7 +113,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>${maven-source-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -122,7 +127,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>${maven-javadoc-plugin.version}</version>
                 <configuration>
                     <failOnError>false</failOnError>
                 </configuration>
@@ -135,16 +140,11 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.0.0-M2</version>
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>${maven-enforcer-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>enforce-banned-dependencies</id>
