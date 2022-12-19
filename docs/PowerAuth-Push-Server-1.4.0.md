@@ -62,3 +62,8 @@ CREATE TABLE `push_inbox` (
 CREATE INDEX `push_inbox_user` ON `push_inbox` (`user_id`);
 CREATE INDEX `push_inbox_user_read` ON `push_inbox` (`user_id`, `read`);
 ```
+
+## Bouncy Castle Library Update to Version 1.72
+
+Bouncy Castle library has been updated to version `1.72`.
+The newest version of Bouncy Castle library can be downloaded from: [https://www.bouncycastle.org/download/bcprov-jdk18on-172.jar](https://www.bouncycastle.org/download/bcprov-jdk18on-172.jar)
