@@ -607,9 +607,28 @@ public class PushServerClient {
 
             final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
             logger.info("Calling push server to send message to inbox of: {}, subject: {} - start", userId, request.getSubject());
-            final ObjectResponse<GetInboxMessageDetailResponse> response = postImpl("/inbox/" + userIdSanitized, new ObjectRequest<>(request), params, null, typeReference);
+            final ObjectResponse<GetInboxMessageDetailResponse> response = postImpl("/inbox/users/" + userIdSanitized, new ObjectRequest<>(request), params, null, typeReference);
             logger.info("Calling push server to send message to inbox of: {}, subject: {} - finish", userId, request.getSubject());
             return response;
+        } catch (UnsupportedEncodingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        }
+    }
+
+    /**
+     * Fetch detail of the message for given message ID.
+     * @param messageId Message Id.
+     * @return Detail of a message with given ID.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(String messageId) throws PushServerClientException {
+        try {
+            final String messageIdSanitized = URLEncoder.encode(String.valueOf(messageId), "UTF-8");
+            final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
+            logger.info("Calling push server fetch message ID: {} - start", messageId);
+            final ObjectResponse<GetInboxMessageDetailResponse> result = getImpl("/inbox/messages/" + messageIdSanitized, null, typeReference);
+            logger.info("Calling push server fetch message ID: {} - finish", messageId);
+            return result;
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
         }
@@ -634,7 +653,7 @@ public class PushServerClient {
 
             final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>>() {};
             logger.info("Calling push server fetch messages for user: {} - start", userId);
-            final PagedResponse<ListOfInboxMessages> result = getImpl("/inbox/" + userIdSanitized, params, typeReference);
+            final PagedResponse<ListOfInboxMessages> result = getImpl("/inbox/users/" + userIdSanitized, params, typeReference);
             logger.info("Calling push server fetch messages for user: {} - finish", userId);
 
             return result;
@@ -658,7 +677,7 @@ public class PushServerClient {
 
             final ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>>() {};
             logger.info("Calling push server fetch message count for user: {} - start", userId);
-            final ObjectResponse<GetInboxMessageCountResponse> result = getImpl("/inbox/" + userIdSanitized + "/count", params, typeReference);
+            final ObjectResponse<GetInboxMessageCountResponse> result = getImpl("/inbox/users/" + userIdSanitized + "/count", params, typeReference);
             logger.info("Calling push server fetch message count for user: {} - finish", userId);
 
             return result;
@@ -684,7 +703,7 @@ public class PushServerClient {
 
             final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
             logger.info("Calling push server fetch message ID: {}, for user: {} - start", messageId, userId);
-            final ObjectResponse<GetInboxMessageDetailResponse> result = getImpl("/inbox/" + userIdSanitized + "/messages/" + messageIdSanitized, params, typeReference);
+            final ObjectResponse<GetInboxMessageDetailResponse> result = getImpl("/inbox/users/" + userIdSanitized + "/messages/" + messageIdSanitized, params, typeReference);
             logger.info("Calling push server fetch message ID: {}, for user: {} - finish", messageId, userId);
 
             return result;
@@ -711,7 +730,7 @@ public class PushServerClient {
             final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
 
             logger.info("Calling push server to read message to inbox of: {}, user: {} - start", messageId, userId);
-            final ObjectResponse<GetInboxMessageDetailResponse> response = putImpl("/inbox/" + userIdSanitized + "/messages/" + messageIdSanitized + "/read", params, typeReference);
+            final ObjectResponse<GetInboxMessageDetailResponse> response = putImpl("/inbox/users/" + userIdSanitized + "/messages/" + messageIdSanitized + "/read", params, typeReference);
             logger.info("Calling push server to read message to inbox of: {}, user: {} - finish", messageId, userId);
             return response;
         } catch (UnsupportedEncodingException e) {
@@ -734,7 +753,7 @@ public class PushServerClient {
             final ParameterizedTypeReference<Response> typeReference = new ParameterizedTypeReference<Response>() {};
 
             logger.info("Calling push server to mark all messages read in inbox of user: {} - start", userId);
-            final Response response = putImpl("/inbox/" + userIdSanitized + "/messages/read-all", null, params, null, typeReference);
+            final Response response = putImpl("/inbox/users/" + userIdSanitized + "/messages/read-all", null, params, null, typeReference);
             logger.info("Calling push server to mark all messages read in inbox of user: {} - finish", userId);
             return response;
         } catch (UnsupportedEncodingException e) {
