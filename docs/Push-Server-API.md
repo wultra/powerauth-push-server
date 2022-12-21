@@ -1391,7 +1391,7 @@ To notify the user about a new message in the inbox, call the `POST /message/sen
 right after you post a message in the inbox.
 <!-- end -->
 
-<!-- begin api POST /inbox/${userId} -->
+<!-- begin api POST /inbox/users/${userId} -->
 ### Post Message to Inbox
 
 Post provided message to an inbox of a given user.
@@ -1406,7 +1406,7 @@ Post provided message to an inbox of a given user.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/${userId}</td>
+        <td>/inbox/users/${userId}</td>
     </tr>
 </table>
 <!-- end -->
@@ -1456,7 +1456,7 @@ Post provided message to an inbox of a given user.
 ```
 <!-- end -->
 
-<!-- begin api GET /inbox/${userId} -->
+<!-- begin api GET /inbox/users/${userId} -->
 ### Get User Messages
 
 Get messages from an inbox of a given user.
@@ -1471,7 +1471,7 @@ Get messages from an inbox of a given user.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/${userId}</td>
+        <td>/inbox/users/${userId}</td>
     </tr>
 </table>
 <!-- end -->
@@ -1531,7 +1531,7 @@ Get messages from an inbox of a given user.
 ```
 <!-- end -->
 
-<!-- begin api GET /inbox/${userId}/count -->
+<!-- begin api GET /inbox/users/${userId}/count -->
 ### Get Count of Unread Messages
 
 Get number of unread messages in an inbox of a given user.
@@ -1546,7 +1546,7 @@ Get number of unread messages in an inbox of a given user.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/${userId}/count</td>
+        <td>/inbox/users/${userId}/count</td>
     </tr>
 </table>
 <!-- end -->
@@ -1581,7 +1581,7 @@ Get number of unread messages in an inbox of a given user.
 ```
 <!-- end -->
 
-<!-- begin api GET /inbox/${userId}/messages/${messageId} -->
+<!-- begin api GET /inbox/users/${userId}/messages/${messageId} -->
 ### Get Message Detail
 
 Get full message detail from an inbox of a given user, based on a message ID.
@@ -1596,7 +1596,7 @@ Get full message detail from an inbox of a given user, based on a message ID.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/${userId}/messages/${messageId}</td>
+        <td>/inbox/users/${userId}/messages/${messageId}</td>
     </tr>
 </table>
 <!-- end -->
@@ -1639,7 +1639,52 @@ Get full message detail from an inbox of a given user, based on a message ID.
 ```
 <!-- end -->
 
-<!-- begin api PUT /inbox/${userId}/messages/${messageId}/read -->
+<!-- begin api GET /inbox/messages/${messageId} -->
+### Get Message Detail by ID
+
+Get full message detail from an inbox for a given message ID.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/messages/${messageId}</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Path Variables
+
+<table>
+    <tr>
+        <td>messageId</td>
+        <td>Message ID</td>
+    </tr>
+</table>
+
+#### Response 200
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "id": "ae641389-d37a-4425-bd14-41c29484596f",
+    "subject": "Example subject",
+    "body": "Example message body",
+    "read": false,
+    "timestampCreated": "2022-08-25T22:34:58.702+00:00"
+  }
+}
+```
+<!-- end -->
+
+<!-- begin api PUT /inbox/users/${userId}/messages/${messageId}/read -->
 ### Mark Message as Read
 
 Mark a message in an inbox of a given user as read. In case the message is already read, this call is a no-op.
@@ -1654,7 +1699,7 @@ Mark a message in an inbox of a given user as read. In case the message is alrea
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/${userId}/messages/${messageId}/read</td>
+        <td>/inbox/users/${userId}/messages/${messageId}/read</td>
     </tr>
 </table>
 <!-- end -->
@@ -1697,7 +1742,7 @@ Mark a message in an inbox of a given user as read. In case the message is alrea
 ```
 <!-- end -->
 
-<!-- begin api PUT /inbox/${userId}/messages/${messageId}/read -->
+<!-- begin api PUT /inbox/users/${userId}/messages/${messageId}/read -->
 ### Mark All Unread Messages as Read for User
 
 Mark all unread messages in an inbox of a given user as read.
@@ -1712,7 +1757,7 @@ Mark all unread messages in an inbox of a given user as read.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/${userId}/messages/read-all</td>
+        <td>/inbox/users/${userId}/messages/read-all</td>
     </tr>
 </table>
 <!-- end -->

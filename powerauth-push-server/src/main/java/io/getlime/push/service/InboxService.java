@@ -89,6 +89,15 @@ public class InboxService {
     }
 
     @Transactional(readOnly=true)
+    public GetInboxMessageDetailResponse fetchMessageDetail(String messageId) throws InboxMessageNotFoundException, AppNotFoundException {
+        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findById(messageId);
+        if (!messageEntity.isPresent()) {
+            throw new InboxMessageNotFoundException("Unable to fetch message: " + messageId + ".");
+        }
+        return inboxMessageConverter.convertResponse(messageEntity.get());
+    }
+
+    @Transactional(readOnly=true)
     public GetInboxMessageCountResponse fetchMessageCountForUser(String userId, String appId) throws AppNotFoundException {
         checkAppId(appId);
         final long countUnread = inboxRepository.countAllByUserIdAndAppIdAndRead(userId, appId,false);
