@@ -16,6 +16,7 @@
 
 package io.getlime.push.repository;
 
+import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.InboxMessageEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
@@ -37,47 +38,47 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
     /**
      * Find all messages for given user ID.
      * @param userId User ID.
-     * @param appId Application ID.
+     * @param applicationIds Application identifiers.
      * @param pageable Paging parameters.
      * @return List of messages for user ID.
      */
-    List<InboxMessageEntity> findAllByUserIdAndAppIdOrderByTimestampCreatedDesc(String userId, String appId, Pageable pageable);
+    @Query("SELECT DISTINCT o FROM InboxMessageEntity o INNER JOIN o.applications a WHERE o.userId = :userId AND a.appId in :applicationIds ORDER BY o.timestampCreated DESC")
+    List<InboxMessageEntity> findInboxMessagesForUserAndApplications(String userId, List<String> applicationIds, Pageable pageable);
 
     /**
      * Find messages for given user ID in a given read state.
      * @param userId User ID.
-     * @param appId Application ID.
+     * @param applicationIds Application identifiers.
      * @param read Should the query return read messages, or those that are not read?
      * @param pageable Paging parameters.
      * @return List of messages for user ID with provided read state.
      */
-    List<InboxMessageEntity> findAllByUserIdAndAppIdAndReadOrderByTimestampCreatedDesc(String userId, String appId, boolean read, Pageable pageable);
+    @Query("SELECT DISTINCT o FROM InboxMessageEntity o INNER JOIN o.applications a WHERE o.userId = :userId AND a.appId in :applicationIds AND o.read = :read ORDER BY o.timestampCreated DESC")
+    List<InboxMessageEntity> findAllByUserIdAndApplicationsContainingAndReadOrderByTimestampCreatedDesc(String userId, List<String> applicationIds, boolean read, Pageable pageable);
 
     /**
-     * Find first message with given ID and user ID.
+     * Find first message with given ID.
      * @param inboxId Message ID.
-     * @param userId User ID.
-     * @param appId Application ID.
-     * @return First message matching ID and user ID.
+     * @return First message matching ID.
      */
-    Optional<InboxMessageEntity> findFirstByInboxIdAndUserIdAndAppId(String inboxId, String userId, String appId);
+    Optional<InboxMessageEntity> findFirstByInboxId(String inboxId);
 
     /**
      * Return how many there are records for given user ID with provided read state.
      * @param userId User ID.
-     * @param appId Application ID.
+     * @param app Application.
      * @param read Read status.
      * @return Count of messages for given user in provided read state.
      */
-    long countAllByUserIdAndAppIdAndRead(String userId, String appId, boolean read);
+    long countAllByUserIdAndApplicationsContainingAndRead(String userId, AppCredentialsEntity app, boolean read);
 
     /**
      * Mark all user messages as read.
      * @param userId User ID.
-     * @param appId Application ID.
+     * @param app Application.
      */
-    @Query("UPDATE InboxMessageEntity i SET i.read = true WHERE i.userId = :userId AND i.appId = :appId AND i.read = false")
+    @Query("UPDATE InboxMessageEntity i SET i.read = true WHERE i.userId = :userId AND :app member i.applications AND i.read = false")
     @Modifying
-    int markAllAsRead(String userId, String appId);
+    int markAllAsRead(String userId, AppCredentialsEntity app);
 
 }

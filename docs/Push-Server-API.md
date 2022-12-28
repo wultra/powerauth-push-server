@@ -1420,22 +1420,17 @@ Post provided message to an inbox of a given user.
     </tr>
 </table>
 
-##### Query Params
-
-<table>
-    <tr>
-        <td>appId</td>
-        <td>Application ID</td>
-    </tr>
-</table>
-
 ##### Request Body
 
 ```json
 {
   "requestObject": {
     "subject": "Example subject",
-    "body": "Example message body"
+    "body": "Example message body",
+    "applications": [
+      "application-001",
+      "application-002"
+    ]
   }
 }
 ```
@@ -1450,7 +1445,11 @@ Post provided message to an inbox of a given user.
     "subject": "Example subject",
     "body": "Example message body",
     "read": false,
-    "timestampCreated": "2022-08-25T22:34:58.702+00:00"
+    "timestampCreated": "2022-08-25T22:34:58.702+00:00",
+    "applications": [
+      "application-001",
+      "application-002"
+    ]
   }
 }
 ```
@@ -1489,8 +1488,8 @@ Get messages from an inbox of a given user.
 
 <table>
     <tr>
-        <td>appId</td>
-        <td>Application ID</td>
+        <td>applications</td>
+        <td>Applications, comma-separated value of application IDs.</td>
     </tr>
     <tr>
         <td>onlyUnread</td>
@@ -1581,64 +1580,6 @@ Get number of unread messages in an inbox of a given user.
 ```
 <!-- end -->
 
-<!-- begin api GET /inbox/users/${userId}/messages/${messageId} -->
-### Get Message Detail
-
-Get full message detail from an inbox of a given user, based on a message ID.
-
-#### Request
-
-<!-- begin remove -->
-<table>
-    <tr>
-        <td>Method</td>
-        <td><code>GET</code></td>
-    </tr>
-    <tr>
-        <td>Resource URI</td>
-        <td>/inbox/users/${userId}/messages/${messageId}</td>
-    </tr>
-</table>
-<!-- end -->
-
-##### Path Variables
-
-<table>
-    <tr>
-        <td>userId</td>
-        <td>User ID</td>
-    </tr>
-    <tr>
-        <td>messageId</td>
-        <td>Message ID</td>
-    </tr>
-</table>
-
-##### Query Params
-
-<table>
-    <tr>
-        <td>appId</td>
-        <td>Application ID</td>
-    </tr>
-</table>
-
-#### Response 200
-
-```json
-{
-  "status": "OK",
-  "responseObject": {
-    "id": "ae641389-d37a-4425-bd14-41c29484596f",
-    "subject": "Example subject",
-    "body": "Example message body",
-    "read": false,
-    "timestampCreated": "2022-08-25T22:34:58.702+00:00"
-  }
-}
-```
-<!-- end -->
-
 <!-- begin api GET /inbox/messages/${messageId} -->
 ### Get Message Detail by ID
 
@@ -1678,16 +1619,20 @@ Get full message detail from an inbox for a given message ID.
     "subject": "Example subject",
     "body": "Example message body",
     "read": false,
-    "timestampCreated": "2022-08-25T22:34:58.702+00:00"
+    "timestampCreated": "2022-08-25T22:34:58.702+00:00",
+    "applications": [
+      "application-001",
+      "application-002"
+    ]
   }
 }
 ```
 <!-- end -->
 
-<!-- begin api PUT /inbox/users/${userId}/messages/${messageId}/read -->
+<!-- begin api PUT /inbox/messages/${messageId}/read -->
 ### Mark Message as Read
 
-Mark a message in an inbox of a given user as read. In case the message is already read, this call is a no-op.
+Mark a message in an inbox as read. In case the message is already read, this call is a no-op.
 
 #### Request
 
@@ -1699,7 +1644,7 @@ Mark a message in an inbox of a given user as read. In case the message is alrea
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/users/${userId}/messages/${messageId}/read</td>
+        <td>/inbox/messages/${messageId}/read</td>
     </tr>
 </table>
 <!-- end -->
@@ -1717,15 +1662,6 @@ Mark a message in an inbox of a given user as read. In case the message is alrea
     </tr>
 </table>
 
-##### Query Params
-
-<table>
-    <tr>
-        <td>appId</td>
-        <td>Application ID</td>
-    </tr>
-</table>
-
 #### Response 200
 
 ```json
@@ -1736,13 +1672,17 @@ Mark a message in an inbox of a given user as read. In case the message is alrea
     "subject": "Example subject",
     "body": "Example message body",
     "read": true,
-    "timestampCreated": "2022-08-25T22:34:58.702+00:00"
+    "timestampCreated": "2022-08-25T22:34:58.702+00:00",
+    "applications": [
+      "application-001",
+      "application-002"
+    ]
   }
 }
 ```
 <!-- end -->
 
-<!-- begin api PUT /inbox/users/${userId}/messages/${messageId}/read -->
+<!-- begin api PUT /inbox/users/${userId}/read-all -->
 ### Mark All Unread Messages as Read for User
 
 Mark all unread messages in an inbox of a given user as read.
@@ -1757,7 +1697,7 @@ Mark all unread messages in an inbox of a given user as read.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/users/${userId}/messages/read-all</td>
+        <td>/inbox/users/${userId}/read-all</td>
     </tr>
 </table>
 <!-- end -->

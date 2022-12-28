@@ -29,7 +29,6 @@ import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesCrypt
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesSharedInfo1;
 import io.getlime.security.powerauth.crypto.lib.util.KeyConvertor;
 import io.getlime.security.powerauth.rest.api.model.request.v3.ActivationLayer2Request;
-import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;

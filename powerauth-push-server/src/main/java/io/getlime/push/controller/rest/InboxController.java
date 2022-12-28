@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Arrays;
 
 /**
  * Controller for message inbox.
@@ -56,18 +57,17 @@ public class InboxController {
     @PostMapping("users/{userId}")
     public ObjectResponse<GetInboxMessageDetailResponse> postMessage(
             @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
-            @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId,
             @Valid @RequestBody ObjectRequest<CreateInboxMessageRequest> request) throws AppNotFoundException {
-        return new ObjectResponse<>(inboxService.postMessage(userId, appId, request.getRequestObject()));
+        return new ObjectResponse<>(inboxService.postMessage(userId, request.getRequestObject()));
     }
 
     @GetMapping("users/{userId}")
     public PagedResponse<ListOfInboxMessages> fetchMessageListForUser(
             @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
-            @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId,
+            @NotNull @Size(min = 1, max = 255) @RequestParam("applications") String applications,
             @RequestParam(value = "onlyUnread", required = false, defaultValue = "false") boolean onlyUnread,
             @ParameterObject Pageable pageable) throws AppNotFoundException {
-        return new PagedResponse<>(inboxService.fetchMessageListForUser(userId, appId, onlyUnread, pageable), pageable.getPageNumber(), pageable.getPageSize());
+        return new PagedResponse<>(inboxService.fetchMessageListForUser(userId, Arrays.asList(applications.split(",")), onlyUnread, pageable), pageable.getPageNumber(), pageable.getPageSize());
     }
 
     @GetMapping("users/{userId}/count")
@@ -77,34 +77,23 @@ public class InboxController {
         return new ObjectResponse<>(inboxService.fetchMessageCountForUser(userId, appId));
     }
 
-    @GetMapping("users/{userId}/messages/{id}")
-    public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(
-            @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
-            @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId,
-            @NotNull @PathVariable("id") String inboxId) throws InboxMessageNotFoundException, AppNotFoundException {
-        return new ObjectResponse<>(inboxService.fetchMessageDetail(userId, appId, inboxId));
-    }
-
-    @GetMapping("messages/{id}")
-    public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(
-            @NotNull @PathVariable("id") String messageId) throws InboxMessageNotFoundException, AppNotFoundException {
-        return new ObjectResponse<>(inboxService.fetchMessageDetail(messageId));
-    }
-
-    @PutMapping("users/{userId}/messages/{id}/read")
-    public ObjectResponse<GetInboxMessageDetailResponse> readMessage(
-            @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
-            @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId,
-            @NotNull @Size(min = 1, max = 255) @PathVariable("id") String inboxId) throws InboxMessageNotFoundException, AppNotFoundException {
-        return new ObjectResponse<>(inboxService.readMessage(userId, appId, inboxId));
-    }
-
-    @PutMapping("users/{userId}/messages/read-all")
+    @PutMapping("users/{userId}/read-all")
     public Response readAllMessages(
             @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
             @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId) throws AppNotFoundException {
         inboxService.readAllMessages(userId, appId);
         return new Response();
+    }
+
+    @GetMapping("messages/{id}")
+    public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(
+            @NotNull @PathVariable("id") String inboxId) throws InboxMessageNotFoundException, AppNotFoundException {
+        return new ObjectResponse<>(inboxService.fetchMessageDetail(inboxId));
+    }
+
+    @PutMapping("messages/{id}/read")
+    public ObjectResponse<GetInboxMessageDetailResponse> readMessage(@NotNull @Size(min = 1, max = 255) @PathVariable("id") String inboxId) throws InboxMessageNotFoundException {
+        return new ObjectResponse<>(inboxService.readMessage(inboxId));
     }
 
 }

@@ -25,6 +25,7 @@ import io.getlime.push.model.response.GetInboxMessageDetailResponse;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.InboxRepository;
 import io.getlime.push.repository.converter.InboxMessageConverter;
+import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.InboxMessageEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,63 +59,55 @@ public class InboxService {
     }
 
     @Transactional
-    public GetInboxMessageDetailResponse postMessage(String userId, String appId, CreateInboxMessageRequest request) throws AppNotFoundException {
-        checkAppId(appId);
-        final InboxMessageEntity messageEntity = inboxMessageConverter.convert(UUID.randomUUID(), userId, appId, request, new Date());
+    public GetInboxMessageDetailResponse postMessage(String userId, CreateInboxMessageRequest request) throws AppNotFoundException {
+        final List<AppCredentialsEntity> apps = fetchAppsForAppIds(request.getApplications());
+        if (apps.size() != request.getApplications().size()) {
+            logger.info("Application list received: {}, apps configured in the system: {}.", request.getApplications(), apps.stream().map(AppCredentialsEntity::getAppId));
+            throw new AppNotFoundException("Application list contained an app that is not configured in the system.");
+        }
+        final InboxMessageEntity messageEntity = inboxMessageConverter.convert(UUID.randomUUID(), userId, request, apps, new Date());
         final InboxMessageEntity savedMessageEntity = inboxRepository.save(messageEntity);
         logger.info("Posted new inbox message for user: {}, message ID: {}", userId, messageEntity.getInboxId());
         return inboxMessageConverter.convertResponse(savedMessageEntity);
     }
 
     @Transactional(readOnly=true)
-    public ListOfInboxMessages fetchMessageListForUser(String userId, String appId, boolean onlyUnread, Pageable pageable) throws AppNotFoundException {
-        checkAppId(appId);
+    public ListOfInboxMessages fetchMessageListForUser(String userId, List<String> appIds, boolean onlyUnread, Pageable pageable) {
         final List<InboxMessageEntity> messageEntities;
         if (onlyUnread) {
-            messageEntities = inboxRepository.findAllByUserIdAndAppIdAndReadOrderByTimestampCreatedDesc(userId, appId, false, pageable);
+            messageEntities = inboxRepository.findAllByUserIdAndApplicationsContainingAndReadOrderByTimestampCreatedDesc(userId, appIds, false, pageable);
         } else {
-            messageEntities = inboxRepository.findAllByUserIdAndAppIdOrderByTimestampCreatedDesc(userId, appId, pageable);
+            messageEntities = inboxRepository.findInboxMessagesForUserAndApplications(userId, appIds, pageable);
         }
-        return inboxMessageConverter.convert(messageEntities, pageable.getPageNumber(), pageable.getPageSize());
+        return inboxMessageConverter.convert(messageEntities);
     }
 
     @Transactional(readOnly=true)
-    public GetInboxMessageDetailResponse fetchMessageDetail(String userId, String appId, String id) throws InboxMessageNotFoundException, AppNotFoundException {
-        checkAppId(appId);
-        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findFirstByInboxIdAndUserIdAndAppId(id, userId, appId);
+    public GetInboxMessageDetailResponse fetchMessageDetail(String inboxId) throws InboxMessageNotFoundException {
+        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findFirstByInboxId(inboxId);
         if (!messageEntity.isPresent()) {
-            throw new InboxMessageNotFoundException("Unable to fetch message: " + id + ", for user: " + userId + ".");
-        }
-        return inboxMessageConverter.convertResponse(messageEntity.get());
-    }
-
-    @Transactional(readOnly=true)
-    public GetInboxMessageDetailResponse fetchMessageDetail(String messageId) throws InboxMessageNotFoundException, AppNotFoundException {
-        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findById(messageId);
-        if (!messageEntity.isPresent()) {
-            throw new InboxMessageNotFoundException("Unable to fetch message: " + messageId + ".");
+            throw new InboxMessageNotFoundException("Unable to fetch message: " + inboxId + ".");
         }
         return inboxMessageConverter.convertResponse(messageEntity.get());
     }
 
     @Transactional(readOnly=true)
     public GetInboxMessageCountResponse fetchMessageCountForUser(String userId, String appId) throws AppNotFoundException {
-        checkAppId(appId);
-        final long countUnread = inboxRepository.countAllByUserIdAndAppIdAndRead(userId, appId,false);
+        final AppCredentialsEntity app = checkAppId(appId);
+        final long countUnread = inboxRepository.countAllByUserIdAndApplicationsContainingAndRead(userId, app,false);
         return new GetInboxMessageCountResponse(countUnread);
     }
 
     @Transactional
-    public GetInboxMessageDetailResponse readMessage(String userId, String appId, String inboxId) throws InboxMessageNotFoundException, AppNotFoundException {
-        checkAppId(appId);
-        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findFirstByInboxIdAndUserIdAndAppId(inboxId, userId, appId);
+    public GetInboxMessageDetailResponse readMessage(String inboxId) throws InboxMessageNotFoundException {
+        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findFirstByInboxId(inboxId);
         if (!messageEntity.isPresent()) {
-            throw new InboxMessageNotFoundException("Unable to mark message: " + inboxId + ", for user: " + userId + " as read.");
+            throw new InboxMessageNotFoundException("Unable to mark message: " + inboxId + " as read.");
         }
         final InboxMessageEntity inboxMessage = messageEntity.get();
         if (!inboxMessage.isRead()) { // do not call repository save if there is no change.
             inboxMessage.setRead(true);
-            logger.info("Marked inbox message as read for user: {}, message ID: {}", userId, inboxId);
+            logger.info("Marked inbox message as read for message ID: {}", inboxId);
             final InboxMessageEntity savedInboxMessage = inboxRepository.save(inboxMessage);
             return inboxMessageConverter.convertResponse(savedInboxMessage);
         } else {
@@ -124,13 +117,18 @@ public class InboxService {
 
     @Transactional
     public void readAllMessages(String userId, String appId) throws AppNotFoundException {
-        checkAppId(appId);
-        int countRead = inboxRepository.markAllAsRead(userId, appId);
+        final AppCredentialsEntity appCredentialsEntity = checkAppId(appId);
+        int countRead = inboxRepository.markAllAsRead(userId, appCredentialsEntity);
         logger.info("Marked all inbox messages as read for user: {}, count: {}", userId, countRead);
     }
 
-    private void checkAppId(String appId) throws AppNotFoundException {
-        appCredentialsRepository.findFirstByAppId(appId).orElseThrow(
+    private AppCredentialsEntity checkAppId(String appId) throws AppNotFoundException {
+        return appCredentialsRepository.findFirstByAppId(appId).orElseThrow(
                 () -> new AppNotFoundException("Application was not found: " + appId));
     }
+
+    private List<AppCredentialsEntity> fetchAppsForAppIds(List<String> apps) {
+        return appCredentialsRepository.findAllByAppIdIn(apps);
+    }
+
 }
