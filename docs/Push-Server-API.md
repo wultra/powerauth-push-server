@@ -8,6 +8,7 @@ Push Server provides a simple to use RESTful API for the 3rd party integration p
 - [Message](#message)
 - [Campaign](#campaign)
 - [Administration](#administration)
+- [Message Inbox](#message-inbox)
 
 Following endpoints are published in PowerAuth Push Server RESTful API:
 
