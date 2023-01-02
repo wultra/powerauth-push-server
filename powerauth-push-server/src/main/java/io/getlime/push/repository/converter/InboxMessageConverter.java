@@ -73,10 +73,12 @@ public class InboxMessageConverter {
         }
         final GetInboxMessageDetailResponse destination = new GetInboxMessageDetailResponse();
         destination.setId(source.getInboxId());
+        destination.setUserId(source.getUserId());
         destination.setSubject(source.getSubject());
         destination.setBody(source.getBody());
         destination.setRead(source.isRead());
         destination.setTimestampCreated(source.getTimestampCreated());
+        destination.setTimestampRead(source.getTimestampRead());
         destination.setApplications(source.getApplications().stream().map(AppCredentialsEntity::getAppId).collect(Collectors.toList()));
         return destination;
     }

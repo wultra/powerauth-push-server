@@ -31,10 +31,12 @@ import java.util.List;
 public class GetInboxMessageDetailResponse {
 
     private String id;
+    private String userId;
     private String subject;
     private String body;
     private boolean read;
     private Date timestampCreated;
+    private Date timestampRead;
     private List<String> applications = new ArrayList<>();
 
 }

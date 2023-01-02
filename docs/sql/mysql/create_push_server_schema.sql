@@ -70,7 +70,8 @@ CREATE TABLE `push_inbox` (
 -- Create table for assignment of inbox messages to apps
 CREATE TABLE `push_inbox_app` (
     `app_credentials_id` bigint(20) NOT NULL,
-    `inbox_id`           bigint(20) NOT NULL
+    `inbox_id`           bigint(20) NOT NULL,
+    PRIMARY KEY (`inbox_id`, `app_credentials_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 --
@@ -92,7 +93,5 @@ CREATE INDEX `push_campaign_user_campaign` ON `push_campaign_user`(`campaign_id`
 CREATE INDEX `push_campaign_user_detail` ON `push_campaign_user`(`user_id`);
 
 CREATE INDEX `push_inbox_id` ON `push_inbox` (`inbox_id`);
-CREATE INDEX `push_inbox_user_app` ON `push_inbox` (`user_id`);
+CREATE INDEX `push_inbox_user` ON `push_inbox` (`user_id`);
 CREATE INDEX `push_inbox_user_read` ON `push_inbox` (`user_id`, `read`);
-
-CREATE INDEX `push_inbox_app_inbox` ON `push_inbox_app` (`inbox_id`, `app_credentials_id`);

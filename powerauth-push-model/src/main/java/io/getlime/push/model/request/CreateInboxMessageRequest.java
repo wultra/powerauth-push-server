@@ -18,7 +18,6 @@ package io.getlime.push.model.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.NonNull;
 import lombok.ToString;
 
 import javax.validation.constraints.NotEmpty;
@@ -49,6 +48,6 @@ public class CreateInboxMessageRequest {
 
     @NotNull
     @NotEmpty
-    private List<@NonNull @Pattern(regexp="^[a-zA-Z0-9_-]{3,255}$") String> applications = new ArrayList<>();
+    private List<@NotNull @Pattern(regexp="^[a-zA-Z0-9_-]{3,255}$") String> applications = new ArrayList<>();
 
 }
