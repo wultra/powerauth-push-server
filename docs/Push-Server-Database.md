@@ -324,24 +324,23 @@ Stores the messages to application mapping.
 ```sql
 CREATE TABLE push_inbox_app (
     app_credentials_id INTEGER NOT NULL,
-    inbox_id           INTEGER NOT NULL
+    inbox_id           INTEGER NOT NULL,
+    CONSTRAINT push_inbox_app_pk PRIMARY KEY (inbox_id, app_credentials_id)
 );
-
-CREATE INDEX push_inbox_app_inbox ON push_inbox_app (inbox_id, app_credentials_id);
 ```
 
 #### Columns
 
-| Name                 | Type       | Info  | Note                                              |
-|----------------------|------------|-------|---------------------------------------------------|
-| `app_credentials_id` | INTEGER    | index | Unique message ID.                                |
-| `inbox_id`           | INTEGER    | index | Unique message ID. |
+| Name                 | Type       | Info | Note                        |
+|----------------------|------------|------|-----------------------------|
+| `app_credentials_id` | INTEGER    | PK   | Application credentials ID. |
+| `inbox_id`           | INTEGER    | PK   | Unique message ID.          |
 
 #### Keys
 
-| Name            | Primary   | References  | Description                   |
-|-----------------|-----------|-------------|-------------------------------|
-| `push_inbox_pk` | Y         | `id`        | Primary key for table records |
+| Name                | Primary   | References                       | Description                   |
+|---------------------|-----------|----------------------------------|-------------------------------|
+| `push_inbox_app_pk` | Y         | `inbox_id`, `app_credentials_id` | Primary key for table records |
 
 #### Indexes
 

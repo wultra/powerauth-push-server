@@ -89,7 +89,8 @@ CREATE TABLE push_inbox (
 -- Create table for assignment of inbox messages to apps
 CREATE TABLE push_inbox_app (
     app_credentials_id INTEGER NOT NULL,
-    inbox_id           INTEGER NOT NULL
+    inbox_id           INTEGER NOT NULL,
+    CONSTRAINT push_inbox_app_pk PRIMARY KEY (inbox_id, app_credentials_id)
 );
 
 --
