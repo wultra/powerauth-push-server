@@ -60,18 +60,18 @@ CREATE UNIQUE INDEX push_device_activation_token ON push_device_registration (ac
 
 #### Keys
 
-| Name | Primary | References | Description |
-|---|---|---|---|
-| `push_device_registration_pkey` | Y | `id` | Primary key for table records |
+| Name                            | Primary  | References | Description                   |
+|---------------------------------|----------|------------|-------------------------------|
+| `push_device_registration_pkey` | Y        | `id`       | Primary key for table records |
 
 #### Indexes
 
-| Name | Unique | Columns | Description |
-|---|---|---|---|
-| `push_device_app_token`        | N | `app_id, push_token` | Index for faster lookup by push token for given app. |
-| `push_device_user_app`         | N | `user_id, app_id` | Index for faster lookup by user ID for given app. |
-| `push_device_activation`       | Y | `activation_id` | Index for faster lookup by activation ID. |
-| `push_device_activation_token` | Y | `activation_id, push_token` | Index for faster lookup by push token with constraints to activation ID. |
+| Name                           | Unique | Columns                     | Description                                                              |
+|--------------------------------|--------|-----------------------------|--------------------------------------------------------------------------|
+| `push_device_app_token`        | N      | `app_id, push_token`        | Index for faster lookup by push token for given app.                     |
+| `push_device_user_app`         | N      | `user_id, app_id`           | Index for faster lookup by user ID for given app.                        |
+| `push_device_activation`       | Y      | `activation_id`             | Index for faster lookup by activation ID.                                |
+| `push_device_activation_token` | Y      | `activation_id, push_token` | Index for faster lookup by push token with constraints to activation ID. |
 <!-- end -->
 
 <!-- begin database table push_app_credentials -->
@@ -250,16 +250,16 @@ CREATE INDEX push_campaign_user_detail ON push_campaign_user (user_id);
 
 #### Keys
 
-| Name | Primary | References | Description |
-|---|---|---|---|
-| `push_campaign_user_pkey` | Y | `id` | Primary key for table records |
+| Name                      | Primary | References | Description                   |
+|---------------------------|---------|------------|-------------------------------|
+| `push_campaign_user_pkey` | Y       | `id`       | Primary key for table records |
 
 #### Indexes
 
-| Name | Unique | Columns | Description |
-|---|---|---|---|
-| `push_campaign_user_campaign` | N | `campaign_id, user_id` | Index for easier campaign lookup for user by campaign ID. |
-| `push_campaign_user_detail`   | N | `user_id` | Index for easier lookup by user ID. |
+| Name                          | Unique | Columns                | Description                                               |
+|-------------------------------|--------|------------------------|-----------------------------------------------------------|
+| `push_campaign_user_campaign` | N      | `campaign_id, user_id` | Index for easier campaign lookup for user by campaign ID. |
+| `push_campaign_user_detail`   | N      | `user_id`              | Index for easier lookup by user ID.                       |
 <!-- end -->
 
 <!-- begin database table push_inbox -->
@@ -301,9 +301,9 @@ CREATE INDEX push_inbox_user_read ON push_inbox (user_id, read);
 
 #### Keys
 
-| Name | Primary | References | Description |
-|---|---|---|---|
-| `push_inbox_pk` | Y | `id` | Primary key for table records |
+| Name            | Primary | References | Description                   |
+|-----------------|---------|------------|-------------------------------|
+| `push_inbox_pk` | Y       | `id`       | Primary key for table records |
 
 #### Indexes
 
@@ -339,17 +339,17 @@ CREATE INDEX push_inbox_app_inbox ON push_inbox_app (inbox_id, app_credentials_i
 
 #### Keys
 
-| Name | Primary | References | Description |
-|---|---|---|---|
-| `push_inbox_pk` | Y | `id` | Primary key for table records |
+| Name            | Primary   | References  | Description                   |
+|-----------------|-----------|-------------|-------------------------------|
+| `push_inbox_pk` | Y         | `id`        | Primary key for table records |
 
 #### Indexes
 
 | Name                   | Unique | Columns           | Description                                                     |
-|------------------------|---|-------------------|-----------------------------------------------------------------|
-| `push_inbox_id`        | N | `inbox_id`        | Index for easier lookup for message by ID.                      |
-| `push_inbox_user`      | N | `user_id`         | Index for easier lookup for message by user ID.                 |
-| `push_inbox_user_read` | N | `user_id`, `read` | Index for easier lookup for message by user ID and read status. |
+|------------------------|--------|-------------------|-----------------------------------------------------------------|
+| `push_inbox_id`        | N      | `inbox_id`        | Index for easier lookup for message by ID.                      |
+| `push_inbox_user`      | N      | `user_id`         | Index for easier lookup for message by user ID.                 |
+| `push_inbox_user_read` | N      | `user_id`, `read` | Index for easier lookup for message by user ID and read status. |
 <!-- end -->
 
 ## Sequences

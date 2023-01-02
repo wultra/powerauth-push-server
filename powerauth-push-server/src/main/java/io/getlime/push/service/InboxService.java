@@ -93,7 +93,7 @@ public class InboxService {
 
     @Transactional(readOnly=true)
     public GetInboxMessageCountResponse fetchMessageCountForUser(String userId, String appId) throws AppNotFoundException {
-        final AppCredentialsEntity app = checkAppId(appId);
+        final AppCredentialsEntity app = fetchAppForAppId(appId);
         final long countUnread = inboxRepository.countAllByUserIdAndApplicationsContainingAndRead(userId, app,false);
         return new GetInboxMessageCountResponse(countUnread);
     }
@@ -117,12 +117,12 @@ public class InboxService {
 
     @Transactional
     public void readAllMessages(String userId, String appId) throws AppNotFoundException {
-        final AppCredentialsEntity appCredentialsEntity = checkAppId(appId);
+        final AppCredentialsEntity appCredentialsEntity = fetchAppForAppId(appId);
         int countRead = inboxRepository.markAllAsRead(userId, appCredentialsEntity);
         logger.info("Marked all inbox messages as read for user: {}, count: {}", userId, countRead);
     }
 
-    private AppCredentialsEntity checkAppId(String appId) throws AppNotFoundException {
+    private AppCredentialsEntity fetchAppForAppId(String appId) throws AppNotFoundException {
         return appCredentialsRepository.findFirstByAppId(appId).orElseThrow(
                 () -> new AppNotFoundException("Application was not found: " + appId));
     }
