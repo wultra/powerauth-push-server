@@ -20,12 +20,14 @@ import io.getlime.push.model.entity.InboxMessage;
 import io.getlime.push.model.entity.ListOfInboxMessages;
 import io.getlime.push.model.request.CreateInboxMessageRequest;
 import io.getlime.push.model.response.GetInboxMessageDetailResponse;
+import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.InboxMessageEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Converter for inbox related entities.
@@ -40,19 +42,19 @@ public class InboxMessageConverter {
      *
      * @param id Random UUID identifier.
      * @param userId User ID.
-     * @param appId Application ID.
      * @param source Request model.
+     * @param apps Apps for the model.
      * @param date Date on which the message should be created.
      * @return Database entity.
      */
-    public InboxMessageEntity convert(UUID id, String userId, String appId, CreateInboxMessageRequest source, Date date) {
+    public InboxMessageEntity convert(UUID id, String userId, CreateInboxMessageRequest source, List<AppCredentialsEntity> apps, Date date) {
         if (source == null) {
             return null;
         }
         final InboxMessageEntity destination = new InboxMessageEntity();
         destination.setInboxId(id.toString());
         destination.setUserId(userId);
-        destination.setAppId(appId);
+        destination.setApplications(apps);
         destination.setSubject(source.getSubject());
         destination.setBody(source.getBody());
         destination.setTimestampCreated(date);
@@ -71,10 +73,13 @@ public class InboxMessageConverter {
         }
         final GetInboxMessageDetailResponse destination = new GetInboxMessageDetailResponse();
         destination.setId(source.getInboxId());
+        destination.setUserId(source.getUserId());
         destination.setSubject(source.getSubject());
         destination.setBody(source.getBody());
         destination.setRead(source.isRead());
         destination.setTimestampCreated(source.getTimestampCreated());
+        destination.setTimestampRead(source.getTimestampRead());
+        destination.setApplications(source.getApplications().stream().map(AppCredentialsEntity::getAppId).collect(Collectors.toList()));
         return destination;
     }
 
@@ -97,14 +102,12 @@ public class InboxMessageConverter {
     }
 
     /**
-     * Convert list of database entities to response with API entities and appropriate paging.
+     * Convert list of database entities to response with API entities.
      *
      * @param source List of database entities.
-     * @param page Page.
-     * @param size Size.
-     * @return List of API entities with paging set.
+     * @return List of API entities.
      */
-    public ListOfInboxMessages convert(List<InboxMessageEntity> source, Integer page, Integer size) {
+    public ListOfInboxMessages convert(List<InboxMessageEntity> source) {
         if (source == null) {
             return null;
         }

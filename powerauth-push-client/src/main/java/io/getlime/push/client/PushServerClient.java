@@ -594,20 +594,16 @@ public class PushServerClient {
     /**
      * Post a message to an inbox of provided user.
      * @param userId User ID.
-     * @param appId Application ID.
      * @param request Request with the message detail.
      * @return Response with a newly created message.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public ObjectResponse<GetInboxMessageDetailResponse> postMessage(String userId, String appId, CreateInboxMessageRequest request) throws PushServerClientException {
+    public ObjectResponse<GetInboxMessageDetailResponse> postMessage(String userId, CreateInboxMessageRequest request) throws PushServerClientException {
         try {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
-            final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-            params.add("appId", appId);
-
             final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
             logger.info("Calling push server to send message to inbox of: {}, subject: {} - start", userId, request.getSubject());
-            final ObjectResponse<GetInboxMessageDetailResponse> response = postImpl("/inbox/users/" + userIdSanitized, new ObjectRequest<>(request), params, null, typeReference);
+            final ObjectResponse<GetInboxMessageDetailResponse> response = postImpl("/inbox/users/" + userIdSanitized, new ObjectRequest<>(request), null, null, typeReference);
             logger.info("Calling push server to send message to inbox of: {}, subject: {} - finish", userId, request.getSubject());
             return response;
         } catch (UnsupportedEncodingException e) {
@@ -616,39 +612,20 @@ public class PushServerClient {
     }
 
     /**
-     * Fetch detail of the message for given message ID.
-     * @param messageId Message Id.
-     * @return Detail of a message with given ID.
-     * @throws PushServerClientException Thrown when communication with Push Server fails.
-     */
-    public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(String messageId) throws PushServerClientException {
-        try {
-            final String messageIdSanitized = URLEncoder.encode(String.valueOf(messageId), "UTF-8");
-            final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
-            logger.info("Calling push server fetch message ID: {} - start", messageId);
-            final ObjectResponse<GetInboxMessageDetailResponse> result = getImpl("/inbox/messages/" + messageIdSanitized, null, typeReference);
-            logger.info("Calling push server fetch message ID: {} - finish", messageId);
-            return result;
-        } catch (UnsupportedEncodingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
-        }
-    }
-
-    /**
      * Fetch the list of messages for a given user.
      * @param userId User ID.
-     * @param appId Application ID.
+     * @param applications List of application IDs.
      * @param onlyUnread Indication if only unread messages should be returneed.
      * @param page Page index.
      * @param size Page size.
      * @return List of inbox messages.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public PagedResponse<ListOfInboxMessages> fetchMessageListForUser(String userId, String appId, boolean onlyUnread, Integer page, Integer size) throws PushServerClientException {
+    public PagedResponse<ListOfInboxMessages> fetchMessageListForUser(String userId, List<String> applications, boolean onlyUnread, Integer page, Integer size) throws PushServerClientException {
         try {
             final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
             final MultiValueMap<String, String> params = buildPages(page, size);
-            params.add("appId", appId);
+            params.add("applications", String.join(",", applications));
             params.add("onlyUnread", onlyUnread ? "true" : "false");
 
             final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>>() {};
@@ -687,58 +664,6 @@ public class PushServerClient {
     }
 
     /**
-     * Fetch detail of the message for given user and message ID.
-     * @param userId User ID.
-     * @param appId Application ID.
-     * @param messageId Message Id.
-     * @return Detail of a message with given ID.
-     * @throws PushServerClientException Thrown when communication with Push Server fails.
-     */
-    public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(String userId, String appId, String messageId) throws PushServerClientException {
-        try {
-            final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
-            final String messageIdSanitized = URLEncoder.encode(String.valueOf(messageId), "UTF-8");
-            final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-            params.add("appId", appId);
-
-            final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
-            logger.info("Calling push server fetch message ID: {}, for user: {} - start", messageId, userId);
-            final ObjectResponse<GetInboxMessageDetailResponse> result = getImpl("/inbox/users/" + userIdSanitized + "/messages/" + messageIdSanitized, params, typeReference);
-            logger.info("Calling push server fetch message ID: {}, for user: {} - finish", messageId, userId);
-
-            return result;
-        } catch (UnsupportedEncodingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
-        }
-    }
-
-    /**
-     * Read message with given ID in inbox of provided user.
-     * @param userId User ID.
-     * @param appId Application ID.
-     * @param messageId Message ID.
-     * @return Detail of the read message.
-     * @throws PushServerClientException Thrown when communication with Push Server fails.
-     */
-    public ObjectResponse<GetInboxMessageDetailResponse> readMessage(String userId, String appId, String messageId) throws PushServerClientException {
-        try {
-            final String userIdSanitized = URLEncoder.encode(String.valueOf(userId), "UTF-8");
-            final String messageIdSanitized = URLEncoder.encode(String.valueOf(messageId), "UTF-8");
-            final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-            params.add("appId", appId);
-
-            final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
-
-            logger.info("Calling push server to read message to inbox of: {}, user: {} - start", messageId, userId);
-            final ObjectResponse<GetInboxMessageDetailResponse> response = putImpl("/inbox/users/" + userIdSanitized + "/messages/" + messageIdSanitized + "/read", params, typeReference);
-            logger.info("Calling push server to read message to inbox of: {}, user: {} - finish", messageId, userId);
-            return response;
-        } catch (UnsupportedEncodingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
-        }
-    }
-
-    /**
      * Read all unread messages in inbox of provided user.
      * @param userId User ID.
      * @param appId Application ID.
@@ -753,8 +678,50 @@ public class PushServerClient {
             final ParameterizedTypeReference<Response> typeReference = new ParameterizedTypeReference<Response>() {};
 
             logger.info("Calling push server to mark all messages read in inbox of user: {} - start", userId);
-            final Response response = putImpl("/inbox/users/" + userIdSanitized + "/messages/read-all", null, params, null, typeReference);
+            final Response response = putImpl("/inbox/users/" + userIdSanitized + "/read-all", null, params, null, typeReference);
             logger.info("Calling push server to mark all messages read in inbox of user: {} - finish", userId);
+            return response;
+        } catch (UnsupportedEncodingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        }
+    }
+
+    /**
+     * Fetch detail of the message for given message ID.
+     * @param messageId Message Id.
+     * @return Detail of a message with given ID.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(String messageId) throws PushServerClientException {
+        try {
+            final String messageIdSanitized = URLEncoder.encode(String.valueOf(messageId), "UTF-8");
+
+            final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
+            logger.info("Calling push server fetch message ID: {} - start", messageId);
+            final ObjectResponse<GetInboxMessageDetailResponse> result = getImpl("/inbox/messages/" + messageIdSanitized, null, typeReference);
+            logger.info("Calling push server fetch message ID: {} - finish", messageId);
+
+            return result;
+        } catch (UnsupportedEncodingException e) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        }
+    }
+
+    /**
+     * Read message with given ID in inbox of provided user.
+     * @param messageId Message ID.
+     * @return Detail of the read message.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public ObjectResponse<GetInboxMessageDetailResponse> readMessage(String messageId) throws PushServerClientException {
+        try {
+            final String messageIdSanitized = URLEncoder.encode(String.valueOf(messageId), "UTF-8");
+
+            final ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageDetailResponse>>() {};
+
+            logger.info("Calling push server to read message to inbox of: {} - start", messageId);
+            final ObjectResponse<GetInboxMessageDetailResponse> response = putImpl("/inbox/messages/" + messageIdSanitized + "/read", null, typeReference);
+            logger.info("Calling push server to read message to inbox of: {} - finish", messageId);
             return response;
         } catch (UnsupportedEncodingException e) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));

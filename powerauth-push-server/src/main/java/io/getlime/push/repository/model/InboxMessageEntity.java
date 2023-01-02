@@ -21,6 +21,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -45,27 +46,57 @@ public class InboxMessageEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_app_inbox")
     private Long id;
 
+    /**
+     * Inbox identifier, used as public message ID.
+     */
     @Column(name = "inbox_id", nullable = false)
     private String inboxId;
 
+    /**
+     * User ID.
+     */
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(name = "app_id", nullable = false)
-    private String appId;
+    /**
+     * Mapping to the relation table between inbox messages and applications (credentials).
+     */
+    @ManyToMany
+    @JoinTable(
+            name = "push_inbox_app",
+            joinColumns = @JoinColumn(name = "app_credentials_id", referencedColumnName = "id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "inbox_id")
+    )
+    @ToString.Exclude
+    private List<AppCredentialsEntity> applications;
 
+    /**
+     * Message subject.
+     */
     @Column(name = "subject", nullable = false)
     private String subject;
 
+    /**
+     * Message body.
+     */
     @Column(name = "body", nullable = false)
     private String body;
 
+    /**
+     * Flag indicating if the message was read.
+     */
     @Column(name = "read")
     private boolean read;
 
+    /**
+     * Timestamp the message was created.
+     */
     @Column(name = "timestamp_created", nullable = false)
     private Date timestampCreated;
 
+    /**
+     * Timestamp the message was read.
+     */
     @Column(name = "timestamp_read")
     private Date timestampRead;
 
@@ -76,7 +107,7 @@ public class InboxMessageEntity implements Serializable {
         final InboxMessageEntity that = (InboxMessageEntity) o;
         return inboxId.equals(that.inboxId)
                 && userId.equals(that.userId)
-                && appId.equals(that.appId)
+                && applications.equals(that.applications)
                 && subject.equals(that.subject)
                 && body.equals(that.body)
                 && timestampCreated.equals(that.timestampCreated);
@@ -84,6 +115,6 @@ public class InboxMessageEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(inboxId, userId, appId, subject, body, timestampCreated);
+        return Objects.hash(inboxId, userId, applications, subject, body, timestampCreated);
     }
 }

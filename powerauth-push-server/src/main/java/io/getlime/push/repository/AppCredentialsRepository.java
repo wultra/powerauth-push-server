@@ -21,6 +21,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -38,5 +39,12 @@ public interface AppCredentialsRepository extends CrudRepository<AppCredentialsE
      * @return Push service app credentials.
      */
     Optional<AppCredentialsEntity> findFirstByAppId(String appId);
+
+    /**
+     * Find all app push service credentials for provided collection of app IDs.
+     * @param appIds App IDs.
+     * @return Push service app credentials list.
+     */
+    List<AppCredentialsEntity> findAllByAppIdIn(List<String> appIds);
 
 }

@@ -18,7 +18,9 @@ package io.getlime.push.model.response;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Response with the post message.
@@ -29,9 +31,12 @@ import java.util.Date;
 public class GetInboxMessageDetailResponse {
 
     private String id;
+    private String userId;
     private String subject;
     private String body;
     private boolean read;
     private Date timestampCreated;
+    private Date timestampRead;
+    private List<String> applications = new ArrayList<>();
 
 }
