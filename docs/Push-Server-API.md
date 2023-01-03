@@ -521,7 +521,7 @@ Sends a message message batch - each item in the batch represents a message to g
 
 Used for informing closed group of users about some certain announcement containing message object described [here](./Push-Message-Payload-Mapping.md).
 
-Further campaign comes with:
+Furthermore, the campaign comes with:
 
 - application that campaign is using
 - timestamp of
@@ -1392,7 +1392,7 @@ To notify the user about a new message in the inbox, call the `POST /message/sen
 right after you post a message in the inbox.
 <!-- end -->
 
-<!-- begin api POST /inbox/users/${userId} -->
+<!-- begin api POST /inbox/messages -->
 ### Post Message to Inbox
 
 Post provided message to an inbox of a given user.
@@ -1407,25 +1407,17 @@ Post provided message to an inbox of a given user.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/users/${userId}</td>
+        <td>/inbox/users</td>
     </tr>
 </table>
 <!-- end -->
-
-##### Path Variables
-
-<table>
-    <tr>
-        <td>userId</td>
-        <td>User ID</td>
-    </tr>
-</table>
 
 ##### Request Body
 
 ```json
 {
   "requestObject": {
+    "userId": "user-001",
     "subject": "Example subject",
     "body": "Example message body",
     "applications": [
@@ -1443,6 +1435,7 @@ Post provided message to an inbox of a given user.
   "status": "OK",
   "responseObject": {
     "id": "ae641389-d37a-4425-bd14-41c29484596f",
+    "userId": "user-001",
     "subject": "Example subject",
     "body": "Example message body",
     "read": false,
@@ -1456,7 +1449,7 @@ Post provided message to an inbox of a given user.
 ```
 <!-- end -->
 
-<!-- begin api GET /inbox/users/${userId} -->
+<!-- begin api GET /inbox/messages/list -->
 ### Get User Messages
 
 Get messages from an inbox of a given user.
@@ -1471,23 +1464,18 @@ Get messages from an inbox of a given user.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/users/${userId}</td>
+        <td>/inbox/messages/list</td>
     </tr>
 </table>
 <!-- end -->
 
-##### Path Variables
+##### Query Params
 
 <table>
     <tr>
         <td>userId</td>
         <td>User ID</td>
     </tr>
-</table>
-
-##### Query Params
-
-<table>
     <tr>
         <td>applications</td>
         <td>Applications, comma-separated value of application IDs.</td>
@@ -1531,7 +1519,7 @@ Get messages from an inbox of a given user.
 ```
 <!-- end -->
 
-<!-- begin api GET /inbox/users/${userId}/count -->
+<!-- begin api GET /inbox/messages/count -->
 ### Get Count of Unread Messages
 
 Get number of unread messages in an inbox of a given user.
@@ -1546,23 +1534,18 @@ Get number of unread messages in an inbox of a given user.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/users/${userId}/count</td>
+        <td>/inbox/messages/count</td>
     </tr>
 </table>
 <!-- end -->
 
-##### Path Variables
+##### Query Params
 
 <table>
     <tr>
         <td>userId</td>
         <td>User ID</td>
     </tr>
-</table>
-
-##### Query Params
-
-<table>
     <tr>
         <td>appId</td>
         <td>Application ID</td>
@@ -1581,7 +1564,7 @@ Get number of unread messages in an inbox of a given user.
 ```
 <!-- end -->
 
-<!-- begin api GET /inbox/messages/${messageId} -->
+<!-- begin api GET /inbox/messages -->
 ### Get Message Detail by ID
 
 Get full message detail from an inbox for a given message ID.
@@ -1596,12 +1579,12 @@ Get full message detail from an inbox for a given message ID.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/messages/${messageId}</td>
+        <td>/inbox/messages/detail</td>
     </tr>
 </table>
 <!-- end -->
 
-##### Path Variables
+##### Query Params
 
 <table>
     <tr>
@@ -1630,7 +1613,7 @@ Get full message detail from an inbox for a given message ID.
 ```
 <!-- end -->
 
-<!-- begin api PUT /inbox/messages/${messageId}/read -->
+<!-- begin api PUT /inbox/messages/read -->
 ### Mark Message as Read
 
 Mark a message in an inbox as read. In case the message is already read, this call is a no-op.
@@ -1645,12 +1628,12 @@ Mark a message in an inbox as read. In case the message is already read, this ca
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/messages/${messageId}/read</td>
+        <td>/inbox/messages/read</td>
     </tr>
 </table>
 <!-- end -->
 
-##### Path Variables
+##### Query Params
 
 <table>
     <tr>
@@ -1683,7 +1666,7 @@ Mark a message in an inbox as read. In case the message is already read, this ca
 ```
 <!-- end -->
 
-<!-- begin api PUT /inbox/users/${userId}/read-all -->
+<!-- begin api PUT /inbox/messages/read-all -->
 ### Mark All Unread Messages as Read for User
 
 Mark all unread messages in an inbox of a given user as read.
@@ -1698,23 +1681,18 @@ Mark all unread messages in an inbox of a given user as read.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/users/${userId}/read-all</td>
+        <td>/inbox/messages/read-all</td>
     </tr>
 </table>
 <!-- end -->
 
-##### Path Variables
+##### Query Params
 
 <table>
     <tr>
         <td>userId</td>
         <td>User ID</td>
     </tr>
-</table>
-
-##### Query Params
-
-<table>
     <tr>
         <td>appId</td>
         <td>Application ID</td>
