@@ -57,13 +57,13 @@ public class InboxController {
         this.inboxService = inboxService;
     }
 
-    @PostMapping("users")
+    @PostMapping("messages")
     public ObjectResponse<GetInboxMessageDetailResponse> postMessage(
             @Valid @RequestBody ObjectRequest<CreateInboxMessageRequest> request) throws AppNotFoundException {
         return new ObjectResponse<>(inboxService.postMessage(request.getRequestObject()));
     }
 
-    @GetMapping("users")
+    @GetMapping("messages/list")
     public PagedResponse<ListOfInboxMessages> fetchMessageListForUser(
             @NotNull @Size(min = 1, max = 255) @RequestParam("userId") String userId,
             @NotNull @Size(min = 1, max = 255) @RequestParam("applications") @Schema(type = "string", example = "app-id-01,app-id-02") String applications,
@@ -72,14 +72,14 @@ public class InboxController {
         return new PagedResponse<>(inboxService.fetchMessageListForUser(userId, Arrays.asList(applications.split(",")), onlyUnread, pageable), pageable.getPageNumber(), pageable.getPageSize());
     }
 
-    @GetMapping("users/count")
+    @GetMapping("messages/count")
     public ObjectResponse<GetInboxMessageCountResponse> fetchMessageCountForUser(
             @NotNull @Size(min = 1, max = 255) @RequestParam("userId") String userId,
             @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId) throws AppNotFoundException {
         return new ObjectResponse<>(inboxService.fetchMessageCountForUser(userId, appId));
     }
 
-    @PostMapping("users/read-all")
+    @PostMapping("messages/read-all")
     public Response readAllMessages(
             @Valid @RequestBody ObjectRequest<ReadAllInboxMessagesRequest> request) throws AppNotFoundException {
         final ReadAllInboxMessagesRequest requestObject = request.getRequestObject();
@@ -87,7 +87,7 @@ public class InboxController {
         return new Response();
     }
 
-    @GetMapping("messages")
+    @GetMapping("messages/detail")
     public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(
             @NotNull @RequestParam("id") String inboxId) throws InboxMessageNotFoundException {
         return new ObjectResponse<>(inboxService.fetchMessageDetail(inboxId));

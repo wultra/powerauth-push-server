@@ -599,7 +599,7 @@ public class PushServerClient {
      */
     public ObjectResponse<GetInboxMessageDetailResponse> postMessage(CreateInboxMessageRequest request) throws PushServerClientException {
         logger.info("Calling push server to send message to inbox of: {}, subject: {} - start", request.getUserId(), request.getSubject());
-        final ObjectResponse<GetInboxMessageDetailResponse> response = postObjectImpl("/inbox/users", new ObjectRequest<>(request), GetInboxMessageDetailResponse.class);
+        final ObjectResponse<GetInboxMessageDetailResponse> response = postObjectImpl("/inbox/messages", new ObjectRequest<>(request), GetInboxMessageDetailResponse.class);
         logger.info("Calling push server to send message to inbox of: {}, subject: {} - finish", request.getUserId(), request.getSubject());
         return response;
     }
@@ -622,7 +622,7 @@ public class PushServerClient {
 
         final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>>() {};
         logger.info("Calling push server fetch messages for user: {} - start", userId);
-        final PagedResponse<ListOfInboxMessages> result = getImpl("/inbox/users", params, typeReference);
+        final PagedResponse<ListOfInboxMessages> result = getImpl("/inbox/messages/list", params, typeReference);
         logger.info("Calling push server fetch messages for user: {} - finish", userId);
 
         return result;
@@ -642,7 +642,7 @@ public class PushServerClient {
 
         final ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>>() {};
         logger.info("Calling push server fetch message count for user: {} - start", userId);
-        final ObjectResponse<GetInboxMessageCountResponse> result = getImpl("/inbox/users/count", params, typeReference);
+        final ObjectResponse<GetInboxMessageCountResponse> result = getImpl("/inbox/messages/count", params, typeReference);
         logger.info("Calling push server fetch message count for user: {} - finish", userId);
 
         return result;
@@ -659,7 +659,7 @@ public class PushServerClient {
         request.setUserId(userId);
         request.setAppId(appId);
         logger.info("Calling push server to mark all messages read in inbox of user: {} - start", userId);
-        final Response response = postObjectImpl("/inbox/users/read-all", new ObjectRequest<>(request));
+        final Response response = postObjectImpl("/inbox/messages/read-all", new ObjectRequest<>(request));
         logger.info("Calling push server to mark all messages read in inbox of user: {} - finish", userId);
         return response;
     }
@@ -675,7 +675,7 @@ public class PushServerClient {
         params.add("id", inboxId);
 
         logger.info("Calling push server fetch message ID: {} - start", inboxId);
-        final ObjectResponse<GetInboxMessageDetailResponse> result = getObjectImpl("/inbox/messages", params, GetInboxMessageDetailResponse.class);
+        final ObjectResponse<GetInboxMessageDetailResponse> result = getObjectImpl("/inbox/messages/detail", params, GetInboxMessageDetailResponse.class);
         logger.info("Calling push server fetch message ID: {} - finish", inboxId);
 
         return result;
