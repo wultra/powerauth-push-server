@@ -2,8 +2,7 @@
 
 ## New Message Inbox APIs
 
-You can review and consider implementing our [Message Inbox API](./Push-Server-API.md). Message inbox is a new feature
-of the push server that can be used to send targeted messages to the users to be read later.
+You can review and consider implementing our [Message Inbox API](./Push-Server-API.md#message-inbox). Message inbox is a new feature of the push server that can be used to send targeted messages to the users to be read later.
 
 ## Database Changes
 
@@ -14,8 +13,10 @@ Message inbox requires a simple database structure below:
 #### PostgreSQL
 
 ```sql
+-- Create table for message inbox
 CREATE TABLE push_inbox (
-    id VARCHAR(37) CONSTRAINT push_inbox_pk PRIMARY KEY,
+    id INTEGER NOT NULL CONSTRAINT push_inbox_pk PRIMARY KEY,
+    inbox_id VARCHAR(37),
     user_id VARCHAR(255) NOT NULL,
     subject TEXT NOT NULL,
     body TEXT NOT NULL,
@@ -24,6 +25,14 @@ CREATE TABLE push_inbox (
     timestamp_read TIMESTAMP
 );
 
+-- Create table for assignment of inbox messages to apps
+CREATE TABLE push_inbox_app (
+    app_credentials_id INTEGER NOT NULL,
+    inbox_id           INTEGER NOT NULL,
+    CONSTRAINT push_inbox_app_pk PRIMARY KEY (inbox_id, app_credentials_id)
+);
+
+CREATE INDEX push_inbox_id ON push_inbox (inbox_id);
 CREATE INDEX push_inbox_user ON push_inbox (user_id);
 CREATE INDEX push_inbox_user_read ON push_inbox (user_id, read);
 ```
@@ -32,7 +41,8 @@ CREATE INDEX push_inbox_user_read ON push_inbox (user_id, read);
 
 ```sql
 CREATE TABLE PUSH_INBOX (
-  ID VARCHAR2(37 CHAR) PRIMARY KEY,
+  ID NUMBER(19) PRIMARY KEY NOT NULL,
+  INBOX_ID VARCHAR2(37 CHAR),
   USER_ID VARCHAR2(255 CHAR) NOT NULL,
   SUBJECT VARCHAR2(4000 CHAR) NOT NULL,
   BODY CLOB NOT NULL,
@@ -41,15 +51,24 @@ CREATE TABLE PUSH_INBOX (
   TIMESTAMP_READ TIMESTAMP(6)
 );
 
-CREATE INDEX PUSH_INBOX_USER ON push_inbox(USER_ID);
-CREATE INDEX PUSH_INBOX_USER_READ ON push_inbox (USER_ID, READ);
+-- Create table for assignment of inbox messages to apps
+CREATE TABLE PUSH_INBOX_APP (
+  APP_CREDENTIALS_ID NUMBER(19) NOT NULL,
+  INBOX_ID           NUMBER(19) NOT NULL,
+  CONSTRAINT PUSH_INBOX_APP_PK PRIMARY KEY (INBOX_ID, APP_CREDENTIALS_ID)
+);
+
+CREATE INDEX PUSH_INBOX_ID ON PUSH_INBOX(INBOX_ID);
+CREATE INDEX PUSH_INBOX_USER ON PUSH_INBOX(USER_ID);
+CREATE INDEX PUSH_INBOX_USER_READ ON PUSH_INBOX(USER_ID, READ);
 ```
 
 #### MySQL
 
 ```sql
 CREATE TABLE `push_inbox` (
-  `id` VARCHAR(37),
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `inbox_id` VARCHAR(37),
   `user_id` VARCHAR(255) NOT NULL,
   `subject` TEXT NOT NULL,
   `body` TEXT NOT NULL,
@@ -59,6 +78,14 @@ CREATE TABLE `push_inbox` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- Create table for assignment of inbox messages to apps
+CREATE TABLE `push_inbox_app` (
+    `app_credentials_id` bigint(20) NOT NULL,
+    `inbox_id`           bigint(20) NOT NULL,
+    PRIMARY KEY (`inbox_id`, `app_credentials_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE INDEX `push_inbox_id` ON `push_inbox` (`inbox_id`);
 CREATE INDEX `push_inbox_user` ON `push_inbox` (`user_id`);
 CREATE INDEX `push_inbox_user_read` ON `push_inbox` (`user_id`, `read`);
 ```

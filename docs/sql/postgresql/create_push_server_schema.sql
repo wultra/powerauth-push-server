@@ -118,5 +118,3 @@ CREATE INDEX push_campaign_user_detail ON push_campaign_user (user_id);
 CREATE INDEX push_inbox_id ON push_inbox (inbox_id);
 CREATE INDEX push_inbox_user ON push_inbox (user_id);
 CREATE INDEX push_inbox_user_read ON push_inbox (user_id, read);
-
-CREATE INDEX push_inbox_app_inbox ON push_inbox_app (inbox_id, app_credentials_id);
