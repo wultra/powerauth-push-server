@@ -59,12 +59,13 @@ public class InboxService {
     }
 
     @Transactional
-    public GetInboxMessageDetailResponse postMessage(String userId, CreateInboxMessageRequest request) throws AppNotFoundException {
+    public GetInboxMessageDetailResponse postMessage(CreateInboxMessageRequest request) throws AppNotFoundException {
         final List<AppCredentialsEntity> apps = fetchAppsForAppIds(request.getApplications());
         if (apps.size() != request.getApplications().size()) {
             logger.info("Application list received: {}, apps configured in the system: {}.", request.getApplications(), apps.stream().map(AppCredentialsEntity::getAppId));
             throw new AppNotFoundException("Application list contained an app that is not configured in the system.");
         }
+        final String userId = request.getUserId();
         final InboxMessageEntity messageEntity = inboxMessageConverter.convert(UUID.randomUUID(), userId, request, apps, new Date());
         final InboxMessageEntity savedMessageEntity = inboxRepository.save(messageEntity);
         logger.info("Posted new inbox message for user: {}, message ID: {}", userId, messageEntity.getInboxId());
