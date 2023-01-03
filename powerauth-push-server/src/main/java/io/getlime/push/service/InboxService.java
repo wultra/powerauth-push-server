@@ -73,7 +73,13 @@ public class InboxService {
     }
 
     @Transactional(readOnly=true)
-    public ListOfInboxMessages fetchMessageListForUser(String userId, List<String> appIds, boolean onlyUnread, Pageable pageable) {
+    public ListOfInboxMessages fetchMessageListForUser(String userId, List<String> appIds, boolean onlyUnread, Pageable pageable) throws AppNotFoundException {
+        final List<AppCredentialsEntity> apps = fetchAppsForAppIds(appIds);
+        if (apps.size() != appIds.size()) {
+            logger.info("Application list received: {}, apps configured in the system: {}.", appIds, apps.stream().map(AppCredentialsEntity::getAppId));
+            throw new AppNotFoundException("Application list contained an app that is not configured in the system.");
+        }
+
         final List<InboxMessageEntity> messageEntities;
         if (onlyUnread) {
             messageEntities = inboxRepository.findAllByUserIdAndApplicationsContainingAndReadOrderByTimestampCreatedDesc(userId, appIds, false, pageable);
