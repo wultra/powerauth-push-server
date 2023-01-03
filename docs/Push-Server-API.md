@@ -1407,7 +1407,7 @@ Post provided message to an inbox of a given user.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/inbox/users</td>
+        <td>/inbox/messages</td>
     </tr>
 </table>
 <!-- end -->
