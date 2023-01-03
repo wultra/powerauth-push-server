@@ -22,10 +22,13 @@ import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.InboxMessageNotFoundException;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.request.CreateInboxMessageRequest;
+import io.getlime.push.model.request.ReadAllInboxMessagesRequest;
+import io.getlime.push.model.request.ReadInboxMessageRequest;
 import io.getlime.push.model.response.GetInboxMessageCountResponse;
 import io.getlime.push.model.response.GetInboxMessageDetailResponse;
 import io.getlime.push.model.entity.ListOfInboxMessages;
 import io.getlime.push.service.InboxService;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -54,46 +57,47 @@ public class InboxController {
         this.inboxService = inboxService;
     }
 
-    @PostMapping("users/{userId}")
+    @PostMapping("users")
     public ObjectResponse<GetInboxMessageDetailResponse> postMessage(
-            @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
             @Valid @RequestBody ObjectRequest<CreateInboxMessageRequest> request) throws AppNotFoundException {
-        return new ObjectResponse<>(inboxService.postMessage(userId, request.getRequestObject()));
+        return new ObjectResponse<>(inboxService.postMessage(request.getRequestObject()));
     }
 
-    @GetMapping("users/{userId}")
+    @GetMapping("users")
     public PagedResponse<ListOfInboxMessages> fetchMessageListForUser(
-            @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
-            @NotNull @Size(min = 1, max = 255) @RequestParam("applications") String applications,
+            @NotNull @Size(min = 1, max = 255) @RequestParam("userId") String userId,
+            @NotNull @Size(min = 1, max = 255) @RequestParam("applications") @Schema(type = "string", example = "app-id-01,app-id-02") String applications,
             @RequestParam(value = "onlyUnread", required = false, defaultValue = "false") boolean onlyUnread,
-            @ParameterObject Pageable pageable) throws AppNotFoundException {
+            @ParameterObject Pageable pageable) {
         return new PagedResponse<>(inboxService.fetchMessageListForUser(userId, Arrays.asList(applications.split(",")), onlyUnread, pageable), pageable.getPageNumber(), pageable.getPageSize());
     }
 
-    @GetMapping("users/{userId}/count")
+    @GetMapping("users/count")
     public ObjectResponse<GetInboxMessageCountResponse> fetchMessageCountForUser(
-            @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
+            @NotNull @Size(min = 1, max = 255) @RequestParam("userId") String userId,
             @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId) throws AppNotFoundException {
         return new ObjectResponse<>(inboxService.fetchMessageCountForUser(userId, appId));
     }
 
-    @PutMapping("users/{userId}/read-all")
+    @PostMapping("users/read-all")
     public Response readAllMessages(
-            @NotNull @Size(min = 1, max = 255) @PathVariable("userId") String userId,
-            @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId) throws AppNotFoundException {
-        inboxService.readAllMessages(userId, appId);
+            @Valid @RequestBody ObjectRequest<ReadAllInboxMessagesRequest> request) throws AppNotFoundException {
+        final ReadAllInboxMessagesRequest requestObject = request.getRequestObject();
+        inboxService.readAllMessages(requestObject.getUserId(), requestObject.getAppId());
         return new Response();
     }
 
-    @GetMapping("messages/{id}")
+    @GetMapping("messages")
     public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(
-            @NotNull @PathVariable("id") String inboxId) throws InboxMessageNotFoundException, AppNotFoundException {
+            @NotNull @RequestParam("id") String inboxId) throws InboxMessageNotFoundException {
         return new ObjectResponse<>(inboxService.fetchMessageDetail(inboxId));
     }
 
-    @PutMapping("messages/{id}/read")
-    public ObjectResponse<GetInboxMessageDetailResponse> readMessage(@NotNull @Size(min = 1, max = 255) @PathVariable("id") String inboxId) throws InboxMessageNotFoundException {
-        return new ObjectResponse<>(inboxService.readMessage(inboxId));
+    @PostMapping("messages/read")
+    public ObjectResponse<GetInboxMessageDetailResponse> readMessage(
+            @Valid @RequestBody ObjectRequest<ReadInboxMessageRequest> request) throws InboxMessageNotFoundException {
+        final ReadInboxMessageRequest requestObject = request.getRequestObject();
+        return new ObjectResponse<>(inboxService.readMessage(requestObject.getInboxId()));
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Wultra s.r.o.
+ * Copyright 2023 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,41 +18,29 @@ package io.getlime.push.model.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Request object for the message.
+ * Request object to read all messages in users inbox.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
 @Data
-public class CreateInboxMessageRequest {
+public class ReadAllInboxMessagesRequest {
 
+    @NotNull
     @NotEmpty
     @Size(min = 1, max = 255)
     @Schema(type = "string", example = "end-user-123")
     private String userId;
 
     @NotNull
-    @Size(min = 8, max = 255)
-    @Schema(type = "string", example = "Example subject")
-    private String subject;
-
-    @NotNull
-    @Size(min = 8, max = 65536)
-    @Schema(type = "string", example = "Example message body")
-    @ToString.Exclude
-    private String body;
-
-    @NotNull
     @NotEmpty
-    private List<@NotNull @Pattern(regexp="^[a-zA-Z0-9_-]{3,255}$") String> applications = new ArrayList<>();
+    @Size(min = 1, max = 255)
+    @Schema(type = "string", example = "my-app-01")
+    private String appId;
 
 }
