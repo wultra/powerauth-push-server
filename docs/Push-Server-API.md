@@ -1564,7 +1564,7 @@ Get number of unread messages in an inbox of a given user.
 ```
 <!-- end -->
 
-<!-- begin api GET /inbox/messages -->
+<!-- begin api GET /inbox/messages/detail -->
 ### Get Message Detail by ID
 
 Get full message detail from an inbox for a given message ID.
