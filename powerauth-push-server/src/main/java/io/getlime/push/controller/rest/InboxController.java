@@ -68,7 +68,7 @@ public class InboxController {
             @NotNull @Size(min = 1, max = 255) @RequestParam("userId") String userId,
             @NotNull @Size(min = 1, max = 255) @RequestParam("applications") @Schema(type = "string", example = "app-id-01,app-id-02") String applications,
             @RequestParam(value = "onlyUnread", required = false, defaultValue = "false") boolean onlyUnread,
-            @ParameterObject Pageable pageable) {
+            @ParameterObject Pageable pageable) throws AppNotFoundException {
         return new PagedResponse<>(inboxService.fetchMessageListForUser(userId, Arrays.asList(applications.split(",")), onlyUnread, pageable), pageable.getPageNumber(), pageable.getPageSize());
     }
 
