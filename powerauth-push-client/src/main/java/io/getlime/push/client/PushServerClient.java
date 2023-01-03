@@ -618,7 +618,7 @@ public class PushServerClient {
         final MultiValueMap<String, String> params = buildPages(page, size);
         params.add("userId", userId);
         params.add("applications", String.join(",", applications));
-        params.add("onlyUnread", onlyUnread ? "true" : "false");
+        params.add("onlyUnread", Boolean.toString(onlyUnread));
 
         final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>>() {};
         logger.info("Calling push server fetch messages for user: {} - start", userId);
