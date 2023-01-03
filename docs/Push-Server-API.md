@@ -1600,6 +1600,7 @@ Get full message detail from an inbox for a given message ID.
   "status": "OK",
   "responseObject": {
     "id": "ae641389-d37a-4425-bd14-41c29484596f",
+    "userId": "user-001",
     "subject": "Example subject",
     "body": "Example message body",
     "read": false,
@@ -1653,6 +1654,7 @@ Mark a message in an inbox as read. In case the message is already read, this ca
   "status": "OK",
   "responseObject": {
     "id": "ae641389-d37a-4425-bd14-41c29484596f",
+    "userId": "user-001",
     "subject": "Example subject",
     "body": "Example message body",
     "read": true,
