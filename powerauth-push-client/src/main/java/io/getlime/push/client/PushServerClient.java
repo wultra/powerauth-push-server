@@ -755,26 +755,6 @@ public class PushServerClient {
     }
 
     /**
-     * Prepare a generic POST response.
-     *
-     * @param url specific url of method
-     * @param request request body
-     * @param queryParams query parameters
-     * @param headers HTTP headers
-     * @param typeReference type reference
-     * @return Object obtained after processing the response JSON.
-     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
-     */
-    private <T> T postImpl(String url, Object request, MultiValueMap<String, String> queryParams, MultiValueMap<String, String> headers, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
-        try {
-            return restClient.post(url, request, queryParams, headers, typeReference).getBody();
-        } catch (RestClientException ex) {
-            logger.debug(ex.getMessage(), ex);
-            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
-        }
-    }
-
-    /**
      * Prepare POST object response. Uses default {@link Response} type reference for response.
      *
      * @param url specific url of method
