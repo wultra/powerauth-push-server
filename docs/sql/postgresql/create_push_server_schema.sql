@@ -7,6 +7,7 @@ CREATE SEQUENCE push_device_registration_seq;
 CREATE SEQUENCE push_message_seq;
 CREATE SEQUENCE push_campaign_seq;
 CREATE SEQUENCE push_campaign_user_seq;
+CREATE SEQUENCE push_inbox_seq;
 
 ---
 --- DB Tables
@@ -15,7 +16,7 @@ CREATE SEQUENCE push_campaign_user_seq;
 -- Create table for application credentials used for APNS and FCM
 CREATE TABLE push_app_credentials (
 	id INTEGER NOT NULL CONSTRAINT push_app_credentials_pkey PRIMARY KEY,
-	app_id INTEGER NOT NULL,
+	app_id VARCHAR(255) NOT NULL,
 	ios_key_id VARCHAR(255),
 	ios_private_key BYTEA,
 	ios_team_id VARCHAR(255),
@@ -73,6 +74,25 @@ CREATE TABLE push_campaign_user (
 	timestamp_created TIMESTAMP(6) NOT NULL
 );
 
+-- Create table for message inbox
+CREATE TABLE push_inbox (
+    id INTEGER NOT NULL CONSTRAINT push_inbox_pk PRIMARY KEY,
+    inbox_id VARCHAR(37),
+    user_id VARCHAR(255) NOT NULL,
+    subject TEXT NOT NULL,
+    body TEXT NOT NULL,
+    read BOOLEAN DEFAULT false NOT NULL,
+    timestamp_created TIMESTAMP NOT NULL,
+    timestamp_read TIMESTAMP
+);
+
+-- Create table for assignment of inbox messages to apps
+CREATE TABLE push_inbox_app (
+    app_credentials_id INTEGER NOT NULL,
+    inbox_id           INTEGER NOT NULL,
+    CONSTRAINT push_inbox_app_pk PRIMARY KEY (inbox_id, app_credentials_id)
+);
+
 --
 -- DB Indexes (recommended for better performance)
 --
@@ -94,3 +114,7 @@ CREATE INDEX push_campaign_sent ON push_campaign (is_sent);
 CREATE INDEX push_campaign_user_campaign ON push_campaign_user (campaign_id, user_id);
 
 CREATE INDEX push_campaign_user_detail ON push_campaign_user (user_id);
+
+CREATE INDEX push_inbox_id ON push_inbox (inbox_id);
+CREATE INDEX push_inbox_user ON push_inbox (user_id);
+CREATE INDEX push_inbox_user_read ON push_inbox (user_id, read);

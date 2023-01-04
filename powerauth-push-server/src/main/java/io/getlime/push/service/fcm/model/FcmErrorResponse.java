@@ -49,6 +49,11 @@ public class FcmErrorResponse {
     @Key("error")
     private Map<String, Object> error;
 
+    /**
+     * Get status.
+     *
+     * @return Status in case of error, or null.
+     */
     public String getStatus() {
         if (error == null) {
             return null;
@@ -56,6 +61,11 @@ public class FcmErrorResponse {
         return (String) error.get("status");
     }
 
+    /**
+     * Get message error code from the response.
+     *
+     * @return Error code.
+     */
     public MessagingErrorCode getMessagingErrorCode() {
         if (error == null) {
             return null;
@@ -75,6 +85,11 @@ public class FcmErrorResponse {
         return null;
     }
 
+    /**
+     * Get error message.
+     *
+     * @return Value of the error message, or null.
+     */
     public String getErrorMessage() {
         if (error != null) {
             return (String) error.get("message");

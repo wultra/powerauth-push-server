@@ -178,3 +178,12 @@ _Note: You can overwrite the port using `-Dserver.port=8090` parameter to avoid 
 ## Deploying Push Server On JBoss / Wildfly
 
 Follow the extra instructions in chapter [Deploying Push Server on JBoss / Wildfly](./Deploying-Wildfly.md).
+
+### How to Disable Display of Tomcat Version
+
+It case you do not want to show Tomcat version on error pages when deploying Push server, you can use the following configuration:
+
+- Edit the file `<install-directory>/conf/server.xml`.
+- Search for the parameters `<Host name="..."/>`.
+- Just below that line, insert the following parameters `<Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false"/>`.
+- Restart Tomcat.

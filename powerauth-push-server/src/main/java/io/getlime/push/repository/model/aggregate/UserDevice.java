@@ -18,7 +18,7 @@ package io.getlime.push.repository.model.aggregate;
 /**
  * Object used in sending campaigns, as an aggregate object for storing information about
  * user, device (including platform), app and campaign.
- *
+ * <p>
  * The main purpose of this object is a performance optimization. We pull it from multiple
  * database tables in order to minimize the number of required database queries during batch
  * processing.

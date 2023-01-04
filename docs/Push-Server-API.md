@@ -8,6 +8,7 @@ Push Server provides a simple to use RESTful API for the 3rd party integration p
 - [Message](#message)
 - [Campaign](#campaign)
 - [Administration](#administration)
+- [Message Inbox](#message-inbox)
 
 Following endpoints are published in PowerAuth Push Server RESTful API:
 
@@ -520,7 +521,7 @@ Sends a message message batch - each item in the batch represents a message to g
 
 Used for informing closed group of users about some certain announcement containing message object described [here](./Push-Message-Payload-Mapping.md).
 
-Further campaign comes with:
+Furthermore, the campaign comes with:
 
 - application that campaign is using
 - timestamp of
@@ -1370,6 +1371,335 @@ Remove FCM configuration for Android push messages.
   }
 }
 ```
+
+#### Response 200
+
+```json
+{
+  "status": "OK"
+}
+```
+<!-- end -->
+
+## Message Inbox
+
+When communicating with your users, you can use the message inbox to store messages for users. Inbox is not responsible
+for sending push notifications, but it is responsible for handling messages that should be read by the user later
+and for marking the messages as read, while marking a timestamp.
+
+<!-- begin box info -->
+To notify the user about a new message in the inbox, call the `POST /message/send` (or other push message sending API)
+right after you post a message in the inbox.
+<!-- end -->
+
+<!-- begin api POST /inbox/messages -->
+### Post Message to Inbox
+
+Post provided message to an inbox of a given user.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>POST</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/messages</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Request Body
+
+```json
+{
+  "requestObject": {
+    "userId": "user-001",
+    "subject": "Example subject",
+    "body": "Example message body",
+    "applications": [
+      "application-001",
+      "application-002"
+    ]
+  }
+}
+```
+
+#### Response 200
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "id": "ae641389-d37a-4425-bd14-41c29484596f",
+    "userId": "user-001",
+    "subject": "Example subject",
+    "body": "Example message body",
+    "read": false,
+    "timestampCreated": "2022-08-25T22:34:58.702+00:00",
+    "applications": [
+      "application-001",
+      "application-002"
+    ]
+  }
+}
+```
+<!-- end -->
+
+<!-- begin api GET /inbox/messages/list -->
+### Get User Messages
+
+Get messages from an inbox of a given user.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/messages/list</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Query Params
+
+<table>
+    <tr>
+        <td>userId</td>
+        <td>User ID</td>
+    </tr>
+    <tr>
+        <td>applications</td>
+        <td>Applications, comma-separated value of application IDs.</td>
+    </tr>
+    <tr>
+        <td>onlyUnread</td>
+        <td>Set to true to return only unread messages.</td>
+    </tr>
+    <tr>
+        <td>page</td>
+        <td>Page index, zero based. Default: 0.</td>
+    </tr>
+    <tr>
+        <td>size</td>
+        <td>Page size. Default: 100.</td>
+    </tr>
+</table>
+
+#### Response 200
+
+```json
+{
+  "status": "OK",
+  "page": 0,
+  "size": 20,
+  "responseObject": [
+    {
+      "id": "059b3a83-c025-45be-b815-497d39222024",
+      "subject": "Hello, how are you?",
+      "read": true,
+      "timestampCreated": "2022-08-25T20:35:01.067+00:00"
+    },
+    {
+      "id": "ae641389-d37a-4425-bd14-41c29484596f",
+      "subject": "Example subject",
+      "read": false,
+      "timestampCreated": "2022-08-25T22:34:58.702+00:00"
+    }
+  ]
+}
+```
+<!-- end -->
+
+<!-- begin api GET /inbox/messages/count -->
+### Get Count of Unread Messages
+
+Get number of unread messages in an inbox of a given user.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/messages/count</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Query Params
+
+<table>
+    <tr>
+        <td>userId</td>
+        <td>User ID</td>
+    </tr>
+    <tr>
+        <td>appId</td>
+        <td>Application ID</td>
+    </tr>
+</table>
+
+#### Response 200
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "countUnread": 1
+  }
+}
+```
+<!-- end -->
+
+<!-- begin api GET /inbox/messages/detail -->
+### Get Message Detail by ID
+
+Get full message detail from an inbox for a given message ID.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>GET</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/messages/detail</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Query Params
+
+<table>
+    <tr>
+        <td>messageId</td>
+        <td>Message ID</td>
+    </tr>
+</table>
+
+#### Response 200
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "id": "ae641389-d37a-4425-bd14-41c29484596f",
+    "userId": "user-001",
+    "subject": "Example subject",
+    "body": "Example message body",
+    "read": false,
+    "timestampCreated": "2022-08-25T22:34:58.702+00:00",
+    "applications": [
+      "application-001",
+      "application-002"
+    ]
+  }
+}
+```
+<!-- end -->
+
+<!-- begin api PUT /inbox/messages/read -->
+### Mark Message as Read
+
+Mark a message in an inbox as read. In case the message is already read, this call is a no-op.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/messages/read</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Query Params
+
+<table>
+    <tr>
+        <td>userId</td>
+        <td>User ID</td>
+    </tr>
+    <tr>
+        <td>messageId</td>
+        <td>Message ID</td>
+    </tr>
+</table>
+
+#### Response 200
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "id": "ae641389-d37a-4425-bd14-41c29484596f",
+    "userId": "user-001",
+    "subject": "Example subject",
+    "body": "Example message body",
+    "read": true,
+    "timestampCreated": "2022-08-25T22:34:58.702+00:00",
+    "applications": [
+      "application-001",
+      "application-002"
+    ]
+  }
+}
+```
+<!-- end -->
+
+<!-- begin api PUT /inbox/messages/read-all -->
+### Mark All Unread Messages as Read for User
+
+Mark all unread messages in an inbox of a given user as read.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/inbox/messages/read-all</td>
+    </tr>
+</table>
+<!-- end -->
+
+##### Query Params
+
+<table>
+    <tr>
+        <td>userId</td>
+        <td>User ID</td>
+    </tr>
+    <tr>
+        <td>appId</td>
+        <td>Application ID</td>
+    </tr>
+</table>
 
 #### Response 200
 

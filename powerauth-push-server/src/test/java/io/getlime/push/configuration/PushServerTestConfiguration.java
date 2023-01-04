@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 @Configuration
-public class PushSeverTestConfiguration {
+public class PushServerTestConfiguration {
 
     @Value("${powerauth.push.service.url}")
     private String pushServiceUrl;

@@ -25,10 +25,7 @@ import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.model.base.PagedResponse;
-import io.getlime.push.model.entity.ListOfUsers;
-import io.getlime.push.model.entity.PushMessage;
-import io.getlime.push.model.entity.PushMessageBody;
-import io.getlime.push.model.entity.PushMessageSendResult;
+import io.getlime.push.model.entity.*;
 import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.request.*;
 import io.getlime.push.model.response.*;
@@ -388,9 +385,7 @@ public class PushServerClient {
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(Long campaignId, int page, int size) throws PushServerClientException {
         try {
             String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
-            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-            params.put("page", Collections.singletonList(Integer.valueOf(page).toString()));
-            params.put("size", Collections.singletonList(Integer.valueOf(size).toString()));
+            MultiValueMap<String, String> params = buildPages(page, size);
 
             ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>>() {};
             logger.info("Calling push server to get users from the campaign, campaign ID: {} - start", campaignId);
@@ -596,6 +591,111 @@ public class PushServerClient {
         return response;
     }
 
+    /**
+     * Post a message to an inbox of provided user.
+     * @param request Request with the message detail.
+     * @return Response with a newly created message.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public ObjectResponse<GetInboxMessageDetailResponse> postMessage(CreateInboxMessageRequest request) throws PushServerClientException {
+        logger.info("Calling push server to send message to inbox of: {}, subject: {} - start", request.getUserId(), request.getSubject());
+        final ObjectResponse<GetInboxMessageDetailResponse> response = postObjectImpl("/inbox/messages", new ObjectRequest<>(request), GetInboxMessageDetailResponse.class);
+        logger.info("Calling push server to send message to inbox of: {}, subject: {} - finish", request.getUserId(), request.getSubject());
+        return response;
+    }
+
+    /**
+     * Fetch the list of messages for a given user.
+     * @param userId User ID.
+     * @param applications List of application IDs.
+     * @param onlyUnread Indication if only unread messages should be returneed.
+     * @param page Page index.
+     * @param size Page size.
+     * @return List of inbox messages.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public PagedResponse<ListOfInboxMessages> fetchMessageListForUser(String userId, List<String> applications, boolean onlyUnread, Integer page, Integer size) throws PushServerClientException {
+        final MultiValueMap<String, String> params = buildPages(page, size);
+        params.add("userId", userId);
+        params.add("applications", String.join(",", applications));
+        params.add("onlyUnread", Boolean.toString(onlyUnread));
+
+        final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>>() {};
+        logger.info("Calling push server fetch messages for user: {} - start", userId);
+        final PagedResponse<ListOfInboxMessages> result = getImpl("/inbox/messages/list", params, typeReference);
+        logger.info("Calling push server fetch messages for user: {} - finish", userId);
+
+        return result;
+    }
+
+    /**
+     * Fetch unread message count for a user with given ID.
+     * @param userId User ID.
+     * @param appId Application ID.
+     * @return Count of unread messages.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public ObjectResponse<GetInboxMessageCountResponse> fetchMessageCountForUser(String userId, String appId) throws PushServerClientException {
+        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("userId", userId);
+        params.add("appId", appId);
+
+        final ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>>() {};
+        logger.info("Calling push server fetch message count for user: {} - start", userId);
+        final ObjectResponse<GetInboxMessageCountResponse> result = getImpl("/inbox/messages/count", params, typeReference);
+        logger.info("Calling push server fetch message count for user: {} - finish", userId);
+
+        return result;
+    }
+
+    /**
+     * Read all unread messages in inbox of provided user.
+     * @param userId User ID.
+     * @param appId Application ID.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response readAllMessages(String userId, String appId) throws PushServerClientException {
+        final ReadAllInboxMessagesRequest request = new ReadAllInboxMessagesRequest();
+        request.setUserId(userId);
+        request.setAppId(appId);
+        logger.info("Calling push server to mark all messages read in inbox of user: {} - start", userId);
+        final Response response = postObjectImpl("/inbox/messages/read-all", new ObjectRequest<>(request));
+        logger.info("Calling push server to mark all messages read in inbox of user: {} - finish", userId);
+        return response;
+    }
+
+    /**
+     * Fetch detail of the message for given message ID.
+     * @param inboxId Inbox message ID.
+     * @return Detail of a message with given ID.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(String inboxId) throws PushServerClientException {
+        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("id", inboxId);
+
+        logger.info("Calling push server fetch message ID: {} - start", inboxId);
+        final ObjectResponse<GetInboxMessageDetailResponse> result = getObjectImpl("/inbox/messages/detail", params, GetInboxMessageDetailResponse.class);
+        logger.info("Calling push server fetch message ID: {} - finish", inboxId);
+
+        return result;
+    }
+
+    /**
+     * Read message with given ID in inbox of provided user.
+     * @param inboxId Inbox message ID.
+     * @return Detail of the read message.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public ObjectResponse<GetInboxMessageDetailResponse> readMessage(String inboxId) throws PushServerClientException {
+        final ReadInboxMessageRequest request = new ReadInboxMessageRequest();
+        request.setInboxId(inboxId);
+        logger.info("Calling push server to read message to inbox of: {} - start", inboxId);
+        final ObjectResponse<GetInboxMessageDetailResponse> response = postObjectImpl("/inbox/messages/read", new ObjectRequest<>(request), GetInboxMessageDetailResponse.class);
+        logger.info("Calling push server to read message to inbox of: {} - finish", inboxId);
+        return response;
+    }
+
     // Generic HTTP client methods
 
     /**
@@ -612,7 +712,7 @@ public class PushServerClient {
         try {
             return restClient.get(url, params, null, typeReference).getBody();
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP GET request failed."));
         }
     }
@@ -631,7 +731,7 @@ public class PushServerClient {
         try {
             return restClient.getObject(url, params, null, responseType);
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP GET request failed."));
         }
     }
@@ -649,7 +749,7 @@ public class PushServerClient {
         try {
             return restClient.post(url, request, typeReference).getBody();
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
@@ -666,7 +766,7 @@ public class PushServerClient {
         try {
             return restClient.postObject(url, request);
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
@@ -684,7 +784,45 @@ public class PushServerClient {
         try {
             return restClient.postObject(url, request, responseType);
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
+        }
+    }
+
+    /**
+     * Prepare a generic PUT response.
+     *
+     * @param url specific url of method
+     * @param request request body
+     * @param typeReference type reference
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    private <T> T putImpl(String url, Object request, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        try {
+            return restClient.put(url, request, typeReference).getBody();
+        } catch (RestClientException ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
+        }
+    }
+
+    /**
+     * Prepare a generic PUT response.
+     *
+     * @param url specific url of method
+     * @param request request body
+     * @param queryParams query parameters
+     * @param headers HTTP headers
+     * @param typeReference type reference
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    private <T> T putImpl(String url, Object request, MultiValueMap<String, String> queryParams, MultiValueMap<String, String> headers, ParameterizedTypeReference<T> typeReference) throws PushServerClientException {
+        try {
+            return restClient.put(url, request, queryParams, headers, typeReference).getBody();
+        } catch (RestClientException ex) {
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
@@ -701,7 +839,7 @@ public class PushServerClient {
         try {
             return restClient.putObject(url, request);
         } catch (RestClientException ex) {
-            logger.warn(ex.getMessage(), ex);
+            logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
         }
     }
@@ -716,6 +854,27 @@ public class PushServerClient {
             return token;
         }
         return token.substring(0, 10) + "...";
+    }
+
+    /**
+     * Convert input page and size to query parameter map.
+     * @param page Page index. Zero indexed. Default: 0.
+     * @param size Page size. Default: 100.
+     * @return Query parameter map.
+     */
+    private MultiValueMap<String, String> buildPages(Integer page, Integer size) {
+        final MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
+        if (page != null) {
+            result.put("page", Collections.singletonList(page.toString()));
+        } else {
+            result.put("page", Collections.singletonList("0"));
+        }
+        if (size != null) {
+            result.put("size", Collections.singletonList(size.toString()));
+        } else {
+            result.put("size", Collections.singletonList("100"));
+        }
+        return result;
     }
 
 }

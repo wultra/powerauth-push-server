@@ -84,7 +84,7 @@ The `application-ext.properties` file is used to override default configuration 
 
 ```
 # PowerAuth 2.0 Client configuration
-powerauth.service.url=http://[host]:[port]/powerauth-java-server/rest
+powerauth.service.url=https://[host]:[port]/powerauth-java-server/rest
 ```
 
 Push Server Spring application uses the `ext` Spring profile which activates overriding of default properties by `application-ext.properties`.

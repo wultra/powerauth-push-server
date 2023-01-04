@@ -48,7 +48,6 @@ public class PushCampaignEntity implements Serializable {
     /**
      * Message.
      */
-    @Lob
     @Column(name = "message", nullable = false, updatable = false)
     private String message;
 

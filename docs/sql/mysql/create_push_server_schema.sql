@@ -1,6 +1,6 @@
 CREATE TABLE `push_app_credentials` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `app_id` bigint(20) NOT NULL,
+  `app_id` varchar(255) NOT NULL,
   `ios_private_key` blob DEFAULT NULL,
   `ios_team_id` varchar(255) DEFAULT NULL,
   `ios_key_id` varchar(255) DEFAULT NULL,
@@ -55,6 +55,25 @@ CREATE TABLE `push_campaign_user` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+CREATE TABLE `push_inbox` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `inbox_id` VARCHAR(37),
+  `user_id` VARCHAR(255) NOT NULL,
+  `subject` TEXT NOT NULL,
+  `body` TEXT NOT NULL,
+  `read` BOOLEAN DEFAULT false NOT NULL,
+  `timestamp_created` TIMESTAMP NOT NULL,
+  `timestamp_read` TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Create table for assignment of inbox messages to apps
+CREATE TABLE `push_inbox_app` (
+    `app_credentials_id` bigint(20) NOT NULL,
+    `inbox_id`           bigint(20) NOT NULL,
+    PRIMARY KEY (`inbox_id`, `app_credentials_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 --
 -- Indexes for better performance.
 --
@@ -72,3 +91,7 @@ CREATE INDEX `push_campaign_sent` ON `push_campaign`(`is_sent`);
 
 CREATE INDEX `push_campaign_user_campaign` ON `push_campaign_user`(`campaign_id`, `user_id`);
 CREATE INDEX `push_campaign_user_detail` ON `push_campaign_user`(`user_id`);
+
+CREATE INDEX `push_inbox_id` ON `push_inbox` (`inbox_id`);
+CREATE INDEX `push_inbox_user` ON `push_inbox` (`user_id`);
+CREATE INDEX `push_inbox_user_read` ON `push_inbox` (`user_id`, `read`);

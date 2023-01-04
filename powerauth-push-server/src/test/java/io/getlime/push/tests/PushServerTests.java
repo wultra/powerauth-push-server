@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package io.getlime.push.client;
+package io.getlime.push.tests;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
+import io.getlime.push.api.PowerAuthTestClient;
+import io.getlime.push.client.PushServerClient;
+import io.getlime.push.client.PushServerClientException;
+import io.getlime.push.client.PushServerTestClientFactory;
+import io.getlime.push.configuration.PushServerAppCredentialConfiguration;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.entity.*;
 import io.getlime.push.model.enumeration.MobilePlatform;
@@ -27,8 +32,7 @@ import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
-import io.getlime.push.shared.PowerAuthTestClient;
-import io.getlime.push.shared.PushServerTestClientFactory;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -36,11 +40,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
@@ -74,25 +78,20 @@ public class PushServerTests {
     private ObjectMapper mapper;
 
     @Autowired
-    private AppCredentialsRepository appCredentialsRepository;
-
-    @Autowired
     private PushDeviceRepository pushDeviceRepository;
 
     @Autowired
     private PushServerTestClientFactory testClientFactory;
 
-    @MockBean
+    @Autowired
+    private PushServerAppCredentialConfiguration appCredentialConfig;
+
     private PushServerClient pushServerClient;
 
-    @MockBean
     private PowerAuthTestClient powerAuthTestClient;
 
     @LocalServerPort
     private int port;
-
-    @Value("${powerauth.service.url}")
-    private String powerAuthRestUrl;
 
     @Value("${powerauth.push.service.fcm.sendMessageUrl}")
     private String fcmUrlForTests;
@@ -101,11 +100,7 @@ public class PushServerTests {
     public void setUp() throws Exception {
         pushServerClient = testClientFactory.createPushServerClient("http://localhost:" + port);
         powerAuthTestClient = testClientFactory.createPowerAuthTestClient();
-        AppCredentialsEntity testCredentials = new AppCredentialsEntity();
-        testCredentials.setAppId(powerAuthTestClient.getApplicationId());
-        testCredentials.setAndroidProjectId("test-project");
-        testCredentials.setAndroidPrivateKey(new byte[128]);
-        appCredentialsRepository.save(testCredentials);
+        appCredentialConfig.configure(powerAuthTestClient.getApplicationId());
     }
 
     @Test
@@ -152,7 +147,6 @@ public class PushServerTests {
     public void testFcmUrlConfiguredForTests() {
         assertEquals("http://localhost:" + port + "/mockfcm/message:send", fcmUrlForTests);
     }
-
 
     @Test
     public void updateDeviceStatusTest() throws Exception {
@@ -208,6 +202,7 @@ public class PushServerTests {
 
     @Test
     @SuppressWarnings("unchecked") //known parameters of HashMap
+    @Sql(scripts = "classpath:/sql/batch-init-h2.sql")
     public void sendPushMessageBatchTest() throws Exception {
         boolean result = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.Android, powerAuthTestClient.getActivationId());
         assertTrue(result);
