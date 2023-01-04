@@ -29,7 +29,6 @@ UPDATE push_app_credentials push
 SET app_id = (SELECT pa.name FROM pa_application pa WHERE pa.id = push.app_id_orig)
 WHERE EXISTS (SELECT 1 FROM pa_application pa WHERE pa.id = push.app_id_orig);
 
-
 -- remove the original column with numeric app ID value 
 ALTER TABLE push_app_credentials DROP COLUMN app_id_orig;
 ```
