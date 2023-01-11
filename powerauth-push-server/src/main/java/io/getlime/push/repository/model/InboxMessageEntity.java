@@ -64,8 +64,8 @@ public class InboxMessageEntity implements Serializable {
     @ManyToMany
     @JoinTable(
             name = "push_inbox_app",
-            joinColumns = @JoinColumn(name = "app_credentials_id", referencedColumnName = "id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "inbox_id")
+            joinColumns = @JoinColumn(name = "inbox_id", referencedColumnName = "id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "app_credentials_id")
     )
     @ToString.Exclude
     private List<AppCredentialsEntity> applications;
