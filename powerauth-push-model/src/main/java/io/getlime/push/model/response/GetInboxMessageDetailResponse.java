@@ -16,6 +16,7 @@
 
 package io.getlime.push.model.response;
 
+import io.getlime.push.model.enumeration.MessageType;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -32,7 +33,9 @@ public class GetInboxMessageDetailResponse {
 
     private String id;
     private String userId;
+    private MessageType type;
     private String subject;
+    private String summary;
     private String body;
     private boolean read;
     private Date timestampCreated;

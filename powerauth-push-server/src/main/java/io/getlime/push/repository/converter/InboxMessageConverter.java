@@ -18,6 +18,7 @@ package io.getlime.push.repository.converter;
 
 import io.getlime.push.model.entity.InboxMessage;
 import io.getlime.push.model.entity.ListOfInboxMessages;
+import io.getlime.push.model.enumeration.MessageType;
 import io.getlime.push.model.request.CreateInboxMessageRequest;
 import io.getlime.push.model.response.GetInboxMessageDetailResponse;
 import io.getlime.push.repository.model.AppCredentialsEntity;
@@ -55,7 +56,9 @@ public class InboxMessageConverter {
         destination.setInboxId(id.toString());
         destination.setUserId(userId);
         destination.setApplications(apps);
+        destination.setType(source.getType().getValue());
         destination.setSubject(source.getSubject());
+        destination.setSummary(source.getSummary());
         destination.setBody(source.getBody());
         destination.setTimestampCreated(date);
         return destination;
@@ -74,7 +77,9 @@ public class InboxMessageConverter {
         final GetInboxMessageDetailResponse destination = new GetInboxMessageDetailResponse();
         destination.setId(source.getInboxId());
         destination.setUserId(source.getUserId());
+        destination.setType(MessageType.fromLowerCaseString(source.getType()));
         destination.setSubject(source.getSubject());
+        destination.setSummary(source.getSummary());
         destination.setBody(source.getBody());
         destination.setRead(source.isRead());
         destination.setTimestampCreated(source.getTimestampCreated());
@@ -95,7 +100,9 @@ public class InboxMessageConverter {
         }
         final InboxMessage destination = new InboxMessage();
         destination.setId(source.getInboxId());
+        destination.setType(MessageType.fromLowerCaseString(source.getType()));
         destination.setSubject(source.getSubject());
+        destination.setSummary(source.getSummary());
         destination.setRead(source.isRead());
         destination.setTimestampCreated(source.getTimestampCreated());
         return destination;

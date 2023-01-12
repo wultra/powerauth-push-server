@@ -1387,6 +1387,13 @@ When communicating with your users, you can use the message inbox to store messa
 for sending push notifications, but it is responsible for handling messages that should be read by the user later
 and for marking the messages as read, while marking a timestamp.
 
+Each message can have associated a type - either `text`, or `html`:
+
+- For `text` messages, the layout of the final message is defined by `subject` and `body` attributes. The `summary`
+  attribute is only used in list and push notifications.
+- For `html` messages, the `subject` and `summary` attributes are only used in list and push notifications, the `body`
+  attribute contains the full formatted HTML document. 
+
 <!-- begin box info -->
 To notify the user about a new message in the inbox, call the `POST /message/send` (or other push message sending API)
 right after you post a message in the inbox.
@@ -1418,7 +1425,9 @@ Post provided message to an inbox of a given user.
 {
   "requestObject": {
     "userId": "user-001",
+    "type": "text",
     "subject": "Example subject",
+    "summary": "Example summary",
     "body": "Example message body",
     "applications": [
       "application-001",
@@ -1436,7 +1445,9 @@ Post provided message to an inbox of a given user.
   "responseObject": {
     "id": "ae641389-d37a-4425-bd14-41c29484596f",
     "userId": "user-001",
+    "type": "text",
     "subject": "Example subject",
+    "summary": "Example summary",
     "body": "Example message body",
     "read": false,
     "timestampCreated": "2022-08-25T22:34:58.702+00:00",
@@ -1504,13 +1515,17 @@ Get messages from an inbox of a given user.
   "responseObject": [
     {
       "id": "059b3a83-c025-45be-b815-497d39222024",
+      "type": "text",
       "subject": "Hello, how are you?",
+      "summary": "Example summary",
       "read": true,
       "timestampCreated": "2022-08-25T20:35:01.067+00:00"
     },
     {
       "id": "ae641389-d37a-4425-bd14-41c29484596f",
+      "type": "text",
       "subject": "Example subject",
+      "summary": "Example summary",
       "read": false,
       "timestampCreated": "2022-08-25T22:34:58.702+00:00"
     }
@@ -1601,7 +1616,9 @@ Get full message detail from an inbox for a given message ID.
   "responseObject": {
     "id": "ae641389-d37a-4425-bd14-41c29484596f",
     "userId": "user-001",
+    "type": "text",
     "subject": "Example subject",
+    "summary": "Example summary",
     "body": "Example message body",
     "read": false,
     "timestampCreated": "2022-08-25T22:34:58.702+00:00",
@@ -1655,7 +1672,9 @@ Mark a message in an inbox as read. In case the message is already read, this ca
   "responseObject": {
     "id": "ae641389-d37a-4425-bd14-41c29484596f",
     "userId": "user-001",
+    "type": "text",
     "subject": "Example subject",
+    "summary": "Example summary",
     "body": "Example message body",
     "read": true,
     "timestampCreated": "2022-08-25T22:34:58.702+00:00",
