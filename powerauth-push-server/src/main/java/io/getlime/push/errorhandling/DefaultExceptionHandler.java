@@ -21,11 +21,15 @@ import io.getlime.core.rest.model.base.response.ErrorResponse;
 import io.getlime.push.errorhandling.exceptions.AppNotFoundException;
 import io.getlime.push.errorhandling.exceptions.InboxMessageNotFoundException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.errorhandling.model.ExtendedError;
+import io.getlime.push.errorhandling.model.Violation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -68,7 +72,7 @@ public class DefaultExceptionHandler {
     }
 
     /**
-     * Handle database errors in case entities are not fount.
+     * Handle database errors in case entities are not found.
      * @param e Empty result returned.
      * @return Error response.
      */
@@ -134,4 +138,23 @@ public class DefaultExceptionHandler {
         return new ErrorResponse(AppError.Code.ERROR_MESSAGE_NOT_FOUND, e);
     }
 
+    /**
+     * Exception handler for issues related to failed argument validations.
+     *
+     * @param e Exception.
+     * @return Response with error details.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public @ResponseBody ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        logger.warn("Error occurred when calling an API: {}", e.getMessage());
+        logger.debug("Exception detail: ", e);
+        final ExtendedError error = new ExtendedError("ERROR_REQUEST", "Invalid method parameter value");
+        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
+            error.getViolations().add(
+                    new Violation(fieldError.getField(), fieldError.getRejectedValue(), fieldError.getDefaultMessage())
+            );
+        }
+        return new ErrorResponse(error);
+    }
 }
