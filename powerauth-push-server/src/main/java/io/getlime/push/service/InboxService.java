@@ -114,6 +114,7 @@ public class InboxService {
         final InboxMessageEntity inboxMessage = messageEntity.get();
         if (!inboxMessage.isRead()) { // do not call repository save if there is no change.
             inboxMessage.setRead(true);
+            inboxMessage.setTimestampRead(new Date());
             logger.info("Marked inbox message as read for message ID: {}", inboxId);
             final InboxMessageEntity savedInboxMessage = inboxRepository.save(inboxMessage);
             return inboxMessageConverter.convertResponse(savedInboxMessage);
@@ -125,7 +126,7 @@ public class InboxService {
     @Transactional
     public void readAllMessages(String userId, String appId) throws AppNotFoundException {
         final AppCredentialsEntity appCredentialsEntity = fetchAppForAppId(appId);
-        int countRead = inboxRepository.markAllAsRead(userId, appCredentialsEntity);
+        int countRead = inboxRepository.markAllAsRead(userId, appCredentialsEntity, new Date());
         logger.info("Marked all inbox messages as read for user: {}, count: {}", userId, countRead);
     }
 

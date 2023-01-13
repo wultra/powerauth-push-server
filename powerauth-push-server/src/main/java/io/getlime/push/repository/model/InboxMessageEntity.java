@@ -71,10 +71,22 @@ public class InboxMessageEntity implements Serializable {
     private List<AppCredentialsEntity> applications;
 
     /**
+     * Message type.
+     */
+    @Column(name = "type", nullable = false)
+    private String type;
+
+    /**
      * Message subject.
      */
     @Column(name = "subject", nullable = false)
     private String subject;
+
+    /**
+     * Message summary.
+     */
+    @Column(name = "summary", nullable = false)
+    private String summary;
 
     /**
      * Message body.
@@ -108,13 +120,15 @@ public class InboxMessageEntity implements Serializable {
         return inboxId.equals(that.inboxId)
                 && userId.equals(that.userId)
                 && applications.equals(that.applications)
+                && type.equals(that.type)
                 && subject.equals(that.subject)
+                && summary.equals(that.summary)
                 && body.equals(that.body)
                 && timestampCreated.equals(that.timestampCreated);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(inboxId, userId, applications, subject, body, timestampCreated);
+        return Objects.hash(inboxId, userId, applications, type, subject, summary, body, timestampCreated);
     }
 }

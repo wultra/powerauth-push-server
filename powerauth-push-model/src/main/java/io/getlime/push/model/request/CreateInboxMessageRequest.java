@@ -16,6 +16,7 @@
 
 package io.getlime.push.model.request;
 
+import io.getlime.push.model.enumeration.MessageType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
@@ -41,9 +42,18 @@ public class CreateInboxMessageRequest {
     private String userId;
 
     @NotNull
+    @Schema(type = "string", example = "text")
+    private MessageType type;
+
+    @NotNull
     @Size(min = 8, max = 255)
     @Schema(type = "string", example = "Example subject")
     private String subject;
+
+    @NotNull
+    @Size(min = 8, max = 255)
+    @Schema(type = "string", example = "Example summary")
+    private String summary;
 
     @NotNull
     @Size(min = 8, max = 65536)
