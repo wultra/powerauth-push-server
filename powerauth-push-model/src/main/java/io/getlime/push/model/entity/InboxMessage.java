@@ -16,6 +16,7 @@
 
 package io.getlime.push.model.entity;
 
+import io.getlime.push.model.enumeration.MessageType;
 import lombok.Data;
 
 import java.util.Date;
@@ -29,7 +30,9 @@ import java.util.Date;
 public class InboxMessage {
 
     private String id;
+    private MessageType type;
     private String subject;
+    private String summary;
     private boolean read;
     private Date timestampCreated;
 
