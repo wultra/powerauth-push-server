@@ -8,7 +8,6 @@ You can download DDL scripts for supported databases:
 
 - [PostgreSQL](./sql/postgresql/create_push_server_schema.sql)
 - [Oracle](./sql/oracle/create_push_server_schema.sql)
-- [MySQL](./sql/mysql/create_push_server_schema.sql)
 
 ## Tables
 
