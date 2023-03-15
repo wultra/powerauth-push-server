@@ -27,6 +27,7 @@ import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.entity.*;
 import io.getlime.push.model.enumeration.MobilePlatform;
+import io.getlime.push.model.enumeration.Mode;
 import io.getlime.push.model.request.*;
 import io.getlime.push.model.response.*;
 import io.getlime.push.model.validator.*;
@@ -217,12 +218,26 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<PushMessageSendResult> sendPushMessage(String appId, PushMessage pushMessage) throws PushServerClientException {
-        SendPushMessageRequest request = new SendPushMessageRequest();
+        return sendPushMessage(appId, Mode.SYNCHRONOUS, pushMessage);
+    }
+
+    /**
+     * Send a single push message to application with given ID.
+     *
+     * @param appId PowerAuth application app ID.
+     * @param mode Mode of push notification sending.
+     * @param pushMessage Push message to be sent.
+     * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    public ObjectResponse<PushMessageSendResult> sendPushMessage(String appId, Mode mode, PushMessage pushMessage) throws PushServerClientException {
+        final SendPushMessageRequest request = new SendPushMessageRequest();
+        request.setMode(mode);
         request.setAppId(appId);
         request.setMessage(pushMessage);
 
         // Validate request on the client side.
-        String error = SendPushMessageRequestValidator.validate(request);
+        final String error = SendPushMessageRequestValidator.validate(request);
         if (error != null) {
             throw new PushServerClientException(error);
         }
@@ -243,12 +258,26 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(String appId, List<PushMessage> batch) throws PushServerClientException {
-        SendPushMessageBatchRequest request = new SendPushMessageBatchRequest();
+        return sendPushMessageBatch(appId, Mode.SYNCHRONOUS, batch);
+    }
+
+    /**
+     * Send a push message batch to application with given ID.
+     *
+     * @param appId PowerAuth application app ID.
+     * @param mode Mode of push notification sending.
+     * @param batch Push message batch to be sent.
+     * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(String appId, Mode mode, List<PushMessage> batch) throws PushServerClientException {
+        final SendPushMessageBatchRequest request = new SendPushMessageBatchRequest();
         request.setAppId(appId);
+        request.setMode(mode);
         request.setBatch(batch);
 
         // Validate request on the client side.
-        String error = SendPushMessageBatchRequestValidator.validate(request);
+        final String error = SendPushMessageBatchRequestValidator.validate(request);
         if (error != null) {
             throw new PushServerClientException(error);
         }

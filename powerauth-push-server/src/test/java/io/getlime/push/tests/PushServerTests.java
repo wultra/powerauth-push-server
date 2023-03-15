@@ -27,6 +27,7 @@ import io.getlime.push.configuration.PushServerAppCredentialConfiguration;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.entity.*;
 import io.getlime.push.model.enumeration.MobilePlatform;
+import io.getlime.push.model.enumeration.Mode;
 import io.getlime.push.model.response.*;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
@@ -190,7 +191,7 @@ public class PushServerTests {
         pushMessage.setAttributes(attributes);
         pushMessage.setBody(pushMessageBody);
         pushMessage.setAttributes(attributes);
-        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessage(powerAuthTestClient.getApplicationId(), pushMessage);
+        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessage(powerAuthTestClient.getApplicationId(), Mode.SYNCHRONOUS, pushMessage);
         assertEquals("OK", actual.getStatus());
         List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         pushDeviceRepository.deleteAll(devices);
@@ -223,7 +224,7 @@ public class PushServerTests {
         pushMessage.setBody(pushMessageBody);
         pushMessage.setAttributes(attributes);
         batch.add(pushMessage);
-        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessageBatch(powerAuthTestClient.getApplicationId(), batch);
+        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessageBatch(powerAuthTestClient.getApplicationId(), Mode.SYNCHRONOUS, batch);
         assertEquals("OK", actual.getStatus());
         List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         pushDeviceRepository.deleteAll(devices);
