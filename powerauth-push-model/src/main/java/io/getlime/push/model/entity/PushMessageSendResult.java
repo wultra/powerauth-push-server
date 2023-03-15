@@ -223,6 +223,15 @@ public class PushMessageSendResult extends BasePushMessageSendResult {
     private final Android android;
 
     /**
+     * Default constructor.
+     */
+    public PushMessageSendResult() {
+        super();
+        this.ios = new iOS();
+        this.android = new Android();
+    }
+
+    /**
      * Primary constructor.
      *
      * @param mode Mode of push message sending.

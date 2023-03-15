@@ -27,10 +27,25 @@ public class BasePushMessageSendResult {
 
     private final Mode mode;
 
+    /**
+     * Default constructor.
+     */
+    public BasePushMessageSendResult() {
+        this.mode = Mode.SYNCHRONOUS;
+    }
+
+    /**
+     * Primary constructor with mode.
+     * @param mode Mode.
+     */
     public BasePushMessageSendResult(Mode mode) {
         this.mode = mode;
     }
 
+    /**
+     * Get mode.
+     * @return Mode.
+     */
     public Mode getMode() {
         return mode;
     }
