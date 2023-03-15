@@ -368,27 +368,27 @@ public class PushMessageSenderService {
     }
 
     /**
-     * Arrive and deregister phaser based on the mode. For Mode.SYNCHRONOUS, the method provides deregistration. Otherwise,
-     * for Mode.ASYNCHRONOUS, it is a noop method.
+     * Arrive and deregister phaser based on the mode. For {@link Mode#SYNCHRONOUS}, the method provides deregistration. Otherwise,
+     * for {@link Mode#ASYNCHRONOUS}, it is a noop method.
      *
      * @param phaser Phaser.
      * @param mode Mode.
      */
     private static void arriveAndDeregisterPhaserForMode(Phaser phaser, Mode mode) {
-        if (mode == Mode.SYNCHRONOUS) {
+        if (mode == Mode.SYNCHRONOUS && phaser != null) {
             phaser.arriveAndDeregister();
         }
     }
 
     /**
-     * Register phaser based on the mode. For Mode.SYNCHRONOUS, the method provides registration. Otherwise,
-     * for Mode.ASYNCHRONOUS, it is a noop method.
+     * Register phaser based on the mode. For {@link Mode#SYNCHRONOUS}, the method provides registration. Otherwise,
+     * for {@link Mode#ASYNCHRONOUS}, it is a noop method.
      *
-     * @param phaser
-     * @param mode
+     * @param phaser Phaser.
+     * @param mode Mode.
      */
-    private static void registerPhaserForMode(Phaser phaser, Mode mode) {
-        if (mode == Mode.SYNCHRONOUS) {
+    private static void registerPhaserForMode(Phaser phaser,Mode mode) {
+        if (mode == Mode.SYNCHRONOUS && phaser != null) {
             phaser.register();
         }
     }

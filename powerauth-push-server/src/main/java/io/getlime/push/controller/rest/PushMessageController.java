@@ -20,7 +20,6 @@ import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.BasePushMessageSendResult;
 import io.getlime.push.model.entity.PushMessage;
-import io.getlime.push.model.entity.PushMessageSendResult;
 import io.getlime.push.model.enumeration.Mode;
 import io.getlime.push.model.request.SendPushMessageBatchRequest;
 import io.getlime.push.model.request.SendPushMessageRequest;
