@@ -2,6 +2,87 @@
 
 This guide contains instructions for migration from PowerAuth Push Server version `1.4.x` to version `1.5.x`.
 
+## New Asynchronous Sending Mode
+
+When sending a push notification or batch of notifications, it is now possible to specify an additional `mode` parameter. The parameter specifies if the request processing should wait for sending all push notifications (`SYNCHRONOUS`, default value), or if the request processing should return value immediately (`ASYNCHRONOUS`). When `ASYNCHRONOUS` mode is specified, the response object does not include the number of sent, failed, pending and total messages.
+
+### Synchronous Sending Example
+
+#### Request
+
+```json
+{
+  "requestObject": {
+    "appId": "mobile-app",
+    "mode": "SYNCHRONOUS",
+    "message": {
+      "userId": "test-user",
+      "priority": "NORMAL",
+      "body": {
+        "title": "Some title",
+        "body": "Some message body",
+        "sound": "default"
+      }
+    }
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "mode": "SYNCHRONOUS",
+    "ios": {
+      "sent": 1,
+      "failed": 0,
+      "pending": 0,
+      "total": 1
+    },
+    "android": {
+      "sent": 2,
+      "failed": 0,
+      "pending": 0,
+      "total": 2
+    }
+  }
+}
+```
+
+### Asynchronous Sending Example
+
+#### Request
+
+```json
+{
+  "requestObject": {
+    "appId": "mobile-app",
+    "mode": "SYNCHRONOUS",
+    "message": {
+      "userId": "test-user",
+      "priority": "NORMAL",
+      "body": {
+        "title": "Some title",
+        "body": "Some message body",
+        "sound": "default"
+      }
+    }
+  }
+}
+```
+
+#### Response
+
+```json
+{
+  "status": "OK",
+  "responseObject": {
+    "mode": "ASYNCHRONOUS"
+  }
+}
+```
 
 ## Database Changes
 

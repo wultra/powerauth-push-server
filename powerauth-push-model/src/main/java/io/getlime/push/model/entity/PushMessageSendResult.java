@@ -16,12 +16,14 @@
 
 package io.getlime.push.model.entity;
 
+import io.getlime.push.model.enumeration.Mode;
+
 /**
  * Class that contains push message sending result data.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-public class PushMessageSendResult {
+public class PushMessageSendResult extends BasePushMessageSendResult {
 
     /**
      * Result for the iOS platform.
@@ -221,9 +223,12 @@ public class PushMessageSendResult {
     private final Android android;
 
     /**
-     * Default constructor.
+     * Primary constructor.
+     *
+     * @param mode Mode of push message sending.
      */
-    public PushMessageSendResult() {
+    public PushMessageSendResult(Mode mode) {
+        super(mode);
         this.ios = new iOS();
         this.android = new Android();
     }
@@ -243,7 +248,6 @@ public class PushMessageSendResult {
     public iOS getIos() {
         return ios;
     }
-
 
     @Override
     public boolean equals(Object o) {
