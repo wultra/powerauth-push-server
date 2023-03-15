@@ -59,7 +59,7 @@ When sending a push notification or batch of notifications, it is now possible t
 {
   "requestObject": {
     "appId": "mobile-app",
-    "mode": "SYNCHRONOUS",
+    "mode": "ASYNCHRONOUS",
     "message": {
       "userId": "test-user",
       "priority": "NORMAL",
