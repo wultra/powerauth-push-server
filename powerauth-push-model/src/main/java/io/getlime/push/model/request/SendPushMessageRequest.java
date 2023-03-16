@@ -17,6 +17,7 @@
 package io.getlime.push.model.request;
 
 import io.getlime.push.model.entity.PushMessage;
+import io.getlime.push.model.enumeration.Mode;
 
 /**
  * Class representing a single push message send request.
@@ -26,6 +27,7 @@ import io.getlime.push.model.entity.PushMessage;
 public class SendPushMessageRequest {
 
     private String appId;
+    private Mode mode = Mode.SYNCHRONOUS;
     private PushMessage message;
 
     /**
@@ -42,6 +44,22 @@ public class SendPushMessageRequest {
      */
     public void setAppId(String appId) {
         this.appId = appId;
+    }
+
+    /**
+     * Get mode of sending.
+     * @return Mode.
+     */
+    public Mode getMode() {
+        return mode;
+    }
+
+    /**
+     * Set mode of sending.
+     * @param mode Mode.
+     */
+    public void setMode(Mode mode) {
+        this.mode = mode;
     }
 
     /**
