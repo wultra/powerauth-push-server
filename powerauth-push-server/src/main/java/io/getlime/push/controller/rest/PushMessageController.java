@@ -18,8 +18,9 @@ package io.getlime.push.controller.rest;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.model.entity.BasePushMessageSendResult;
 import io.getlime.push.model.entity.PushMessage;
-import io.getlime.push.model.entity.PushMessageSendResult;
+import io.getlime.push.model.enumeration.Mode;
 import io.getlime.push.model.request.SendPushMessageBatchRequest;
 import io.getlime.push.model.request.SendPushMessageRequest;
 import io.getlime.push.model.validator.SendPushMessageBatchRequestValidator;
@@ -47,7 +48,6 @@ import java.util.List;
 public class PushMessageController {
     private static final Logger logger = LoggerFactory.getLogger(PushMessageController.class);
 
-
     private final PushMessageSenderService pushMessageSenderService;
 
     /**
@@ -74,7 +74,7 @@ public class PushMessageController {
                           "Attributes describe whether message has to be " +
                           "silent (If true, no system UI is displayed), personal (If true and activation is not in ACTIVE state the message is not sent)\n" +
                           "Body consist of body (message), and notification parameters")
-    public ObjectResponse<PushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
+    public ObjectResponse<BasePushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
         SendPushMessageRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
@@ -89,10 +89,10 @@ public class PushMessageController {
             throw new PushServerException(errorMessage);
         }
         final String appId = requestObject.getAppId();
+        final Mode mode = requestObject.getMode();
         final List<PushMessage> pushMessageList = new ArrayList<>();
         pushMessageList.add(requestObject.getMessage());
-        PushMessageSendResult result;
-        result = pushMessageSenderService.sendPushMessage(appId, pushMessageList);
+        final BasePushMessageSendResult result = pushMessageSenderService.sendPushMessage(appId, mode, pushMessageList);
         logger.info("The sendPushMessage request succeeded, application ID: {}, activation ID: {}, user ID: {}", requestObject.getAppId(),
                 requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
         return new ObjectResponse<>(result);
@@ -109,7 +109,7 @@ public class PushMessageController {
     @Operation(summary = "Send batch of push messages",
                   description = "Send to each user in request body, assigned to application ID, message. Message and user definition is same as in \"send a single push message\" method. " +
                           "Users and their messages are inside request body - batch param.")
-    public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
+    public ObjectResponse<BasePushMessageSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
         SendPushMessageBatchRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
@@ -123,9 +123,9 @@ public class PushMessageController {
             throw new PushServerException(errorMessage);
         }
         final String appId = requestObject.getAppId();
+        final Mode mode = requestObject.getMode();
         final List<PushMessage> batch = requestObject.getBatch();
-        PushMessageSendResult result;
-        result = pushMessageSenderService.sendPushMessage(appId, batch);
+        final BasePushMessageSendResult result = pushMessageSenderService.sendPushMessage(appId, mode, batch);
         logger.info("The sendPushMessageBatch request succeeded, application ID: {}", requestObject.getAppId());
         return new ObjectResponse<>(result);
     }

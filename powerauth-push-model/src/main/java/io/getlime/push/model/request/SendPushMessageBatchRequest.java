@@ -16,6 +16,7 @@
 package io.getlime.push.model.request;
 
 import io.getlime.push.model.entity.PushMessage;
+import io.getlime.push.model.enumeration.Mode;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ import java.util.List;
 public class SendPushMessageBatchRequest {
 
     private String appId;
+    private Mode mode = Mode.SYNCHRONOUS;
     private List<PushMessage> batch;
 
     /**
@@ -43,6 +45,22 @@ public class SendPushMessageBatchRequest {
      */
     public void setAppId(String appId) {
         this.appId = appId;
+    }
+
+    /**
+     * Get mode of sending.
+     * @return Mode.
+     */
+    public Mode getMode() {
+        return mode;
+    }
+
+    /**
+     * Set mode of sending.
+     * @param mode Mode.
+     */
+    public void setMode(Mode mode) {
+        this.mode = mode;
     }
 
     /**

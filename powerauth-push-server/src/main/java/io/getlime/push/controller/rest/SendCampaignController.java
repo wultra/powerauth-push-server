@@ -20,6 +20,7 @@ import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessage;
+import io.getlime.push.model.enumeration.Mode;
 import io.getlime.push.model.request.TestCampaignRequest;
 import io.getlime.push.model.validator.TestCampaignRequestValidator;
 import io.getlime.push.repository.PushCampaignRepository;
@@ -147,7 +148,7 @@ public class SendCampaignController {
         pushMessage.setBody(jsonSerialization.deserializePushMessageBody(campaign.getMessage()));
         List<PushMessage> message = new ArrayList<>();
         message.add(pushMessage);
-        pushMessageSenderService.sendPushMessage(campaign.getAppCredentials().getAppId(), message);
+        pushMessageSenderService.sendPushMessage(campaign.getAppCredentials().getAppId(), Mode.SYNCHRONOUS, message);
         logger.info("The sendTestCampaign request succeeded, campaign ID: {}", id);
         return new Response();
     }

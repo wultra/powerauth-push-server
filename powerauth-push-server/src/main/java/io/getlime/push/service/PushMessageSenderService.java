@@ -19,10 +19,8 @@ package io.getlime.push.service;
 import com.eatthepath.pushy.apns.ApnsClient;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
-import io.getlime.push.model.entity.PushMessage;
-import io.getlime.push.model.entity.PushMessageAttributes;
-import io.getlime.push.model.entity.PushMessageBody;
-import io.getlime.push.model.entity.PushMessageSendResult;
+import io.getlime.push.model.entity.*;
+import io.getlime.push.model.enumeration.Mode;
 import io.getlime.push.model.enumeration.Priority;
 import io.getlime.push.model.validator.PushMessageValidator;
 import io.getlime.push.repository.AppCredentialsRepository;
@@ -91,7 +89,7 @@ public class PushMessageSenderService {
      * @return Result of this batch sending.
      * @throws PushServerException In case push message sending fails.
      */
-    public PushMessageSendResult sendPushMessage(final String appId, List<PushMessage> pushMessageList) throws PushServerException {
+    public BasePushMessageSendResult sendPushMessage(final String appId, final Mode mode, List<PushMessage> pushMessageList) throws PushServerException {
         // Prepare clients
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
@@ -99,7 +97,7 @@ public class PushMessageSenderService {
         final Phaser phaser = new Phaser(1);
 
         // Prepare result object
-        final PushMessageSendResult sendResult = new PushMessageSendResult();
+        final PushMessageSendResult sendResult = new PushMessageSendResult(mode);
 
         // Send push message batch
         for (PushMessage pushMessage : pushMessageList) {
@@ -122,14 +120,14 @@ public class PushMessageSenderService {
                 if (!isMessagePersonal || isDeviceActive) {
 
                     // Register phaser for synchronization
-                    phaser.register();
+                    registerPhaserForMode(phaser, mode);
 
                     // Decide if the device is iOS or Android and send message accordingly
                     final String platform = device.getPlatform();
                     if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
                         if (pushClient.getApnsClient() == null) {
                             logger.error("Push message cannot be sent to APNS because APNS is not configured in push server.");
-                            phaser.arriveAndDeregister();
+                            arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
                         }
                         pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), (result) -> {
@@ -161,13 +159,13 @@ public class PushMessageSenderService {
                             } catch (Throwable t) {
                                 logger.error("System error when sending notification: {}", t.getMessage(), t);
                             } finally {
-                                phaser.arriveAndDeregister();
+                                arriveAndDeregisterPhaserForMode(phaser, mode);
                             }
                         });
                     } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
                         if (pushClient.getFcmClient() == null) {
                             logger.error("Push message cannot be sent to FCM because FCM is not configured in push server.");
-                            phaser.arriveAndDeregister();
+                            arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
                         }
                         final String token = device.getPushToken();
@@ -200,7 +198,7 @@ public class PushMessageSenderService {
                             } catch (Throwable t) {
                                 logger.error("System error when sending notification: {}", t.getMessage(), t);
                             } finally {
-                                phaser.arriveAndDeregister();
+                                arriveAndDeregisterPhaserForMode(phaser, mode);
                             }
                         });
                     }
@@ -208,7 +206,7 @@ public class PushMessageSenderService {
             }
         }
         phaser.arriveAndAwaitAdvance();
-        return sendResult;
+        return mode == Mode.SYNCHRONOUS ? sendResult : new BasePushMessageSendResult(mode);
     }
 
     /**
@@ -366,6 +364,32 @@ public class PushMessageSenderService {
         if (pushMessageObject != null) {
             pushMessageObject.setStatus(status);
             pushMessageDAO.save(pushMessageObject);
+        }
+    }
+
+    /**
+     * Arrive and deregister phaser based on the mode. For {@link Mode#SYNCHRONOUS}, the method provides deregistration. Otherwise,
+     * for {@link Mode#ASYNCHRONOUS}, it is a noop method.
+     *
+     * @param phaser Phaser.
+     * @param mode Mode.
+     */
+    private static void arriveAndDeregisterPhaserForMode(Phaser phaser, Mode mode) {
+        if (mode == Mode.SYNCHRONOUS && phaser != null) {
+            phaser.arriveAndDeregister();
+        }
+    }
+
+    /**
+     * Register phaser based on the mode. For {@link Mode#SYNCHRONOUS}, the method provides registration. Otherwise,
+     * for {@link Mode#ASYNCHRONOUS}, it is a noop method.
+     *
+     * @param phaser Phaser.
+     * @param mode Mode.
+     */
+    private static void registerPhaserForMode(Phaser phaser,Mode mode) {
+        if (mode == Mode.SYNCHRONOUS && phaser != null) {
+            phaser.register();
         }
     }
 
