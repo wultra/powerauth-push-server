@@ -16,7 +16,6 @@
 
 package io.getlime.push.util;
 
-import com.google.common.io.BaseEncoding;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +35,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -115,7 +115,7 @@ public class CaCertUtil {
     }
 
     private X509Certificate certificateFromPem(String pem) throws CertificateException {
-        byte[] decoded = BaseEncoding.base64().decode(pem
+        final byte[] decoded = Base64.getDecoder().decode(pem
                 .replaceAll(BEGIN_CERT, "")
                 .replaceAll(END_CERT, "")
                 .replaceAll("\\s", "")

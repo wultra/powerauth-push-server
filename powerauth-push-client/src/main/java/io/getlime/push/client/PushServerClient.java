@@ -16,7 +16,6 @@
 
 package io.getlime.push.client;
 
-import com.google.common.io.BaseEncoding;
 import com.wultra.core.rest.client.base.DefaultRestClient;
 import com.wultra.core.rest.client.base.RestClient;
 import com.wultra.core.rest.client.base.RestClientException;
@@ -39,6 +38,7 @@ import org.springframework.util.MultiValueMap;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -567,7 +567,7 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response updateIos(String appId, String bundle, String keyId, String teamId, String environment, byte[] privateKey) throws PushServerClientException {
-        final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
+        final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
         final UpdateIosRequest request = new UpdateIosRequest(appId, bundle, keyId, teamId, environment, privateKeyBase64);
         logger.info("Calling push server to update iOS, ID: {} - start", appId);
         final Response response = putObjectImpl("/admin/app/ios/update", new ObjectRequest<>(request));
@@ -598,7 +598,7 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response updateAndroid(String appId, String projectId, byte[] privateKey) throws PushServerClientException {
-        final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
+        final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
         final UpdateAndroidRequest request = new UpdateAndroidRequest(appId, projectId, privateKeyBase64);
         logger.info("Calling push server to update android, ID: {} - start", appId);
         final Response response = putObjectImpl("/admin/app/android/update", new ObjectRequest<>(request));

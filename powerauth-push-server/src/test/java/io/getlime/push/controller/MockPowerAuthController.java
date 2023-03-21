@@ -15,7 +15,6 @@
  */
 package io.getlime.push.controller;
 
-import com.google.common.io.BaseEncoding;
 import com.wultra.security.powerauth.client.v3.*;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
@@ -32,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.KeyPair;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -78,7 +78,7 @@ public class MockPowerAuthController {
         try {
             final KeyPair keyPair = new KeyGenerator().generateKeyPair();
             final KeyConvertor keyConvertor = new KeyConvertor();
-            response.setMasterPublicKey(BaseEncoding.base64().encode(keyConvertor.convertPublicKeyToBytes(keyPair.getPublic())));
+            response.setMasterPublicKey(Base64.getEncoder().encodeToString(keyConvertor.convertPublicKeyToBytes(keyPair.getPublic())));
         } catch (CryptoProviderException e) {
             // Exception cannot occur when cryptography provider is set correctly
             logger.error(e.getMessage(), e);
