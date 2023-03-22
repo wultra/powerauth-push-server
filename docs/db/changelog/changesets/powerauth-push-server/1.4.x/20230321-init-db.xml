@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="1" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="push_credentials_seq"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence push_credentials_seq</comment>
+        <createSequence sequenceName="push_credentials_seq"/>
+    </changeSet>
+
+    <changeSet id="2" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="push_device_registration_seq"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence sequence push_device_registration_seq</comment>
+        <createSequence sequenceName="push_device_registration_seq"/>
+    </changeSet>
+
+    <changeSet id="3" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="push_message_seq"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence sequence push_message_seq</comment>
+        <createSequence sequenceName="push_message_seq"/>
+    </changeSet>
+
+    <changeSet id="4" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="push_campaign_seq"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence sequence push_campaign_seq</comment>
+        <createSequence sequenceName="push_campaign_seq"/>
+    </changeSet>
+
+    <changeSet id="5" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="push_campaign_user_seq"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence sequence push_campaign_user_seq</comment>
+        <createSequence sequenceName="push_campaign_user_seq"/>
+    </changeSet>
+
+    <changeSet id="6" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="push_inbox_seq"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence sequence push_inbox_seq</comment>
+        <createSequence sequenceName="push_inbox_seq"/>
+    </changeSet>
+
+    <changeSet id="7" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="push_app_credentials"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence push_app_credentials</comment>
+        <createTable tableName="push_app_credentials">
+            <column name="id" type="integer">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="app_id" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="ios_key_id" type="varchar(255)" />
+            <column name="ios_private_key" type="${blob_type}" />
+            <column name="ios_team_id" type="varchar(255)" />
+            <column name="ios_bundle" type="varchar(255)" />
+            <column name="ios_environment" type="varchar(32)" />
+            <column name="android_private_key" type="${blob_type}" />
+            <column name="android_project_id" type="varchar(255)" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="8" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="push_device_registration"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence push_device_registration</comment>
+        <createTable tableName="push_device_registration">
+            <column name="id" type="integer">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="activation_id" type="varchar(37)" />
+            <column name="user_id" type="varchar(255)" />
+            <column name="app_id" type="integer">
+                <constraints nullable="false" />
+            </column>
+            <column name="platform" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="push_token" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="timestamp_last_registered" type="timestamp(6)">
+                <constraints nullable="false" />
+            </column>
+            <column name="is_active" type="boolean" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="9" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="push_message"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence push_message</comment>
+        <createTable tableName="push_message">
+            <column name="id" type="integer">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="device_registration_id" type="integer">
+                <constraints nullable="false" />
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="activation_id" type="varchar(37)" />
+            <column name="is_silent" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="is_personal" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="message_body" type="varchar(2048)">
+                <constraints nullable="false" />
+            </column>
+            <column name="timestamp_created" type="timestamp(6)">
+                <constraints nullable="false" />
+            </column>
+            <column name="status" type="integer">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="10" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="push_campaign"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence push_campaign</comment>
+        <createTable tableName="push_campaign">
+            <column name="id" type="integer">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="app_id" type="integer">
+                <constraints nullable="false" />
+            </column>
+            <column name="message" type="varchar(4000)">
+                <constraints nullable="false" />
+            </column>
+            <column name="is_sent" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="timestamp_created" type="timestamp(6)">
+                <constraints nullable="false" />
+            </column>
+            <column name="timestamp_completed" type="timestamp(6)" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="11" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="push_campaign_user"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence push_campaign_user</comment>
+        <createTable tableName="push_campaign_user">
+            <column name="id" type="integer">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="campaign_id" type="integer">
+                <constraints nullable="false" />
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="timestamp_created" type="timestamp(6)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="12" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="push_inbox"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence push_inbox</comment>
+        <createTable tableName="push_inbox">
+            <column name="id" type="integer">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="inbox_id" type="varchar(37)">
+                <constraints nullable="false" />
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="type" type="varchar(32)">
+                <constraints nullable="false" />
+            </column>
+            <column name="subject" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="summary" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="body" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="read" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="timestamp_created" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="timestamp_read" type="timestamp" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="13" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="push_inbox_app"/>
+            </not>
+        </preConditions>
+        <comment>Create a new sequence push_inbox_app</comment>
+        <createTable tableName="push_inbox_app">
+            <column name="app_credentials_id" type="integer">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="inbox_id" type="integer">
+                <constraints primaryKey="true" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="14" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_app_cred_app"/>
+            </not>
+        </preConditions>
+        <comment>Create a new unique index on push_app_credentials(app_id)</comment>
+        <createIndex tableName="push_app_credentials" indexName="push_app_cred_app" unique="true">
+            <column name="app_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="15" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_device_app_token"/>
+            </not>
+        </preConditions>
+        <comment>Create a new index on push_device_registration(app_id, push_token)</comment>
+        <createIndex tableName="push_device_registration" indexName="push_device_app_token">
+            <column name="app_id" />
+            <column name="push_token" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="16" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_device_user_app"/>
+            </not>
+        </preConditions>
+        <comment>Create a new index on push_device_registration(user_id, app_id)</comment>
+        <createIndex tableName="push_device_registration" indexName="push_device_user_app">
+            <column name="user_id" />
+            <column name="app_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="17" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_device_activation"/>
+            </not>
+        </preConditions>
+        <comment>Create a new unique index on push_device_registration(activation_id)</comment>
+        <createIndex tableName="push_device_registration" indexName="push_device_activation" unique="true">
+            <column name="activation_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="18" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_device_activation_token"/>
+            </not>
+        </preConditions>
+        <comment>Create a new unique index on push_device_registration(activation_id, push_token)</comment>
+        <createIndex tableName="push_device_registration" indexName="push_device_activation_token" unique="true">
+            <column name="activation_id" />
+            <column name="push_token" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="19" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_message_status"/>
+            </not>
+        </preConditions>
+        <comment>Create a new index on push_message(status)</comment>
+        <createIndex tableName="push_message" indexName="push_message_status">
+            <column name="status" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_campaign_sent"/>
+            </not>
+        </preConditions>
+        <comment>Create a new index on push_campaign(is_sent)</comment>
+        <createIndex tableName="push_campaign" indexName="push_campaign_sent">
+            <column name="is_sent" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="21" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_campaign_user_campaign"/>
+            </not>
+        </preConditions>
+        <comment>Create a new index on push_campaign_user(campaign_id, user_id)</comment>
+        <createIndex tableName="push_campaign_user" indexName="push_campaign_user_campaign">
+            <column name="campaign_id" />
+            <column name="user_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="22" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_campaign_user_detail"/>
+            </not>
+        </preConditions>
+        <comment>Create a new index on push_campaign_user(user_id)</comment>
+        <createIndex tableName="push_campaign_user" indexName="push_campaign_user_detail">
+            <column name="user_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="23" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_inbox_id"/>
+            </not>
+        </preConditions>
+        <comment>Create a new index on push_inbox(inbox_id)</comment>
+        <createIndex tableName="push_inbox" indexName="push_inbox_id">
+            <column name="inbox_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="24" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_inbox_user"/>
+            </not>
+        </preConditions>
+        <comment>Create a new index on push_inbox(user_id)</comment>
+        <createIndex tableName="push_inbox" indexName="push_inbox_user">
+            <column name="user_id" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="25" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="push_inbox_user_read"/>
+            </not>
+        </preConditions>
+        <comment>Create a new index on push_inbox(user_id, read)</comment>
+        <createIndex tableName="push_inbox" indexName="push_inbox_user_read">
+            <column name="user_id" />
+            <column name="read" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
