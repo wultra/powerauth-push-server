@@ -15,7 +15,6 @@
  */
 package io.getlime.push.controller.rest;
 
-import com.google.common.io.BaseEncoding;
 import com.wultra.security.powerauth.client.PowerAuthClient;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
@@ -209,7 +208,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
-        final byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
+        final byte[] privateKeyBytes = Base64.getDecoder().decode(requestObject.getPrivateKeyBase64());
         appCredentialsEntity.setIosPrivateKey(privateKeyBytes);
         appCredentialsEntity.setIosTeamId(requestObject.getTeamId());
         appCredentialsEntity.setIosKeyId(requestObject.getKeyId());
@@ -268,7 +267,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
-        byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
+        final byte[] privateKeyBytes = Base64.getDecoder().decode(requestObject.getPrivateKeyBase64());
         appCredentialsEntity.setAndroidPrivateKey(privateKeyBytes);
         appCredentialsEntity.setAndroidProjectId(requestObject.getProjectId());
         appCredentialsRepository.save(appCredentialsEntity);
