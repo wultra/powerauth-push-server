@@ -40,6 +40,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.PostConstruct;
@@ -176,6 +177,8 @@ public class BatchSendingConfiguration implements BatchConfigurer {
 
     private PlatformTransactionManager createTransactionManager() {
         final JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setDataSource(dataSource);
+        transactionManager.setJpaDialect(new HibernateJpaDialect());
         transactionManager.setEntityManagerFactory(entityManagerFactory);
         return transactionManager;
     }
