@@ -74,7 +74,6 @@
 
         <!-- Library Versions -->
         <guava.version>31.1-jre</guava.version>
-        <jakarta-interceptor.version>1.2.5</jakarta-interceptor.version>
         <rest-base.version>1.6.0</rest-base.version>
         <powerauth.version>1.4.0</powerauth.version>
         <powerauth-crypto.version>1.4.0</powerauth-crypto.version>
