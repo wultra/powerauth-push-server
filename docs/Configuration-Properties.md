@@ -78,4 +78,4 @@ The Push Server uses the following public configuration properties:
 | `powerauth.service.correlation-header.enabled` | `false` | Whether correlation header is enabled |
 | `powerauth.service.correlation-header.name` | `X-Correlation-ID` | Correlation header name |
 | `powerauth.service.correlation-header.value.validation-regexp` | `[a-zA-Z0-9\\-]{8,1024}` | Regular expression for correlation header value validation |
-| `logging.pattern.console` | [See application.properties](https://github.com/wultra/powerauth-push-server/blob/develop/powerauth-push-server/src/main/resources/application.properties#L105) | Logging pattern for console which includes the correlation header value |
+| `logging.pattern.console` | [See application.properties](https://github.com/wultra/powerauth-push-server/blob/develop/powerauth-push-server/src/main/resources/application.properties#docucheck-keep-link) | Logging pattern for console which includes the correlation header value |
