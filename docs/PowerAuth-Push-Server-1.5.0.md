@@ -87,6 +87,18 @@ When sending a push notification or batch of notifications, it is now possible t
 ## Database Changes
 
 
+### Follow-up to Application ID Migrating
+
+Migration guide to [PowerAuth Push Server 1.3.0](./PowerAuth-Push-Server-1.3.0.md) was not clear enough about changing application ID from number to string,
+so you may miss the unique index `push_app_credentials(app_id)`.
+Please double-check its presence and add it if needed.
+
+```sql
+-- reintroduce the unique index
+CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials(app_id);
+```
+
+
 ### Drop MySQL Support
 
 Since version `1.5.0`, MySQL database is not supported anymore.
