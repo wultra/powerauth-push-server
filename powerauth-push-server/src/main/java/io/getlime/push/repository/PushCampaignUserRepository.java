@@ -18,10 +18,11 @@ package io.getlime.push.repository;
 
 import io.getlime.push.repository.model.PushCampaignUserEntity;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -32,7 +33,7 @@ import java.util.List;
 
 @Repository
 @Transactional
-public interface PushCampaignUserRepository extends PagingAndSortingRepository<PushCampaignUserEntity, Long> {
+public interface PushCampaignUserRepository extends PagingAndSortingRepository<PushCampaignUserEntity, Long>, CrudRepository<PushCampaignUserEntity, Long> {
 
     /**
      * Fetches detailed information about the user who is scheduled to given campaign.

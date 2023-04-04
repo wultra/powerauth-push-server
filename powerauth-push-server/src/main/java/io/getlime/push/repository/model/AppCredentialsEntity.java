@@ -16,7 +16,7 @@
 
 package io.getlime.push.repository.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 
 /**

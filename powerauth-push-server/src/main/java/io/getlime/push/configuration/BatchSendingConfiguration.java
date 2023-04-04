@@ -24,27 +24,23 @@ import io.getlime.push.service.batch.UserDeviceItemWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManagerFactory;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManagerFactory;
+import org.springframework.transaction.TransactionManager;
+
 import javax.sql.DataSource;
 
 /**
@@ -54,12 +50,10 @@ import javax.sql.DataSource;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
 @Configuration
-public class BatchSendingConfiguration implements BatchConfigurer {
+public class BatchSendingConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(BatchSendingConfiguration.class);
 
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
     private final PushServiceConfiguration pushServiceConfiguration;
     private final UserDeviceItemReader userDeviceItemReader;
     private final UserDeviceItemProcessor userDeviceItemProcessor;
@@ -68,15 +62,11 @@ public class BatchSendingConfiguration implements BatchConfigurer {
 
     private DataSource dataSource;
     private final EntityManagerFactory entityManagerFactory;
-    private PlatformTransactionManager transactionManager;
     private JobRepository jobRepository;
-    private JobLauncher jobLauncher;
-    private JobExplorer jobExplorer;
+    private PlatformTransactionManager transactionManager;
 
     /**
      * Constructor with autowired dependencies.
-     * @param jobBuilderFactory Job builder factory.
-     * @param stepBuilderFactory Step builder factory.
      * @param pushServiceConfiguration Push service configuration.
      * @param userDeviceItemReader Step user device item reader.
      * @param userDeviceItemProcessor Step user device item processor.
@@ -85,16 +75,12 @@ public class BatchSendingConfiguration implements BatchConfigurer {
      * @param entityManagerFactory Entity manager factory.
      */
     @Autowired
-    public BatchSendingConfiguration(JobBuilderFactory jobBuilderFactory,
-                                     StepBuilderFactory stepBuilderFactory,
-                                     PushServiceConfiguration pushServiceConfiguration,
+    public BatchSendingConfiguration(PushServiceConfiguration pushServiceConfiguration,
                                      UserDeviceItemReader userDeviceItemReader,
                                      UserDeviceItemProcessor userDeviceItemProcessor,
                                      UserDeviceItemWriter userDeviceItemWriter,
                                      SendCampaignJobListener sendCampaignJobListener,
                                      EntityManagerFactory entityManagerFactory) {
-        this.jobBuilderFactory = jobBuilderFactory;
-        this.stepBuilderFactory = stepBuilderFactory;
         this.pushServiceConfiguration = pushServiceConfiguration;
         this.userDeviceItemReader = userDeviceItemReader;
         this.userDeviceItemProcessor = userDeviceItemProcessor;
@@ -104,8 +90,8 @@ public class BatchSendingConfiguration implements BatchConfigurer {
     }
 
     private TaskletStep buildTaskletStep() {
-        return stepBuilderFactory.get("SendCampaignStep")
-                .<UserDevice, UserDevice>chunk(pushServiceConfiguration.getCampaignBatchSize())
+        return new StepBuilder("SendCampaignStep", jobRepository)
+                .<UserDevice, UserDevice>chunk(pushServiceConfiguration.getCampaignBatchSize(), transactionManager)
                 .reader(userDeviceItemReader)
                 .processor(userDeviceItemProcessor)
                 .writer(userDeviceItemWriter)
@@ -119,12 +105,17 @@ public class BatchSendingConfiguration implements BatchConfigurer {
     @Bean
     public Job sendCampaignJob() {
         final TaskletStep step = buildTaskletStep();
-        return jobBuilderFactory.get("SendCampaignJob")
+        return new JobBuilder("SendCampaignJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .flow(step)
                 .end()
                 .listener(sendCampaignJobListener)
                 .build();
+    }
+
+    @Bean
+    public TransactionManager transactionManager() {
+        return transactionManager;
     }
 
     /**
@@ -134,31 +125,6 @@ public class BatchSendingConfiguration implements BatchConfigurer {
     @Autowired(required = false)
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.transactionManager = createTransactionManager();
-    }
-
-    @Override
-    @NonNull
-    public JobRepository getJobRepository() {
-        return jobRepository;
-    }
-
-    @Override
-    @NonNull
-    public PlatformTransactionManager getTransactionManager() {
-        return transactionManager;
-    }
-
-    @Override
-    @NonNull
-    public JobLauncher getJobLauncher() {
-        return jobLauncher;
-    }
-
-    @Override
-    @NonNull
-    public JobExplorer getJobExplorer() {
-        return jobExplorer;
     }
 
     /**
@@ -167,9 +133,8 @@ public class BatchSendingConfiguration implements BatchConfigurer {
     @PostConstruct
     public void initialize() {
         try {
+            this.transactionManager = createTransactionManager();
             this.jobRepository = createJobRepository();
-            this.jobExplorer = createJobExplorer();
-            this.jobLauncher = createJobLauncher();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -181,20 +146,6 @@ public class BatchSendingConfiguration implements BatchConfigurer {
         transactionManager.setJpaDialect(new HibernateJpaDialect());
         transactionManager.setEntityManagerFactory(entityManagerFactory);
         return transactionManager;
-    }
-
-    private JobExplorer createJobExplorer() throws Exception {
-        JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
-        jobExplorerFactoryBean.setDataSource(this.dataSource);
-        jobExplorerFactoryBean.afterPropertiesSet();
-        return jobExplorerFactoryBean.getObject();
-    }
-
-    private JobLauncher createJobLauncher() throws Exception {
-        SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
-        jobLauncher.setJobRepository(jobRepository);
-        jobLauncher.afterPropertiesSet();
-        return jobLauncher;
     }
 
     private JobRepository createJobRepository() throws Exception {

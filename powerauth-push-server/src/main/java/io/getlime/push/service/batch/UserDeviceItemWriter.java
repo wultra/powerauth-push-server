@@ -25,11 +25,11 @@ import io.getlime.push.repository.serialization.JsonSerialization;
 import io.getlime.push.service.PushMessageSenderService;
 import io.getlime.push.service.batch.storage.CampaignMessageStorageMap;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -68,7 +68,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
      * @throws Exception In case of business logic error.
      */
     @Override
-    public void write(List<? extends UserDevice> list) throws Exception {
+    public void write(Chunk<? extends UserDevice> list) throws Exception {
         for (UserDevice device: list) {
             final String platform = device.getPlatform();
             final String token = device.getToken();

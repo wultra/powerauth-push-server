@@ -20,7 +20,7 @@ import io.getlime.push.repository.model.PushCampaignEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 
 /**
