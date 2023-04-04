@@ -31,6 +31,9 @@ WHERE EXISTS (SELECT 1 FROM pa_application pa WHERE pa.id = push.app_id_orig);
 
 -- remove the original column with numeric app ID value 
 ALTER TABLE push_app_credentials DROP COLUMN app_id_orig;
+
+-- reintroduce the unique index
+CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials(app_id);
 ```
 
 PostgreSQL:
@@ -49,6 +52,9 @@ WHERE pa.id = push_app_credentials.app_id_orig;
 
 -- remove the original column with numeric app ID value 
 ALTER TABLE push_app_credentials DROP COLUMN app_id_orig;
+
+-- reintroduce the unique index
+CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials(app_id);
 ```
 
 Alternatively, you can alter the table manually to have `app_id` column of `VARCHAR(255)` type and value of PowerAuth application name.
