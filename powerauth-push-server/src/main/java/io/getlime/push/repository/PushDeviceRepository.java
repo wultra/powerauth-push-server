@@ -19,8 +19,8 @@ package io.getlime.push.repository;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.transaction.Transactional;
 import java.util.List;
 
 /**
