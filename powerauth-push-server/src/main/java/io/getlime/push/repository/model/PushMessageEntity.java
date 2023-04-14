@@ -18,7 +18,7 @@ package io.getlime.push.repository.model;
 
 import io.getlime.push.repository.converter.PushMessageStatusConverter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 

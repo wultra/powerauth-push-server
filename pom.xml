@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version>
+        <version>3.0.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -74,7 +74,7 @@
 
         <!-- Library Versions -->
         <guava.version>31.1-jre</guava.version>
-        <rest-base.version>1.6.0</rest-base.version>
+        <rest-base.version>1.7.0-SNAPSHOT</rest-base.version>
         <powerauth.version>1.4.0</powerauth.version>
         <powerauth-crypto.version>1.4.0</powerauth-crypto.version>
         <pushy.version>0.15.2</pushy.version>
