@@ -16,7 +16,8 @@
 
 package io.getlime.push.model.request;
 
-import com.wultra.security.powerauth.client.v3.ActivationStatus;
+
+import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
 
 /**
  * Class representing request object responsible for updating activation status.

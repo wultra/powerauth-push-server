@@ -16,6 +16,7 @@
 package io.getlime.push.controller.rest;
 
 import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.model.entity.Application;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
@@ -101,7 +102,7 @@ public class AdministrationController {
             final GetApplicationListResponse response = new GetApplicationListResponse();
 
             // Get all applications in PA Server
-            final List<com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications> applicationList = getApplicationList().getApplications();
+            final List<Application> applicationList = getApplicationList().getApplications();
 
             // Get all applications that are already set up
             final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
@@ -111,7 +112,7 @@ public class AdministrationController {
             for (AppCredentialsEntity appCred: appCredentials) {
                 identifiers.add(appCred.getAppId());
             }
-            for (com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications app : applicationList) {
+            for (Application app : applicationList) {
                 if (!identifiers.contains(app.getApplicationId())) {
                     final PushServerApplication applicationToAdd = new PushServerApplication();
                     applicationToAdd.setAppId(app.getApplicationId());
@@ -316,10 +317,8 @@ public class AdministrationController {
         return appCredentialsEntityOptional.get();
     }
 
-    private com.wultra.security.powerauth.client.v3.GetApplicationListResponse getApplicationList() throws PowerAuthClientException {
-        final com.wultra.security.powerauth.client.v3.GetApplicationListRequest listRequest = new com.wultra.security.powerauth.client.v3.GetApplicationListRequest();
+    private com.wultra.security.powerauth.client.model.response.GetApplicationListResponse getApplicationList() throws PowerAuthClientException {
         return powerAuthClient.getApplicationList(
-                listRequest,
                 httpCustomizationService.getQueryParams(),
                 httpCustomizationService.getHttpHeaders()
         );
