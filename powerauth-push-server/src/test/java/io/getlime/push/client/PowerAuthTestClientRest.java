@@ -17,8 +17,14 @@ package io.getlime.push.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.model.entity.Application;
+import com.wultra.security.powerauth.client.model.entity.ApplicationVersion;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
-import com.wultra.security.powerauth.client.v3.*;
+import com.wultra.security.powerauth.client.model.request.InitActivationRequest;
+import com.wultra.security.powerauth.client.model.response.CommitActivationResponse;
+import com.wultra.security.powerauth.client.model.response.CreateApplicationVersionResponse;
+import com.wultra.security.powerauth.client.model.response.InitActivationResponse;
+import com.wultra.security.powerauth.client.model.response.PrepareActivationResponse;
 import com.wultra.security.powerauth.rest.client.PowerAuthRestClient;
 import io.getlime.push.api.PowerAuthTestClient;
 import io.getlime.security.powerauth.crypto.client.activation.PowerAuthClientActivation;
@@ -69,24 +75,24 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
 
     public String initializeApplication(String applicationName, String applicationVersion) throws PowerAuthClientException {
         // Create application if it does not exist
-        List<GetApplicationListResponse.Applications> applications = powerAuthClient.getApplicationList();
+        final List<Application> applications = powerAuthClient.getApplicationList().getApplications();
         boolean applicationExists = false;
-        for (com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications app: applications) {
+        for (Application app: applications) {
             if (app.getApplicationId().equals(applicationName)) {
                 applicationExists = true;
                 applicationId = app.getApplicationId();
             }
         }
         if (!applicationExists) {
-            com.wultra.security.powerauth.client.v3.CreateApplicationResponse response = powerAuthClient.createApplication(applicationName);
+            com.wultra.security.powerauth.client.model.response.CreateApplicationResponse response = powerAuthClient.createApplication(applicationName);
             applicationId = response.getApplicationId();
         }
 
         // Create application version if it does not exist
-        com.wultra.security.powerauth.client.v3.GetApplicationDetailResponse detail = powerAuthClient.getApplicationDetail(applicationId);
+        com.wultra.security.powerauth.client.model.response.GetApplicationDetailResponse detail = powerAuthClient.getApplicationDetail(applicationId);
         masterPublicKey = detail.getMasterPublicKey();
         boolean versionExists = false;
-        for (GetApplicationDetailResponse.Versions appVersion: detail.getVersions()) {
+        for (ApplicationVersion appVersion: detail.getVersions()) {
             if (appVersion.getApplicationVersionId().equals(applicationVersion)) {
                 versionExists = true;
                 applicationKey = appVersion.getApplicationKey();
@@ -118,7 +124,7 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
         final String devicePublicKeyBase64 = Base64.getEncoder().encodeToString(devicePublicKeyBytes);
 
         // Create activation layer 2 request which is decryptable only on PowerAuth server
-        ActivationLayer2Request requestL2 = new ActivationLayer2Request();
+        final ActivationLayer2Request requestL2 = new ActivationLayer2Request();
         requestL2.setActivationName("Test activation");
         requestL2.setDevicePublicKey(devicePublicKeyBase64);
 
@@ -138,7 +144,7 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
         final String nonce = Base64.getEncoder().encodeToString(eciesCryptogramL2.getNonce());
 
         // Prepare activation
-        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, null, ephemeralPublicKey, encryptedData, mac, nonce);
+        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, false, ephemeralPublicKey, encryptedData, mac, nonce);
         assertNotNull(prepareResponse.getActivationId());
 
         // Commit activation
