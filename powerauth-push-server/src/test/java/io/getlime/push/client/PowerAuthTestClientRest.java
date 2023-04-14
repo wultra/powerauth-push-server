@@ -144,7 +144,7 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
         final String nonce = Base64.getEncoder().encodeToString(eciesCryptogramL2.getNonce());
 
         // Prepare activation
-        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, null, ephemeralPublicKey, encryptedData, mac, nonce);
+        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, false, ephemeralPublicKey, encryptedData, mac, nonce);
         assertNotNull(prepareResponse.getActivationId());
 
         // Commit activation
