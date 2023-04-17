@@ -50,7 +50,7 @@ public class PushDeviceRegistrationEntity implements Serializable {
      */
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_device_registration", sequenceName = "push_device_registration_seq")
+    @SequenceGenerator(name = "push_device_registration", sequenceName = "push_device_registration_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_device_registration")
     private Long id;
 
