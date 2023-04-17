@@ -82,7 +82,7 @@
         <pushy.version>0.15.2</pushy.version>
         <springdoc-openapi.version>1.6.14</springdoc-openapi.version>
         <google-api-client.version>1.35.1</google-api-client.version>
-        <firebase-admin.version>8.2.0</firebase-admin.version>
+        <firebase-admin.version>9.1.1</firebase-admin.version>
         <bc.version>1.73</bc.version>
         <swagger-annotations-jakarta.version>2.2.8</swagger-annotations-jakarta.version>
 
