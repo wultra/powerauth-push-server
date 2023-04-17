@@ -34,7 +34,7 @@ public class PushCampaignEntity implements Serializable {
      */
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_campaign", sequenceName = "push_campaign_seq")
+    @SequenceGenerator(name = "push_campaign", sequenceName = "push_campaign_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_campaign")
     private Long id;
 

@@ -2,6 +2,22 @@
 
 This guide contains instructions for migration from PowerAuth Push Server version `1.4.x` to version `1.5.x`.
 
+## Spring Boot 3
+
+The PowerAuth Server was upgraded to Spring Boot 3, Spring Framework 6, and Hibernate 6.
+It requires Java 17 or newer.
+
+Remove this property.
+
+`spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false`
+
+Make sure that you use dialect without version.
+
+```properties
+# spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+# spring.jpa.database-platform=org.hibernate.dialect.OracleDialect
+```
+
 ## New Asynchronous Sending Mode
 
 When sending a push notification or batch of notifications, it is now possible to specify an additional `mode` parameter. The parameter specifies if the request processing should wait for sending all push notifications (`SYNCHRONOUS`, default value), or if the request processing should return value immediately (`ASYNCHRONOUS`). When `ASYNCHRONOUS` mode is specified, the response object does not include the number of sent, failed, pending and total messages.

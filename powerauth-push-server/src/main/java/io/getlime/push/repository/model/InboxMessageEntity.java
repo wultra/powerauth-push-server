@@ -45,7 +45,7 @@ public class InboxMessageEntity implements Serializable {
      */
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_app_inbox", sequenceName = "push_inbox_seq")
+    @SequenceGenerator(name = "push_app_inbox", sequenceName = "push_inbox_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_app_inbox")
     private Long id;
 

@@ -77,7 +77,7 @@ public class PushMessageEntity implements Serializable {
      */
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_message", sequenceName = "push_message_seq")
+    @SequenceGenerator(name = "push_message", sequenceName = "push_message_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_message")
     private Long id;
 
