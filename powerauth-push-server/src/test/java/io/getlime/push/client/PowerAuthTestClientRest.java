@@ -33,7 +33,7 @@ import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.EciesFactory;
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesCryptogram;
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesSharedInfo1;
 import io.getlime.security.powerauth.crypto.lib.util.KeyConvertor;
-import io.getlime.security.powerauth.rest.api.model.request.v3.ActivationLayer2Request;
+import io.getlime.security.powerauth.rest.api.model.request.ActivationLayer2Request;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
