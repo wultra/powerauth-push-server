@@ -29,7 +29,7 @@ import io.getlime.push.model.response.GetInboxMessageCountResponse;
 import io.getlime.push.model.response.GetInboxMessageDetailResponse;
 import io.getlime.push.service.InboxService;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.springdoc.api.annotations.ParameterObject;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
