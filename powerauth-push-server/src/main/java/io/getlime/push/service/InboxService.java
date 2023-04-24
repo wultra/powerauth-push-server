@@ -104,9 +104,8 @@ public class InboxService {
 
     @Transactional
     public GetInboxMessageDetailResponse readMessage(String inboxId) throws InboxMessageNotFoundException {
-        final InboxMessageEntity messageEntity = inboxRepository.findFirstByInboxId(inboxId).orElseThrow(() ->
+        final InboxMessageEntity inboxMessage = inboxRepository.findFirstByInboxId(inboxId).orElseThrow(() ->
                 new InboxMessageNotFoundException("Unable to mark message: " + inboxId + " as read."));
-        final InboxMessageEntity inboxMessage = messageEntity;
         if (!inboxMessage.isRead()) { // do not call repository save if there is no change.
             inboxMessage.setRead(true);
             inboxMessage.setTimestampRead(new Date());

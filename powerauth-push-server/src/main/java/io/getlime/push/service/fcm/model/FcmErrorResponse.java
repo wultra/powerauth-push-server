@@ -73,8 +73,7 @@ public class FcmErrorResponse {
         Object details = error.get("details");
         if (details instanceof List) {
             for (Object detail : (List<?>) details) {
-                if (detail instanceof Map) {
-                    Map<?, ?> detailMap = (Map<?, ?>) detail;
+                if (detail instanceof final Map<?, ?> detailMap) {
                     if (FCM_ERROR_TYPE.equals(detailMap.get("@type"))) {
                         String errorCode = (String) detailMap.get("errorCode");
                         return MESSAGING_ERROR_CODES.get(errorCode);

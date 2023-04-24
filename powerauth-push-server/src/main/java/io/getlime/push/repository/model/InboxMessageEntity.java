@@ -118,8 +118,7 @@ public class InboxMessageEntity implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof InboxMessageEntity)) return false;
-        final InboxMessageEntity that = (InboxMessageEntity) o;
+        if (!(o instanceof final InboxMessageEntity that)) return false;
         return inboxId.equals(that.inboxId)
                 && userId.equals(that.userId)
                 && applications.equals(that.applications)

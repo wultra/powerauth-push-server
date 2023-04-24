@@ -167,9 +167,9 @@ public class PushSendingWorker {
 
         // Callback when FCM request fails
         final Consumer<Throwable> onError = t -> {
-            if (t instanceof RestClientException) {
-                final MessagingErrorCode errorCode = fcmConverter.convertExceptionToErrorCode((RestClientException) t);
-                logger.warn("FCM server returned error response: {}.", ((RestClientException) t).getResponse());
+            if (t instanceof final RestClientException restClientException) {
+                final MessagingErrorCode errorCode = fcmConverter.convertExceptionToErrorCode(restClientException);
+                logger.warn("FCM server returned error response: {}.", (restClientException).getResponse());
                 switch (errorCode) {
                     case UNREGISTERED -> {
                         logger.info("Push message rejected by FCM gateway, device registration for token: {} is invalid and will be removed. Error: {}", pushToken, errorCode);
