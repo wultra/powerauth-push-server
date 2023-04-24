@@ -89,9 +89,8 @@ public class PushServerMultipleActivationsTests {
 
     @Test
     public void createDeviceWithMultipleActivationsInvalidTest() {
-        assertThrows(PushServerClientException.class, () -> {
-            pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, Collections.emptyList());
-        });
+        assertThrows(PushServerClientException.class, () ->
+                pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, Collections.emptyList()));
     }
 
     @Test
