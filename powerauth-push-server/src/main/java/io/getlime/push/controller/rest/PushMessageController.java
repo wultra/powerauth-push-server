@@ -68,12 +68,12 @@ public class PushMessageController {
      */
     @PostMapping(value = "send")
     @Operation(summary = "Send a single Push message",
-                  description = "Send push message to user, defined in request body - message object by user ID and activation ID," +
-                          " using given application ID \n \n" +
-                          "Message contains attributes and body\n" +
-                          "Attributes describe whether message has to be " +
-                          "silent (If true, no system UI is displayed), personal (If true and activation is not in ACTIVE state the message is not sent)\n" +
-                          "Body consist of body (message), and notification parameters")
+                  description = """
+                          Send push message to user, defined in request body - message object by user ID and activation ID, using given application ID\s
+                          \s
+                          Message contains attributes and body
+                          Attributes describe whether message has to be silent (If true, no system UI is displayed), personal (If true and activation is not in ACTIVE state the message is not sent)
+                          Body consist of body (message), and notification parameters""")
     public ObjectResponse<BasePushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
         SendPushMessageRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
