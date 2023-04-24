@@ -238,7 +238,7 @@ public class FcmClient {
         }
 
         try {
-            ParameterizedTypeReference<FcmSuccessResponse> responseType = new ParameterizedTypeReference<FcmSuccessResponse>(){};
+            ParameterizedTypeReference<FcmSuccessResponse> responseType = new ParameterizedTypeReference<>(){};
             restClient.postNonBlocking(fcmSendMessageUrl, body, null, headers, responseType, onSuccess, onError);
         } catch (RestClientException ex) {
             logger.debug(ex.getMessage(), ex);

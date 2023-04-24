@@ -203,7 +203,7 @@ public class PushServerClient {
         logger.info("Calling push server update device status, activation ID: {} - start", activationId);
         // Note that there is just plain 'request' in the request, not 'new ObjectRequest<>(request)'.
         // This is due to the fact that standard PowerAuth Server callback format is used here.
-        Response response = postImpl("/push/device/status/update", request, new ParameterizedTypeReference<Response>(){});
+        Response response = postImpl("/push/device/status/update", request, new ParameterizedTypeReference<>(){});
         logger.info("Calling push server update device status, activation ID: {} - finish", activationId);
 
         return response.getStatus().equals(Response.Status.OK);
@@ -403,7 +403,7 @@ public class PushServerClient {
         String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
         MultiValueMap<String, String> params = buildPages(page, size);
 
-        ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>>() {};
+        ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new ParameterizedTypeReference<>() {};
         logger.info("Calling push server to get users from the campaign, campaign ID: {} - start", campaignId);
         final PagedResponse<ListOfUsersFromCampaignResponse> result = getImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
         logger.info("Calling push server to get users from the campaign, campaign ID: {} - finish", campaignId);
@@ -621,7 +621,7 @@ public class PushServerClient {
         params.add("applications", String.join(",", applications));
         params.add("onlyUnread", Boolean.toString(onlyUnread));
 
-        final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>>() {};
+        final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<>() {};
         logger.info("Calling push server fetch messages for user: {} - start", userId);
         final PagedResponse<ListOfInboxMessages> result = getImpl("/inbox/messages/list", params, typeReference);
         logger.info("Calling push server fetch messages for user: {} - finish", userId);
@@ -641,7 +641,7 @@ public class PushServerClient {
         params.add("userId", userId);
         params.add("appId", appId);
 
-        final ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>>() {};
+        final ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>> typeReference = new ParameterizedTypeReference<>() {};
         logger.info("Calling push server fetch message count for user: {} - start", userId);
         final ObjectResponse<GetInboxMessageCountResponse> result = getImpl("/inbox/messages/count", params, typeReference);
         logger.info("Calling push server fetch message count for user: {} - finish", userId);
