@@ -17,6 +17,8 @@
 package io.getlime.push.repository.model;
 
 import jakarta.persistence.*;
+
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -27,6 +29,8 @@ import java.io.Serializable;
 @Entity
 @Table(name = "push_app_credentials")
 public class AppCredentialsEntity implements Serializable {
+
+    @Serial
     private static final long serialVersionUID = -8904070389354612019L;
 
     /**
