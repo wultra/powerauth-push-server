@@ -136,13 +136,10 @@ public class PushDeviceController {
      */
     @PostMapping(value = "create/multi")
     @Operation(summary = "Create a device for multiple associated activations",
-            description = "Create a new device push token (platform specific). The call must include one or more activation IDs." +
-                    "Request body should contain application ID, device token, device's platform and list of activation IDs. " +
-                    "If such device already exist, date on last registration is updated and also platform might be changed\n" +
-                    "\n---" +
-                    "Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. " +
-                    "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs," +
-                    " so that there are no incorrect bindings.")
+            description = """
+                    Create a new device push token (platform specific). The call must include one or more activation IDs.Request body should contain application ID, device token, device's platform and list of activation IDs. If such device already exist, date on last registration is updated and also platform might be changed
+
+                    ---Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs, so that there are no incorrect bindings.""")
     public Response createDeviceMultipleActivations(@RequestBody ObjectRequest<CreateDeviceForActivationsRequest> request) throws PushServerException {
         CreateDeviceForActivationsRequest requestedObject = request.getRequestObject();
         if (requestedObject == null) {
