@@ -129,7 +129,7 @@ public class PushCampaignController {
         logger.info("Received deleteCampaign request, campaign ID: {}", campaignId);
         final DeleteCampaignResponse deleteCampaignResponse = new DeleteCampaignResponse();
         final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
-        if (!campaignEntityOptional.isPresent()) {
+        if (campaignEntityOptional.isEmpty()) {
             deleteCampaignResponse.setDeleted(false);
         } else {
             pushCampaignRepository.delete(campaignEntityOptional.get());
@@ -289,11 +289,8 @@ public class PushCampaignController {
      * @throws PushServerException In case the application credentials do not exist for provided PowerAuth app ID.
      */
     private AppCredentialsEntity findApplicationCredentials(String powerAuthAppId) throws PushServerException {
-        final Optional<AppCredentialsEntity> credentialsEntityOptional = appCredentialsRepository.findFirstByAppId(powerAuthAppId);
-        if (!credentialsEntityOptional.isPresent()) {
-            throw new PushServerException("Application with a provided PowerAuth app ID does not exist: " + powerAuthAppId);
-        }
-        return credentialsEntityOptional.get();
+        return appCredentialsRepository.findFirstByAppId(powerAuthAppId).orElseThrow(() ->
+                new PushServerException("Application with a provided PowerAuth app ID does not exist: " + powerAuthAppId));
     }
 
     /**
@@ -315,11 +312,8 @@ public class PushCampaignController {
      * @throws PushServerException Thrown when campaign entity does not exist.
      */
     private PushCampaignEntity findPushCampaignById(Long campaignId) throws PushServerException {
-        final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
-        if (!campaignEntityOptional.isPresent()) {
-            throw new PushServerException("Campaign with entered ID does not exist");
-        }
-        return campaignEntityOptional.get();
+        return pushCampaignRepository.findById(campaignId).orElseThrow(() ->
+            new PushServerException("Campaign with entered ID does not exist"));
     }
 
     /**
@@ -329,7 +323,7 @@ public class PushCampaignController {
      */
     private void assureExistsPushCampaignById(Long campaignId) throws PushServerException {
         final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
-        if (!campaignEntityOptional.isPresent()) {
+        if (campaignEntityOptional.isEmpty()) {
             throw new PushServerException("Campaign with entered ID does not exist");
         }
     }

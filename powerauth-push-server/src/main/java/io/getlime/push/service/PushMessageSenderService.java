@@ -37,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Phaser;
 
 /**
@@ -298,11 +297,8 @@ public class PushMessageSenderService {
 
     // Lookup application credentials by appID and throw exception in case application is not found.
     private AppCredentialsEntity getAppCredentials(String appId) throws PushServerException {
-        final Optional<AppCredentialsEntity> credentials = appCredentialsRepository.findFirstByAppId(appId);
-        if (!credentials.isPresent()) {
-            throw new PushServerException("Application not found: " + appId);
-        }
-        return credentials.get();
+        return appCredentialsRepository.findFirstByAppId(appId).orElseThrow(() ->
+            new PushServerException("Application not found: " + appId));
     }
 
     // Return list of devices related to given user or activation ID (if present). List of devices is related to particular application as well.

@@ -30,8 +30,6 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 /**
  * Item writer that send notification to directed device and save message to database.
  *
@@ -80,11 +78,8 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
             // Load and cache campaign information
             PushCampaignEntity campaign = campaignStorageMap.get(campaignId);
             if (campaign == null) {
-                final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
-                if (!campaignEntityOptional.isPresent()) {
-                    throw new PushServerException("Campaign with entered ID does not exist");
-                }
-                campaign = campaignEntityOptional.get();
+                campaign = pushCampaignRepository.findById(campaignId).orElseThrow(() ->
+                    new PushServerException("Campaign with entered ID does not exist"));
                 campaignStorageMap.put(campaignId, campaign);
             }
             final PushMessageBody messageBody = jsonSerialization.deserializePushMessageBody(campaign.getMessage());

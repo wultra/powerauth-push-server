@@ -381,10 +381,7 @@ public class PushDeviceController {
     }
 
     private AppCredentialsEntity findAppCredentials(String powerAuthAppId) throws PushServerException {
-        final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findFirstByAppId(powerAuthAppId);
-        if (!appCredentialsEntityOptional.isPresent()) {
-            throw new PushServerException("Application with given ID does not exist");
-        }
-        return appCredentialsEntityOptional.get();
+        return appCredentialsRepository.findFirstByAppId(powerAuthAppId).orElseThrow(() ->
+                new PushServerException("Application with given ID does not exist"));
     }
 }

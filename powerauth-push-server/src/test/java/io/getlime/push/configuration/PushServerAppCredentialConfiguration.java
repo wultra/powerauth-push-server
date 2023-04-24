@@ -36,7 +36,7 @@ public class PushServerAppCredentialConfiguration {
     }
 
     public void configure(String applicationId) {
-        if (!appCredentialsRepository.findFirstByAppId(applicationId).isPresent()) {
+        if (appCredentialsRepository.findFirstByAppId(applicationId).isEmpty()) {
             final AppCredentialsEntity testCredentials = new AppCredentialsEntity();
             testCredentials.setAppId(applicationId);
             testCredentials.setAndroidProjectId("test-project");

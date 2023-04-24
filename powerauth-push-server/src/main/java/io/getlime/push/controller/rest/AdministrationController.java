@@ -310,11 +310,8 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity does not exists.
      */
     private AppCredentialsEntity findAppCredentialsEntityById(String powerAuthAppId) throws PushServerException {
-        final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findFirstByAppId(powerAuthAppId);
-        if (!appCredentialsEntityOptional.isPresent()) {
-            throw new PushServerException("Application credentials with entered ID does not exist");
-        }
-        return appCredentialsEntityOptional.get();
+        return appCredentialsRepository.findFirstByAppId(powerAuthAppId).orElseThrow(() ->
+                new PushServerException("Application credentials with entered ID does not exist"));
     }
 
     private com.wultra.security.powerauth.client.model.response.GetApplicationListResponse getApplicationList() throws PowerAuthClientException {
