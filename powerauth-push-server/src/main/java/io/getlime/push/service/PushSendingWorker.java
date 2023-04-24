@@ -171,31 +171,28 @@ public class PushSendingWorker {
                 final MessagingErrorCode errorCode = fcmConverter.convertExceptionToErrorCode((RestClientException) t);
                 logger.warn("FCM server returned error response: {}.", ((RestClientException) t).getResponse());
                 switch (errorCode) {
-                    case UNREGISTERED:
+                    case UNREGISTERED -> {
                         logger.info("Push message rejected by FCM gateway, device registration for token: {} is invalid and will be removed. Error: {}", pushToken, errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                         return;
-
-                    case UNAVAILABLE:
-                    case INTERNAL:
-                    case QUOTA_EXCEEDED:
+                    }
+                    case UNAVAILABLE, INTERNAL, QUOTA_EXCEEDED -> {
                         // TODO - implement throttling of messages, see:
                         // https://firebase.google.com/docs/cloud-messaging/admin/errors
                         logger.warn("Push message rejected by FCM gateway, message status set to PENDING. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
                         return;
-
-                    case SENDER_ID_MISMATCH:
-                    case THIRD_PARTY_AUTH_ERROR:
-                    case INVALID_ARGUMENT:
+                    }
+                    case SENDER_ID_MISMATCH, THIRD_PARTY_AUTH_ERROR, INVALID_ARGUMENT -> {
                         logger.warn("Push message rejected by FCM gateway. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         return;
-
-                    default:
+                    }
+                    default -> {
                         logger.error("Unexpected error code received from FCM gateway. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         return;
+                    }
                 }
             }
 

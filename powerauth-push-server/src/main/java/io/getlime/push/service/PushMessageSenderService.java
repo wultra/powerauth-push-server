@@ -132,26 +132,22 @@ public class PushMessageSenderService {
                         pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), (result) -> {
                             try {
                                 switch (result) {
-                                    case OK: {
+                                    case OK -> {
                                         sendResult.getIos().setSent(sendResult.getIos().getSent() + 1);
                                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
-                                        break;
                                     }
-                                    case PENDING: {
+                                    case PENDING -> {
                                         sendResult.getIos().setPending(sendResult.getIos().getPending() + 1);
                                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
-                                        break;
                                     }
-                                    case FAILED: {
+                                    case FAILED -> {
                                         sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
                                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
-                                        break;
                                     }
-                                    case FAILED_DELETE: {
+                                    case FAILED_DELETE -> {
                                         sendResult.getIos().setFailed(sendResult.getIos().getFailed() + 1);
                                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                                         pushDeviceRepository.delete(device);
-                                        break;
                                     }
                                 }
                                 sendResult.getIos().setTotal(sendResult.getIos().getTotal() + 1);
@@ -171,26 +167,22 @@ public class PushMessageSenderService {
                         pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, (sendingResult) -> {
                             try {
                                 switch (sendingResult) {
-                                    case OK: {
+                                    case OK -> {
                                         sendResult.getAndroid().setSent(sendResult.getAndroid().getSent() + 1);
                                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
-                                        break;
                                     }
-                                    case PENDING: {
+                                    case PENDING -> {
                                         sendResult.getAndroid().setPending(sendResult.getAndroid().getPending() + 1);
                                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
-                                        break;
                                     }
-                                    case FAILED: {
+                                    case FAILED -> {
                                         sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
                                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
-                                        break;
                                     }
-                                    case FAILED_DELETE: {
+                                    case FAILED_DELETE -> {
                                         sendResult.getAndroid().setFailed(sendResult.getAndroid().getFailed() + 1);
                                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                                         pushDeviceRepository.delete(device);
-                                        break;
                                     }
                                 }
                                 sendResult.getAndroid().setTotal(sendResult.getAndroid().getTotal() + 1);
@@ -251,44 +243,30 @@ public class PushMessageSenderService {
         if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
             pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getIosBundle(), (result) -> {
                 switch (result) {
-                    case OK: {
+                    case OK ->
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
-                        break;
-                    }
-                    case PENDING: {
+                    case PENDING ->
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
-                        break;
-                    }
-                    case FAILED: {
+                    case FAILED ->
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
-                        break;
-                    }
-                    case FAILED_DELETE: {
+                    case FAILED_DELETE -> {
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                         pushDeviceRepository.deleteAllByAppCredentialsIdAndPushToken(pushClient.getAppCredentials().getId(), token);
-                        break;
                     }
                 }
             });
         } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
             pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, priority, token, (result) -> {
                 switch (result) {
-                    case OK: {
+                    case OK ->
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.SENT);
-                        break;
-                    }
-                    case PENDING: {
+                    case PENDING ->
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.PENDING);
-                        break;
-                    }
-                    case FAILED: {
+                    case FAILED ->
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
-                        break;
-                    }
-                    case FAILED_DELETE: {
+                    case FAILED_DELETE -> {
                         updateStatusAndPersist(pushMessageObject, PushMessageEntity.Status.FAILED);
                         pushDeviceRepository.deleteAllByAppCredentialsIdAndPushToken(pushClient.getAppCredentials().getId(), token);
-                        break;
                     }
                 }
             });
