@@ -175,6 +175,7 @@
             <column name="timestamp_created" type="timestamp(6)">
                 <constraints nullable="false" />
             </column>
+            <column name="timestamp_sent" type="timestamp(6)" />
             <column name="timestamp_completed" type="timestamp(6)" />
         </createTable>
     </changeSet>
