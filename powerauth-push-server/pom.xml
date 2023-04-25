@@ -104,10 +104,6 @@
         </dependency>
         <dependency>
             <groupId>io.getlime.security</groupId>
-            <artifactId>powerauth-push-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-rest-client-spring</artifactId>
             <version>${powerauth.version}</version>
         </dependency>
@@ -138,6 +134,11 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.getlime.security</groupId>
+            <artifactId>powerauth-push-client</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

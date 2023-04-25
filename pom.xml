@@ -69,7 +69,7 @@
 
     <properties>
         <!--  Wultra Dependencies  -->
-        <rest-base.version>1.7.0-SNAPSHOT</rest-base.version>
+        <wultra-core.version>1.7.0-SNAPSHOT</wultra-core.version>
         <powerauth.version>1.5.0-SNAPSHOT</powerauth.version>
         <powerauth-crypto.version>1.5.0-SNAPSHOT</powerauth-crypto.version>
 
@@ -103,6 +103,26 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- Wultra Dependencies -->
+            <dependency>
+                <groupId>io.getlime.core</groupId>
+                <artifactId>rest-model-base</artifactId>
+                <version>${wultra-core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.getlime.core</groupId>
+                <artifactId>rest-client-base</artifactId>
+                <version>${wultra-core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.getlime.security</groupId>
+                <artifactId>powerauth-client-model</artifactId>
+                <version>${powerauth.version}</version>
+            </dependency>
+
+            <!-- Documentation -->
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations-jakarta</artifactId>
@@ -110,6 +130,14 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
