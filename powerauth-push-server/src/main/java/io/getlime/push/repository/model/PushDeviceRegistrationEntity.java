@@ -17,6 +17,8 @@
 package io.getlime.push.repository.model;
 
 import jakarta.persistence.*;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -29,6 +31,7 @@ import java.util.Date;
 @Table(name = "push_device_registration")
 public class PushDeviceRegistrationEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1530682530822178192L;
 
     /**

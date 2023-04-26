@@ -102,9 +102,7 @@ public class PushMessageSendResult extends BasePushMessageSendResult {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof iOS)) return false;
-
-            iOS iOS = (iOS) o;
+            if (!(o instanceof final iOS iOS)) return false;
 
             if (getSent() != iOS.getSent()) return false;
             if (getFailed() != iOS.getFailed()) return false;
@@ -199,9 +197,7 @@ public class PushMessageSendResult extends BasePushMessageSendResult {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof Android)) return false;
-
-            Android android = (Android) o;
+            if (!(o instanceof final Android android)) return false;
 
             if (getSent() != android.getSent()) return false;
             if (getFailed() != android.getFailed()) return false;
@@ -261,9 +257,7 @@ public class PushMessageSendResult extends BasePushMessageSendResult {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PushMessageSendResult)) return false;
-
-        PushMessageSendResult that = (PushMessageSendResult) o;
+        if (!(o instanceof final PushMessageSendResult that)) return false;
 
         if (getIos() != null ? !getIos().equals(that.getIos()) : that.getIos() != null) return false;
         return getAndroid() != null ? getAndroid().equals(that.getAndroid()) : that.getAndroid() == null;

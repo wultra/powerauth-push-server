@@ -92,14 +92,15 @@ public class SendCampaignController {
      */
     @PostMapping(value = "live/{id}")
     @Operation(summary = "Send a campaign",
-                  description = "Send message from a specific campaign to devices belonged to users associated with that campaign. Whereas each device gets a campaign only once.\n" +
-                          "\n" +
-                          "If sending was successful then sent parameter is set on true and timestampSent is set on current time.")
+                  description = """
+                          Send message from a specific campaign to devices belonged to users associated with that campaign. Whereas each device gets a campaign only once.
+
+                          If sending was successful then sent parameter is set on true and timestampSent is set on current time.""")
     public Response sendCampaign(@PathVariable(value = "id") Long id) throws PushServerException {
         logger.info("Received sendCampaign request, campaign ID: {}", id);
         try {
             final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(id);
-            if (!campaignEntityOptional.isPresent()) {
+            if (campaignEntityOptional.isEmpty()) {
                 throw new PushServerException("Campaign with entered ID does not exist");
             }
             JobParameters jobParameters = new JobParametersBuilder()
@@ -133,11 +134,8 @@ public class SendCampaignController {
                   description = "Send message from a specific campaign on test user identified in request body, userId param, to check rightness of that campaign.")
     public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
         logger.info("Received sendTestCampaign request, campaign ID: {}", id);
-        final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(id);
-        if (!campaignEntityOptional.isPresent()) {
-            throw new PushServerException("Campaign with entered ID does not exist");
-        }
-        final PushCampaignEntity campaign = campaignEntityOptional.get();
+        final PushCampaignEntity campaign = pushCampaignRepository.findById(id).orElseThrow(() ->
+                new PushServerException("Campaign with entered ID does not exist"));
         TestCampaignRequest requestedObject = request.getRequestObject();
         String errorMessage = TestCampaignRequestValidator.validate(requestedObject);
         if (errorMessage != null) {

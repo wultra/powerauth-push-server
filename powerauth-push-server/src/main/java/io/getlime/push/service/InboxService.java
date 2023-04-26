@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -91,11 +90,9 @@ public class InboxService {
 
     @Transactional(readOnly=true)
     public GetInboxMessageDetailResponse fetchMessageDetail(String inboxId) throws InboxMessageNotFoundException {
-        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findFirstByInboxId(inboxId);
-        if (!messageEntity.isPresent()) {
-            throw new InboxMessageNotFoundException("Unable to fetch message: " + inboxId + ".");
-        }
-        return inboxMessageConverter.convertResponse(messageEntity.get());
+        final InboxMessageEntity messageEntity = inboxRepository.findFirstByInboxId(inboxId).orElseThrow(() ->
+                new InboxMessageNotFoundException("Unable to fetch message: " + inboxId + "."));
+        return inboxMessageConverter.convertResponse(messageEntity);
     }
 
     @Transactional(readOnly=true)
@@ -107,11 +104,8 @@ public class InboxService {
 
     @Transactional
     public GetInboxMessageDetailResponse readMessage(String inboxId) throws InboxMessageNotFoundException {
-        final Optional<InboxMessageEntity> messageEntity = inboxRepository.findFirstByInboxId(inboxId);
-        if (!messageEntity.isPresent()) {
-            throw new InboxMessageNotFoundException("Unable to mark message: " + inboxId + " as read.");
-        }
-        final InboxMessageEntity inboxMessage = messageEntity.get();
+        final InboxMessageEntity inboxMessage = inboxRepository.findFirstByInboxId(inboxId).orElseThrow(() ->
+                new InboxMessageNotFoundException("Unable to mark message: " + inboxId + " as read."));
         if (!inboxMessage.isRead()) { // do not call repository save if there is no change.
             inboxMessage.setRead(true);
             inboxMessage.setTimestampRead(new Date());

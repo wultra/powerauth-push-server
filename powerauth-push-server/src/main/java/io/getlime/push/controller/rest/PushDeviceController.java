@@ -82,13 +82,10 @@ public class PushDeviceController {
      */
     @PostMapping(value = "create")
     @Operation(summary = "Create a device",
-                  description = "Create a new device push token (platform specific). The call must include an activation ID, so that the token is associated with given user." +
-                          "Request body should contain application ID, device token, device's platform and an activation ID. " +
-                          "If such device already exist, date on last registration is updated and also platform might be changed\n" +
-                          "\n---" +
-                          "Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. " +
-                          "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID," +
-                          " so that there are no incorrect bindings.")
+                  description = """
+                          Create a new device push token (platform specific). The call must include an activation ID, so that the token is associated with given user.Request body should contain application ID, device token, device's platform and an activation ID. If such device already exist, date on last registration is updated and also platform might be changed
+
+                          ---Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID, so that there are no incorrect bindings.""")
     public Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
         CreateDeviceRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
@@ -139,13 +136,10 @@ public class PushDeviceController {
      */
     @PostMapping(value = "create/multi")
     @Operation(summary = "Create a device for multiple associated activations",
-            description = "Create a new device push token (platform specific). The call must include one or more activation IDs." +
-                    "Request body should contain application ID, device token, device's platform and list of activation IDs. " +
-                    "If such device already exist, date on last registration is updated and also platform might be changed\n" +
-                    "\n---" +
-                    "Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. " +
-                    "It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs," +
-                    " so that there are no incorrect bindings.")
+            description = """
+                    Create a new device push token (platform specific). The call must include one or more activation IDs.Request body should contain application ID, device token, device's platform and list of activation IDs. If such device already exist, date on last registration is updated and also platform might be changed
+
+                    ---Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs, so that there are no incorrect bindings.""")
     public Response createDeviceMultipleActivations(@RequestBody ObjectRequest<CreateDeviceForActivationsRequest> request) throws PushServerException {
         CreateDeviceForActivationsRequest requestedObject = request.getRequestObject();
         if (requestedObject == null) {
@@ -381,10 +375,7 @@ public class PushDeviceController {
     }
 
     private AppCredentialsEntity findAppCredentials(String powerAuthAppId) throws PushServerException {
-        final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findFirstByAppId(powerAuthAppId);
-        if (!appCredentialsEntityOptional.isPresent()) {
-            throw new PushServerException("Application with given ID does not exist");
-        }
-        return appCredentialsEntityOptional.get();
+        return appCredentialsRepository.findFirstByAppId(powerAuthAppId).orElseThrow(() ->
+                new PushServerException("Application with given ID does not exist"));
     }
 }

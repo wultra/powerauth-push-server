@@ -27,7 +27,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -103,7 +102,7 @@ public class CaCertUtil {
             try {
                 logger.info("Importing embedded certificate: {}", certPath);
                 final File resource = new ClassPathResource(certPath).getFile();
-                final String certString = new String(Files.readAllBytes(resource.toPath()), StandardCharsets.UTF_8);
+                final String certString = Files.readString(resource.toPath());
                 final X509Certificate cert = certificateFromPem(certString);
                 result.add(cert);
             } catch (CertificateException | IOException e) {

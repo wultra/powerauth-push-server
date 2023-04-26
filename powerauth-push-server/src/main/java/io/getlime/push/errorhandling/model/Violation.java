@@ -16,18 +16,10 @@
 
 package io.getlime.push.errorhandling.model;
 
-import lombok.Data;
-
 /**
  * Entity class representing a violation of constraints.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-@Data
-public class Violation {
-
-    private final String fieldName;
-    private final Object invalidValue;
-    private final String hint;
-
+public record Violation(String fieldName, Object invalidValue, String hint) {
 }

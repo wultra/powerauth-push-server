@@ -19,6 +19,8 @@ package io.getlime.push.repository.model;
 import io.getlime.push.repository.converter.PushMessageStatusConverter;
 
 import jakarta.persistence.*;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -70,6 +72,7 @@ public class PushMessageEntity implements Serializable {
         }
     }
 
+    @Serial
     private static final long serialVersionUID = -2570093156350796326L;
 
     /**
