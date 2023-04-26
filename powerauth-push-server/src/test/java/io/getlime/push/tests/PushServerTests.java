@@ -105,7 +105,7 @@ class PushServerTests {
         ObjectResponse<ServiceStatusResponse> actual = pushServerClient.getServiceStatus();
         String body = restTemplate.getForEntity("http://localhost:" + port + "/push/service/status", String.class).getBody();
         assertNotNull(body);
-        ObjectResponse<ServiceStatusResponse> expected = mapper.readValue(body, new TypeReference<>() {});
+        final ObjectResponse<ServiceStatusResponse> expected = mapper.readValue(body, new TypeReference<>() {});
         assertEquals(expected.getStatus(), actual.getStatus());
         assertEquals(expected.getResponseObject().getApplicationDisplayName(), actual.getResponseObject().getApplicationDisplayName());
         assertEquals(expected.getResponseObject().getApplicationEnvironment(), actual.getResponseObject().getApplicationEnvironment());
@@ -248,7 +248,7 @@ class PushServerTests {
         ObjectResponse<ListOfCampaignsResponse> actual = pushServerClient.getListOfCampaigns(true);
         String body = restTemplate.getForEntity("http://localhost:" + port + "/push/campaign/list?all=true", String.class).getBody();
         assertNotNull(body);
-        ObjectResponse<ListOfCampaignsResponse> expected = mapper.readValue(body, new TypeReference<>() {});
+        final ObjectResponse<ListOfCampaignsResponse> expected = mapper.readValue(body, new TypeReference<>() {});
         assertEquals(expected.getStatus(), actual.getStatus());
         assertTrue(actual.getResponseObject().containsAll(expected.getResponseObject()));
     }
@@ -258,7 +258,7 @@ class PushServerTests {
         ObjectResponse<CampaignResponse> actual = pushServerClient.getCampaign(1L);
         String body = restTemplate.getForEntity("http://localhost:" + port + "/push/campaign/1/detail", String.class).getBody();
         assertNotNull(body);
-        ObjectResponse<CampaignResponse> expected = mapper.readValue(body, new TypeReference<>() {});
+        final ObjectResponse<CampaignResponse> expected = mapper.readValue(body, new TypeReference<>() {});
         assertEquals(expected.getStatus(), actual.getStatus());
         assertEquals(expected.getResponseObject(), actual.getResponseObject());
     }
@@ -276,7 +276,7 @@ class PushServerTests {
         PagedResponse<ListOfUsersFromCampaignResponse> actual = pushServerClient.getListOfUsersFromCampaign(10L, 0, 3);
         String body = restTemplate.getForEntity("http://localhost:" + port + "/push/campaign/10/user/list?page=0&size=3", String.class).getBody();
         assertNotNull(body);
-        PagedResponse<ListOfUsersFromCampaignResponse> expected = mapper.readValue(body, new TypeReference<>() {});
+        final PagedResponse<ListOfUsersFromCampaignResponse> expected = mapper.readValue(body, new TypeReference<>() {});
         assertEquals(expected.getResponseObject(), actual.getResponseObject());
         assertEquals(expected.getStatus(), actual.getStatus());
         assertEquals(expected.getPage(), actual.getPage());

@@ -203,7 +203,7 @@ public class PushServerClient {
         logger.info("Calling push server update device status, activation ID: {} - start", activationId);
         // Note that there is just plain 'request' in the request, not 'new ObjectRequest<>(request)'.
         // This is due to the fact that standard PowerAuth Server callback format is used here.
-        Response response = postImpl("/push/device/status/update", request, new ParameterizedTypeReference<>(){});
+        final Response response = postImpl("/push/device/status/update", request, new ParameterizedTypeReference<>(){});
         logger.info("Calling push server update device status, activation ID: {} - finish", activationId);
 
         return response.getStatus().equals(Response.Status.OK);
@@ -323,10 +323,10 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean deleteCampaign(Long campaignId) throws PushServerClientException {
-        String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
         logger.info("Calling push server to delete a push campaign, campaign ID: {} - start", campaignId);
-        ObjectResponse<DeleteCampaignResponse> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, DeleteCampaignResponse.class);
+        final ObjectResponse<DeleteCampaignResponse> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, DeleteCampaignResponse.class);
         logger.info("Calling push server to delete a push campaign, campaign ID: {} - finish", campaignId);
 
         return response.getStatus().equals(Response.Status.OK);
@@ -358,7 +358,7 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<CampaignResponse> getCampaign(Long campaignId) throws PushServerClientException {
-        String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
         logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - start", campaignId);
         final ObjectResponse<CampaignResponse> result = getObjectImpl("/push/campaign/" + campaignIdSanitized + "/detail", null, CampaignResponse.class);
@@ -376,11 +376,11 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean addUsersToCampaign(Long campaignId, List<String> users) throws PushServerClientException {
-        ListOfUsers listOfUsers = new ListOfUsers(users);
-        String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
+        final ListOfUsers listOfUsers = new ListOfUsers(users);
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
         logger.info("Calling push server to add users to campaign, campaign ID: {} - start", campaignId);
-        Response response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", new ObjectRequest<>(listOfUsers));
+        final Response response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", new ObjectRequest<>(listOfUsers));
         logger.info("Calling push server to add users to campaign, campaign ID: {} - finish", campaignId);
 
         if (response == null) {
@@ -400,10 +400,10 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(Long campaignId, int page, int size) throws PushServerClientException {
-        String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
-        MultiValueMap<String, String> params = buildPages(page, size);
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
+        final MultiValueMap<String, String> params = buildPages(page, size);
 
-        ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new ParameterizedTypeReference<>() {};
+        final ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new ParameterizedTypeReference<>() {};
         logger.info("Calling push server to get users from the campaign, campaign ID: {} - start", campaignId);
         final PagedResponse<ListOfUsersFromCampaignResponse> result = getImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
         logger.info("Calling push server to get users from the campaign, campaign ID: {} - finish", campaignId);
@@ -420,11 +420,11 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean deleteUsersFromCampaign(Long campaignId, List<String> users) throws PushServerClientException {
-        ListOfUsers listOfUsers = new ListOfUsers(users);
-        String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
+        final ListOfUsers listOfUsers = new ListOfUsers(users);
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
         logger.info("Calling push server to remove users from the campaign, campaign ID: {} - start", campaignId);
-        Response response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", new ObjectRequest<>(listOfUsers));
+        final Response response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", new ObjectRequest<>(listOfUsers));
         logger.info("Calling push server to remove users from the campaign, campaign ID: {} - finish", campaignId);
 
         return response.getStatus().equals(Response.Status.OK);
@@ -439,18 +439,18 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean sendTestCampaign(Long campaignId, String userId) throws PushServerClientException {
-        String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
-        TestCampaignRequest request = new TestCampaignRequest();
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
+        final TestCampaignRequest request = new TestCampaignRequest();
         request.setUserId(userId);
 
         // Validate request on the client side.
-        String error = TestCampaignRequestValidator.validate(request);
+        final String error = TestCampaignRequestValidator.validate(request);
         if (error != null) {
             throw new PushServerClientException(error);
         }
 
         logger.info("Calling push server to send test campaign, campaign ID: {}, user ID: {} - start", campaignId, userId);
-        Response response = postObjectImpl("/push/campaign/send/test/" + campaignIdSanitized, new ObjectRequest<>(request));
+        final Response response = postObjectImpl("/push/campaign/send/test/" + campaignIdSanitized, new ObjectRequest<>(request));
         logger.info("Calling push server to send test campaign, campaign ID: {}, user ID: {} - finish", campaignId, userId);
 
         return response.getStatus().equals(Response.Status.OK);
@@ -464,10 +464,10 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean sendCampaign(Long campaignId) throws PushServerClientException {
-        String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
         logger.info("Calling push server to send a production campaign, campaign ID: {} - start", campaignId);
-        Response response = postObjectImpl("/push/campaign/send/live/" + campaignIdSanitized, null);
+        final Response response = postObjectImpl("/push/campaign/send/live/" + campaignIdSanitized, null);
         logger.info("Calling push server to send a production campaign, campaign ID: {} - finish", campaignId);
 
         return response.getStatus().equals(Response.Status.OK);
