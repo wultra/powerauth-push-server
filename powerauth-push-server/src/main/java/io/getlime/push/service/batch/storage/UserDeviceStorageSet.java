@@ -23,6 +23,8 @@ import java.util.Set;
  * {@link io.getlime.push.repository.model.aggregate.UserDevice} objects.
  *
  * @author Petr Dvorak, petr@wultra.com
+ *
+ * @param <T> Type of the stored record.
  */
 public class UserDeviceStorageSet<T> implements ItemStorageSet<T> {
 

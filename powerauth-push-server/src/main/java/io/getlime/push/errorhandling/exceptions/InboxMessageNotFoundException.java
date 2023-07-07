@@ -23,6 +23,10 @@ package io.getlime.push.errorhandling.exceptions;
  */
 public class InboxMessageNotFoundException extends Exception {
 
+    /**
+     * Constructor with message override.
+     * @param message Message.
+     */
     public InboxMessageNotFoundException(String message) {
         super(message);
     }

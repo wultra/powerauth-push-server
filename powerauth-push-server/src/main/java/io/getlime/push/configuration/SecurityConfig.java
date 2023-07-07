@@ -32,6 +32,13 @@ public class SecurityConfig {
 
     //TODO: Fix to contain secured setup.
 
+    /**
+     * Filter chain bean producer.
+     *
+     * @param http HttpSecurity instance.
+     * @return Security filter chain.
+     * @throws Exception In case of an error.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http

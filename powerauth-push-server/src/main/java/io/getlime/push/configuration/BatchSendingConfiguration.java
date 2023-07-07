@@ -113,6 +113,10 @@ public class BatchSendingConfiguration {
                 .build();
     }
 
+    /**
+     * Bean producer for TransactionManager.
+     * @return Transaction manager.
+     */
     @Bean
     public TransactionManager transactionManager() {
         return transactionManager;

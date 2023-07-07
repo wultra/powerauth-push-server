@@ -40,6 +40,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 /**
+ * Controller for administering the push server.
+ *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 @RestController

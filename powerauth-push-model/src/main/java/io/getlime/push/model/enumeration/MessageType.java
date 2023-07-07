@@ -26,7 +26,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum MessageType {
 
+    /**
+     * Plain text message type.
+     */
     TEXT("text"),
+    /**
+     * HTML message type.
+     */
     HTML("html");
 
     private final String value;
@@ -35,15 +41,28 @@ public enum MessageType {
         this.value = value;
     }
 
+    /**
+     * Get value.
+     * @return Value.
+     */
     public String getValue() {
         return value;
     }
 
+    /**
+     * Get type from lowercase string.
+     * @param value Lowercase string with the expected enum value.
+     * @return Enum value.
+     */
     @JsonCreator
     public static MessageType fromLowerCaseString(String value) {
         return MessageType.valueOf(value.toUpperCase());
     }
 
+    /**
+     * Converted enum name to lowercase string.
+     * @return Lowercased enum name.
+     */
     @JsonValue
     public String toLowerCaseString() {
         return toString().toLowerCase();

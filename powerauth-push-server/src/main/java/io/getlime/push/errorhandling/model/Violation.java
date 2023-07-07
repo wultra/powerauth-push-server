@@ -20,6 +20,10 @@ package io.getlime.push.errorhandling.model;
  * Entity class representing a violation of constraints.
  *
  * @author Petr Dvorak, petr@wultra.com
+ *
+ * @param fieldName Name of the field causing the violation.
+ * @param invalidValue Value that was provided and was invalid.
+ * @param hint Hing on what to do to fix the issue.
  */
 public record Violation(String fieldName, Object invalidValue, String hint) {
 }
