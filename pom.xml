@@ -82,7 +82,7 @@
         <bc.version>1.76</bc.version>
 
         <!-- Documentation Dependencies -->
-        <springdoc-openapi-starter-webmvc-ui.version>2.1.0</springdoc-openapi-starter-webmvc-ui.version>
+        <springdoc-openapi-starter-webmvc-ui.version>2.2.0</springdoc-openapi-starter-webmvc-ui.version>
         <swagger-annotations-jakarta.version>2.2.8</swagger-annotations-jakarta.version>
 
         <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
