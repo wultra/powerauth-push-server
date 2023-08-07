@@ -31,7 +31,10 @@ import io.getlime.security.powerauth.crypto.client.activation.PowerAuthClientAct
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.EciesEncryptor;
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.EciesFactory;
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesCryptogram;
+import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesParameters;
+import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesPayload;
 import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesSharedInfo1;
+import io.getlime.security.powerauth.crypto.lib.generator.KeyGenerator;
 import io.getlime.security.powerauth.crypto.lib.util.KeyConvertor;
 import io.getlime.security.powerauth.rest.api.model.request.ActivationLayer2Request;
 
@@ -133,18 +136,20 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
         ECPublicKey masterPK = (ECPublicKey) keyConvertor.convertBytesToPublicKey(masterKeyBytes);
         byte[] applicationSecretBytes = applicationSecret.getBytes(StandardCharsets.UTF_8);
 
-        EciesEncryptor eciesEncryptorL2 = eciesFactory.getEciesEncryptorForApplication(masterPK, applicationSecretBytes, EciesSharedInfo1.ACTIVATION_LAYER_2);
+        EciesParameters eciesParameters = new EciesParameters(new KeyGenerator().generateRandomBytes(16), null, null);
+        EciesEncryptor eciesEncryptorL2 = eciesFactory.getEciesEncryptorForApplication(masterPK, applicationSecretBytes, EciesSharedInfo1.ACTIVATION_LAYER_2, eciesParameters);
         ByteArrayOutputStream baosL2 = new ByteArrayOutputStream();
         objectMapper.writeValue(baosL2, requestL2);
-        EciesCryptogram eciesCryptogramL2 = eciesEncryptorL2.encryptRequest(baosL2.toByteArray(), true);
+        EciesPayload eciesPayloadL2 = eciesEncryptorL2.encrypt(baosL2.toByteArray(), eciesParameters);
+        EciesCryptogram eciesCryptogramL2 = eciesPayloadL2.getCryptogram();
 
         final String ephemeralPublicKey = Base64.getEncoder().encodeToString(eciesCryptogramL2.getEphemeralPublicKey());
         final String encryptedData = Base64.getEncoder().encodeToString(eciesCryptogramL2.getEncryptedData());
         final String mac = Base64.getEncoder().encodeToString(eciesCryptogramL2.getMac());
-        final String nonce = Base64.getEncoder().encodeToString(eciesCryptogramL2.getNonce());
+        final String nonce = Base64.getEncoder().encodeToString(eciesParameters.getNonce());
 
         // Prepare activation
-        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, false, ephemeralPublicKey, encryptedData, mac, nonce);
+        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, false, ephemeralPublicKey, encryptedData, mac, nonce, "3.1", null);
         assertNotNull(prepareResponse.getActivationId());
 
         // Commit activation
