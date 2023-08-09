@@ -50,6 +50,12 @@ public class InboxService {
     private final AppCredentialsRepository appCredentialsRepository;
     private final InboxMessageConverter inboxMessageConverter;
 
+    /**
+     * Constructor with injected beans.
+     * @param inboxRepository Inbox repository.
+     * @param appCredentialsRepository App credentials repository.
+     * @param inboxMessageConverter Inbox message converter.
+     */
     @Autowired
     public InboxService(InboxRepository inboxRepository, AppCredentialsRepository appCredentialsRepository, InboxMessageConverter inboxMessageConverter) {
         this.inboxRepository = inboxRepository;
@@ -57,6 +63,13 @@ public class InboxService {
         this.inboxMessageConverter = inboxMessageConverter;
     }
 
+    /**
+     * Post message in inbox.
+     *
+     * @param request Message to be posted.
+     * @return Message detail.
+     * @throws AppNotFoundException In case an app with provided ID was not found.
+     */
     @Transactional
     public GetInboxMessageDetailResponse postMessage(CreateInboxMessageRequest request) throws AppNotFoundException {
         final List<AppCredentialsEntity> apps = fetchAppsForAppIds(request.getApplications());
@@ -71,6 +84,16 @@ public class InboxService {
         return inboxMessageConverter.convertResponse(savedMessageEntity);
     }
 
+    /**
+     * Fetch messages for a given user ID and apps.
+     *
+     * @param userId User ID.
+     * @param appIds App IDs.
+     * @param onlyUnread Indication if only unread messages should be returned.
+     * @param pageable Paging object.
+     * @return List of messages.
+     * @throws AppNotFoundException In case an app with provided ID was not found.
+     */
     @Transactional(readOnly=true)
     public ListOfInboxMessages fetchMessageListForUser(String userId, List<String> appIds, boolean onlyUnread, Pageable pageable) throws AppNotFoundException {
         final List<AppCredentialsEntity> apps = fetchAppsForAppIds(appIds);
@@ -88,6 +111,12 @@ public class InboxService {
         return inboxMessageConverter.convert(messageEntities);
     }
 
+    /**
+     * Fetch message detail.
+     * @param inboxId Inbox message ID.
+     * @return Message detail.
+     * @throws InboxMessageNotFoundException In case an message with provided ID was not found.
+     */
     @Transactional(readOnly=true)
     public GetInboxMessageDetailResponse fetchMessageDetail(String inboxId) throws InboxMessageNotFoundException {
         final InboxMessageEntity messageEntity = inboxRepository.findFirstByInboxId(inboxId).orElseThrow(() ->
@@ -95,6 +124,13 @@ public class InboxService {
         return inboxMessageConverter.convertResponse(messageEntity);
     }
 
+    /**
+     * Get the unread message count.
+     * @param userId User ID.
+     * @param appId App ID.
+     * @return Count of the unread messages.
+     * @throws AppNotFoundException In case an app with provided ID was not found.
+     */
     @Transactional(readOnly=true)
     public GetInboxMessageCountResponse fetchMessageCountForUser(String userId, String appId) throws AppNotFoundException {
         final AppCredentialsEntity app = fetchAppForAppId(appId);
@@ -102,6 +138,12 @@ public class InboxService {
         return new GetInboxMessageCountResponse(countUnread);
     }
 
+    /**
+     * Read message with a given ID.
+     * @param inboxId Inbox message ID.
+     * @return Message detail.
+     * @throws InboxMessageNotFoundException In case a message with provided ID was not found.
+     */
     @Transactional
     public GetInboxMessageDetailResponse readMessage(String inboxId) throws InboxMessageNotFoundException {
         final InboxMessageEntity inboxMessage = inboxRepository.findFirstByInboxId(inboxId).orElseThrow(() ->
@@ -117,6 +159,12 @@ public class InboxService {
         }
     }
 
+    /**
+     * Read all messages for a user and app.
+     * @param userId User ID.
+     * @param appId App ID.
+     * @throws AppNotFoundException In case an app with provided ID was not found.
+     */
     @Transactional
     public void readAllMessages(String userId, String appId) throws AppNotFoundException {
         final AppCredentialsEntity appCredentialsEntity = fetchAppForAppId(appId);

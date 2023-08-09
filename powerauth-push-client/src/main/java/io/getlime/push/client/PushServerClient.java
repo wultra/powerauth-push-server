@@ -653,6 +653,7 @@ public class PushServerClient {
      * Read all unread messages in inbox of provided user.
      * @param userId User ID.
      * @param appId Application ID.
+     * @return Response.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response readAllMessages(String userId, String appId) throws PushServerClientException {

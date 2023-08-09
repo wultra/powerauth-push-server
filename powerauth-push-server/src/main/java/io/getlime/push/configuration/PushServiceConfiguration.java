@@ -21,6 +21,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Configuration class for push server properties.
+ *
  * @author Petr Dvorak, petr@wultra.com
  */
 @Configuration

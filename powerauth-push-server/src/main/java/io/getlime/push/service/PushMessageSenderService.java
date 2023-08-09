@@ -84,6 +84,7 @@ public class PushMessageSenderService {
      * Send push notifications to given application.
      *
      * @param appId App ID used for addressing push messages. Required so that appropriate APNs/FCM credentials can be obtained.
+     * @param mode Specifies if the message sending should be synchronous or asynchronous.
      * @param pushMessageList List with push message objects.
      * @return Result of this batch sending.
      * @throws PushServerException In case push message sending fails.

@@ -22,6 +22,8 @@ import io.getlime.core.rest.model.base.response.ObjectResponse;
  * Generic response class for paged results
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
+ *
+ * @param <T> Type of the paged records.
  */
 public class PagedResponse<T> extends ObjectResponse<T> {
 
