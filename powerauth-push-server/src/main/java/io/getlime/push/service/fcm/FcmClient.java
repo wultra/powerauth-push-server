@@ -45,6 +45,7 @@ import java.net.Authenticator;
 import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.function.Consumer;
 
@@ -119,7 +120,7 @@ public class FcmClient {
      */
     public void initializeRestClient() throws PushServerException {
         DefaultRestClient.Builder builder = DefaultRestClient.builder()
-                .connectionTimeout(pushServiceConfiguration.getFcmConnectTimeout());
+                .connectionTimeout(Duration.ofMillis(pushServiceConfiguration.getFcmConnectTimeout()));
         if (proxyHost != null) {
             DefaultRestClient.ProxyBuilder proxyBuilder = builder.proxy().host(proxyHost).port(proxyPort);
             if (proxyUsername != null) {
