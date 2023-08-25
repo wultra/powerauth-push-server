@@ -21,6 +21,7 @@ import com.wultra.security.powerauth.client.model.entity.Application;
 import com.wultra.security.powerauth.client.model.entity.ApplicationVersion;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import com.wultra.security.powerauth.client.model.request.InitActivationRequest;
+import com.wultra.security.powerauth.client.model.request.PrepareActivationRequest;
 import com.wultra.security.powerauth.client.model.response.CommitActivationResponse;
 import com.wultra.security.powerauth.client.model.response.CreateApplicationVersionResponse;
 import com.wultra.security.powerauth.client.model.response.InitActivationResponse;
@@ -28,13 +29,12 @@ import com.wultra.security.powerauth.client.model.response.PrepareActivationResp
 import com.wultra.security.powerauth.rest.client.PowerAuthRestClient;
 import io.getlime.push.api.PowerAuthTestClient;
 import io.getlime.security.powerauth.crypto.client.activation.PowerAuthClientActivation;
-import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.EciesEncryptor;
-import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.EciesFactory;
-import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesCryptogram;
-import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesParameters;
-import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesPayload;
-import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesSharedInfo1;
-import io.getlime.security.powerauth.crypto.lib.generator.KeyGenerator;
+import io.getlime.security.powerauth.crypto.lib.encryptor.ClientEncryptor;
+import io.getlime.security.powerauth.crypto.lib.encryptor.EncryptorFactory;
+import io.getlime.security.powerauth.crypto.lib.encryptor.model.EncryptedRequest;
+import io.getlime.security.powerauth.crypto.lib.encryptor.model.EncryptorId;
+import io.getlime.security.powerauth.crypto.lib.encryptor.model.EncryptorParameters;
+import io.getlime.security.powerauth.crypto.lib.encryptor.model.v3.ClientEncryptorSecrets;
 import io.getlime.security.powerauth.crypto.lib.util.KeyConvertor;
 import io.getlime.security.powerauth.rest.api.model.request.ActivationLayer2Request;
 
@@ -56,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class PowerAuthTestClientRest implements PowerAuthTestClient {
 
     private final PowerAuthClientActivation activation = new PowerAuthClientActivation();
-    private final EciesFactory eciesFactory = new EciesFactory();
+    private final EncryptorFactory encryptorFactory = new EncryptorFactory();
     private final KeyConvertor keyConvertor = new KeyConvertor();
     private PowerAuthClient powerAuthClient;
 
@@ -136,20 +136,24 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
         ECPublicKey masterPK = (ECPublicKey) keyConvertor.convertBytesToPublicKey(masterKeyBytes);
         byte[] applicationSecretBytes = applicationSecret.getBytes(StandardCharsets.UTF_8);
 
-        EciesParameters eciesParameters = new EciesParameters(new KeyGenerator().generateRandomBytes(16), null, null);
-        EciesEncryptor eciesEncryptorL2 = eciesFactory.getEciesEncryptorForApplication(masterPK, applicationSecretBytes, EciesSharedInfo1.ACTIVATION_LAYER_2, eciesParameters);
-        ByteArrayOutputStream baosL2 = new ByteArrayOutputStream();
+        final String protocolVersion = "3.1";
+        final EncryptorParameters encryptorParameters = new EncryptorParameters(protocolVersion, applicationKey, null);
+        final ClientEncryptorSecrets encryptorSecrets = new ClientEncryptorSecrets(masterPK, applicationSecretBytes);
+        final ClientEncryptor clientEncryptor = encryptorFactory.getClientEncryptor(EncryptorId.ACTIVATION_LAYER_2, encryptorParameters, encryptorSecrets);
+        final ByteArrayOutputStream baosL2 = new ByteArrayOutputStream();
         objectMapper.writeValue(baosL2, requestL2);
-        EciesPayload eciesPayloadL2 = eciesEncryptorL2.encrypt(baosL2.toByteArray(), eciesParameters);
-        EciesCryptogram eciesCryptogramL2 = eciesPayloadL2.getCryptogram();
+        final EncryptedRequest encryptedRequest = clientEncryptor.encryptRequest(baosL2.toByteArray());
 
-        final String ephemeralPublicKey = Base64.getEncoder().encodeToString(eciesCryptogramL2.getEphemeralPublicKey());
-        final String encryptedData = Base64.getEncoder().encodeToString(eciesCryptogramL2.getEncryptedData());
-        final String mac = Base64.getEncoder().encodeToString(eciesCryptogramL2.getMac());
-        final String nonce = Base64.getEncoder().encodeToString(eciesParameters.getNonce());
+        final PrepareActivationRequest prepareRequest = new PrepareActivationRequest();
+        prepareRequest.setActivationCode(initResponse.getActivationCode());
+        prepareRequest.setApplicationKey(applicationKey);
+        prepareRequest.setEphemeralPublicKey(encryptedRequest.getEphemeralPublicKey());
+        prepareRequest.setEncryptedData(encryptedRequest.getEncryptedData());
+        prepareRequest.setMac(encryptedRequest.getMac());
+        prepareRequest.setNonce(encryptedRequest.getNonce());
+        prepareRequest.setProtocolVersion(protocolVersion);
 
-        // Prepare activation
-        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, false, ephemeralPublicKey, encryptedData, mac, nonce, "3.1", null);
+        final PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(prepareRequest);
         assertNotNull(prepareResponse.getActivationId());
 
         // Commit activation
