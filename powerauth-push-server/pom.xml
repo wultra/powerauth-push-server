@@ -115,6 +115,13 @@
             <artifactId>postgresql</artifactId>
         </dependency>
 
+        <!-- Logging -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash.version}</version>
+        </dependency>
+
         <!-- API -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
