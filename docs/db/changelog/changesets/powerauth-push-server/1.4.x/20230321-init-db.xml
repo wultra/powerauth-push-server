@@ -10,7 +10,7 @@
             </not>
         </preConditions>
         <comment>Create a new sequence push_credentials_seq</comment>
-        <createSequence sequenceName="push_credentials_seq"/>
+        <createSequence sequenceName="push_credentials_seq" startValue="1" incrementBy="1" cacheSize="20"/>
     </changeSet>
 
     <changeSet id="2" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
@@ -20,7 +20,7 @@
             </not>
         </preConditions>
         <comment>Create a new sequence sequence push_device_registration_seq</comment>
-        <createSequence sequenceName="push_device_registration_seq"/>
+        <createSequence sequenceName="push_device_registration_seq" startValue="1" incrementBy="1" cacheSize="20"/>
     </changeSet>
 
     <changeSet id="3" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
@@ -30,7 +30,7 @@
             </not>
         </preConditions>
         <comment>Create a new sequence sequence push_message_seq</comment>
-        <createSequence sequenceName="push_message_seq"/>
+        <createSequence sequenceName="push_message_seq" startValue="1" incrementBy="1" cacheSize="20"/>
     </changeSet>
 
     <changeSet id="4" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
@@ -40,7 +40,7 @@
             </not>
         </preConditions>
         <comment>Create a new sequence sequence push_campaign_seq</comment>
-        <createSequence sequenceName="push_campaign_seq"/>
+        <createSequence sequenceName="push_campaign_seq" startValue="1" incrementBy="1" cacheSize="20"/>
     </changeSet>
 
     <changeSet id="5" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
@@ -50,7 +50,7 @@
             </not>
         </preConditions>
         <comment>Create a new sequence sequence push_campaign_user_seq</comment>
-        <createSequence sequenceName="push_campaign_user_seq"/>
+        <createSequence sequenceName="push_campaign_user_seq" startValue="1" incrementBy="1" cacheSize="20"/>
     </changeSet>
 
     <changeSet id="6" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
@@ -60,7 +60,7 @@
             </not>
         </preConditions>
         <comment>Create a new sequence sequence push_inbox_seq</comment>
-        <createSequence sequenceName="push_inbox_seq"/>
+        <createSequence sequenceName="push_inbox_seq" startValue="1" incrementBy="1" cacheSize="20"/>
     </changeSet>
 
     <changeSet id="7" logicalFilePath="powerauth-push-server/1.4.x/20230321-init-db.xml" author="Lubos Racansky">
