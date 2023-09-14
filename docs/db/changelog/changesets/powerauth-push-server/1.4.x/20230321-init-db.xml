@@ -209,7 +209,7 @@
                 <tableExists tableName="push_inbox"/>
             </not>
         </preConditions>
-        <comment>Create a new sequence push_inbox</comment>
+        <comment>Create a new table push_inbox</comment>
         <createTable tableName="push_inbox">
             <column name="id" type="integer">
                 <constraints primaryKey="true" />

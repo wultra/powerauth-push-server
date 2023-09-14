@@ -77,7 +77,7 @@ CREATE TABLE push_campaign_user (
 -- Create table for message inbox
 CREATE TABLE push_inbox (
     id INTEGER NOT NULL CONSTRAINT push_inbox_pk PRIMARY KEY,
-    inbox_id VARCHAR(37),
+    inbox_id VARCHAR(37) NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     type VARCHAR(32) NOT NULL,
     subject TEXT NOT NULL,
