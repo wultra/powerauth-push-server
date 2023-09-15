@@ -115,6 +115,23 @@ CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials(app_id);
 ```
 
 
+### Missing Inbox Constraint
+
+Inbox table is missing _not null_ constraint for `inbox_id`.
+
+### PostgreSQL
+
+```sql
+alter table push_inbox alter column inbox_id set not null;
+```
+
+### Oracle
+
+```sql
+alter table push_inbox modify inbox_id not null;
+```
+
+
 ### Drop MySQL Support
 
 Since version `1.5.0`, MySQL database is not supported anymore.
