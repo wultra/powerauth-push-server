@@ -72,6 +72,7 @@
         <wultra-core.version>1.7.0</wultra-core.version>
         <powerauth.version>1.5.0</powerauth.version>
         <powerauth-crypto.version>1.5.1</powerauth-crypto.version>
+        <powerauth-restful-integration.version>1.5.0</powerauth-restful-integration.version>
 
         <!-- Library Versions -->
         <pushy.version>0.15.2</pushy.version>

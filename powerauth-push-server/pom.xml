@@ -166,7 +166,7 @@
         <dependency>
             <groupId>io.getlime.security</groupId>
             <artifactId>powerauth-restful-model</artifactId>
-            <version>${powerauth.version}</version>
+            <version>${powerauth-restful-integration.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
