@@ -16,9 +16,12 @@
 
 package io.getlime.push.repository.model;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -42,7 +45,7 @@ public class InboxMessageEntity implements Serializable {
      */
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_app_inbox", sequenceName = "push_inbox_seq")
+    @SequenceGenerator(name = "push_app_inbox", sequenceName = "push_inbox_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_app_inbox")
     private Long id;
 
@@ -64,17 +67,29 @@ public class InboxMessageEntity implements Serializable {
     @ManyToMany
     @JoinTable(
             name = "push_inbox_app",
-            joinColumns = @JoinColumn(name = "app_credentials_id", referencedColumnName = "id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "inbox_id")
+            joinColumns = @JoinColumn(name = "inbox_id", referencedColumnName = "id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "app_credentials_id")
     )
     @ToString.Exclude
     private List<AppCredentialsEntity> applications;
+
+    /**
+     * Message type.
+     */
+    @Column(name = "type", nullable = false)
+    private String type;
 
     /**
      * Message subject.
      */
     @Column(name = "subject", nullable = false)
     private String subject;
+
+    /**
+     * Message summary.
+     */
+    @Column(name = "summary", nullable = false)
+    private String summary;
 
     /**
      * Message body.
@@ -103,18 +118,19 @@ public class InboxMessageEntity implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof InboxMessageEntity)) return false;
-        final InboxMessageEntity that = (InboxMessageEntity) o;
+        if (!(o instanceof final InboxMessageEntity that)) return false;
         return inboxId.equals(that.inboxId)
                 && userId.equals(that.userId)
                 && applications.equals(that.applications)
+                && type.equals(that.type)
                 && subject.equals(that.subject)
+                && summary.equals(that.summary)
                 && body.equals(that.body)
                 && timestampCreated.equals(that.timestampCreated);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(inboxId, userId, applications, subject, body, timestampCreated);
+        return Objects.hash(inboxId, userId, applications, type, subject, summary, body, timestampCreated);
     }
 }

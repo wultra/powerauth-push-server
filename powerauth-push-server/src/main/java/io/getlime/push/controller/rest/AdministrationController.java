@@ -15,8 +15,8 @@
  */
 package io.getlime.push.controller.rest;
 
-import com.google.common.io.BaseEncoding;
 import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.model.entity.Application;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
@@ -40,6 +40,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 /**
+ * Controller for administering the push server.
+ *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 @RestController
@@ -102,7 +104,7 @@ public class AdministrationController {
             final GetApplicationListResponse response = new GetApplicationListResponse();
 
             // Get all applications in PA Server
-            final List<com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications> applicationList = getApplicationList().getApplications();
+            final List<Application> applicationList = getApplicationList().getApplications();
 
             // Get all applications that are already set up
             final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
@@ -112,7 +114,7 @@ public class AdministrationController {
             for (AppCredentialsEntity appCred: appCredentials) {
                 identifiers.add(appCred.getAppId());
             }
-            for (com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications app : applicationList) {
+            for (Application app : applicationList) {
                 if (!identifiers.contains(app.getApplicationId())) {
                     final PushServerApplication applicationToAdd = new PushServerApplication();
                     applicationToAdd.setAppId(app.getApplicationId());
@@ -209,7 +211,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
-        final byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
+        final byte[] privateKeyBytes = Base64.getDecoder().decode(requestObject.getPrivateKeyBase64());
         appCredentialsEntity.setIosPrivateKey(privateKeyBytes);
         appCredentialsEntity.setIosTeamId(requestObject.getTeamId());
         appCredentialsEntity.setIosKeyId(requestObject.getKeyId());
@@ -268,7 +270,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
-        byte[] privateKeyBytes = BaseEncoding.base64().decode(requestObject.getPrivateKeyBase64());
+        final byte[] privateKeyBytes = Base64.getDecoder().decode(requestObject.getPrivateKeyBase64());
         appCredentialsEntity.setAndroidPrivateKey(privateKeyBytes);
         appCredentialsEntity.setAndroidProjectId(requestObject.getProjectId());
         appCredentialsRepository.save(appCredentialsEntity);
@@ -310,17 +312,12 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity does not exists.
      */
     private AppCredentialsEntity findAppCredentialsEntityById(String powerAuthAppId) throws PushServerException {
-        final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findFirstByAppId(powerAuthAppId);
-        if (!appCredentialsEntityOptional.isPresent()) {
-            throw new PushServerException("Application credentials with entered ID does not exist");
-        }
-        return appCredentialsEntityOptional.get();
+        return appCredentialsRepository.findFirstByAppId(powerAuthAppId).orElseThrow(() ->
+                new PushServerException("Application credentials with entered ID does not exist"));
     }
 
-    private com.wultra.security.powerauth.client.v3.GetApplicationListResponse getApplicationList() throws PowerAuthClientException {
-        final com.wultra.security.powerauth.client.v3.GetApplicationListRequest listRequest = new com.wultra.security.powerauth.client.v3.GetApplicationListRequest();
+    private com.wultra.security.powerauth.client.model.response.GetApplicationListResponse getApplicationList() throws PowerAuthClientException {
         return powerAuthClient.getApplicationList(
-                listRequest,
                 httpCustomizationService.getQueryParams(),
                 httpCustomizationService.getHttpHeaders()
         );

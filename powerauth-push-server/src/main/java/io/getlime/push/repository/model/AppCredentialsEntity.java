@@ -16,7 +16,9 @@
 
 package io.getlime.push.repository.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -27,6 +29,8 @@ import java.io.Serializable;
 @Entity
 @Table(name = "push_app_credentials")
 public class AppCredentialsEntity implements Serializable {
+
+    @Serial
     private static final long serialVersionUID = -8904070389354612019L;
 
     /**
@@ -34,7 +38,7 @@ public class AppCredentialsEntity implements Serializable {
      */
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_app_credentials", sequenceName = "push_credentials_seq")
+    @SequenceGenerator(name = "push_app_credentials", sequenceName = "push_credentials_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_app_credentials")
     private Long id;
 

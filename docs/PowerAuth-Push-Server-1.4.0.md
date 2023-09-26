@@ -16,9 +16,11 @@ Message inbox requires a simple database structure below:
 -- Create table for message inbox
 CREATE TABLE push_inbox (
     id INTEGER NOT NULL CONSTRAINT push_inbox_pk PRIMARY KEY,
-    inbox_id VARCHAR(37),
+    inbox_id VARCHAR(37) NOT NULL,
     user_id VARCHAR(255) NOT NULL,
+    type VARCHAR(32) NOT NULL,
     subject TEXT NOT NULL,
+    summary TEXT NOT NULL,
     body TEXT NOT NULL,
     read BOOLEAN DEFAULT false NOT NULL,
     timestamp_created TIMESTAMP NOT NULL,
@@ -44,7 +46,9 @@ CREATE TABLE PUSH_INBOX (
   ID NUMBER(19) PRIMARY KEY NOT NULL,
   INBOX_ID VARCHAR2(37 CHAR),
   USER_ID VARCHAR2(255 CHAR) NOT NULL,
+  TYPE VARCHAR2(32 CHAR) NOT NULL,
   SUBJECT VARCHAR2(4000 CHAR) NOT NULL,
+  SUMMARY VARCHAR2(4000 CHAR) NOT NULL,
   BODY CLOB NOT NULL,
   READ NUMBER(1) DEFAULT 0 NOT NULL,
   TIMESTAMP_CREATED TIMESTAMP(6) NOT NULL,
@@ -70,7 +74,9 @@ CREATE TABLE `push_inbox` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `inbox_id` VARCHAR(37),
   `user_id` VARCHAR(255) NOT NULL,
+  `type` VARCHAR(32) NOT NULL,
   `subject` TEXT NOT NULL,
+  `summary` TEXT NOT NULL,
   `body` TEXT NOT NULL,
   `read` BOOLEAN DEFAULT false NOT NULL,
   `timestamp_created` TIMESTAMP NOT NULL,
@@ -89,8 +95,3 @@ CREATE INDEX `push_inbox_id` ON `push_inbox` (`inbox_id`);
 CREATE INDEX `push_inbox_user` ON `push_inbox` (`user_id`);
 CREATE INDEX `push_inbox_user_read` ON `push_inbox` (`user_id`, `read`);
 ```
-
-## Bouncy Castle Library Update to Version 1.72
-
-Bouncy Castle library has been updated to version `1.72`.
-The newest version of Bouncy Castle library can be downloaded from: [https://www.bouncycastle.org/download/bcprov-jdk18on-172.jar](https://www.bouncycastle.org/download/bcprov-jdk18on-172.jar)

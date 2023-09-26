@@ -23,6 +23,10 @@ package io.getlime.push.errorhandling.exceptions;
  */
 public class AppNotFoundException extends Exception {
 
+    /**
+     * Constructor with a message override.
+     * @param message Message.
+     */
     public AppNotFoundException(String message) {
         super(message);
     }

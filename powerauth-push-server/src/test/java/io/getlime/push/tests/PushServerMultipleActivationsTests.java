@@ -22,9 +22,7 @@ import io.getlime.push.client.PushServerClientException;
 import io.getlime.push.client.PushServerTestClientFactory;
 import io.getlime.push.configuration.PushServerAppCredentialConfiguration;
 import io.getlime.push.model.enumeration.MobilePlatform;
-import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushDeviceRepository;
-import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,8 +30,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -92,9 +89,8 @@ public class PushServerMultipleActivationsTests {
 
     @Test
     public void createDeviceWithMultipleActivationsInvalidTest() {
-        assertThrows(PushServerClientException.class, () -> {
-            pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, Collections.emptyList());
-        });
+        assertThrows(PushServerClientException.class, () ->
+                pushServerClient.createDeviceForActivations(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, Collections.emptyList()));
     }
 
     @Test

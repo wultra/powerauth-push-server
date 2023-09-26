@@ -18,7 +18,9 @@ package io.getlime.push.repository.model;
 
 import io.getlime.push.repository.converter.PushMessageStatusConverter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -70,6 +72,7 @@ public class PushMessageEntity implements Serializable {
         }
     }
 
+    @Serial
     private static final long serialVersionUID = -2570093156350796326L;
 
     /**
@@ -77,7 +80,7 @@ public class PushMessageEntity implements Serializable {
      */
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_message", sequenceName = "push_message_seq")
+    @SequenceGenerator(name = "push_message", sequenceName = "push_message_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_message")
     private Long id;
 

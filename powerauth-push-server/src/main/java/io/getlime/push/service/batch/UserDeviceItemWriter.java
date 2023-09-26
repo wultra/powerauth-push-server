@@ -25,12 +25,10 @@ import io.getlime.push.repository.serialization.JsonSerialization;
 import io.getlime.push.service.PushMessageSenderService;
 import io.getlime.push.service.batch.storage.CampaignMessageStorageMap;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Item writer that send notification to directed device and save message to database.
@@ -68,7 +66,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
      * @throws Exception In case of business logic error.
      */
     @Override
-    public void write(List<? extends UserDevice> list) throws Exception {
+    public void write(Chunk<? extends UserDevice> list) throws Exception {
         for (UserDevice device: list) {
             final String platform = device.getPlatform();
             final String token = device.getToken();
@@ -80,11 +78,8 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
             // Load and cache campaign information
             PushCampaignEntity campaign = campaignStorageMap.get(campaignId);
             if (campaign == null) {
-                final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
-                if (!campaignEntityOptional.isPresent()) {
-                    throw new PushServerException("Campaign with entered ID does not exist");
-                }
-                campaign = campaignEntityOptional.get();
+                campaign = pushCampaignRepository.findById(campaignId).orElseThrow(() ->
+                    new PushServerException("Campaign with entered ID does not exist"));
                 campaignStorageMap.put(campaignId, campaign);
             }
             final PushMessageBody messageBody = jsonSerialization.deserializePushMessageBody(campaign.getMessage());

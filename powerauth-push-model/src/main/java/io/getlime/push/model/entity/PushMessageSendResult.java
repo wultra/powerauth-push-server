@@ -16,12 +16,14 @@
 
 package io.getlime.push.model.entity;
 
+import io.getlime.push.model.enumeration.Mode;
+
 /**
  * Class that contains push message sending result data.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-public class PushMessageSendResult {
+public class PushMessageSendResult extends BasePushMessageSendResult {
 
     /**
      * Result for the iOS platform.
@@ -100,9 +102,7 @@ public class PushMessageSendResult {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof iOS)) return false;
-
-            iOS iOS = (iOS) o;
+            if (!(o instanceof final iOS iOS)) return false;
 
             if (getSent() != iOS.getSent()) return false;
             if (getFailed() != iOS.getFailed()) return false;
@@ -197,9 +197,7 @@ public class PushMessageSendResult {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof Android)) return false;
-
-            Android android = (Android) o;
+            if (!(o instanceof final Android android)) return false;
 
             if (getSent() != android.getSent()) return false;
             if (getFailed() != android.getFailed()) return false;
@@ -224,6 +222,18 @@ public class PushMessageSendResult {
      * Default constructor.
      */
     public PushMessageSendResult() {
+        super();
+        this.ios = new iOS();
+        this.android = new Android();
+    }
+
+    /**
+     * Primary constructor.
+     *
+     * @param mode Mode of push message sending.
+     */
+    public PushMessageSendResult(Mode mode) {
+        super(mode);
         this.ios = new iOS();
         this.android = new Android();
     }
@@ -244,13 +254,10 @@ public class PushMessageSendResult {
         return ios;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PushMessageSendResult)) return false;
-
-        PushMessageSendResult that = (PushMessageSendResult) o;
+        if (!(o instanceof final PushMessageSendResult that)) return false;
 
         if (getIos() != null ? !getIos().equals(that.getIos()) : that.getIos() != null) return false;
         return getAndroid() != null ? getAndroid().equals(that.getAndroid()) : that.getAndroid() == null;

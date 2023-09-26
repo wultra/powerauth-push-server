@@ -19,6 +19,8 @@ package io.getlime.push.service.batch.storage;
  * Interface that prescribes methods for userDevice storage
  *
  * @author Petr Dvorak, petr@wultra.com
+ *
+ * @param <T> Type of the stored record.
  */
 public interface ItemStorageSet<T> {
 

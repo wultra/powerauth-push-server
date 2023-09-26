@@ -8,7 +8,6 @@ You can download DDL scripts for supported databases:
 
 - [PostgreSQL](./sql/postgresql/create_push_server_schema.sql)
 - [Oracle](./sql/oracle/create_push_server_schema.sql)
-- [MySQL](./sql/mysql/create_push_server_schema.sql)
 
 ## Tables
 
@@ -18,6 +17,8 @@ You can download DDL scripts for supported databases:
 - [Push messages](#push-messages-table)
 - [Push campaigns](#push-campaigns-table)
 - [Push campaign users](#push-campaign-users-table)
+- [Message inbox](#message-inbox)
+- [Message inbox mapping](#message-inbox-mapping-table)
 <!-- end -->
 
 <!-- begin database table push_device_registration -->
@@ -272,9 +273,11 @@ Stores the messages to be delivered to particular users.
 ```sql
 CREATE TABLE push_inbox (
     id INTEGER NOT NULL CONSTRAINT push_inbox_pk PRIMARY KEY,
-    inbox_id VARCHAR(37),
+    inbox_id VARCHAR(37) NOT NULL,
     user_id VARCHAR(255) NOT NULL,
+    type VARCHAR(32) NOT NULL;
     subject TEXT NOT NULL,
+    summary TEXT NOT NULL;
     body TEXT NOT NULL,
     read BOOLEAN DEFAULT false NOT NULL,
     timestamp_created TIMESTAMP NOT NULL,
@@ -293,7 +296,9 @@ CREATE INDEX push_inbox_user_read ON push_inbox (user_id, read);
 | `id`                | INTEGER      | primary key, index, autoincrement | Unique message ID.                              |
 | `inbox_id`          | INTEGER      | index                             | Identifier of message that is publicly visible. |
 | `user_id`           | VARCHAR(255) | index                             | Identifier of user.                             |
+| `type`              | VARCHAR(32)  | -                                 | Message type (`text` or `html`).                |
 | `subject`           | TEXT         | -                                 | Message subject.                                |
+| `summary`           | TEXT         | -                                 | Message summary.                                |
 | `body`              | TEXT         | -                                 | Message body.                                   |
 | `read`              | BOOLEAN      | index                             | Indication of in the message was read.          |
 | `timestamp_created` | TIMESTAMP    | -                                 | Timestamp of message creation.                  |

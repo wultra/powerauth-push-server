@@ -17,6 +17,7 @@ package io.getlime.push.client;
 
 import io.getlime.core.rest.model.base.entity.Error;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -26,6 +27,7 @@ import java.io.Serializable;
  */
 public class PushServerClientError extends Error implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -3063064667769595550L;
 
     private static final String ERROR_VALIDATION = "ERROR_VALIDATION";

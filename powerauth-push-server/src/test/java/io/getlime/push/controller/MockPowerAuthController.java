@@ -15,8 +15,11 @@
  */
 package io.getlime.push.controller;
 
-import com.google.common.io.BaseEncoding;
-import com.wultra.security.powerauth.client.v3.*;
+import com.wultra.security.powerauth.client.model.entity.Application;
+import com.wultra.security.powerauth.client.model.entity.ApplicationVersion;
+import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
+import com.wultra.security.powerauth.client.model.request.*;
+import com.wultra.security.powerauth.client.model.response.*;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.push.client.PushServerTestClientFactory;
@@ -32,7 +35,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.KeyPair;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Mock controller for PowerAuth services.
@@ -51,9 +57,9 @@ public class MockPowerAuthController {
     @PostMapping("application/list")
     public ObjectResponse<GetApplicationListResponse> getApplicationList() {
         final GetApplicationListResponse response = new GetApplicationListResponse();
-        final GetApplicationListResponse.Applications app = new GetApplicationListResponse.Applications();
-        app.setApplicationId(PushServerTestClientFactory.TEST_APPLICATION_NAME);
-        response.getApplications().add(app);
+        final Application application = new Application();
+        application.setApplicationId(PushServerTestClientFactory.TEST_APPLICATION_NAME);
+        response.getApplications().add(application);
         return new ObjectResponse<>(response);
     }
 
@@ -67,7 +73,7 @@ public class MockPowerAuthController {
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail() {
         final GetApplicationDetailResponse response = new GetApplicationDetailResponse();
         response.setApplicationId(PushServerTestClientFactory.TEST_APPLICATION_NAME);
-        final GetApplicationDetailResponse.Versions version = new GetApplicationDetailResponse.Versions();
+        final ApplicationVersion version = new ApplicationVersion();
         version.setApplicationVersionId(PushServerTestClientFactory.TEST_APPLICATION_VERSION);
         version.setSupported(true);
         version.setApplicationKey("key");
@@ -76,7 +82,7 @@ public class MockPowerAuthController {
         try {
             final KeyPair keyPair = new KeyGenerator().generateKeyPair();
             final KeyConvertor keyConvertor = new KeyConvertor();
-            response.setMasterPublicKey(BaseEncoding.base64().encode(keyConvertor.convertPublicKeyToBytes(keyPair.getPublic())));
+            response.setMasterPublicKey(Base64.getEncoder().encodeToString(keyConvertor.convertPublicKeyToBytes(keyPair.getPublic())));
         } catch (CryptoProviderException e) {
             // Exception cannot occur when cryptography provider is set correctly
             logger.error(e.getMessage(), e);

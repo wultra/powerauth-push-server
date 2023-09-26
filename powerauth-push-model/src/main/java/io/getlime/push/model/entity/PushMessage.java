@@ -18,7 +18,7 @@ package io.getlime.push.model.entity;
 
 import io.getlime.push.model.enumeration.Priority;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Class representing a single push message payload.

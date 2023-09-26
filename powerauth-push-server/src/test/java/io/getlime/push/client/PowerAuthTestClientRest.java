@@ -16,24 +16,33 @@
 package io.getlime.push.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.BaseEncoding;
 import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.model.entity.Application;
+import com.wultra.security.powerauth.client.model.entity.ApplicationVersion;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
-import com.wultra.security.powerauth.client.v3.*;
+import com.wultra.security.powerauth.client.model.request.InitActivationRequest;
+import com.wultra.security.powerauth.client.model.request.PrepareActivationRequest;
+import com.wultra.security.powerauth.client.model.response.CommitActivationResponse;
+import com.wultra.security.powerauth.client.model.response.CreateApplicationVersionResponse;
+import com.wultra.security.powerauth.client.model.response.InitActivationResponse;
+import com.wultra.security.powerauth.client.model.response.PrepareActivationResponse;
 import com.wultra.security.powerauth.rest.client.PowerAuthRestClient;
 import io.getlime.push.api.PowerAuthTestClient;
 import io.getlime.security.powerauth.crypto.client.activation.PowerAuthClientActivation;
-import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.EciesEncryptor;
-import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.EciesFactory;
-import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesCryptogram;
-import io.getlime.security.powerauth.crypto.lib.encryptor.ecies.model.EciesSharedInfo1;
+import io.getlime.security.powerauth.crypto.lib.encryptor.ClientEncryptor;
+import io.getlime.security.powerauth.crypto.lib.encryptor.EncryptorFactory;
+import io.getlime.security.powerauth.crypto.lib.encryptor.model.EncryptedRequest;
+import io.getlime.security.powerauth.crypto.lib.encryptor.model.EncryptorId;
+import io.getlime.security.powerauth.crypto.lib.encryptor.model.EncryptorParameters;
+import io.getlime.security.powerauth.crypto.lib.encryptor.model.v3.ClientEncryptorSecrets;
 import io.getlime.security.powerauth.crypto.lib.util.KeyConvertor;
-import io.getlime.security.powerauth.rest.api.model.request.v3.ActivationLayer2Request;
+import io.getlime.security.powerauth.rest.api.model.request.ActivationLayer2Request;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.interfaces.ECPublicKey;
+import java.util.Base64;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class PowerAuthTestClientRest implements PowerAuthTestClient {
 
     private final PowerAuthClientActivation activation = new PowerAuthClientActivation();
-    private final EciesFactory eciesFactory = new EciesFactory();
+    private final EncryptorFactory encryptorFactory = new EncryptorFactory();
     private final KeyConvertor keyConvertor = new KeyConvertor();
     private PowerAuthClient powerAuthClient;
 
@@ -69,24 +78,24 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
 
     public String initializeApplication(String applicationName, String applicationVersion) throws PowerAuthClientException {
         // Create application if it does not exist
-        List<GetApplicationListResponse.Applications> applications = powerAuthClient.getApplicationList();
+        final List<Application> applications = powerAuthClient.getApplicationList().getApplications();
         boolean applicationExists = false;
-        for (com.wultra.security.powerauth.client.v3.GetApplicationListResponse.Applications app: applications) {
+        for (Application app: applications) {
             if (app.getApplicationId().equals(applicationName)) {
                 applicationExists = true;
                 applicationId = app.getApplicationId();
             }
         }
         if (!applicationExists) {
-            com.wultra.security.powerauth.client.v3.CreateApplicationResponse response = powerAuthClient.createApplication(applicationName);
+            com.wultra.security.powerauth.client.model.response.CreateApplicationResponse response = powerAuthClient.createApplication(applicationName);
             applicationId = response.getApplicationId();
         }
 
         // Create application version if it does not exist
-        com.wultra.security.powerauth.client.v3.GetApplicationDetailResponse detail = powerAuthClient.getApplicationDetail(applicationId);
+        com.wultra.security.powerauth.client.model.response.GetApplicationDetailResponse detail = powerAuthClient.getApplicationDetail(applicationId);
         masterPublicKey = detail.getMasterPublicKey();
         boolean versionExists = false;
-        for (GetApplicationDetailResponse.Versions appVersion: detail.getVersions()) {
+        for (ApplicationVersion appVersion: detail.getVersions()) {
             if (appVersion.getApplicationVersionId().equals(applicationVersion)) {
                 versionExists = true;
                 applicationKey = appVersion.getApplicationKey();
@@ -115,30 +124,36 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
         // Generate device key pair
         KeyPair deviceKeyPair = activation.generateDeviceKeyPair();
         byte[] devicePublicKeyBytes = keyConvertor.convertPublicKeyToBytes(deviceKeyPair.getPublic());
-        String devicePublicKeyBase64 = BaseEncoding.base64().encode(devicePublicKeyBytes);
+        final String devicePublicKeyBase64 = Base64.getEncoder().encodeToString(devicePublicKeyBytes);
 
         // Create activation layer 2 request which is decryptable only on PowerAuth server
-        ActivationLayer2Request requestL2 = new ActivationLayer2Request();
+        final ActivationLayer2Request requestL2 = new ActivationLayer2Request();
         requestL2.setActivationName("Test activation");
         requestL2.setDevicePublicKey(devicePublicKeyBase64);
 
         // Encrypt request data using ECIES in application scope with sharedInfo1 = /pa/activation
-        byte[] masterKeyBytes = BaseEncoding.base64().decode(masterPublicKey);
+        final byte[] masterKeyBytes = Base64.getDecoder().decode(masterPublicKey);
         ECPublicKey masterPK = (ECPublicKey) keyConvertor.convertBytesToPublicKey(masterKeyBytes);
         byte[] applicationSecretBytes = applicationSecret.getBytes(StandardCharsets.UTF_8);
 
-        EciesEncryptor eciesEncryptorL2 = eciesFactory.getEciesEncryptorForApplication(masterPK, applicationSecretBytes, EciesSharedInfo1.ACTIVATION_LAYER_2);
-        ByteArrayOutputStream baosL2 = new ByteArrayOutputStream();
+        final String protocolVersion = "3.1";
+        final EncryptorParameters encryptorParameters = new EncryptorParameters(protocolVersion, applicationKey, null);
+        final ClientEncryptorSecrets encryptorSecrets = new ClientEncryptorSecrets(masterPK, applicationSecretBytes);
+        final ClientEncryptor clientEncryptor = encryptorFactory.getClientEncryptor(EncryptorId.ACTIVATION_LAYER_2, encryptorParameters, encryptorSecrets);
+        final ByteArrayOutputStream baosL2 = new ByteArrayOutputStream();
         objectMapper.writeValue(baosL2, requestL2);
-        EciesCryptogram eciesCryptogramL2 = eciesEncryptorL2.encryptRequest(baosL2.toByteArray(), true);
+        final EncryptedRequest encryptedRequest = clientEncryptor.encryptRequest(baosL2.toByteArray());
 
-        String ephemeralPublicKey = BaseEncoding.base64().encode(eciesCryptogramL2.getEphemeralPublicKey());
-        String encryptedData = BaseEncoding.base64().encode(eciesCryptogramL2.getEncryptedData());
-        String mac = BaseEncoding.base64().encode(eciesCryptogramL2.getMac());
-        String nonce = BaseEncoding.base64().encode(eciesCryptogramL2.getNonce());
+        final PrepareActivationRequest prepareRequest = new PrepareActivationRequest();
+        prepareRequest.setActivationCode(initResponse.getActivationCode());
+        prepareRequest.setApplicationKey(applicationKey);
+        prepareRequest.setEphemeralPublicKey(encryptedRequest.getEphemeralPublicKey());
+        prepareRequest.setEncryptedData(encryptedRequest.getEncryptedData());
+        prepareRequest.setMac(encryptedRequest.getMac());
+        prepareRequest.setNonce(encryptedRequest.getNonce());
+        prepareRequest.setProtocolVersion(protocolVersion);
 
-        // Prepare activation
-        PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(initResponse.getActivationCode(), applicationKey, null, ephemeralPublicKey, encryptedData, mac, nonce);
+        final PrepareActivationResponse prepareResponse = powerAuthClient.prepareActivation(prepareRequest);
         assertNotNull(prepareResponse.getActivationId());
 
         // Commit activation

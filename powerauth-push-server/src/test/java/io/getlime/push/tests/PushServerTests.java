@@ -27,21 +27,18 @@ import io.getlime.push.configuration.PushServerAppCredentialConfiguration;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.entity.*;
 import io.getlime.push.model.enumeration.MobilePlatform;
+import io.getlime.push.model.enumeration.Mode;
 import io.getlime.push.model.response.*;
-import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushDeviceRepository;
-import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
@@ -64,9 +61,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
-public class PushServerTests {
+@Sql(scripts = "classpath:/sql/batch-init-h2.sql")
+class PushServerTests {
 
     private static final String MOCK_PUSH_TOKEN = "1234567890987654321234567890";
     private static final String MOCK_PUSH_TOKEN_2 = "9876543212345678901234567890";
@@ -97,18 +94,18 @@ public class PushServerTests {
     private String fcmUrlForTests;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         pushServerClient = testClientFactory.createPushServerClient("http://localhost:" + port);
         powerAuthTestClient = testClientFactory.createPowerAuthTestClient();
         appCredentialConfig.configure(powerAuthTestClient.getApplicationId());
     }
 
     @Test
-    public void getServiceStatusTest() throws Exception {
+    void getServiceStatusTest() throws Exception {
         ObjectResponse<ServiceStatusResponse> actual = pushServerClient.getServiceStatus();
         String body = restTemplate.getForEntity("http://localhost:" + port + "/push/service/status", String.class).getBody();
         assertNotNull(body);
-        ObjectResponse<ServiceStatusResponse> expected = mapper.readValue(body, new TypeReference<ObjectResponse<ServiceStatusResponse>>() {});
+        final ObjectResponse<ServiceStatusResponse> expected = mapper.readValue(body, new TypeReference<>() {});
         assertEquals(expected.getStatus(), actual.getStatus());
         assertEquals(expected.getResponseObject().getApplicationDisplayName(), actual.getResponseObject().getApplicationDisplayName());
         assertEquals(expected.getResponseObject().getApplicationEnvironment(), actual.getResponseObject().getApplicationEnvironment());
@@ -116,14 +113,13 @@ public class PushServerTests {
     }
 
     @Test
-    public void createDeviceWithoutActivationIDTest() {
-        assertThrows(PushServerClientException.class, () -> {
-            pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS);
-        });
+    void createDeviceWithoutActivationIDTest() {
+        assertThrows(PushServerClientException.class, () ->
+            pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS));
     }
 
     @Test
-    public void createDeviceWithActivationIDTest() throws Exception {
+    void createDeviceWithActivationIDTest() throws Exception {
         boolean result = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, powerAuthTestClient.getActivationId());
         assertTrue(result);
         List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
@@ -132,7 +128,7 @@ public class PushServerTests {
     }
 
     @Test
-    public void deleteDeviceTest() throws Exception {
+    void deleteDeviceTest() throws Exception {
         boolean result = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, powerAuthTestClient.getActivationId());
         assertTrue(result);
         List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
@@ -144,12 +140,12 @@ public class PushServerTests {
     }
 
     @Test
-    public void testFcmUrlConfiguredForTests() {
+    void testFcmUrlConfiguredForTests() {
         assertEquals("http://localhost:" + port + "/mockfcm/message:send", fcmUrlForTests);
     }
 
     @Test
-    public void updateDeviceStatusTest() throws Exception {
+    void updateDeviceStatusTest() throws Exception {
         boolean result = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, powerAuthTestClient.getActivationId());
         assertTrue(result);
         List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
@@ -172,7 +168,7 @@ public class PushServerTests {
 
     @Test
     @SuppressWarnings("unchecked") //known parameters of HashMap
-    public void sendPushMessageTest() throws Exception {
+    void sendPushMessageTest() throws Exception {
         boolean result = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.Android, powerAuthTestClient.getActivationId());
         assertTrue(result);
         PushMessage pushMessage = new PushMessage();
@@ -193,7 +189,7 @@ public class PushServerTests {
         pushMessage.setAttributes(attributes);
         pushMessage.setBody(pushMessageBody);
         pushMessage.setAttributes(attributes);
-        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessage(powerAuthTestClient.getApplicationId(), pushMessage);
+        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessage(powerAuthTestClient.getApplicationId(), Mode.SYNCHRONOUS, pushMessage);
         assertEquals("OK", actual.getStatus());
         List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         pushDeviceRepository.deleteAll(devices);
@@ -202,8 +198,7 @@ public class PushServerTests {
 
     @Test
     @SuppressWarnings("unchecked") //known parameters of HashMap
-    @Sql(scripts = "classpath:/sql/batch-init-h2.sql")
-    public void sendPushMessageBatchTest() throws Exception {
+    void sendPushMessageBatchTest() throws Exception {
         boolean result = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.Android, powerAuthTestClient.getActivationId());
         assertTrue(result);
         List<PushMessage> batch = new ArrayList<>();
@@ -226,60 +221,50 @@ public class PushServerTests {
         pushMessage.setBody(pushMessageBody);
         pushMessage.setAttributes(attributes);
         batch.add(pushMessage);
-        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessageBatch(powerAuthTestClient.getApplicationId(), batch);
+        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessageBatch(powerAuthTestClient.getApplicationId(), Mode.SYNCHRONOUS, batch);
         assertEquals("OK", actual.getStatus());
         List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         pushDeviceRepository.deleteAll(devices);
     }
 
     @Test
-    @SuppressWarnings("unchecked") //known parameters of HashMap
-    public void createCampaignTest() throws Exception {
+    void createCampaignTest() throws Exception {
         boolean result = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.Android, powerAuthTestClient.getActivationId());
         assertTrue(result);
-        PushMessageBody pushMessageBody = new PushMessageBody();
-        pushMessageBody.setTitle("Balance update");
-        pushMessageBody.setBody("Your balance is now $745.00");
-        pushMessageBody.setBadge(3);
-        pushMessageBody.setSound("riff.wav");
-        pushMessageBody.setCategory("balance-update");
-        pushMessageBody.setCollapseKey("balance-update");
-        pushMessageBody.setValidUntil(Instant.now());
-        pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
-        ObjectResponse<CreateCampaignResponse> actual = pushServerClient.createCampaign(powerAuthTestClient.getApplicationId(), pushMessageBody);
+        final ObjectResponse<CreateCampaignResponse> actual = createCampaign();
         assertEquals("OK", actual.getStatus());
         List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         pushDeviceRepository.deleteAll(devices);
     }
 
     @Test
-    public void deleteCampaignTest() throws Exception {
+    void deleteCampaignTest() throws Exception {
         boolean actual = pushServerClient.deleteCampaign(2L);
         assertTrue(actual);
     }
 
     @Test
-    public void getListOfCampaignsTest() throws Exception{
+    void getListOfCampaignsTest() throws Exception{
         ObjectResponse<ListOfCampaignsResponse> actual = pushServerClient.getListOfCampaigns(true);
         String body = restTemplate.getForEntity("http://localhost:" + port + "/push/campaign/list?all=true", String.class).getBody();
         assertNotNull(body);
-        ObjectResponse<ListOfCampaignsResponse> expected = mapper.readValue(body, new TypeReference<ObjectResponse<ListOfCampaignsResponse>>() {});
+        final ObjectResponse<ListOfCampaignsResponse> expected = mapper.readValue(body, new TypeReference<>() {});
         assertEquals(expected.getStatus(), actual.getStatus());
         assertTrue(actual.getResponseObject().containsAll(expected.getResponseObject()));
     }
 
     @Test
-    public void getCampaignTest() throws Exception{
+    void getCampaignTest() throws Exception{
         ObjectResponse<CampaignResponse> actual = pushServerClient.getCampaign(1L);
         String body = restTemplate.getForEntity("http://localhost:" + port + "/push/campaign/1/detail", String.class).getBody();
         assertNotNull(body);
-        ObjectResponse<CampaignResponse> expected = mapper.readValue(body, new TypeReference<ObjectResponse<CampaignResponse>>() {});
+        final ObjectResponse<CampaignResponse> expected = mapper.readValue(body, new TypeReference<>() {});
         assertEquals(expected.getStatus(), actual.getStatus());
         assertEquals(expected.getResponseObject(), actual.getResponseObject());
     }
 
     @Test
-    public void addUsersToCampaignTest() throws Exception {
+    void addUsersToCampaignTest() throws Exception {
         ListOfUsers listOfUsers = new ListOfUsers();
         listOfUsers.addAll(Arrays.asList("1234567890", "1234567891", "1234567893"));
         boolean actual = pushServerClient.addUsersToCampaign(1L, listOfUsers);
@@ -287,18 +272,18 @@ public class PushServerTests {
     }
 
     @Test
-    public void getListOfUsersFromCampaignTest() throws Exception {
+    void getListOfUsersFromCampaignTest() throws Exception {
         PagedResponse<ListOfUsersFromCampaignResponse> actual = pushServerClient.getListOfUsersFromCampaign(10L, 0, 3);
         String body = restTemplate.getForEntity("http://localhost:" + port + "/push/campaign/10/user/list?page=0&size=3", String.class).getBody();
         assertNotNull(body);
-        PagedResponse<ListOfUsersFromCampaignResponse> expected = mapper.readValue(body, new TypeReference<PagedResponse<ListOfUsersFromCampaignResponse>>() {});
+        final PagedResponse<ListOfUsersFromCampaignResponse> expected = mapper.readValue(body, new TypeReference<>() {});
         assertEquals(expected.getResponseObject(), actual.getResponseObject());
         assertEquals(expected.getStatus(), actual.getStatus());
         assertEquals(expected.getPage(), actual.getPage());
     }
 
     @Test
-    public void deleteUsersFromCampaignTest() throws Exception {
+    void deleteUsersFromCampaignTest() throws Exception {
         ListOfUsers listOfUsers = new ListOfUsers();
         listOfUsers.addAll(Arrays.asList("1234567890", "1234567891", "1234567893"));
         boolean actual = pushServerClient.deleteUsersFromCampaign(3L, listOfUsers);
@@ -306,19 +291,20 @@ public class PushServerTests {
     }
 
     @Test
-    public void sendTestingCampaignTest() throws Exception {
+    void sendTestingCampaignTest() throws Exception {
         boolean actual = pushServerClient.sendTestCampaign(1L, "Test_User");
         assertTrue(actual);
     }
 
     @Test
-    public void sendCampaignTest() throws Exception {
-        boolean actual = pushServerClient.sendCampaign(1L);
-        assertTrue(actual);
+    void sendCampaignTest() throws Exception {
+        createCampaign();
+        boolean result = pushServerClient.sendCampaign(1L);
+        assertTrue(result);
     }
 
     @Test
-    public void createDeviceWithMultipleActivationsTest() {
+    void createDeviceWithMultipleActivationsTest() {
         assertThrows(PushServerClientException.class, () -> {
             List<String> activationIds = new ArrayList<>();
             activationIds.add(powerAuthTestClient.getActivationId());
@@ -328,7 +314,7 @@ public class PushServerTests {
     }
 
     @Test
-    public void createDeviceSameActivationSamePushTokenUpdatesTest() throws PushServerClientException {
+    void createDeviceSameActivationSamePushTokenUpdatesTest() throws PushServerClientException {
         // This test tests refresh of a device registration
         boolean actual = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, powerAuthTestClient.getActivationId());
         assertTrue(actual);
@@ -344,7 +330,7 @@ public class PushServerTests {
     }
 
     @Test
-    public void createDeviceSameActivationDifferentPushTokenTest() throws PushServerClientException {
+    void createDeviceSameActivationDifferentPushTokenTest() throws PushServerClientException {
         // This test tests change of Push Token - new token has been issued by Google or Apple and the device registers for same activation
         boolean actual = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, powerAuthTestClient.getActivationId());
         assertTrue(actual);
@@ -362,7 +348,7 @@ public class PushServerTests {
     }
 
     @Test
-    public void createDeviceDifferentActivationSamePushTokenTest() throws PushServerClientException {
+    void createDeviceDifferentActivationSamePushTokenTest() throws PushServerClientException {
         // This test tests change of activation - user deleted the activation and created a new one, the push token is the same
         boolean actual = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.iOS, powerAuthTestClient.getActivationId());
         assertTrue(actual);
@@ -376,4 +362,17 @@ public class PushServerTests {
         pushDeviceRepository.deleteAll(devices2);
     }
 
+    @SuppressWarnings("unchecked") // known parameters of HashMap
+    private ObjectResponse<CreateCampaignResponse> createCampaign() throws Exception {
+        final PushMessageBody pushMessageBody = new PushMessageBody();
+        pushMessageBody.setTitle("Balance update");
+        pushMessageBody.setBody("Your balance is now $745.00");
+        pushMessageBody.setBadge(3);
+        pushMessageBody.setSound("riff.wav");
+        pushMessageBody.setCategory("balance-update");
+        pushMessageBody.setCollapseKey("balance-update");
+        pushMessageBody.setValidUntil(Instant.now());
+        pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
+        return pushServerClient.createCampaign(powerAuthTestClient.getApplicationId(), pushMessageBody);
+    }
 }

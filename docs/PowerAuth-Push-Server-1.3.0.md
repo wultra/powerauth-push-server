@@ -14,8 +14,29 @@ powerauth.push.service.apns.useDevelopment=false
 
 ### Migrating Application ID
 
-Push server now uses `String` application ID instead of numeric one. Therefore, you need to transfer the correct application name to the `push_app_credentials` table. In case you use the same schema to run PowerAuth Server and PowerAuth Push Server, you can use the following script to do it:
+Push server now uses `String` application ID instead of numeric one. Therefore, you need to transfer the correct application name to the `push_app_credentials` table. In case you use the same schema to run PowerAuth Server and PowerAuth Push Server, you can use the following script to do it.
 
+Oracle:
+```sql
+-- rename the original app_id column to app_id_orig 
+ALTER TABLE push_app_credentials RENAME COLUMN app_id TO app_id_orig;
+
+-- create a new column for the string app ID value
+ALTER TABLE push_app_credentials ADD app_id VARCHAR2(255 CHAR);
+
+-- migrate the string app ID value from the PowerAuth table with applications
+UPDATE push_app_credentials push
+SET app_id = (SELECT pa.name FROM pa_application pa WHERE pa.id = push.app_id_orig)
+WHERE EXISTS (SELECT 1 FROM pa_application pa WHERE pa.id = push.app_id_orig);
+
+-- remove the original column with numeric app ID value 
+ALTER TABLE push_app_credentials DROP COLUMN app_id_orig;
+
+-- reintroduce the unique index
+CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials(app_id);
+```
+
+PostgreSQL:
 ```sql
 -- rename the original app_id column to app_id_orig 
 ALTER TABLE push_app_credentials RENAME COLUMN app_id TO app_id_orig;
@@ -31,6 +52,9 @@ WHERE pa.id = push_app_credentials.app_id_orig;
 
 -- remove the original column with numeric app ID value 
 ALTER TABLE push_app_credentials DROP COLUMN app_id_orig;
+
+-- reintroduce the unique index
+CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials(app_id);
 ```
 
 Alternatively, you can alter the table manually to have `app_id` column of `VARCHAR(255)` type and value of PowerAuth application name.

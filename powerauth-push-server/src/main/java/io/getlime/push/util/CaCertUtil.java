@@ -16,7 +16,6 @@
 
 package io.getlime.push.util;
 
-import com.google.common.io.BaseEncoding;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -36,6 +34,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -103,7 +102,7 @@ public class CaCertUtil {
             try {
                 logger.info("Importing embedded certificate: {}", certPath);
                 final File resource = new ClassPathResource(certPath).getFile();
-                final String certString = new String(Files.readAllBytes(resource.toPath()), StandardCharsets.UTF_8);
+                final String certString = Files.readString(resource.toPath());
                 final X509Certificate cert = certificateFromPem(certString);
                 result.add(cert);
             } catch (CertificateException | IOException e) {
@@ -115,7 +114,7 @@ public class CaCertUtil {
     }
 
     private X509Certificate certificateFromPem(String pem) throws CertificateException {
-        byte[] decoded = BaseEncoding.base64().decode(pem
+        final byte[] decoded = Base64.getDecoder().decode(pem
                 .replaceAll(BEGIN_CERT, "")
                 .replaceAll(END_CERT, "")
                 .replaceAll("\\s", "")

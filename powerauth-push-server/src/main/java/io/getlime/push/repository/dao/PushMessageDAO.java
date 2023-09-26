@@ -24,8 +24,8 @@ import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.repository.serialization.JsonSerialization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.Date;
 
 /**

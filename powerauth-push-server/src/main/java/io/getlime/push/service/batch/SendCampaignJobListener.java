@@ -27,7 +27,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.Optional;
 
 /**
  * Listener for the batch job execution.
@@ -73,10 +72,7 @@ public class SendCampaignJobListener implements JobExecutionListener {
      * @return Push campaign entity.
      */
     private PushCampaignEntity findPushCampaignById(Long campaignId) {
-        final Optional<PushCampaignEntity> pushCampaignEntityOptional = pushCampaignRepository.findById(campaignId);
-        if (!pushCampaignEntityOptional.isPresent()) {
-            throw new IllegalArgumentException("Campaign with entered ID does not exist");
-        }
-        return pushCampaignEntityOptional.get();
+        return pushCampaignRepository.findById(campaignId).orElseThrow(() ->
+                new IllegalArgumentException("Campaign with entered ID does not exist"));
     }
 }

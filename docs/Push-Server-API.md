@@ -1,7 +1,7 @@
 # Push Server API
 <!-- template api -->
 
-Push Server provides a simple to use RESTful API for the 3rd party integration purposes. The API contains methods related with:
+Push Server provides a RESTful API for the 3rd party integration purposes. The API contains methods related with:
 
 - [Service](#service)
 - [Device](#device)
@@ -82,7 +82,6 @@ PowerAuth Push Server uses following format for error response body, accompanied
 All error responses that are produced by the PowerAuth Push Server have following body:
 
 ```json
-
 {
   "status": "ERROR",
   "responseObject": {
@@ -172,7 +171,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 ```json
 {
   "requestObject": {
-    "appId": 2,
+    "appId": "mobile-app",
     "token": "1234567890987654321234567890",
     "platform": "ios",
     "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
@@ -219,7 +218,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 ```json
 {
   "requestObject": {
-    "appId": 2,
+    "appId": "mobile-app",
     "token": "1234567890987654321234567890",
     "platform": "ios",
     "activationIds": [
@@ -267,7 +266,7 @@ Removes registered device based on the push token value.
 ```json
 {
   "requestObject": {
-    "appId": 2,
+    "appId": "mobile-app",
     "token": "12456789098321234567890"
   }
 }
@@ -349,7 +348,8 @@ Send a single push message to given user via provided application, optionally to
 ```json
 {
   "requestObject": {
-    "appId": 2,
+    "appId": "mobile-app",
+    "mode": "SYNCHRONOUS",
     "message": {
       "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
       "userId": "123",
@@ -382,6 +382,7 @@ Send a single push message to given user via provided application, optionally to
 ```
 
 - `appId` - Application that user/s is/are using.
+- `mode` - Mode of sending, default value is `SYNCHRONOUS` (response waits for all messages being sent), you can use `ASYNCHRONOUS` (return response immediately).
 - `message` - Body for notification creating.
     - `activationId` - Identifier of specific activation, that usually corresponds to the device.
     - `userId` - Identifier of user.
@@ -396,15 +397,39 @@ Send a single push message to given user via provided application, optionally to
 
 ```json
 {
-  "status": "OK"
+  "status": "OK",
+  "responseObject": {
+    "mode": "SYNCHRONOUS",
+    "result": {
+      "ios": {
+        "sent": 1,
+        "pending": 0,
+        "failed": 0,
+        "total": 1
+      },
+      "android": {
+        "sent": 1,
+        "pending": 0,
+        "failed": 0,
+        "total": 1
+      }
+    }
+  }
 }
 ```
+
+- `mode` - Used sending mode.
+- `result` - Information about sending notifications. Present only for `SYNCHRONOUS` mode.
+    - `sent` - Number of sent notifications.
+    - `failed` - Number of failed notifications.
+    - `pending` - Number of notifications that are still pending sending.
+    - `total` - Number of total notifications.
 <!-- end -->
 
 <!-- begin api POST /push/message/batch/send  -->
 ### Send Message Batch
 
-Sends a message message batch - each item in the batch represents a message to given user. The message is sent via provided application (optionally to the specific device represented by given `activationId`).
+Sends a message batch - each item in the batch represents a message to given user. The message is sent via provided application (optionally to the specific device represented by given `activationId`).
 
 <!-- begin remove -->
 <table>
@@ -424,7 +449,8 @@ Sends a message message batch - each item in the batch represents a message to g
 ```json
 {
   "requestObject": {
-    "appId": 2,
+    "appId": "mobile-app",
+    "mode": "SYNCHRONOUS",
     "batch": [
       {
         "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
@@ -485,7 +511,8 @@ Sends a message message batch - each item in the batch represents a message to g
 ```
 
 - `appId` - Application that user is using.
-- `batch` - List of messages, see [documentation for sending a single message](#send-message) for details
+- `mode` - Mode of sending, default value is `SYNCHRONOUS` (response waits for all messages being sent), you can use `ASYNCHRONOUS` (return response immediately).
+- `batch` - List of messages, see [documentation for sending a single message](#send-message) for details.
 
 #### Response 200
 
@@ -493,6 +520,7 @@ Sends a message message batch - each item in the batch represents a message to g
 {
   "status": "OK",
   "responseObject": {
+    "mode": "SYNCHRONOUS",
     "result": {
       "ios": {
         "sent": 1,
@@ -511,10 +539,12 @@ Sends a message message batch - each item in the batch represents a message to g
 }
 ```
 
-- `result` - Information about sending notifications.
-- `sent` - Number of sent notifications.
-- `failed` - Number of failed notifications.
-- `total` - Number of total notifications.
+- `mode` - Used sending mode.
+- `result` - Information about sending notifications. Present only for `SYNCHRONOUS` mode.
+  - `sent` - Number of sent notifications.
+  - `failed` - Number of failed notifications.
+  - `pending` - Number of notifications that are still pending sending.
+  - `total` - Number of total notifications.
 <!-- end -->
 
 ## Campaign
@@ -553,7 +583,7 @@ Create a campaign with application that campaign is using and certain message th
 ```json
 {
   "requestObject": {
-    "appId": "2",
+    "appId": "mobile-app",
     "message": {
       "title": "Balance update",
       "titleLocKey": "balance.update.title",
@@ -681,7 +711,7 @@ Return details of a specific campaign.
   "status": "OK",
   "responseObject": {
     "id": "10",
-    "appId": 2,
+    "appId": "mobile-app",
     "sent": "false",
     "message": {
       "title": "Balance update",
@@ -732,13 +762,13 @@ Return list of actually registered campaigns, based on `all` parameter. This par
 
 #### Response 200
 
-``` json
+```json
 {
   "status": "OK",
   "responseObject": [
     {
       "id": "10",
-      "appId": 2,
+      "appId": "mobile-app",
       "sent": "false",
       "message": {
         "title": "Balance update",
@@ -759,7 +789,7 @@ Return list of actually registered campaigns, based on `all` parameter. This par
       }
     }, {
       "id": "11",
-      "appId": 3,
+      "appId": "mobile-app-other",
       "sent": "true",
       "message": {
         "title": "Balance update",
@@ -1076,9 +1106,7 @@ Get list of all applications.
   "responseObject": {
     "applicationList": [
       {
-        "id": 1,
-        "appId": 1,
-        "appName": "app1",
+        "appId": "mobile-app",
         "ios": true,
         "android": true
       }
@@ -1116,9 +1144,7 @@ Get list of applications which have not been configured yet.
   "responseObject": {
     "applicationList": [
       {
-        "id": 2,
-        "appId": null,
-        "appName": "app2",
+        "appId": "mobile-app-other",
         "ios": null,
         "android": null
       }
@@ -1151,7 +1177,7 @@ Get detail of an application.
 ```json
 {
   "requestObject": {
-    "id": 1,
+    "appId": "mobile-app",
     "includeIos": true,
     "includeAndroid": true
   }
@@ -1165,9 +1191,7 @@ Get detail of an application.
   "status": "OK",
   "responseObject": {
     "application": {
-      "id": 1,
-      "appId": 1,
-      "appName": "app1",
+      "appId": "mobile-app",
       "ios": true,
       "android": true
     },
@@ -1203,7 +1227,7 @@ Create a new supported application.
 ```json
 {
   "requestObject": {
-    "appId": 4
+    "appId": "mobile-app"
   }
 }
 ```
@@ -1214,7 +1238,7 @@ Create a new supported application.
 {
   "status": "OK",
   "responseObject": {
-    "id": 5
+    "appId": "mobile-app"
   }
 }
 ```
@@ -1243,7 +1267,7 @@ Update an iOS configuration.
 ```json
 {
   "requestObject": {
-    "id": 1,
+    "appId": "mobile-app",
     "bundle": "some.bundle.id",
     "keyId": "KEYID123456",
     "teamId": "TEAMID123456",
@@ -1290,7 +1314,7 @@ Remove an iOS configuration.
 ```json
 {
   "requestObject": {
-    "id": 5
+    "appId": "mobile-app"
   }
 }
 ```
@@ -1328,7 +1352,7 @@ Update an Android configuration.
 ```json
 {
   "requestObject": {
-    "id": 5,
+    "appId": "mobile-app",
     "projectId": "PROJECTID123",
     "privateKeyBase64": "ewogICJ0eXBlIjog..."
   }
@@ -1367,7 +1391,7 @@ Remove FCM configuration for Android push messages.
 ```json
 {
   "requestObject": {
-    "id": 5
+    "appId": "mobile-app"
   }
 }
 ```
@@ -1386,6 +1410,13 @@ Remove FCM configuration for Android push messages.
 When communicating with your users, you can use the message inbox to store messages for users. Inbox is not responsible
 for sending push notifications, but it is responsible for handling messages that should be read by the user later
 and for marking the messages as read, while marking a timestamp.
+
+Each message can have associated a type - either `text`, or `html`:
+
+- For `text` messages, the layout of the final message is defined by `subject` and `body` attributes. The `summary`
+  attribute is only used in list and push notifications.
+- For `html` messages, the `subject` and `summary` attributes are only used in list and push notifications, the `body`
+  attribute contains the full formatted HTML document. 
 
 <!-- begin box info -->
 To notify the user about a new message in the inbox, call the `POST /message/send` (or other push message sending API)
@@ -1418,7 +1449,9 @@ Post provided message to an inbox of a given user.
 {
   "requestObject": {
     "userId": "user-001",
+    "type": "text",
     "subject": "Example subject",
+    "summary": "Example summary",
     "body": "Example message body",
     "applications": [
       "application-001",
@@ -1436,7 +1469,9 @@ Post provided message to an inbox of a given user.
   "responseObject": {
     "id": "ae641389-d37a-4425-bd14-41c29484596f",
     "userId": "user-001",
+    "type": "text",
     "subject": "Example subject",
+    "summary": "Example summary",
     "body": "Example message body",
     "read": false,
     "timestampCreated": "2022-08-25T22:34:58.702+00:00",
@@ -1504,13 +1539,17 @@ Get messages from an inbox of a given user.
   "responseObject": [
     {
       "id": "059b3a83-c025-45be-b815-497d39222024",
+      "type": "text",
       "subject": "Hello, how are you?",
+      "summary": "Example summary",
       "read": true,
       "timestampCreated": "2022-08-25T20:35:01.067+00:00"
     },
     {
       "id": "ae641389-d37a-4425-bd14-41c29484596f",
+      "type": "text",
       "subject": "Example subject",
+      "summary": "Example summary",
       "read": false,
       "timestampCreated": "2022-08-25T22:34:58.702+00:00"
     }
@@ -1601,7 +1640,9 @@ Get full message detail from an inbox for a given message ID.
   "responseObject": {
     "id": "ae641389-d37a-4425-bd14-41c29484596f",
     "userId": "user-001",
+    "type": "text",
     "subject": "Example subject",
+    "summary": "Example summary",
     "body": "Example message body",
     "read": false,
     "timestampCreated": "2022-08-25T22:34:58.702+00:00",
@@ -1655,7 +1696,9 @@ Mark a message in an inbox as read. In case the message is already read, this ca
   "responseObject": {
     "id": "ae641389-d37a-4425-bd14-41c29484596f",
     "userId": "user-001",
+    "type": "text",
     "subject": "Example subject",
+    "summary": "Example summary",
     "body": "Example message body",
     "read": true,
     "timestampCreated": "2022-08-25T22:34:58.702+00:00",

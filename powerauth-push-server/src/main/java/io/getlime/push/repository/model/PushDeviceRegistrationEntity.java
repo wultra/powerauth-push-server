@@ -16,7 +16,9 @@
 
 package io.getlime.push.repository.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -29,6 +31,7 @@ import java.util.Date;
 @Table(name = "push_device_registration")
 public class PushDeviceRegistrationEntity implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1530682530822178192L;
 
     /**
@@ -50,7 +53,7 @@ public class PushDeviceRegistrationEntity implements Serializable {
      */
     @Id
     @Column(name = "id")
-    @SequenceGenerator(name = "push_device_registration", sequenceName = "push_device_registration_seq")
+    @SequenceGenerator(name = "push_device_registration", sequenceName = "push_device_registration_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "push_device_registration")
     private Long id;
 

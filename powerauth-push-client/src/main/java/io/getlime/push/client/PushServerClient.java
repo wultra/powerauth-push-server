@@ -16,7 +16,6 @@
 
 package io.getlime.push.client;
 
-import com.google.common.io.BaseEncoding;
 import com.wultra.core.rest.client.base.DefaultRestClient;
 import com.wultra.core.rest.client.base.RestClient;
 import com.wultra.core.rest.client.base.RestClientException;
@@ -27,6 +26,7 @@ import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.entity.*;
 import io.getlime.push.model.enumeration.MobilePlatform;
+import io.getlime.push.model.enumeration.Mode;
 import io.getlime.push.model.request.*;
 import io.getlime.push.model.response.*;
 import io.getlime.push.model.validator.*;
@@ -36,8 +36,9 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -202,7 +203,7 @@ public class PushServerClient {
         logger.info("Calling push server update device status, activation ID: {} - start", activationId);
         // Note that there is just plain 'request' in the request, not 'new ObjectRequest<>(request)'.
         // This is due to the fact that standard PowerAuth Server callback format is used here.
-        Response response = postImpl("/push/device/status/update", request, new ParameterizedTypeReference<Response>(){});
+        final Response response = postImpl("/push/device/status/update", request, new ParameterizedTypeReference<>(){});
         logger.info("Calling push server update device status, activation ID: {} - finish", activationId);
 
         return response.getStatus().equals(Response.Status.OK);
@@ -217,12 +218,26 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<PushMessageSendResult> sendPushMessage(String appId, PushMessage pushMessage) throws PushServerClientException {
-        SendPushMessageRequest request = new SendPushMessageRequest();
+        return sendPushMessage(appId, Mode.SYNCHRONOUS, pushMessage);
+    }
+
+    /**
+     * Send a single push message to application with given ID.
+     *
+     * @param appId PowerAuth application app ID.
+     * @param mode Mode of push notification sending.
+     * @param pushMessage Push message to be sent.
+     * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    public ObjectResponse<PushMessageSendResult> sendPushMessage(String appId, Mode mode, PushMessage pushMessage) throws PushServerClientException {
+        final SendPushMessageRequest request = new SendPushMessageRequest();
+        request.setMode(mode);
         request.setAppId(appId);
         request.setMessage(pushMessage);
 
         // Validate request on the client side.
-        String error = SendPushMessageRequestValidator.validate(request);
+        final String error = SendPushMessageRequestValidator.validate(request);
         if (error != null) {
             throw new PushServerClientException(error);
         }
@@ -243,12 +258,26 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(String appId, List<PushMessage> batch) throws PushServerClientException {
-        SendPushMessageBatchRequest request = new SendPushMessageBatchRequest();
+        return sendPushMessageBatch(appId, Mode.SYNCHRONOUS, batch);
+    }
+
+    /**
+     * Send a push message batch to application with given ID.
+     *
+     * @param appId PowerAuth application app ID.
+     * @param mode Mode of push notification sending.
+     * @param batch Push message batch to be sent.
+     * @return SendMessageResponse in case everything went OK, ErrorResponse in case of an error.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    public ObjectResponse<PushMessageSendResult> sendPushMessageBatch(String appId, Mode mode, List<PushMessage> batch) throws PushServerClientException {
+        final SendPushMessageBatchRequest request = new SendPushMessageBatchRequest();
         request.setAppId(appId);
+        request.setMode(mode);
         request.setBatch(batch);
 
         // Validate request on the client side.
-        String error = SendPushMessageBatchRequestValidator.validate(request);
+        final String error = SendPushMessageBatchRequestValidator.validate(request);
         if (error != null) {
             throw new PushServerClientException(error);
         }
@@ -294,17 +323,13 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean deleteCampaign(Long campaignId) throws PushServerClientException {
-        try {
-            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
-            logger.info("Calling push server to delete a push campaign, campaign ID: {} - start", campaignId);
-            ObjectResponse<DeleteCampaignResponse> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, DeleteCampaignResponse.class);
-            logger.info("Calling push server to delete a push campaign, campaign ID: {} - finish", campaignId);
+        logger.info("Calling push server to delete a push campaign, campaign ID: {} - start", campaignId);
+        final ObjectResponse<DeleteCampaignResponse> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, DeleteCampaignResponse.class);
+        logger.info("Calling push server to delete a push campaign, campaign ID: {} - finish", campaignId);
 
-            return response.getStatus().equals(Response.Status.OK);
-        } catch (UnsupportedEncodingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
-        }
+        return response.getStatus().equals(Response.Status.OK);
     }
 
     /**
@@ -333,17 +358,13 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public ObjectResponse<CampaignResponse> getCampaign(Long campaignId) throws PushServerClientException {
-        try {
-            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
-            logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - start", campaignId);
-            final ObjectResponse<CampaignResponse> result = getObjectImpl("/push/campaign/" + campaignIdSanitized + "/detail", null, CampaignResponse.class);
-            logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - finish", campaignId);
+        logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - start", campaignId);
+        final ObjectResponse<CampaignResponse> result = getObjectImpl("/push/campaign/" + campaignIdSanitized + "/detail", null, CampaignResponse.class);
+        logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - finish", campaignId);
 
-            return result;
-        } catch (UnsupportedEncodingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
-        }
+        return result;
     }
 
     /**
@@ -355,22 +376,18 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean addUsersToCampaign(Long campaignId, List<String> users) throws PushServerClientException {
-        try {
-            ListOfUsers listOfUsers = new ListOfUsers(users);
-            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
+        final ListOfUsers listOfUsers = new ListOfUsers(users);
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
-            logger.info("Calling push server to add users to campaign, campaign ID: {} - start", campaignId);
-            Response response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", new ObjectRequest<>(listOfUsers));
-            logger.info("Calling push server to add users to campaign, campaign ID: {} - finish", campaignId);
+        logger.info("Calling push server to add users to campaign, campaign ID: {} - start", campaignId);
+        final Response response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", new ObjectRequest<>(listOfUsers));
+        logger.info("Calling push server to add users to campaign, campaign ID: {} - finish", campaignId);
 
-            if (response == null) {
-                throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
-            }
-
-            return response.getStatus().equals(Response.Status.OK);
-        } catch (UnsupportedEncodingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        if (response == null) {
+            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
         }
+
+        return response.getStatus().equals(Response.Status.OK);
     }
 
     /**
@@ -383,19 +400,15 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(Long campaignId, int page, int size) throws PushServerClientException {
-        try {
-            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
-            MultiValueMap<String, String> params = buildPages(page, size);
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
+        final MultiValueMap<String, String> params = buildPages(page, size);
 
-            ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>>() {};
-            logger.info("Calling push server to get users from the campaign, campaign ID: {} - start", campaignId);
-            final PagedResponse<ListOfUsersFromCampaignResponse> result = getImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
-            logger.info("Calling push server to get users from the campaign, campaign ID: {} - finish", campaignId);
+        final ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new ParameterizedTypeReference<>() {};
+        logger.info("Calling push server to get users from the campaign, campaign ID: {} - start", campaignId);
+        final PagedResponse<ListOfUsersFromCampaignResponse> result = getImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
+        logger.info("Calling push server to get users from the campaign, campaign ID: {} - finish", campaignId);
 
-            return result;
-        } catch (UnsupportedEncodingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
-        }
+        return result;
     }
 
     /**
@@ -407,18 +420,14 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean deleteUsersFromCampaign(Long campaignId, List<String> users) throws PushServerClientException {
-        try {
-            ListOfUsers listOfUsers = new ListOfUsers(users);
-            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
+        final ListOfUsers listOfUsers = new ListOfUsers(users);
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
-            logger.info("Calling push server to remove users from the campaign, campaign ID: {} - start", campaignId);
-            Response response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", new ObjectRequest<>(listOfUsers));
-            logger.info("Calling push server to remove users from the campaign, campaign ID: {} - finish", campaignId);
+        logger.info("Calling push server to remove users from the campaign, campaign ID: {} - start", campaignId);
+        final Response response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", new ObjectRequest<>(listOfUsers));
+        logger.info("Calling push server to remove users from the campaign, campaign ID: {} - finish", campaignId);
 
-            return response.getStatus().equals(Response.Status.OK);
-        } catch (UnsupportedEncodingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
-        }
+        return response.getStatus().equals(Response.Status.OK);
     }
 
     /**
@@ -430,25 +439,21 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean sendTestCampaign(Long campaignId, String userId) throws PushServerClientException {
-        try {
-            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
-            TestCampaignRequest request = new TestCampaignRequest();
-            request.setUserId(userId);
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
+        final TestCampaignRequest request = new TestCampaignRequest();
+        request.setUserId(userId);
 
-            // Validate request on the client side.
-            String error = TestCampaignRequestValidator.validate(request);
-            if (error != null) {
-                throw new PushServerClientException(error);
-            }
-
-            logger.info("Calling push server to send test campaign, campaign ID: {}, user ID: {} - start", campaignId, userId);
-            Response response = postObjectImpl("/push/campaign/send/test/" + campaignIdSanitized, new ObjectRequest<>(request));
-            logger.info("Calling push server to send test campaign, campaign ID: {}, user ID: {} - finish", campaignId, userId);
-
-            return response.getStatus().equals(Response.Status.OK);
-        } catch (UnsupportedEncodingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
+        // Validate request on the client side.
+        final String error = TestCampaignRequestValidator.validate(request);
+        if (error != null) {
+            throw new PushServerClientException(error);
         }
+
+        logger.info("Calling push server to send test campaign, campaign ID: {}, user ID: {} - start", campaignId, userId);
+        final Response response = postObjectImpl("/push/campaign/send/test/" + campaignIdSanitized, new ObjectRequest<>(request));
+        logger.info("Calling push server to send test campaign, campaign ID: {}, user ID: {} - finish", campaignId, userId);
+
+        return response.getStatus().equals(Response.Status.OK);
     }
 
     /**
@@ -459,17 +464,13 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean sendCampaign(Long campaignId) throws PushServerClientException {
-        try {
-            String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), "UTF-8");
+        final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
-            logger.info("Calling push server to send a production campaign, campaign ID: {} - start", campaignId);
-            Response response = postObjectImpl("/push/campaign/send/live/" + campaignIdSanitized, null);
-            logger.info("Calling push server to send a production campaign, campaign ID: {} - finish", campaignId);
+        logger.info("Calling push server to send a production campaign, campaign ID: {} - start", campaignId);
+        final Response response = postObjectImpl("/push/campaign/send/live/" + campaignIdSanitized, null);
+        logger.info("Calling push server to send a production campaign, campaign ID: {} - finish", campaignId);
 
-            return response.getStatus().equals(Response.Status.OK);
-        } catch (UnsupportedEncodingException e) {
-            throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", e.getMessage()));
-        }
+        return response.getStatus().equals(Response.Status.OK);
     }
 
     /**
@@ -538,7 +539,7 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response updateIos(String appId, String bundle, String keyId, String teamId, String environment, byte[] privateKey) throws PushServerClientException {
-        final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
+        final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
         final UpdateIosRequest request = new UpdateIosRequest(appId, bundle, keyId, teamId, environment, privateKeyBase64);
         logger.info("Calling push server to update iOS, ID: {} - start", appId);
         final Response response = putObjectImpl("/admin/app/ios/update", new ObjectRequest<>(request));
@@ -569,7 +570,7 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response updateAndroid(String appId, String projectId, byte[] privateKey) throws PushServerClientException {
-        final String privateKeyBase64 = BaseEncoding.base64().encode(privateKey);
+        final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
         final UpdateAndroidRequest request = new UpdateAndroidRequest(appId, projectId, privateKeyBase64);
         logger.info("Calling push server to update android, ID: {} - start", appId);
         final Response response = putObjectImpl("/admin/app/android/update", new ObjectRequest<>(request));
@@ -620,7 +621,7 @@ public class PushServerClient {
         params.add("applications", String.join(",", applications));
         params.add("onlyUnread", Boolean.toString(onlyUnread));
 
-        final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>>() {};
+        final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<>() {};
         logger.info("Calling push server fetch messages for user: {} - start", userId);
         final PagedResponse<ListOfInboxMessages> result = getImpl("/inbox/messages/list", params, typeReference);
         logger.info("Calling push server fetch messages for user: {} - finish", userId);
@@ -640,7 +641,7 @@ public class PushServerClient {
         params.add("userId", userId);
         params.add("appId", appId);
 
-        final ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>> typeReference = new ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>>() {};
+        final ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>> typeReference = new ParameterizedTypeReference<>() {};
         logger.info("Calling push server fetch message count for user: {} - start", userId);
         final ObjectResponse<GetInboxMessageCountResponse> result = getImpl("/inbox/messages/count", params, typeReference);
         logger.info("Calling push server fetch message count for user: {} - finish", userId);
@@ -652,6 +653,7 @@ public class PushServerClient {
      * Read all unread messages in inbox of provided user.
      * @param userId User ID.
      * @param appId Application ID.
+     * @return Response.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response readAllMessages(String userId, String appId) throws PushServerClientException {

@@ -21,9 +21,11 @@ import io.getlime.push.repository.model.InboxMessageEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +35,7 @@ import java.util.Optional;
  * @author Petr Dvorak, petr@wultra.com
  */
 @Repository
-public interface InboxRepository extends PagingAndSortingRepository<InboxMessageEntity, String> {
+public interface InboxRepository extends PagingAndSortingRepository<InboxMessageEntity, String>, CrudRepository<InboxMessageEntity, String> {
 
     /**
      * Find all messages for given user ID.
@@ -76,10 +78,11 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      * Mark all user messages as read.
      * @param userId User ID.
      * @param app Application.
+     * @param date Date to which mark the messages as read.
      * @return Number of messages which were read.
      */
-    @Query("UPDATE InboxMessageEntity i SET i.read = true WHERE i.userId = :userId AND :app MEMBER OF i.applications AND i.read = false")
+    @Query("UPDATE InboxMessageEntity i SET i.read = true, i.timestampRead = :date WHERE i.userId = :userId AND :app MEMBER OF i.applications AND i.read = false")
     @Modifying
-    int markAllAsRead(String userId, AppCredentialsEntity app);
+    int markAllAsRead(String userId, AppCredentialsEntity app, Date date);
 
 }

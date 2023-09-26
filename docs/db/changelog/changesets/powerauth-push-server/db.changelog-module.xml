@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <property name="blob_type" value="bytea" dbms="postgresql"/>
+    <property name="blob_type" value="blob" dbms="oracle"/>
+    <property name="blob_type" value="varbinary(max)" dbms="mssql"/>
+
+    <include file="1.4.x/db.changelog-version.xml" relativeToChangelogFile="true" />
+    <include file="1.5.x/db.changelog-version.xml" relativeToChangelogFile="true" />
+
+</databaseChangeLog>
