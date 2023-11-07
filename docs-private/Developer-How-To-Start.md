@@ -6,7 +6,6 @@
 
 ### Standalone Run
 
-- Enable maven profile `standalone`
 - Use IntelliJ Idea run configuration at `../.run/PowerAuthPushServerJavaApplication.run.xml`
 - Open [http://localhost:8089/powerauth-push-server/actuator/health](http://localhost:8089/powerauth-push-server/actuator/health) and you should get `{"status":"UP"}`
 
