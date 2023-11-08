@@ -1,0 +1,35 @@
+name: Run SCP deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scp-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          server-id: jfrog-central
+          server-username: INTERNAL_USERNAME
+          server-password: INTERNAL_PASSWORD
+          cache: maven
+      - name: Run Maven Package Step
+        run: |
+          mvn -B -U package -Dmaven.test.skip=true
+        env:
+          INTERNAL_USERNAME: ${{ secrets.JFROG_USERNAME }}
+          INTERNAL_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SCP_CERTIFICATE }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa ${{ secrets.SCP_HOST }} >> ~/.ssh/known_hosts
+      - name: Deploy powerauth-push-server.war
+        shell: bash
+        run: |
+          scp -i ~/.ssh/id_rsa **/target/powerauth-push-server-*.war ${{ secrets.SCP_USERNAME }}@${{ secrets.SCP_HOST }}:/opt/apache-tomcat/webapps/powerauth-push-server.war
