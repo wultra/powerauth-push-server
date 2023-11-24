@@ -19,8 +19,6 @@ package io.getlime.push.service;
 import com.eatthepath.pushy.apns.*;
 import com.eatthepath.pushy.apns.auth.ApnsSigningKey;
 import com.eatthepath.pushy.apns.proxy.HttpProxyHandlerFactory;
-import com.eatthepath.pushy.apns.util.ApnsPayloadBuilder;
-import com.eatthepath.pushy.apns.util.SimpleApnsPayloadBuilder;
 import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
 import com.eatthepath.pushy.apns.util.TokenUtil;
 import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
@@ -379,7 +377,7 @@ public class PushSendingWorker {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
         final boolean isSilent = attributes != null && attributes.getSilent(); // In case there are no attributes, the message is not silent
-        final String payload = buildApnsPayload(pushMessageBody, isSilent);
+        final String payload = PayloadBuilder.buildApnsPayload(pushMessageBody, isSilent);
         final Instant validUntil = pushMessageBody.getValidUntil();
         final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set
         final DeliveryPriority deliveryPriority = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
@@ -442,34 +440,4 @@ public class PushSendingWorker {
         });
     }
 
-    /**
-     * Method to build APNs message payload.
-     *
-     * @param push     Push message object with APNs data.
-     * @param isSilent Indicates if the message is silent or not.
-     * @return String with APNs JSON payload.
-     */
-    private String buildApnsPayload(PushMessageBody push, boolean isSilent) {
-        final ApnsPayloadBuilder payloadBuilder = new SimpleApnsPayloadBuilder();
-        if (!isSilent) { // include alert, body, sound and category only in case push message is not silent.
-            payloadBuilder
-                    .setAlertTitle(push.getTitle())
-                    .setLocalizedAlertTitle(push.getTitleLocKey(), push.getTitleLocArgs())
-                    .setAlertBody(push.getBody())
-                    .setLocalizedAlertMessage(push.getBodyLocKey(), push.getBodyLocArgs())
-                    .setSound(push.getSound())
-                    .setCategoryName(push.getCategory());
-        }
-        payloadBuilder
-                .setBadgeNumber(push.getBadge())
-                .setContentAvailable(isSilent)
-                .setThreadId(push.getCollapseKey());
-        final Map<String, Object> extras = push.getExtras();
-        if (extras != null) {
-            for (Map.Entry<String, Object> entry : extras.entrySet()) {
-                payloadBuilder.addCustomProperty(entry.getKey(), entry.getValue());
-            }
-        }
-        return payloadBuilder.build();
-    }
 }

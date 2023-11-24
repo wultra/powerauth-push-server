@@ -33,7 +33,6 @@ import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,7 +41,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
 import java.util.*;
@@ -58,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Martin Tupy, martin.tupy.work@gmail.com
  * @author Roman Strobl, roman.strobl@wultra.com
  */
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ActiveProfiles("test")
@@ -362,8 +359,10 @@ class PushServerTests {
         pushDeviceRepository.deleteAll(devices2);
     }
 
-    @SuppressWarnings("unchecked") // known parameters of HashMap
     private ObjectResponse<CreateCampaignResponse> createCampaign() throws Exception {
+        final Map<String, Object> extras = new HashMap<>();
+        extras.put("_comment", "Any custom data.");
+
         final PushMessageBody pushMessageBody = new PushMessageBody();
         pushMessageBody.setTitle("Balance update");
         pushMessageBody.setBody("Your balance is now $745.00");
@@ -372,7 +371,7 @@ class PushServerTests {
         pushMessageBody.setCategory("balance-update");
         pushMessageBody.setCollapseKey("balance-update");
         pushMessageBody.setValidUntil(Instant.now());
-        pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
+        pushMessageBody.setExtras(extras);
         return pushServerClient.createCampaign(powerAuthTestClient.getApplicationId(), pushMessageBody);
     }
 }

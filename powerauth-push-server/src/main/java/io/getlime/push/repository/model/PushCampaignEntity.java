@@ -48,7 +48,7 @@ public class PushCampaignEntity implements Serializable {
     /**
      * Message.
      */
-    @Column(name = "message", nullable = false, updatable = false)
+    @Column(name = "message", nullable = false, updatable = false, length = 4000)
     private String message;
 
     /**
