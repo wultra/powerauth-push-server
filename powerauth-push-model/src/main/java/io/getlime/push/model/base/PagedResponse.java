@@ -17,6 +17,7 @@
 package io.getlime.push.model.base;
 
 import io.getlime.core.rest.model.base.response.ObjectResponse;
+import lombok.EqualsAndHashCode;
 
 /**
  * Generic response class for paged results
@@ -25,6 +26,7 @@ import io.getlime.core.rest.model.base.response.ObjectResponse;
  *
  * @param <T> Type of the paged records.
  */
+@EqualsAndHashCode(callSuper = true)
 public class PagedResponse<T> extends ObjectResponse<T> {
 
     private int page;
