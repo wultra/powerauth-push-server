@@ -78,6 +78,7 @@
         <javax.interceptor-api.version>1.2.2</javax.interceptor-api.version>
         <rest-base.version>1.6.2</rest-base.version>
         <powerauth.version>1.4.1</powerauth.version>
+        <powerauth-restful-integration.version>1.4.0</powerauth-restful-integration.version>
         <powerauth-crypto.version>1.4.1</powerauth-crypto.version>
         <pushy.version>0.15.1</pushy.version>
         <springdoc-openapi.version>1.6.9</springdoc-openapi.version>
