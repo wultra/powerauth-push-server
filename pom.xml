@@ -80,6 +80,8 @@
         <firebase-admin.version>9.2.0</firebase-admin.version>
         <bc.version>1.77</bc.version>
         <logstash.version>7.4</logstash.version>
+        <!--  TODO (racansky, 2023-12-08) temporarily override the version 1.4.11 from spring boot version because of CVE  -->
+        <logback.version>1.4.14</logback.version>
 
         <!-- Documentation Dependencies -->
         <springdoc-openapi-starter-webmvc-ui.version>2.3.0</springdoc-openapi-starter-webmvc-ui.version>
