@@ -118,6 +118,12 @@
             <artifactId>postgresql</artifactId>
         </dependency>
 
+        <!-- Monitoring -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
         <!-- Logging -->
         <dependency>
             <groupId>net.logstash.logback</groupId>
