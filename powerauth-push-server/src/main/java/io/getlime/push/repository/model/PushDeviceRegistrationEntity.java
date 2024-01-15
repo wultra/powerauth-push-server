@@ -28,7 +28,9 @@ import java.util.Date;
  * @author Petr Dvorak, petr@wultra.com
  */
 @Entity
-@Table(name = "push_device_registration")
+@Table(name = "push_device_registration",
+       uniqueConstraints = {@UniqueConstraint(columnNames = {"activationId", "pushToken"}),
+                            @UniqueConstraint(columnNames = {"activationId"})})
 public class PushDeviceRegistrationEntity implements Serializable {
 
     @Serial

@@ -38,6 +38,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -93,17 +95,32 @@ public class PushDeviceController {
         }
         logger.info("Received createDevice request, app ID: {}, activation ID: {}, token: {}, platform: {}", requestObject.getAppId(),
                 requestObject.getActivationId(), maskPushToken(requestObject.getToken()), requestObject.getPlatform());
-        String errorMessage = CreateDeviceRequestValidator.validate(requestObject);
+        final String errorMessage = CreateDeviceRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        String appId = requestObject.getAppId();
-        String pushToken = requestObject.getToken();
-        String platform = requestObject.getPlatform();
-        String activationId = requestObject.getActivationId();
-        List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
-        final AppCredentialsEntity appCredentials = findAppCredentials(appId);
-        PushDeviceRegistrationEntity device;
+
+        final AppCredentialsEntity appCredentials = findAppCredentials(requestObject.getAppId());
+
+        // In case of parallel requests to create new device, the createOrUpdateDevice may fail because of unique
+        // constraint violation. Try to repeat the save.
+        RetryTemplate.builder()
+                .retryOn(DataIntegrityViolationException.class)
+                .build()
+                .execute(ctx -> createOrUpdateDevice(requestObject, appCredentials));
+
+        logger.info("The createDevice request succeeded, app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
+        return new Response();
+    }
+
+    private Void createOrUpdateDevice(final CreateDeviceRequest requestObject, final AppCredentialsEntity appCredentials) throws PushServerException {
+        final String appId = requestObject.getAppId();
+        final String pushToken = requestObject.getToken();
+        final String platform = requestObject.getPlatform();
+        final String activationId = requestObject.getActivationId();
+
+        final List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
+        final PushDeviceRegistrationEntity device;
         if (devices.isEmpty()) {
             // The device registration is new, create a new entity.
             device = initDeviceRegistrationEntity(appCredentials, pushToken);
@@ -124,8 +141,7 @@ public class PushDeviceController {
         device.setPlatform(platform);
         updateActivationForDevice(device, activationId);
         pushDeviceRepository.save(device);
-        logger.info("The createDevice request succeeded, app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
-        return new Response();
+        return null;
     }
 
     /**
