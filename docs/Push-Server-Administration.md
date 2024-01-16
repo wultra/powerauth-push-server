@@ -53,7 +53,8 @@ curl --request POST \
   "requestObject": {
     "appId": 1,
     "includeIos": true,
-    "includeAndroid": true
+    "includeAndroid": true,
+    "includeHuawei": true
   }
 }'
 ```
@@ -136,7 +137,39 @@ curl --request DELETE \
 }'
 ```
 
-Set the `appId` value for the Push Server application ID you want to update.
+Set the `appId` value for the Push Server application ID you want to delete.
+
+
+### Update Huawei Configuration
+
+```sh
+curl --request POST \
+  --url http://localhost:8080/powerauth-push-server/admin/app/huawei/update \
+  --json '{
+  "requestObject": {
+    "appId": 1,
+    "projectId": "projectId",
+    "clientId": "oAuth 2.0 client ID",
+    "clientSecret": "oAuth 2.0 client secret"
+  }
+}'
+```
+
+Set the `appId` value for Push Server application ID to want to update.
+
+### Remove Huawei Configuration
+
+```sh
+curl --request DELETE \
+  --url http://localhost:8080/powerauth-push-server/admin/app/huawei/remove \
+  --json '{
+  "requestObject": {
+    "appId": 1
+  }
+}'
+```
+
+Set the `appId` value for the Push Server application ID you want to delete.
 
 ## Administration using SQL Database
 

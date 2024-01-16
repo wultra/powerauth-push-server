@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Wultra s.r.o.
+ * Copyright 2024 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,19 @@
  */
 package io.getlime.push.model.request;
 
-import io.getlime.push.model.enumeration.MobilePlatform;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Request object used for device registration.
+ * Update Huawei configuration request.
  *
- * @author Petr Dvorak, petr@wultra.com
+ * @author Lubos Racansky, lubos.racansky@wultra.com
  */
 @Getter
 @Setter
-public class CreateDeviceRequest {
+public class UpdateHuaweiRequest {
 
     /**
      * Application ID.
@@ -39,20 +37,24 @@ public class CreateDeviceRequest {
     private String appId;
 
     /**
-     * The push token is the value received from APNS, FCM, or HMS services without any modification.
+     * Huawei project ID.
      */
     @NotBlank
-    @Schema(description = "The push token is the value received from APNS, FCM, or HMS services without any modification.")
-    private String token;
-
-    @NotNull
-    private MobilePlatform platform;
+    @Schema(description = "Huawei project ID.")
+    private String projectId;
 
     /**
-     * Activation ID.
+     * Huawei OAuth 2.0 client ID.
      */
     @NotBlank
-    @Schema(description = "Activation ID.", format = "UUID (level 4)", maxLength = 37, example = "099e5e30-47b1-41c7-b49b-3bf28e811fca")
-    private String activationId;
+    @Schema(description = "Huawei OAuth 2.0 client ID.")
+    private String clientId;
+
+    /**
+     * Huawei OAuth 2.0 client secret.
+     */
+    @NotBlank
+    @Schema(description = "Huawei OAuth 2.0 client secret.")
+    private String clientSecret;
 
 }

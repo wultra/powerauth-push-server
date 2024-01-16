@@ -40,11 +40,17 @@ public class PushMessageSendResult extends BasePushMessageSendResult {
     private final PlatformResult android;
 
     /**
+     * Data associated with push messages sent to Huawei devices.
+     */
+    private final PlatformResult huawei;
+
+    /**
      * Default constructor.
      */
     public PushMessageSendResult() {
         this.ios = new PlatformResult();
         this.android = new PlatformResult();
+        this.huawei =  new PlatformResult();
     }
 
     /**
@@ -56,6 +62,7 @@ public class PushMessageSendResult extends BasePushMessageSendResult {
         super(mode);
         this.ios = new PlatformResult();
         this.android = new PlatformResult();
+        this.huawei =  new PlatformResult();
     }
 
     /**

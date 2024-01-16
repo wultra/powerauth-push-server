@@ -138,6 +138,55 @@ public class PushServiceConfiguration {
     private String fcmSendMessageUrl;
 
     /**
+     * Flag indicating if proxy is enabled for HMS communication.
+     */
+    @Value("${powerauth.push.service.hms.proxy.enabled}")
+    private boolean hmsProxyEnabled;
+
+    /**
+     * HMS proxy URL.
+     */
+    @Value("${powerauth.push.service.hms.proxy.host}")
+    private String hmsProxyHost;
+
+    /**
+     * HMS proxy port.
+     */
+    @Value("${powerauth.push.service.hms.proxy.port}")
+    private int hmsProxyPort;
+
+    /**
+     * HMS proxy username.
+     */
+    @Value("${powerauth.push.service.hms.proxy.username}")
+    private String hmsProxyUsername;
+
+    /**
+     * HMS proxy password.
+     */
+    @Value("${powerauth.push.service.hms.proxy.password}")
+    private String hmsProxyPassword;
+
+    /**
+     * Get status if notification is set to be sent only through data map
+     * True in case HMS notification should always be a "data" notification, even for messages with title and message, false otherwise.
+     */
+    @Value("${powerauth.push.service.hms.dataNotificationOnly}")
+    private boolean hmsDataNotificationOnly;
+
+    /**
+     * HMS send message endpoint URL.
+     */
+    @Value("${powerauth.push.service.hms.sendMessageUrl}")
+    private String hmsSendMessageUrl;
+
+    /**
+     * HMS OAuth service URL to obtain an access token.
+     */
+    @Value("${powerauth.push.service.hms.tokenUrl}")
+    private String hmsTokenUrl;
+
+    /**
      * The batch size used while sending a push campaign.
      */
     @Value("${powerauth.push.service.campaign.batchSize}")
@@ -166,6 +215,24 @@ public class PushServiceConfiguration {
      */
     @Value("${powerauth.push.service.apns.connect.timeout}")
     private int apnsConnectTimeout;
+
+    /**
+     * HMS connect timeout.
+     */
+    @Value("${powerauth.push.service.hms.connect.timeout}")
+    private Duration hmsConnectTimeout;
+
+    /**
+     * HMS maximum duration allowed between each network-level read operations.
+     */
+    @Value("${powerauth.push.service.hms.response.timeout}")
+    private Duration hmsResponseTimeout;
+
+    /**
+     * HMS ConnectionProvider max idle time.
+     */
+    @Value("${powerauth.push.service.hms.max-idle-time}")
+    private Duration hmsMaxIdleTime;
 
     /**
      * APNS concurrent connections.

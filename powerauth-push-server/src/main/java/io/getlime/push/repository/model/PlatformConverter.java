@@ -36,6 +36,7 @@ class PlatformConverter implements AttributeConverter<Platform, String> {
         return switch (attribute) {
             case IOS -> "ios";
             case ANDROID -> "android";
+            case HUAWEI -> "huawei";
         };
     }
 
@@ -48,6 +49,7 @@ class PlatformConverter implements AttributeConverter<Platform, String> {
         return switch (dbData) {
             case "ios" -> Platform.IOS;
             case "android" -> Platform.ANDROID;
+            case "huawei" -> Platform.HUAWEI;
             default -> throw new IllegalArgumentException("No mapping for platform: " + dbData);
         };
     }

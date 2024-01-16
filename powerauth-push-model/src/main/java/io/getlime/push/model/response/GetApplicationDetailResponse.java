@@ -16,16 +16,14 @@
 package io.getlime.push.model.response;
 
 import io.getlime.push.model.entity.PushServerApplication;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Get application credentials entity detail response.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
-@Getter
-@Setter
+@Data
 public class GetApplicationDetailResponse {
 
     /**
@@ -57,5 +55,10 @@ public class GetApplicationDetailResponse {
      * Android project ID record.
      */
     private String androidProjectId;
+
+    /**
+     * Huawei project ID.
+     */
+    private String huaweiProjectId;
 
 }

@@ -24,7 +24,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * Class representing application tokens used to authenticate against APNs, or FCM services.
+ * Class representing application tokens used to authenticate against APNs, FCM, or HMS services.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
@@ -93,5 +93,23 @@ public class AppCredentialsEntity implements Serializable {
      */
     @Column(name = "android_project_id")
     private String androidProjectId;
+
+    /**
+     * Project ID defined in Huawei AppGallery Connect.
+     */
+    @Column(name = "hms_project_id")
+    private String hmsProjectId;
+
+    /**
+     * Huawei OAuth 2.0 Client ID.
+     */
+    @Column(name = "hms_client_id")
+    private String hmsClientId;
+
+    /**
+     * Huawei OAuth 2.0 Client Secret.
+     */
+    @Column(name = "hms_client_secret")
+    private String hmsClientSecret;
 
 }

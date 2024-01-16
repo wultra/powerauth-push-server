@@ -44,10 +44,10 @@ public class CreateDeviceForActivationsRequest {
     private String appId;
 
     /**
-     * The push token is the value received from APNS, or FCM services without any modification.
+     * The push token is the value received from APNS, FCM, or HMS services without any modification.
      */
     @NotBlank
-    @Schema(description = "The push token is the value received from APNS, or FCM services without any modification.")
+    @Schema(description = "The push token is the value received from APNS, FCM, or HMS services without any modification.")
     private String token;
 
     /**
