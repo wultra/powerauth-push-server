@@ -38,8 +38,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -93,39 +96,58 @@ public class PushDeviceController {
         }
         logger.info("Received createDevice request, app ID: {}, activation ID: {}, token: {}, platform: {}", requestObject.getAppId(),
                 requestObject.getActivationId(), maskPushToken(requestObject.getToken()), requestObject.getPlatform());
-        String errorMessage = CreateDeviceRequestValidator.validate(requestObject);
+        final String errorMessage = CreateDeviceRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        String appId = requestObject.getAppId();
-        String pushToken = requestObject.getToken();
-        String platform = requestObject.getPlatform();
-        String activationId = requestObject.getActivationId();
-        List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
-        final AppCredentialsEntity appCredentials = findAppCredentials(appId);
-        PushDeviceRegistrationEntity device;
+
+        final AppCredentialsEntity appCredentials = findAppCredentials(requestObject.getAppId());
+
+        // In case of parallel requests to create new device, the createOrUpdateDevice may fail because of unique
+        // constraint violation. Try to repeat the save.
+        RetryTemplate.builder()
+                .retryOn(DataIntegrityViolationException.class)
+                .fixedBackoff(config.getCreateDeviceRetryBackoff())
+                .maxAttempts(config.getCreateDeviceRetryMaxAttempts())
+                .build()
+                .execute(ctx -> createOrUpdateDevice(requestObject, appCredentials));
+
+        logger.info("The createDevice request succeeded, app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
+        return new Response();
+    }
+
+    private Void createOrUpdateDevice(final CreateDeviceRequest requestObject, final AppCredentialsEntity appCredentials) throws PushServerException {
+        final String appId = requestObject.getAppId();
+        final String pushToken = requestObject.getToken();
+        final String platform = requestObject.getPlatform();
+        final String activationId = requestObject.getActivationId();
+
+        final List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
+        final PushDeviceRegistrationEntity device;
         if (devices.isEmpty()) {
             // The device registration is new, create a new entity.
+            logger.info("Creating new device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
             device = initDeviceRegistrationEntity(appCredentials, pushToken);
         } else if (devices.size() == 1) {
             // An existing row was found by one of the lookup methods, update this row. This means that either:
             // 1. A row with same activation ID and push token is updated, in this case only the last registration timestamp changes.
             // 2. A row with same activation ID but different push token is updated. A new push token has been issued by Google or Apple for an activation.
             // 3. A row with same push token but different activation ID is updated. The user removed an activation and created a new one, the push token remains the same.
+            logger.info("Updating existing device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
             device = devices.get(0);
             updateDeviceRegistrationEntity(device, appCredentials, pushToken);
         } else {
             // Multiple existing rows have been found. This can only occur during lookup by push token.
             // Push token can be associated with multiple activations only when associated activations are enabled.
             // Push device registration must be done using /push/device/create/multi endpoint in this case.
+            logger.info("Multiple device registrations found: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
             throw new PushServerException("Multiple device registrations found for push token. Use the /push/device/create/multi endpoint for this scenario.");
         }
         device.setTimestampLastRegistered(new Date());
         device.setPlatform(platform);
         updateActivationForDevice(device, activationId);
         pushDeviceRepository.save(device);
-        logger.info("The createDevice request succeeded, app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
-        return new Response();
+        return null;
     }
 
     /**

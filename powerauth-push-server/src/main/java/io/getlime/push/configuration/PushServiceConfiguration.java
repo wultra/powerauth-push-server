@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
+
 /**
  * Configuration class for push server properties.
  *
@@ -92,6 +94,14 @@ public class PushServiceConfiguration {
     // Whether multiple activations are enabled per registered device
     @Value("${powerauth.push.service.registration.multipleActivations.enabled}")
     private boolean registrationOfMultipleActivationsEnabled;
+
+    // Duration before a retry attempt during device registration in case of an insert error
+    @Value("${powerauth.push.service.registration.retry.backoff:100ms}")
+    private Duration createDeviceRetryBackoff;
+
+    // Max number of retry attempts during device registration in case of an insert error
+    @Value("${powerauth.push.service.registration.retry.maxAttempts:3}")
+    private int createDeviceRetryMaxAttempts;
 
     /**
      * FCM connect timeout in milliseconds.
@@ -425,6 +435,38 @@ public class PushServiceConfiguration {
      */
     public void setRegistrationOfMultipleActivationsEnabled(boolean registrationOfMultipleActivationsEnabled) {
         this.registrationOfMultipleActivationsEnabled = registrationOfMultipleActivationsEnabled;
+    }
+
+    /**
+     * Get duration before a retry attempt during the device registration in case of an insert error.
+     * @return Duration before a retry attempt.
+     */
+    public Duration getCreateDeviceRetryBackoff() {
+        return createDeviceRetryBackoff;
+    }
+
+    /**
+     * Set duration before a retry attempt during the device registration in case of an insert error.
+     * @param createDeviceRetryBackoff Duration before a retry attempt.
+     */
+    public void setCreateDeviceRetryBackoff(final Duration createDeviceRetryBackoff) {
+        this.createDeviceRetryBackoff = createDeviceRetryBackoff;
+    }
+
+    /**
+     * Get max number of retry attempts during the device registration in case of an insert error.
+     * @return Max number of retry attempts.
+     */
+    public int getCreateDeviceRetryMaxAttempts() {
+        return createDeviceRetryMaxAttempts;
+    }
+
+    /**
+     * Set max number of retry attempts during the device registration in case of an insert error.
+     * @param createDeviceRetryMaxAttempts Max number of retry attempts.
+     */
+    public void setCreateDeviceRetryMaxAttempts(final int createDeviceRetryMaxAttempts) {
+        this.createDeviceRetryMaxAttempts = createDeviceRetryMaxAttempts;
     }
 
     /**
