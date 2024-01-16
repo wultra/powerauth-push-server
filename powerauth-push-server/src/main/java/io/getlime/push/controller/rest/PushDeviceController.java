@@ -42,6 +42,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -106,6 +107,8 @@ public class PushDeviceController {
         // constraint violation. Try to repeat the save.
         RetryTemplate.builder()
                 .retryOn(DataIntegrityViolationException.class)
+                .fixedBackoff(config.getCreateDeviceRetryBackoff())
+                .maxAttempts(config.getCreateDeviceRetryMaxAttempts())
                 .build()
                 .execute(ctx -> createOrUpdateDevice(requestObject, appCredentials));
 
