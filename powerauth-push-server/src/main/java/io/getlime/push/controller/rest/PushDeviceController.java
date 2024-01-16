@@ -123,18 +123,21 @@ public class PushDeviceController {
         final PushDeviceRegistrationEntity device;
         if (devices.isEmpty()) {
             // The device registration is new, create a new entity.
+            logger.info("Creating new device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
             device = initDeviceRegistrationEntity(appCredentials, pushToken);
         } else if (devices.size() == 1) {
             // An existing row was found by one of the lookup methods, update this row. This means that either:
             // 1. A row with same activation ID and push token is updated, in this case only the last registration timestamp changes.
             // 2. A row with same activation ID but different push token is updated. A new push token has been issued by Google or Apple for an activation.
             // 3. A row with same push token but different activation ID is updated. The user removed an activation and created a new one, the push token remains the same.
+            logger.info("Updating existing device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
             device = devices.get(0);
             updateDeviceRegistrationEntity(device, appCredentials, pushToken);
         } else {
             // Multiple existing rows have been found. This can only occur during lookup by push token.
             // Push token can be associated with multiple activations only when associated activations are enabled.
             // Push device registration must be done using /push/device/create/multi endpoint in this case.
+            logger.info("Multiple device registrations found: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
             throw new PushServerException("Multiple device registrations found for push token. Use the /push/device/create/multi endpoint for this scenario.");
         }
         device.setTimestampLastRegistered(new Date());
