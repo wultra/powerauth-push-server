@@ -17,214 +17,34 @@
 package io.getlime.push.model.entity;
 
 import io.getlime.push.model.enumeration.Mode;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Class that contains push message sending result data.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class PushMessageSendResult extends BasePushMessageSendResult {
 
     /**
-     * Result for the iOS platform.
+     * Data associated with push messages sent to iOS devices.
      */
-    public static class iOS {
-
-        private int sent;
-        private int failed;
-        private int pending;
-        private int total;
-
-        /**
-         * Get number of messages that were sent successfully.
-         * @return Number of sent messages.
-         */
-        public int getSent() {
-            return sent;
-        }
-
-        /**
-         * Set number of messages that were sent successfully.
-         * @param sent Number of sent messages.
-         */
-        public void setSent(int sent) {
-            this.sent = sent;
-        }
-
-        /**
-         * Get number of messages that were sent with failure.
-         * @return Number of failed messages.
-         */
-        public int getFailed() {
-            return failed;
-        }
-
-        /**
-         * Set number of messages that were sent with failure.
-         * @param failed Number of failed messages.
-         */
-        public void setFailed(int failed) {
-            this.failed = failed;
-        }
-
-        /**
-         * Get number of messages that are still in pending state after attempted sending.
-         * @return Number of pending messages.
-         */
-        public int getPending() {
-            return pending;
-        }
-
-        /**
-         * Set number of messages that are still in pending state after attempted sending.
-         * @param pending Number of pending messages.
-         */
-        public void setPending(int pending) {
-            this.pending = pending;
-        }
-
-        /**
-         * Get total number of messages that were attempted to send.
-         * @return Total number of messages.
-         */
-        public int getTotal() {
-            return total;
-        }
-
-        /**
-         * Set total number of messages that were attempted to send.
-         * @param total Total number of messages.
-         */
-        public void setTotal(int total) {
-            this.total = total;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof final iOS iOS)) return false;
-
-            if (getSent() != iOS.getSent()) return false;
-            if (getFailed() != iOS.getFailed()) return false;
-            if (getPending() != iOS.getPending()) return false;
-            return getTotal() == iOS.getTotal();
-        }
-
-        @Override
-        public int hashCode() {
-            int result = getTotal();
-            result = 31 * result + getFailed();
-            result = 31 * result + getPending();
-            result = 31 * result + getSent();
-            return result;
-        }
-    }
+    private final PlatformResult ios;
 
     /**
-     * Result for the Android platform.
+     * Data associated with push messages sent to Android devices.
      */
-    public static class Android {
-
-        private int sent;
-        private int failed;
-        private int pending;
-        private int total;
-
-        /**
-         * Get number of messages that were sent successfully.
-         * @return Number of sent messages.
-         */
-        public int getSent() {
-            return sent;
-        }
-
-        /**
-         * Set number of messages that were sent successfully.
-         * @param sent Number of sent messages.
-         */
-        public void setSent(int sent) {
-            this.sent = sent;
-        }
-
-        /**
-         * Get number of messages that were sent with failure.
-         * @return Number of failed messages.
-         */
-        public int getFailed() {
-            return failed;
-        }
-
-        /**
-         * Set number of messages that were sent with failure.
-         * @param failed Number of failed messages.
-         */
-        public void setFailed(int failed) {
-            this.failed = failed;
-        }
-
-        /**
-         * Get number of messages that are still in pending state after attempted sending.
-         * @return Number of pending messages.
-         */
-        public int getPending() {
-            return pending;
-        }
-
-        /**
-         * Set number of messages that are still in pending state after attempted sending.
-         * @param pending Number of pending messages.
-         */
-        public void setPending(int pending) {
-            this.pending = pending;
-        }
-
-        /**
-         * Get total number of messages that were attempted to send.
-         * @return Total number of messages.
-         */
-        public int getTotal() {
-            return total;
-        }
-
-        /**
-         * Set total number of messages that were attempted to send.
-         * @param total Total number of messages.
-         */
-        public void setTotal(int total) {
-            this.total = total;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof final Android android)) return false;
-
-            if (getSent() != android.getSent()) return false;
-            if (getFailed() != android.getFailed()) return false;
-            if (getPending() != android.getPending()) return false;
-            return getTotal() == android.getTotal();
-        }
-
-        @Override
-        public int hashCode() {
-            int result = getTotal();
-            result = 31 * result + getFailed();
-            result = 31 * result + getPending();
-            result = 31 * result + getSent();
-            return result;
-        }
-    }
-
-    private final iOS ios;
-    private final Android android;
+    private final PlatformResult android;
 
     /**
      * Default constructor.
      */
     public PushMessageSendResult() {
-        super();
-        this.ios = new iOS();
-        this.android = new Android();
+        this.ios = new PlatformResult();
+        this.android = new PlatformResult();
     }
 
     /**
@@ -234,40 +54,35 @@ public class PushMessageSendResult extends BasePushMessageSendResult {
      */
     public PushMessageSendResult(Mode mode) {
         super(mode);
-        this.ios = new iOS();
-        this.android = new Android();
+        this.ios = new PlatformResult();
+        this.android = new PlatformResult();
     }
 
     /**
-     * Data associated with push messages sent to Android devices.
-     * @return Data related to FCM service.
+     * Result for the platform.
      */
-    public Android getAndroid() {
-        return android;
-    }
+    @Data
+    public static class PlatformResult {
 
-    /**
-     * Data associated with push messages sent to iOS devices.
-     * @return Data related to APNS service.
-     */
-    public iOS getIos() {
-        return ios;
-    }
+        /**
+         * Number of messages that were sent successfully.
+         */
+        private int sent;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof final PushMessageSendResult that)) return false;
+        /**
+         * Number of messages that were sent with failure
+         */
+        private int failed;
 
-        if (getIos() != null ? !getIos().equals(that.getIos()) : that.getIos() != null) return false;
-        return getAndroid() != null ? getAndroid().equals(that.getAndroid()) : that.getAndroid() == null;
-    }
+        /**
+         * Number of messages that are still in pending state after attempted sending
+         */
+        private int pending;
 
-    @Override
-    public int hashCode() {
-        int result = 1;
-        result = 31 * result + (getAndroid() != null ? getAndroid().hashCode() : 0);
-        result = 31 * result + (getIos() != null ? getIos().hashCode() : 0);
-        return result;
+        /**
+         * Total number of messages that were attempted to send
+         */
+        private int total;
+
     }
 }
