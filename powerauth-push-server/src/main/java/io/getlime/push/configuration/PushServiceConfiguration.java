@@ -155,11 +155,15 @@ public class PushServiceConfiguration {
     @Value("${powerauth.push.service.registration.multipleActivations.enabled}")
     private boolean registrationOfMultipleActivationsEnabled;
 
-    // Duration before a retry attempt during device registration in case of an insert error
+    /**
+     * Duration before a retry attempt during device registration in case of an insert error.
+     */
     @Value("${powerauth.push.service.registration.retry.backoff:100ms}")
     private Duration createDeviceRetryBackoff;
 
-    // Max number of retry attempts during device registration in case of an insert error
+    /**
+     * Max number of retry attempts during device registration in case of an insert error.
+     */
     @Value("${powerauth.push.service.registration.retry.maxAttempts:3}")
     private int createDeviceRetryMaxAttempts;
 
