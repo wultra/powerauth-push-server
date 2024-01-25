@@ -42,7 +42,7 @@ curl --request POST \
 }'
 ```
 
-Update the `appId` value with requested PowerAuth application ID. The value `id` from response object will be used for identification of the Push Server application.
+Update the `appId` value with requested PowerAuth application ID. The value `appId` from response object will be used for identification of the Push Server application.
 
 ### Get Application Detail
 
@@ -58,7 +58,7 @@ curl --request POST \
 }'
 ```
 
-Update the `id` value with requested Push Server application ID.
+Update the `appId` value with requested Push Server application ID.
 
 ### Update APNs Configuration
 
