@@ -37,20 +37,6 @@ public class PushDeviceRegistrationEntity implements Serializable {
     private static final long serialVersionUID = 1530682530822178192L;
 
     /**
-     * Platform of the registered device.
-     */
-    public static class Platform {
-        /**
-         * iOS Platform
-         */
-        public static final String iOS = "ios";
-        /**
-         * Android Platform
-         */
-        public static final String Android = "android";
-    }
-
-    /**
      * Push device ID.
      */
     @Id
@@ -82,7 +68,8 @@ public class PushDeviceRegistrationEntity implements Serializable {
      * Platform.
      */
     @Column(name = "platform", nullable = false, updatable = false)
-    private String platform;
+    @Convert(converter = PlatformConverter.class)
+    private Platform platform;
 
     /**
      * Push token.
@@ -170,7 +157,7 @@ public class PushDeviceRegistrationEntity implements Serializable {
      * Get platform.
      * @return Platform.
      */
-    public String getPlatform() {
+    public Platform getPlatform() {
         return platform;
     }
 
@@ -178,7 +165,7 @@ public class PushDeviceRegistrationEntity implements Serializable {
      * Set platform.
      * @param platform Platform.
      */
-    public void setPlatform(String platform) {
+    public void setPlatform(Platform platform) {
         this.platform = platform;
     }
 

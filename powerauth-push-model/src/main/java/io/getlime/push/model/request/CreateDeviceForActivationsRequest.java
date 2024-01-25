@@ -15,6 +15,8 @@
  */
 package io.getlime.push.model.request;
 
+import io.getlime.push.model.enumeration.MobilePlatform;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +29,7 @@ public class CreateDeviceForActivationsRequest {
 
     private String appId;
     private String token;
-    private String platform;
+    private MobilePlatform platform;
     private final List<String> activationIds = new ArrayList<>();
 
     /**
@@ -66,7 +68,7 @@ public class CreateDeviceForActivationsRequest {
      * Get the platform name, either "ios" or "android".
      * @return Platform name, "ios" or "android".
      */
-    public String getPlatform() {
+    public MobilePlatform getPlatform() {
         return platform;
     }
 
@@ -74,7 +76,7 @@ public class CreateDeviceForActivationsRequest {
      * Set the platform name.
      * @param platform Platform name.
      */
-    public void setPlatform(String platform) {
+    public void setPlatform(MobilePlatform platform) {
         this.platform = platform;
     }
 

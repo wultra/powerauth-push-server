@@ -23,6 +23,7 @@ import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.request.CreateDeviceForActivationsRequest;
 import io.getlime.push.model.request.CreateDeviceRequest;
 import io.getlime.push.model.request.DeleteDeviceRequest;
@@ -33,6 +34,7 @@ import io.getlime.push.model.validator.UpdateDeviceStatusRequestValidator;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
+import io.getlime.push.repository.model.Platform;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
@@ -42,8 +44,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -119,32 +123,32 @@ public class PushDeviceController {
     private Void createOrUpdateDevice(final CreateDeviceRequest requestObject, final AppCredentialsEntity appCredentials) throws PushServerException {
         final String appId = requestObject.getAppId();
         final String pushToken = requestObject.getToken();
-        final String platform = requestObject.getPlatform();
+        final MobilePlatform platform = requestObject.getPlatform();
         final String activationId = requestObject.getActivationId();
 
         final List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
         final PushDeviceRegistrationEntity device;
         if (devices.isEmpty()) {
             // The device registration is new, create a new entity.
-            logger.info("Creating new device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
+            logger.info("Creating new device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
             device = initDeviceRegistrationEntity(appCredentials, pushToken);
         } else if (devices.size() == 1) {
             // An existing row was found by one of the lookup methods, update this row. This means that either:
             // 1. A row with same activation ID and push token is updated, in this case only the last registration timestamp changes.
             // 2. A row with same activation ID but different push token is updated. A new push token has been issued by Google or Apple for an activation.
             // 3. A row with same push token but different activation ID is updated. The user removed an activation and created a new one, the push token remains the same.
-            logger.info("Updating existing device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
+            logger.info("Updating existing device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
             device = devices.get(0);
             updateDeviceRegistrationEntity(device, appCredentials, pushToken);
         } else {
             // Multiple existing rows have been found. This can only occur during lookup by push token.
             // Push token can be associated with multiple activations only when associated activations are enabled.
             // Push device registration must be done using /push/device/create/multi endpoint in this case.
-            logger.info("Multiple device registrations found: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), requestObject.getPlatform());
+            logger.info("Multiple device registrations found: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
             throw new PushServerException("Multiple device registrations found for push token. Use the /push/device/create/multi endpoint for this scenario.");
         }
         device.setTimestampLastRegistered(new Date());
-        device.setPlatform(platform);
+        device.setPlatform(convert(platform));
         updateActivationForDevice(device, activationId);
         pushDeviceRepository.save(device);
         return null;
@@ -180,7 +184,7 @@ public class PushDeviceController {
         }
         String appId = requestedObject.getAppId();
         String pushToken = requestedObject.getToken();
-        String platform = requestedObject.getPlatform();
+        final MobilePlatform platform = requestedObject.getPlatform();
         List<String> activationIds = requestedObject.getActivationIds();
 
         // Initialize loop variables.
@@ -214,7 +218,7 @@ public class PushDeviceController {
                     device = initDeviceRegistrationEntity(appCredentials, pushToken);
                 }
                 device.setTimestampLastRegistered(new Date());
-                device.setPlatform(platform);
+                device.setPlatform(convert(platform));
                 updateActivationForDevice(device, activationId);
                 PushDeviceRegistrationEntity registeredDevice = pushDeviceRepository.save(device);
                 usedDeviceRegistrationIds.add(registeredDevice.getId());
@@ -229,6 +233,13 @@ public class PushDeviceController {
         }
         logger.info("The createDeviceMultipleActivations request succeeded, app ID: {}, activation IDs: {}, platform: {}", requestedObject.getAppId(), requestedObject.getActivationIds(), requestedObject.getPlatform());
         return new Response();
+    }
+
+    private static Platform convert(final MobilePlatform source) {
+        return switch (source) {
+            case IOS -> Platform.IOS;
+            case ANDROID -> Platform.ANDROID;
+        };
     }
 
     /**
