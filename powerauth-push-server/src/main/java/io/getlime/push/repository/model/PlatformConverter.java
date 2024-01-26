@@ -17,7 +17,6 @@ package io.getlime.push.repository.model;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import org.hibernate.MappingException;
 
 /**
  * {@link Platform} converter for {@link PushDeviceRegistrationEntity#getPlatform()}.
@@ -30,6 +29,10 @@ class PlatformConverter implements AttributeConverter<Platform, String> {
 
     @Override
     public String convertToDatabaseColumn(final Platform attribute) {
+        if (attribute == null) {
+            return null;
+        }
+
         return switch (attribute) {
             case IOS -> "ios";
             case ANDROID -> "android";
@@ -38,10 +41,14 @@ class PlatformConverter implements AttributeConverter<Platform, String> {
 
     @Override
     public Platform convertToEntityAttribute(final String dbData) {
+        if (dbData == null) {
+            return null;
+        }
+
         return switch (dbData) {
             case "ios" -> Platform.IOS;
             case "android" -> Platform.ANDROID;
-            default -> throw new MappingException("No mapping for platform: " + dbData);
+            default -> throw new IllegalArgumentException("No mapping for platform: " + dbData);
         };
     }
 }

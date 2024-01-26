@@ -16,6 +16,7 @@
 package io.getlime.push.repository.model;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -66,9 +67,10 @@ class PushDeviceRegistrationEntityTest {
 
     @Test
     void testConvertPlatform_invalidMapping() {
-        final Exception result = assertThrows(IllegalArgumentException.class,
+        final Exception result = assertThrows(PersistenceException.class,
                 () -> entityManager.find(PushDeviceRegistrationEntity.class, 2L));
 
-        assertEquals("No mapping for platform: xxx", result.getMessage());
+        assertEquals("Error attempting to apply AttributeConverter", result.getMessage());
+        assertEquals("No mapping for platform: xxx", result.getCause().getMessage());
     }
 }
