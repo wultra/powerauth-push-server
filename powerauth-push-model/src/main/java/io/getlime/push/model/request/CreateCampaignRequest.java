@@ -36,14 +36,14 @@ public class CreateCampaignRequest {
      * Application ID.
      */
     @NotBlank
-    @Schema(description = "")
+    @Schema(description = "Application ID.")
     private String appId;
 
     /**
      * Push message body.
      */
     @NotNull
-    @Schema(description = "")
+    @Schema(description = "Push message body.")
     private PushMessageBody message;
 
 }
