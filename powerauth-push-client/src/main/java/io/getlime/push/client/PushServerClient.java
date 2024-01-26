@@ -111,7 +111,7 @@ public class PushServerClient {
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setAppId(appId);
         request.setToken(token);
-        request.setPlatform(platform.value());
+        request.setPlatform(platform);
         request.setActivationId(activationId);
 
         // Validate request on the client side.
@@ -120,9 +120,9 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform.value());
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform);
         Response response = postObjectImpl("/push/device/create", new ObjectRequest<>(request));
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform.value());
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform);
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -141,7 +141,7 @@ public class PushServerClient {
         CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
         request.setAppId(appId);
         request.setToken(token);
-        request.setPlatform(platform.value());
+        request.setPlatform(platform);
         request.getActivationIds().addAll(activationIds);
 
         // Validate request on the client side.
@@ -150,9 +150,9 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform.value());
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform);
         Response response = postObjectImpl("/push/device/create/multi", new ObjectRequest<>(request));
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform.value());
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform);
 
         return response.getStatus().equals(Response.Status.OK);
     }

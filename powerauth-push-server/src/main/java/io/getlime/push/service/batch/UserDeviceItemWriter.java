@@ -19,6 +19,7 @@ package io.getlime.push.service.batch;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.repository.PushCampaignRepository;
+import io.getlime.push.repository.model.Platform;
 import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.aggregate.UserDevice;
 import io.getlime.push.repository.serialization.JsonSerialization;
@@ -68,7 +69,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
     @Override
     public void write(Chunk<? extends UserDevice> list) throws Exception {
         for (UserDevice device: list) {
-            final String platform = device.getPlatform();
+            final Platform platform = device.getPlatform();
             final String token = device.getToken();
             final String userId = device.getUserId();
             final Long campaignId = device.getCampaignId();

@@ -15,6 +15,8 @@
  */
 package io.getlime.push.model.request;
 
+import io.getlime.push.model.enumeration.MobilePlatform;
+
 /**
  * Request object used for device registration.
  *
@@ -24,7 +26,7 @@ public class CreateDeviceRequest {
 
     private String appId;
     private String token;
-    private String platform;
+    private MobilePlatform platform;
     private String activationId;
 
     /**
@@ -63,7 +65,7 @@ public class CreateDeviceRequest {
      * Get the platform name, either "ios" or "android".
      * @return Platform name, "ios" or "android".
      */
-    public String getPlatform() {
+    public MobilePlatform getPlatform() {
         return platform;
     }
 
@@ -71,7 +73,7 @@ public class CreateDeviceRequest {
      * Set the platform name.
      * @param platform Platform name.
      */
-    public void setPlatform(String platform) {
+    public void setPlatform(MobilePlatform platform) {
         this.platform = platform;
     }
 

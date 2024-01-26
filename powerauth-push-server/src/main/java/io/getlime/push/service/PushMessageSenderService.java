@@ -27,6 +27,7 @@ import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.dao.PushMessageDAO;
 import io.getlime.push.repository.model.AppCredentialsEntity;
+import io.getlime.push.repository.model.Platform;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
@@ -122,9 +123,8 @@ public class PushMessageSenderService {
                     // Register phaser for synchronization
                     registerPhaserForMode(phaser, mode);
 
-                    // Decide if the device is iOS or Android and send message accordingly
-                    final String platform = device.getPlatform();
-                    if (platform.equals(PushDeviceRegistrationEntity.Platform.iOS)) {
+                    final Platform platform = device.getPlatform();
+                    if (platform == Platform.IOS) {
                         if (pushClient.getApnsClient() == null) {
                             logger.error("Push message cannot be sent to APNS because APNS is not configured in push server.");
                             arriveAndDeregisterPhaserForMode(phaser, mode);
@@ -132,7 +132,7 @@ public class PushMessageSenderService {
                         }
                         final PushMessageSendResult.PlatformResult platformResult = sendResult.getIos();
                         pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
-                    } else if (platform.equals(PushDeviceRegistrationEntity.Platform.Android)) {
+                    } else if (platform == Platform.ANDROID) {
                         if (pushClient.getFcmClient() == null) {
                             logger.error("Push message cannot be sent to FCM because FCM is not configured in push server.");
                             arriveAndDeregisterPhaserForMode(phaser, mode);
@@ -194,7 +194,7 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      *                             the error can be found in exception message.
      */
-    public void sendCampaignMessage(String appId, String platform, String token, PushMessageBody pushMessageBody, String userId, Long deviceId, String activationId) throws PushServerException {
+    public void sendCampaignMessage(String appId, Platform platform, String token, PushMessageBody pushMessageBody, String userId, Long deviceId, String activationId) throws PushServerException {
         sendCampaignMessage(appId, platform, token, pushMessageBody, null, Priority.HIGH, userId, deviceId, activationId);
     }
 
@@ -214,16 +214,16 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      * the error can be found in exception message.
      */
-    public void sendCampaignMessage(final String appId, String platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, Priority priority, String userId, Long deviceId, String activationId) throws PushServerException {
+    public void sendCampaignMessage(final String appId, Platform platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, Priority priority, String userId, Long deviceId, String activationId) throws PushServerException {
 
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
         final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, activationId, deviceId);
 
         switch (platform) {
-            case PushDeviceRegistrationEntity.Platform.iOS ->
+            case IOS ->
                     pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getIosBundle(), createPushSendingCallback(token, pushMessageObject, pushClient));
-            case PushDeviceRegistrationEntity.Platform.Android ->
+            case ANDROID ->
                     pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
         }
     }

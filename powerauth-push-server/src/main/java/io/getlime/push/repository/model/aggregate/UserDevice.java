@@ -15,6 +15,8 @@
  */
 package io.getlime.push.repository.model.aggregate;
 
+import io.getlime.push.repository.model.Platform;
+
 /**
  * Object used in sending campaigns, as an aggregate object for storing information about
  * user, device (including platform), app and campaign.
@@ -32,7 +34,7 @@ public class UserDevice {
     private String activationId;
     private Long campaignId;
     private Long appId;
-    private String platform;
+    private Platform platform;
     private String token;
 
     /**
@@ -45,7 +47,7 @@ public class UserDevice {
      * @param platform Platform.
      * @param token Push token.
      */
-    public UserDevice(String userId, Long deviceId, String activationId, Long campaignId, Long appId, String platform, String token) {
+    public UserDevice(String userId, Long deviceId, String activationId, Long campaignId, Long appId, Platform platform, String token) {
         this.userId = userId;
         this.deviceId = deviceId;
         this.activationId = activationId;
@@ -139,7 +141,7 @@ public class UserDevice {
      * Get platform.
      * @return Platform.
      */
-    public String getPlatform() {
+    public Platform getPlatform() {
         return platform;
     }
 
@@ -147,7 +149,7 @@ public class UserDevice {
      * Set platform.
      * @param platform Platform.
      */
-    public void setPlatform(String platform) {
+    public void setPlatform(Platform platform) {
         this.platform = platform;
     }
 

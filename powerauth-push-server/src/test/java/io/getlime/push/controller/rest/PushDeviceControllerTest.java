@@ -23,6 +23,7 @@ import com.wultra.security.powerauth.client.model.response.GetActivationStatusRe
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.request.CreateDeviceRequest;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushDeviceRepository;
@@ -37,7 +38,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -75,7 +78,7 @@ class PushDeviceControllerTest {
         request.setAppId("my_app");
         request.setActivationId("a1");
         request.setToken("t1");
-        request.setPlatform("android");
+        request.setPlatform(MobilePlatform.ANDROID);
 
         tested.createDevice(new ObjectRequest<>(request));
 
@@ -95,7 +98,7 @@ class PushDeviceControllerTest {
         request.setAppId("non_existent");
         request.setActivationId("a2");
         request.setToken("t0");
-        request.setPlatform("android");
+        request.setPlatform(MobilePlatform.ANDROID);
 
         assertThrows(PushServerException.class, () -> tested.createDevice(new ObjectRequest<>(request)));
 
@@ -118,7 +121,7 @@ class PushDeviceControllerTest {
                 request.setAppId("my_app");
                 request.setActivationId("a3");
                 request.setToken("token");
-                request.setPlatform("ios");
+                request.setPlatform(MobilePlatform.IOS);
                 return tested.createDevice(new ObjectRequest<>(request));
             });
         }
