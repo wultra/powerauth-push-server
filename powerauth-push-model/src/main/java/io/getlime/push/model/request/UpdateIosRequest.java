@@ -30,10 +30,10 @@ import lombok.Setter;
 public class UpdateIosRequest {
 
     /**
-     *
+     * Application ID.
      */
     @NotBlank
-    @Schema(description = "")
+    @Schema(description = "Application ID.")
     private String appId;
 
     /**
