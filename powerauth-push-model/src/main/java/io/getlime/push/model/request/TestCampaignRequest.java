@@ -16,29 +16,25 @@
 
 package io.getlime.push.model.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Request used for sending a testing campaign
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-
+@Getter
+@Setter
 public class TestCampaignRequest {
 
+    /**
+     * User ID.
+     */
+    @NotBlank
+    @Schema(description = "User ID.")
     private String userId;
 
-    /**
-     * Get user ID.
-     * @return User ID.
-     */
-    public String getUserId() {
-        return userId;
-    }
-
-    /**
-     * Set user ID.
-     * @param userId User ID.
-     */
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 }

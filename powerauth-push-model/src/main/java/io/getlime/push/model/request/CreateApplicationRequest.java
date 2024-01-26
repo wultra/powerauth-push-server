@@ -15,13 +15,25 @@
  */
 package io.getlime.push.model.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Request to create Push Server application credentials entity based on existing PowerAuth server application.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
+@Getter
+@Setter
 public class CreateApplicationRequest {
 
+    /**
+     * Application ID.
+     */
+    @NotBlank
+    @Schema(description = "Application ID.")
     private String appId;
 
     /**
@@ -38,19 +50,4 @@ public class CreateApplicationRequest {
         this.appId = appId;
     }
 
-    /**
-     * Get PowerAuth server application ID.
-     * @return PowerAuth server application ID.
-     */
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set PowerAuth server application ID.
-     * @param appId PowerAuth server application ID.
-     */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
 }

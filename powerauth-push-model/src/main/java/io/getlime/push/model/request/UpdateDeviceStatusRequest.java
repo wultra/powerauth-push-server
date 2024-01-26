@@ -18,47 +18,31 @@ package io.getlime.push.model.request;
 
 
 import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Class representing request object responsible for updating activation status.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Getter
+@Setter
 public class UpdateDeviceStatusRequest {
 
+    /**
+     * Activation ID.
+     */
+    @NotBlank
+    @Schema(description = "Activation ID.")
     private String activationId;
+
+    /**
+     * Activation status.
+     */
+    @Schema(description = "Activation status.")
     private ActivationStatus activationStatus;
-
-    /**
-     * Get PowerAuth activation ID.
-     * @return Activation ID.
-     */
-    public String getActivationId() {
-        return activationId;
-    }
-
-    /**
-     * Set PowerAuth activation ID.
-     * @param activationId Activation ID.
-     */
-    public void setActivationId(String activationId) {
-        this.activationId = activationId;
-    }
-
-    /**
-     * Get PowerAuth activation status.
-     * @return Activation status.
-     */
-    public ActivationStatus getActivationStatus() {
-        return activationStatus;
-    }
-
-    /**
-     * Set PowerAuth activation status.
-     * @param activationStatus Activation status.
-     */
-    public void setActivationStatus(ActivationStatus activationStatus) {
-        this.activationStatus = activationStatus;
-    }
 
 }

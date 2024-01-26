@@ -15,15 +15,39 @@
  */
 package io.getlime.push.model.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Update Android configuration request.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
+@Getter
+@Setter
 public class UpdateAndroidRequest {
 
+    /**
+     * Application ID.
+     */
+    @NotBlank
+    @Schema(description = "Application ID.")
     private String appId;
+
+    /**
+     * Android project ID.
+     */
+    @NotBlank
+    @Schema(description = "Android project ID.")
     private String projectId;
+
+    /**
+     * Base64 encoded Android private key.
+     */
+    @NotBlank
+    @Schema(description = "Base64 encoded Android private key.")
     private String privateKeyBase64;
 
     /**
@@ -41,54 +65,6 @@ public class UpdateAndroidRequest {
     public UpdateAndroidRequest(String appId, String projectId, String privateKeyBase64) {
         this.appId = appId;
         this.projectId = projectId;
-        this.privateKeyBase64 = privateKeyBase64;
-    }
-
-    /**
-     * Get application credentials entity ID.
-     * @return Application credentials entity ID.
-     */
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set application credentials entity ID.
-     * @param appId Application credentials entity ID.
-     */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * Get the Android project ID record.
-     * @return The Android project ID record.
-     */
-    public String getProjectId() {
-        return projectId;
-    }
-
-    /**
-     * Set the Android project ID record.
-     * @param projectId The Android project ID record.
-     */
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
-
-    /**
-     * Get the base64 encoded Android private key.
-     * @return The base64 encoded Android private key.
-     */
-    public String getPrivateKeyBase64() {
-        return privateKeyBase64;
-    }
-
-    /**
-     * Set the base64 encoded Android private key.
-     * @param privateKeyBase64 The base64 encoded Android private key.
-     */
-    public void setPrivateKeyBase64(String privateKeyBase64) {
         this.privateKeyBase64 = privateKeyBase64;
     }
 

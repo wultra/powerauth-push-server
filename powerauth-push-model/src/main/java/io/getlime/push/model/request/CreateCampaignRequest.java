@@ -17,49 +17,33 @@
 package io.getlime.push.model.request;
 
 import io.getlime.push.model.entity.PushMessageBody;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Request object used for creating a campaign.
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-
-
+@Getter
+@Setter
 public class CreateCampaignRequest {
 
+    /**
+     * Application ID.
+     */
+    @NotBlank
+    @Schema(description = "")
     private String appId;
 
+    /**
+     * Push message body.
+     */
+    @NotNull
+    @Schema(description = "")
     private PushMessageBody message;
 
-    /**
-     * Get app ID.
-     * @return App ID.
-     */
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set app ID.
-     * @param appId App ID.
-     */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * Get push message body.
-     * @return Push message body.
-     */
-    public PushMessageBody getMessage() {
-        return message;
-    }
-
-    /**
-     * Set push message body.
-     * @param message Push message body.
-     */
-    public void setMessage(PushMessageBody message) {
-        this.message = message;
-    }
 }
