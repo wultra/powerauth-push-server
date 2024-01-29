@@ -20,6 +20,7 @@ import io.getlime.push.model.enumeration.Mode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -52,6 +53,6 @@ public class SendPushMessageBatchRequest {
      */
     @Schema(description = "Batch list with push notifications to be sent.")
     @NotEmpty
-    private List<PushMessage> batch;
+    private List<@NotNull PushMessage> batch;
 
 }

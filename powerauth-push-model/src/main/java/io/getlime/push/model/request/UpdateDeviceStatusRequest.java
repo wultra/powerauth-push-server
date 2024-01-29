@@ -36,7 +36,7 @@ public class UpdateDeviceStatusRequest {
      * Activation ID.
      */
     @NotBlank
-    @Schema(description = "Activation ID.")
+    @Schema(description = "Activation ID.", format = "UUID (level 4)", maxLength = 37, example = "099e5e30-47b1-41c7-b49b-3bf28e811fca")
     private String activationId;
 
     /**

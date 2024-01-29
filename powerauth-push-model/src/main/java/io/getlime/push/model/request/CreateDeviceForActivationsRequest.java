@@ -16,6 +16,7 @@
 package io.getlime.push.model.request;
 
 import io.getlime.push.model.enumeration.MobilePlatform;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -59,7 +60,10 @@ public class CreateDeviceForActivationsRequest {
      * Activation IDs.
      */
     @NotEmpty
-    @Schema(description = "Activation IDs.")
-    private final List<String> activationIds = new ArrayList<>();
+    @ArraySchema(
+            arraySchema = @Schema(description = "Activation IDs."),
+            schema = @Schema(description = "Activation ID.", format = "UUID (level 4)", maxLength = 37, example = "099e5e30-47b1-41c7-b49b-3bf28e811fca")
+    )
+    private final List<@NotBlank String> activationIds = new ArrayList<>();
 
 }
