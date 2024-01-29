@@ -18,63 +18,36 @@ package io.getlime.push.model.request;
 
 import io.getlime.push.model.entity.PushMessage;
 import io.getlime.push.model.enumeration.Mode;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Class representing a single push message send request.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Getter
+@Setter
 public class SendPushMessageRequest {
 
+    @NotBlank
+    @Schema(description = "Application ID.")
     private String appId;
+
+    /**
+     * Mode of sending.
+     */
+    @Schema(description = "Mode of sending.")
     private Mode mode = Mode.SYNCHRONOUS;
+
+    /**
+     * Push message to be sent.
+     */
+    @NotNull
+    @Schema(description = "Push message to be sent.")
     private PushMessage message;
 
-    /**
-     * Get app ID.
-     * @return App ID.
-     */
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set app ID.
-     * @param appId App ID.
-     */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * Get mode of sending.
-     * @return Mode.
-     */
-    public Mode getMode() {
-        return mode;
-    }
-
-    /**
-     * Set mode of sending.
-     * @param mode Mode.
-     */
-    public void setMode(Mode mode) {
-        this.mode = mode;
-    }
-
-    /**
-     * Get push message to be sent.
-     * @return Push message.
-     */
-    public PushMessage getMessage() {
-        return message;
-    }
-
-    /**
-     * Set push message to be sent.
-     * @param message Push message.
-     */
-    public void setMessage(PushMessage message) {
-        this.message = message;
-    }
 }

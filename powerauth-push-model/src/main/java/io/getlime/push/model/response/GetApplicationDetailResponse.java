@@ -16,120 +16,46 @@
 package io.getlime.push.model.response;
 
 import io.getlime.push.model.entity.PushServerApplication;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Get application credentials entity detail response.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
+@Getter
+@Setter
 public class GetApplicationDetailResponse {
 
+    /**
+     * Push server application.
+     */
     private PushServerApplication application;
+
+    /**
+     * iOS bundle.
+     */
     private String iosBundle;
+
+    /**
+     * iOS key ID.
+     */
     private String iosKeyId;
+
+    /**
+     * iOS team ID.
+     */
     private String iosTeamId;
+
+    /**
+     * APNs environment.
+     */
     private String iosEnvironment;
+
+    /**
+     * Android project ID record.
+     */
     private String androidProjectId;
 
-    /**
-     * Default constructor.
-     */
-    public GetApplicationDetailResponse() {
-    }
-
-    /**
-     * Get push server application.
-     * @return Push server application.
-     */
-    public PushServerApplication getApplication() {
-        return application;
-    }
-
-    /**
-     * Set push server application.
-     * @param application Push server application.
-     */
-    public void setApplication(PushServerApplication application) {
-        this.application = application;
-    }
-
-    /**
-     * Get the iOS bundle record.
-     * @return The iOS bundle record.
-     */
-    public String getIosBundle() {
-        return iosBundle;
-    }
-
-    /**
-     * Set the iOS bundle record.
-     * @param iosBundle The iOS bundle record.
-     */
-    public void setIosBundle(String iosBundle) {
-        this.iosBundle = iosBundle;
-    }
-
-    /**
-     * Get the iOS key record.
-     * @return The iOS key record.
-     */
-    public String getIosKeyId() {
-        return iosKeyId;
-    }
-
-    /**
-     * Set the iOS key record.
-     * @param iosKeyId The iOS key record.
-     */
-    public void setIosKeyId(String iosKeyId) {
-        this.iosKeyId = iosKeyId;
-    }
-
-    /**
-     * Get the iOS team ID record.
-     * @return The iOS team ID record.
-     */
-    public String getIosTeamId() {
-        return iosTeamId;
-    }
-
-    /**
-     * Set the iOS team ID record.
-     * @param iosTeamId The iOS team ID record.
-     */
-    public void setIosTeamId(String iosTeamId) {
-        this.iosTeamId = iosTeamId;
-    }
-
-    /**
-     * Get the APNs environment.
-     * @return APNs environment.
-     */
-    public String getIosEnvironment() {
-        return iosEnvironment;
-    }
-
-    /**
-     * Set the APNs environment.
-     * @param iosEnvironment APNs environment.
-     */
-    public void setIosEnvironment(String iosEnvironment) {
-        this.iosEnvironment = iosEnvironment;
-    }
-
-    /**
-     * Get the Android project ID record.
-     * @return The Android project ID record.
-     */
-    public String getAndroidProjectId() {
-        return androidProjectId;
-    }
-
-    /**
-     * Set the Android project ID record.
-     * @param androidProjectId The Android project ID record.
-     */
-    public void setAndroidProjectId(String androidProjectId) {
-        this.androidProjectId = androidProjectId;
-    }
 }

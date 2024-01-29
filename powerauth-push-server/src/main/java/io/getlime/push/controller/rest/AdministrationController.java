@@ -151,13 +151,13 @@ public class AdministrationController {
         app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
         app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
         response.setApplication(app);
-        if (requestObject.getIncludeIos()) {
+        if (requestObject.isIncludeIos()) {
             response.setIosBundle(appCredentialsEntity.getIosBundle());
             response.setIosKeyId(appCredentialsEntity.getIosKeyId());
             response.setIosTeamId(appCredentialsEntity.getIosTeamId());
             response.setIosEnvironment(appCredentialsEntity.getIosEnvironment());
         }
-        if (requestObject.getIncludeAndroid()) {
+        if (requestObject.isIncludeAndroid()) {
             response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
         }
         logger.debug("The getApplicationDetail request succeeded");

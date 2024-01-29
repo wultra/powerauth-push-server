@@ -17,6 +17,8 @@
 package io.getlime.push.model.response;
 
 import io.getlime.push.model.entity.ListOfUsers;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Objects;
 
@@ -25,48 +27,24 @@ import java.util.Objects;
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-
+@Getter
+@Setter
 public class ListOfUsersFromCampaignResponse {
 
+    /**
+     * Campaign ID.
+     */
     private Long campaignId;
+
+    /**
+     * List of users.
+     */
     private ListOfUsers users;
 
     /**
      * Default constructor.
      */
     public ListOfUsersFromCampaignResponse() {
-    }
-
-    /**
-     * Get campaign ID.
-     * @return Campaign ID.
-     */
-    public Long getCampaignId() {
-        return campaignId;
-    }
-
-    /**
-     * Set campaign ID.
-     * @param campaignId Campaign ID.
-     */
-    public void setCampaignId(Long campaignId) {
-        this.campaignId = campaignId;
-    }
-
-    /**
-     * Get list of users.
-     * @return List of users.
-     */
-    public ListOfUsers getUsers() {
-        return users;
-    }
-
-    /**
-     * Set list of users.
-     * @param users List of users.
-     */
-    public void setUsers(ListOfUsers users) {
-        this.users = users;
     }
 
     @Override

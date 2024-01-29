@@ -15,13 +15,25 @@
  */
 package io.getlime.push.model.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Remove iOS configuration request.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
+@Getter
+@Setter
 public class RemoveIosRequest {
 
+    /**
+     * Application ID.
+     */
+    @NotBlank
+    @Schema(description = "Application ID.")
     private String appId;
 
     /**
@@ -35,22 +47,6 @@ public class RemoveIosRequest {
      * @param appId Application credentials entity ID.
      */
     public RemoveIosRequest(String appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * Get application credentials entity ID.
-     * @return Application credentials entity ID.
-     */
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set application credentials entity ID.
-     * @param appId Application credentials entity ID.
-     */
-    public void setAppId(String appId) {
         this.appId = appId;
     }
 
