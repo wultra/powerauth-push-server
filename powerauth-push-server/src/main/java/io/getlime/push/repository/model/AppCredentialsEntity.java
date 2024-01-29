@@ -24,7 +24,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * Class representing application tokens used to authenticate against APNs, FCM, or HMS services.
+ * Class representing application tokens used to authenticate against APNs, or FCM services.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
