@@ -17,17 +17,21 @@
 package io.getlime.push.repository.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * Class representing application tokens used to authenticate against APNs or FCM services.
+ * Class representing application tokens used to authenticate against APNs, or FCM services.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
 @Entity
 @Table(name = "push_app_credentials")
+@Getter
+@Setter
 public class AppCredentialsEntity implements Serializable {
 
     @Serial
@@ -90,147 +94,4 @@ public class AppCredentialsEntity implements Serializable {
     @Column(name = "android_project_id")
     private String androidProjectId;
 
-    /**
-     * Get credentials ID.
-     * @return Credentials ID
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Set credentials ID
-     * @param id Credentials ID
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * Get PowerAuth app ID.
-     * @return PowerAuth App ID.
-     */
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set PowerAuth app ID.
-     * @param powerAuthAppId PowerAuth App ID.
-     */
-    public void setAppId(String powerAuthAppId) {
-        this.appId = powerAuthAppId;
-    }
-
-    /**
-     * Get iOS bundle ID.
-     * @return iOS bundle ID.
-     */
-    public String getIosBundle() {
-        return iosBundle;
-    }
-
-    /**
-     * Set iOS bundle ID.
-     * @param iosBundle iOS bundle ID.
-     */
-    public void setIosBundle(String iosBundle) {
-        this.iosBundle = iosBundle;
-    }
-
-    /**
-     * Get APNs environment.
-     * @return APNs environment.
-     */
-    public String getIosEnvironment() {
-        return iosEnvironment;
-    }
-
-    /**
-     * Set APNs environment.
-     * @param iosEnvironment APNs environment.
-     */
-    public void setIosEnvironment(String iosEnvironment) {
-        this.iosEnvironment = iosEnvironment;
-    }
-
-    /**
-     * Get iOS private key.
-     * @return iOS private key.
-     */
-    public byte[] getIosPrivateKey() {
-        return iosPrivateKey;
-    }
-
-    /**
-     * Set iOS private key.
-     * @param iosPrivateKey iOS private key.
-     */
-    public void setIosPrivateKey(byte[] iosPrivateKey) {
-        this.iosPrivateKey = iosPrivateKey;
-    }
-
-    /**
-     * Get iOS team ID.
-     * @return iOS team ID.
-     */
-    public String getIosTeamId() {
-        return iosTeamId;
-    }
-
-    /**
-     * Set iOS team ID.
-     * @param iosTeamId iOS team ID.
-     */
-    public void setIosTeamId(String iosTeamId) {
-        this.iosTeamId = iosTeamId;
-    }
-
-    /**
-     * Get iOS key ID.
-     * @return iOS key ID.
-     */
-    public String getIosKeyId() {
-        return iosKeyId;
-    }
-
-    /**
-     * Set iOS key ID.
-     * @param iosKeyId iOS key ID.
-     */
-    public void setIosKeyId(String iosKeyId) {
-        this.iosKeyId = iosKeyId;
-    }
-
-    /**
-     * Get Android private key.
-     * @return Android private key.
-     */
-    public byte[] getAndroidPrivateKey() {
-        return androidPrivateKey;
-    }
-
-    /**
-     * Set Android private key.
-     * @param androidPrivateKey Android private key.
-     */
-    public void setAndroidPrivateKey(byte[] androidPrivateKey) {
-        this.androidPrivateKey = androidPrivateKey;
-    }
-
-    /**
-     * Get Android project ID.
-     * @return Android project ID.
-     */
-    public String getAndroidProjectId() {
-        return androidProjectId;
-    }
-
-    /**
-     * Set Android project ID.
-     * @param androidProjectId Android project ID.
-     */
-    public void setAndroidProjectId(String androidProjectId) {
-        this.androidProjectId = androidProjectId;
-    }
 }
