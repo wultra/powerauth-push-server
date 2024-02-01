@@ -231,17 +231,8 @@ public class PushSendingWorker {
         final AndroidConfig.Builder androidConfigBuilder = AndroidConfig.builder()
                 .setCollapseKey(pushMessageBody.getCollapseKey());
 
-        // Calculate TTL and set it if the TTL is within reasonable limits
-        final Instant validUntil = pushMessageBody.getValidUntil();
-        if (validUntil != null) {
-            final long validUntilMs = validUntil.toEpochMilli();
-            final long currentTimeMs = System.currentTimeMillis();
-            final long ttlInSeconds = (validUntilMs - currentTimeMs) / 1000;
-
-            if (ttlInSeconds > 0 && ttlInSeconds < ANDROID_TTL_SECONDS_MAX) {
-                androidConfigBuilder.setTtl(ttlInSeconds);
-            }
-        }
+        calculateTtl(pushMessageBody.getValidUntil())
+                .ifPresent(androidConfigBuilder::setTtl);
 
         final AndroidNotification.Priority deliveryPriority = (Priority.NORMAL == priority) ?
                 AndroidNotification.Priority.DEFAULT : AndroidNotification.Priority.HIGH;
@@ -267,7 +258,7 @@ public class PushSendingWorker {
 
         if (pushServiceConfiguration.isFcmDataNotificationOnly()) { // notification only through data map
             data.put(FCM_NOTIFICATION_KEY, fcmConverter.convertNotificationToString(notification));
-        } else if (attributes == null || !attributes.getSilent()) { // if there are no attributes, assume the message is not silent
+        } else if (isMessageNotSilent(attributes)) {
             androidConfigBuilder.setNotification(notification);
         }
 
@@ -276,6 +267,28 @@ public class PushSendingWorker {
                 .putAllData(data)
                 .setAndroidConfig(androidConfigBuilder.build())
                 .build();
+    }
+
+    private static boolean isMessageNotSilent(final PushMessageAttributes attributes) {
+        // if there are no attributes, assume the message is not silent
+        return attributes == null || !attributes.getSilent();
+    }
+
+    /**
+     * Calculate TTL and return it if the TTL is within reasonable limits.
+     *
+     * @param validUntil Valid until.
+     * @return TTL in seconds or empty.
+     */
+    private static Optional<Long> calculateTtl(final Instant validUntil) {
+        if (validUntil != null) {
+            final long ttlInSeconds = Duration.between(Instant.now(), validUntil).toSeconds();
+
+            if (ttlInSeconds > 0 && ttlInSeconds < ANDROID_TTL_SECONDS_MAX) {
+                return Optional.of(ttlInSeconds);
+            }
+        }
+        return Optional.empty();
     }
 
     // iOS related methods
