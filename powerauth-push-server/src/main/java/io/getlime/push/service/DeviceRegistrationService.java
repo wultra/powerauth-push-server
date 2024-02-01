@@ -142,23 +142,18 @@ public class DeviceRegistrationService {
     }
 
     public void updateStatus(final UpdateDeviceStatusRequest request) throws PushServerException {
-        try {
-            String activationId = request.getActivationId();
-            ActivationStatus activationStatus = request.getActivationStatus();
-            List<PushDeviceRegistrationEntity> device = pushDeviceRepository.findByActivationId(activationId);
-            if (device != null)  {
-                if (activationStatus == null) {
-                    // Activation status was not received via callback data, retrieve it from PowerAuth server
-                    activationStatus = powerAuthClient.getActivationStatus(activationId).getActivationStatus();
-                }
-                for (PushDeviceRegistrationEntity registration: device) {
-                    registration.setActive(activationStatus.equals(ActivationStatus.ACTIVE));
-                    pushDeviceRepository.save(registration);
-                }
-            }
-        } catch (PowerAuthClientException ex) {
-            logger.warn(ex.getMessage(), ex);
-            throw new PushServerException("Update device status failed because activation status is unknown");
+        final String activationId = request.getActivationId();
+
+        final List<PushDeviceRegistrationEntity> device = pushDeviceRepository.findByActivationId(activationId);
+        if (device == null) {
+            return;
+        }
+
+        final ActivationStatus activationStatus = request.getActivationStatus() == null ? fetchActivationStatus(activationId) : request.getActivationStatus();
+
+        for (PushDeviceRegistrationEntity registration : device) {
+            registration.setActive(activationStatus == ActivationStatus.ACTIVE);
+            pushDeviceRepository.save(registration);
         }
     }
 
@@ -248,6 +243,15 @@ public class DeviceRegistrationService {
         } catch (PowerAuthClientException ex) {
             logger.warn(ex.getMessage(), ex);
             throw new PushServerException("Device registration failed because activation status is unknown");
+        }
+    }
+
+    private ActivationStatus fetchActivationStatus(final String activationId) throws PushServerException {
+        try {
+            return powerAuthClient.getActivationStatus(activationId).getActivationStatus();
+        } catch (PowerAuthClientException ex) {
+            logger.warn(ex.getMessage(), ex);
+            throw new PushServerException("Update device status failed because activation status is unknown");
         }
     }
 
