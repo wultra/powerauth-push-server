@@ -101,7 +101,7 @@ public class DeviceRegistrationService {
         AtomicBoolean registrationFailed = new AtomicBoolean(false);
         Set<Long> usedDeviceRegistrationIds = new HashSet<>();
 
-        activationIds.forEach(activationId -> {
+        activationIds.stream().distinct().forEach(activationId -> {
             try {
                 List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
                 PushDeviceRegistrationEntity device;

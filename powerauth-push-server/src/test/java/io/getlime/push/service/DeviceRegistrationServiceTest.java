@@ -158,6 +158,23 @@ class DeviceRegistrationServiceTest {
     }
 
     @Test
+    void testCreateOrUpdateDevices_withDuplicities() throws Exception {
+        final AppCredentialsEntity credentials = createAppCredentials(APP_NAME);
+        when(powerAuthClient.getActivationStatus("a1"))
+                .thenReturn(createActivationStatusResponse("a1"));
+
+        final CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
+        request.setAppId(APP_NAME);
+        request.getActivationIds().addAll(List.of("a1", "a1"));
+        request.setToken("t1");
+        request.setPlatform(MobilePlatform.ANDROID);
+
+        tested.createOrUpdateDevices(request, credentials);
+
+        assertRegistrationExists("a1", "t1");
+    }
+
+    @Test
     @Sql
     void testCreateOrUpdateDevices_update() throws Exception {
         final AppCredentialsEntity credentials = appCredentialsRepository.findById(1L).get();
