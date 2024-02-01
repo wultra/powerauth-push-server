@@ -145,9 +145,6 @@ public class DeviceRegistrationService {
         final String activationId = request.getActivationId();
 
         final List<PushDeviceRegistrationEntity> device = pushDeviceRepository.findByActivationId(activationId);
-        if (device == null) {
-            return;
-        }
 
         final ActivationStatus activationStatus = request.getActivationStatus() == null ? fetchActivationStatus(activationId) : request.getActivationStatus();
 
@@ -158,7 +155,7 @@ public class DeviceRegistrationService {
     }
 
     public void delete(final String appId, final String pushToken) {
-        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(appId, pushToken);
+        final List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(appId, pushToken);
         pushDeviceRepository.deleteAll(devices);
     }
 
