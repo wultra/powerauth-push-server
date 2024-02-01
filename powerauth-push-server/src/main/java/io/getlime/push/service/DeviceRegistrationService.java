@@ -92,10 +92,10 @@ public class DeviceRegistrationService {
     }
 
     public void createOrUpdateDevices(final CreateDeviceForActivationsRequest request, final AppCredentialsEntity appCredentials) throws PushServerException {
-        String appId = request.getAppId();
-        String pushToken = request.getToken();
+        final String appId = request.getAppId();
+        final String pushToken = request.getToken();
         final MobilePlatform platform = request.getPlatform();
-        List<String> activationIds = request.getActivationIds();
+        final List<String> activationIds = request.getActivationIds();
 
         // Initialize loop variables.
         AtomicBoolean registrationFailed = new AtomicBoolean(false);
