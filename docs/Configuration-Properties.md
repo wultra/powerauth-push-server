@@ -32,7 +32,7 @@ The Push Server uses the following public configuration properties:
 | `powerauth.push.service.message.storage.enabled` | `false` | Whether persistent storing of sent messages is enabled | 
 | `powerauth.push.service.registration.multipleActivations.enabled` | `false` | Whether push registration supports "associated activations" |
 | `powerauth.push.service.registration.retry.backoff` | `100` | Duration in milliseconds before a retry attempt during device registration in case of an insert error |
-| `owerauth.push.service.registration.retry.maxAttempts` | `3` | Max number of retry attempts during device registration in case of an insert error |
+| `owerauth.push.service.registration.retry.maxAttempts` | `2` | Max number of retry attempts during device registration in case of an insert error |
 
 ## PowerAuth Push Campaign Setup
 
