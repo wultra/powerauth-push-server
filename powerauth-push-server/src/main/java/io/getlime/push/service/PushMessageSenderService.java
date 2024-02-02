@@ -149,7 +149,7 @@ public class PushMessageSenderService {
                             continue;
                         }
                         final String token = device.getPushToken();
-                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getAndroid();
+                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getHuawei();
                         pushSendingWorker.sendMessageToHuawei(pushClient.getHmsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
                     }
                 }
