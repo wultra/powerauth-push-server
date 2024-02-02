@@ -58,7 +58,7 @@ public class DeviceRegistrationService {
     @Retryable(retryFor = DataIntegrityViolationException.class,
             maxAttemptsExpression = "${powerauth.push.service.registration.retry.maxAttempts:3}",
             backoff = @Backoff(delayExpression = "${powerauth.push.service.registration.retry.backoff:100}"))
-     public void createOrUpdateDevice(final CreateDeviceRequest requestObject, final AppCredentialsEntity appCredentials) throws PushServerException {
+    public void createOrUpdateDevice(final CreateDeviceRequest requestObject, final AppCredentialsEntity appCredentials) throws PushServerException {
         final String appId = requestObject.getAppId();
         final String pushToken = requestObject.getToken();
         final MobilePlatform platform = requestObject.getPlatform();
