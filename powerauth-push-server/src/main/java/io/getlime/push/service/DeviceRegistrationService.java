@@ -174,27 +174,27 @@ public class DeviceRegistrationService {
      * @return List of found device registration entities.
      */
     private List<PushDeviceRegistrationEntity> lookupDeviceRegistrations(String appId, String activationId, String pushToken) throws PushServerException {
-        List<PushDeviceRegistrationEntity> deviceRegistrations;
         // At first, lookup the device registrations by match on activationId and pushToken.
-        deviceRegistrations = pushDeviceRepository.findByActivationIdAndPushToken(activationId, pushToken);
-        if (!deviceRegistrations.isEmpty()) {
-            if (deviceRegistrations.size() != 1) {
+        final List<PushDeviceRegistrationEntity> deviceRegistrationsByActivationIdAndToken = pushDeviceRepository.findByActivationIdAndPushToken(activationId, pushToken);
+        if (!deviceRegistrationsByActivationIdAndToken.isEmpty()) {
+            if (deviceRegistrationsByActivationIdAndToken.size() != 1) {
                 throw new PushServerException("Multiple device registrations found during lookup by activation ID and push token. Please delete duplicate rows and make sure database indexes have been applied on push_device_registration table.");
             }
-            return deviceRegistrations;
+            return deviceRegistrationsByActivationIdAndToken;
         }
+
         // Second, lookup the device registrations by match on activationId.
-        deviceRegistrations = pushDeviceRepository.findByActivationId(activationId);
-        if (!deviceRegistrations.isEmpty()) {
-            if (deviceRegistrations.size() != 1) {
+        final List<PushDeviceRegistrationEntity> deviceRegistrationsByActivationId = pushDeviceRepository.findByActivationId(activationId);
+        if (!deviceRegistrationsByActivationId.isEmpty()) {
+            if (deviceRegistrationsByActivationId.size() != 1) {
                 throw new PushServerException("Multiple device registrations found during lookup by activation ID. Please delete duplicate rows and make sure database indexes have been applied on push_device_registration table.");
             }
-            return deviceRegistrations;
+            return deviceRegistrationsByActivationId;
         }
+
         // Third, lookup the device registration by match on appId and pushToken. Multiple results can be returned in this case, this is a multi-activation scenario.
-        deviceRegistrations = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(appId, pushToken);
         // The final result is definitive, either device registrations were found by push token or none were found at all.
-        return deviceRegistrations;
+        return pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(appId, pushToken);
     }
 
     /**
