@@ -35,6 +35,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -58,6 +59,7 @@ public class DeviceRegistrationService {
     @Retryable(retryFor = DataIntegrityViolationException.class,
             maxAttemptsExpression = "${powerauth.push.service.registration.retry.maxAttempts:2}",
             backoff = @Backoff(delayExpression = "${powerauth.push.service.registration.retry.backoff:100}"))
+    @Transactional
     public void createOrUpdateDevice(final CreateDeviceRequest requestObject, final AppCredentialsEntity appCredentials) throws PushServerException {
         final String appId = requestObject.getAppId();
         final String pushToken = requestObject.getToken();
@@ -91,6 +93,7 @@ public class DeviceRegistrationService {
         pushDeviceRepository.save(device);
     }
 
+    @Transactional
     public void createOrUpdateDevices(final CreateDeviceForActivationsRequest request, final AppCredentialsEntity appCredentials) throws PushServerException {
         final String appId = request.getAppId();
         final String pushToken = request.getToken();
@@ -141,6 +144,7 @@ public class DeviceRegistrationService {
         }
     }
 
+    @Transactional
     public void updateStatus(final UpdateDeviceStatusRequest request) throws PushServerException {
         final String activationId = request.getActivationId();
 
@@ -154,6 +158,7 @@ public class DeviceRegistrationService {
         }
     }
 
+    @Transactional
     public void delete(final String appId, final String pushToken) {
         final List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(appId, pushToken);
         pushDeviceRepository.deleteAll(devices);
