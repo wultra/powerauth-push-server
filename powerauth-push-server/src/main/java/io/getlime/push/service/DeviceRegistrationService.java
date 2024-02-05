@@ -98,12 +98,12 @@ public class DeviceRegistrationService {
         final List<String> activationIds = request.getActivationIds();
 
         // Initialize loop variables.
-        AtomicBoolean registrationFailed = new AtomicBoolean(false);
-        Set<Long> usedDeviceRegistrationIds = new HashSet<>();
+        final AtomicBoolean registrationFailed = new AtomicBoolean(false);
+        final Set<Long> usedDeviceRegistrationIds = new HashSet<>();
 
         activationIds.stream().distinct().forEach(activationId -> {
             try {
-                List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
+                final List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
                 PushDeviceRegistrationEntity device;
                 if (devices.isEmpty()) {
                     // The device registration is new, create a new entity.
