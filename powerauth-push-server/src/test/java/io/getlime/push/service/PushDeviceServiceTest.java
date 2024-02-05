@@ -172,7 +172,7 @@ class PushDeviceServiceTest {
         final UpdateDeviceStatusRequest request = new UpdateDeviceStatusRequest();
 
         final PushServerException exception = assertThrows(PushServerException.class,
-                () ->tested.updateDeviceStatus(request));
+                () -> tested.updateDeviceStatus(request));
         assertEquals("Activation ID must not be null.", exception.getMessage());
     }
 
@@ -192,7 +192,7 @@ class PushDeviceServiceTest {
         request.setAppId("app1");
 
         final PushServerException exception = assertThrows(PushServerException.class,
-                () ->tested.deleteDevice(request));
+                () -> tested.deleteDevice(request));
         assertEquals("Push token must not be null or empty.", exception.getMessage());
     }
 
