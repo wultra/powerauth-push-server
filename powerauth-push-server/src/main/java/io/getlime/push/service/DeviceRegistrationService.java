@@ -203,8 +203,8 @@ public class DeviceRegistrationService {
      * @param pushToken Push token.
      * @return New device registration entity.
      */
-    private PushDeviceRegistrationEntity initDeviceRegistrationEntity(AppCredentialsEntity app, String pushToken) {
-        PushDeviceRegistrationEntity device = new PushDeviceRegistrationEntity();
+    private static PushDeviceRegistrationEntity initDeviceRegistrationEntity(AppCredentialsEntity app, String pushToken) {
+        final PushDeviceRegistrationEntity device = new PushDeviceRegistrationEntity();
         device.setAppCredentials(app);
         device.setPushToken(pushToken);
         return device;
@@ -215,7 +215,7 @@ public class DeviceRegistrationService {
      * @param app AppCredentialsEntity instance.
      * @param pushToken Push token.
      */
-    private void updateDeviceRegistrationEntity(PushDeviceRegistrationEntity device, AppCredentialsEntity app, String pushToken) {
+    private static void updateDeviceRegistrationEntity(PushDeviceRegistrationEntity device, AppCredentialsEntity app, String pushToken) {
         device.setAppCredentials(app);
         device.setPushToken(pushToken);
     }
