@@ -9,7 +9,6 @@ The Push Server uses the following public configuration properties:
 | `spring.datasource.url` | `jdbc:postgresql://localhost:5432/powerauth` | Database JDBC URL |
 | `spring.datasource.username` | `powerauth` | Database JDBC username |
 | `spring.datasource.password` | `_empty_` | Database JDBC password |
-| `spring.datasource.driver-class-name` | `org.postgresql.Driver` | Datasource JDBC class name | 
 | `spring.jpa.properties.hibernate.connection.characterEncoding` | `utf8` | Character encoding |
 | `spring.jpa.properties.hibernate.connection.useUnicode` | `true` | Character encoding - Unicode support |
 
