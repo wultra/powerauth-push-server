@@ -26,7 +26,6 @@ The default database connectivity parameters in `powerauth-push-server.war` are 
 spring.datasource.url=jdbc:postgresql://localhost:5432/powerauth
 spring.datasource.username=powerauth
 spring.datasource.password=
-spring.datasource.driver-class-name=org.postgresql.Driver
 spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
 spring.jpa.properties.hibernate.connection.characterEncoding=utf8
 spring.jpa.properties.hibernate.connection.useUnicode=true
