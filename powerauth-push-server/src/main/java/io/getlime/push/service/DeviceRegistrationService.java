@@ -261,6 +261,7 @@ public class DeviceRegistrationService {
         return switch (source) {
             case IOS -> Platform.IOS;
             case ANDROID -> Platform.ANDROID;
+            case HUAWEI -> Platform.HUAWEI;
         };
     }
 
