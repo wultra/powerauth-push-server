@@ -32,6 +32,7 @@ import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
 import io.getlime.push.service.http.HttpCustomizationService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,7 @@ public class AdministrationController {
             app.setAppId(appCredentialsEntity.getAppId());
             app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
             app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
+            app.setHuawei(isHuawei(appCredentialsEntity));
             appList.add(app);
         }
         response.setApplicationList(appList);
@@ -150,6 +152,7 @@ public class AdministrationController {
         app.setAppId(appCredentialsEntity.getAppId());
         app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
         app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
+        app.setHuawei(isHuawei(appCredentialsEntity));
         response.setApplication(app);
         if (requestObject.isIncludeIos()) {
             response.setIosBundle(appCredentialsEntity.getIosBundle());
@@ -160,8 +163,15 @@ public class AdministrationController {
         if (requestObject.isIncludeAndroid()) {
             response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
         }
+        if (requestObject.isIncludeHuawei()) {
+            response.setHuaweiProjectId(appCredentialsEntity.getHmsProjectId());
+        }
         logger.debug("The getApplicationDetail request succeeded");
         return new ObjectResponse<>(response);
+    }
+
+    private static boolean isHuawei(final AppCredentialsEntity appCredentialsEntity) {
+        return appCredentialsEntity.getHmsClientSecret() != null && appCredentialsEntity.getHmsClientId() != null;
     }
 
     /**
@@ -205,7 +215,7 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received updateIos request, application credentials entity ID: {}", requestObject.getAppId());
+        logger.info("Received updateIos request, application ID: {}", requestObject.getAppId());
         final String errorMessage = UpdateIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -219,7 +229,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosEnvironment(requestObject.getEnvironment());
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        logger.info("The updateIos request succeeded, application credentials entity ID: {}", requestObject.getAppId());
+        logger.info("The updateIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
 
@@ -235,7 +245,7 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received removeIos request, application credentials entity ID: {}", requestObject.getAppId());
+        logger.info("Received removeIos request, application ID: {}", requestObject.getAppId());
         String errorMessage = RemoveIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -248,7 +258,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosEnvironment(null);
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        logger.info("The removeIos request succeeded, application credentials entity ID: {}", requestObject.getAppId());
+        logger.info("The removeIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
 
@@ -264,7 +274,7 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received updateAndroid request, application credentials entity ID: {}", requestObject.getAppId());
+        logger.info("Received updateAndroid request, application ID: {}", requestObject.getAppId());
         String errorMessage = UpdateAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -275,7 +285,7 @@ public class AdministrationController {
         appCredentialsEntity.setAndroidProjectId(requestObject.getProjectId());
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        logger.info("The updateAndroid request succeeded, application credentials entity ID: {}", requestObject.getAppId());
+        logger.info("The updateAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
 
@@ -291,7 +301,7 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received removeAndroid request, application credentials entity ID: {}", requestObject.getAppId());
+        logger.info("Received removeAndroid request, application ID: {}", requestObject.getAppId());
         String errorMessage = RemoveAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -301,7 +311,51 @@ public class AdministrationController {
         appCredentialsEntity.setAndroidProjectId(null);
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
-        logger.info("The removeAndroid request succeeded, application credentials entity ID: {}", requestObject.getAppId());
+        logger.info("The removeAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        return new Response();
+    }
+
+    /**
+     * Update Huawei configuration.
+     *
+     * @param request Update Huawei configuration request.
+     * @return Response.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
+     */
+    @RequestMapping(value = "huawei/update", method = { RequestMethod.POST, RequestMethod.PUT })
+    public Response updateHuawei(@Valid @RequestBody ObjectRequest<UpdateHuaweiRequest> request) throws PushServerException {
+        final UpdateHuaweiRequest requestObject = request.getRequestObject();
+        logger.info("Received update Huawei request, application ID: {}", requestObject.getAppId());
+
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
+        appCredentialsEntity.setHmsProjectId(requestObject.getProjectId());
+        appCredentialsEntity.setHmsClientId(requestObject.getClientId());
+        appCredentialsEntity.setHmsClientSecret(requestObject.getClientSecret());
+        appCredentialsRepository.save(appCredentialsEntity);
+        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        logger.info("The update Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        return new Response();
+    }
+
+    /**
+     * Remove Huawei configuration.
+     *
+     * @param request Remove Huawei configuration request.
+     * @return Response.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
+     */
+    @RequestMapping(value = "huawei/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
+    public Response removeHuawei(@Valid @RequestBody ObjectRequest<RemoveHuaweiRequest> request) throws PushServerException {
+        final RemoveHuaweiRequest requestObject = request.getRequestObject();
+        logger.info("Received remove Huawei request, application ID: {}", requestObject.getAppId());
+
+        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
+        appCredentialsEntity.setHmsProjectId(null);
+        appCredentialsEntity.setHmsClientSecret(null);
+        appCredentialsEntity.setHmsClientId(null);
+        appCredentialsRepository.save(appCredentialsEntity);
+        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        logger.info("The remove Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
 

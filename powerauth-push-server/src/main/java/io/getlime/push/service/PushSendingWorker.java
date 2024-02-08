@@ -22,6 +22,8 @@ import com.eatthepath.pushy.apns.proxy.HttpProxyHandlerFactory;
 import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
 import com.eatthepath.pushy.apns.util.TokenUtil;
 import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
@@ -33,10 +35,14 @@ import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageAttributes;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.enumeration.Priority;
+import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.apns.ApnsRejectionReason;
 import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmModelConverter;
 import io.getlime.push.service.fcm.model.FcmSuccessResponse;
+import io.getlime.push.service.hms.HmsClient;
+import io.getlime.push.service.hms.HmsSendResponse;
+import io.getlime.push.service.hms.request.AndroidNotification.Importance;
 import io.getlime.push.util.CaCertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,6 +138,17 @@ public class PushSendingWorker {
     }
 
     /**
+     * Prepares an HMS (Huawei Mobile Services) service client.
+     *
+     * @param credentials Credentials.
+     * @return A new instance of HMS client.
+     */
+    HmsClient prepareHmsClient(final AppCredentialsEntity credentials) {
+        logger.info("Initializing HmsClient");
+        return new HmsClient(pushServiceConfiguration, credentials);
+    }
+
+    /**
      * Send message to Android platform.
      * @param fcmClient Instance of the FCM client used for sending the notifications.
      * @param pushMessageBody Push message contents.
@@ -211,6 +228,40 @@ public class PushSendingWorker {
     }
 
     /**
+     * Send message to Huawei platform.
+     *
+     * @param hmsClient Instance of the HMS client used for sending the notifications.
+     * @param pushMessageBody Push message contents.
+     * @param attributes Push message attributes.
+     * @param priority Push message priority.
+     * @param pushToken Push token used to deliver the message.
+     * @param callback Callback that is called after the asynchronous executions is completed.
+     * @throws PushServerException In case any issue happens while sending the push message.
+     */
+    void sendMessageToHuawei(final HmsClient hmsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) throws PushServerException {
+        final io.getlime.push.service.hms.request.Message message = buildHmsMessage(pushMessageBody, attributes, priority, pushToken);
+
+        final Consumer<HmsSendResponse> successConsumer = response -> {
+            final String requestId = response.requestId();
+            if (HmsClient.SUCCESS_CODE.equals(response.code())) {
+                logger.info("Notification sent successfully, request ID: {}", requestId);
+                callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
+            } else {
+                logger.error("Notification sending failed, request ID: {}, code: {}, message: {}", requestId, response.code(), response.msg());
+                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
+            }
+        };
+
+        final Consumer<Throwable> throwableConsumer = throwable -> {
+            logger.error("Invalid response received from HSM, notification sending failed.", throwable);
+            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
+        };
+
+        hmsClient.sendMessage(message, false)
+                .subscribe(successConsumer, throwableConsumer);
+    }
+
+    /**
      * Build Android Message object from Push message body.
      * @param pushMessageBody Push message body.
      * @param attributes Push message attributes.
@@ -266,6 +317,66 @@ public class PushSendingWorker {
                 .setToken(pushToken)
                 .putAllData(data)
                 .setAndroidConfig(androidConfigBuilder.build())
+                .build();
+    }
+
+    /**
+     * Build HMS Message object from Push message body.
+     *
+     * @param pushMessageBody Push message body.
+     * @param attributes Push message attributes.
+     * @param priority Push message priority.
+     * @param pushToken Push token.
+     * @return HMS Message object.
+     * @throws PushServerException In case any issue happens while building the push message.
+     */
+    private io.getlime.push.service.hms.request.Message buildHmsMessage(final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken) throws PushServerException {
+        final var androidConfigBuilder = io.getlime.push.service.hms.request.AndroidConfig.builder()
+                .collapseKey(Integer.valueOf(pushMessageBody.getCollapseKey()));
+
+        calculateTtl(pushMessageBody.getValidUntil())
+                .map(Object::toString)
+                .ifPresent(androidConfigBuilder::ttl);
+
+        final Importance importance = (priority == Priority.NORMAL) ? Importance.NORMAL : Importance.HIGH;
+
+        final var notificationBuilder = io.getlime.push.service.hms.request.AndroidNotification.builder()
+                .importance(importance)
+                .title(pushMessageBody.getTitle())
+                .titleLocKey(pushMessageBody.getTitleLocKey())
+                .body(pushMessageBody.getBody())
+                .bodyLocKey(pushMessageBody.getBodyLocKey())
+                .icon(pushMessageBody.getIcon())
+                .sound(pushMessageBody.getSound())
+                .tag(pushMessageBody.getCategory());
+
+        if (pushMessageBody.getTitleLocArgs() != null) {
+            notificationBuilder.titleLocArgs(List.of(pushMessageBody.getTitleLocArgs()));
+        }
+        if (pushMessageBody.getBodyLocArgs() != null) {
+            notificationBuilder.bodyLocArgs(List.of(pushMessageBody.getBodyLocArgs()));
+        }
+
+        if (isMessageNotSilent(attributes)) {
+            androidConfigBuilder.notification(notificationBuilder.build());
+        }
+
+        final Map<String, Object> extras = pushMessageBody.getExtras();
+        final String data;
+        if (extras == null) {
+            data = null;
+        } else {
+            try {
+                data = new ObjectMapper().writeValueAsString(extras);
+            } catch (JsonProcessingException e) {
+                throw new PushServerException("Failed to serialize extras to JSON", e);
+            }
+        }
+
+        return io.getlime.push.service.hms.request.Message.builder()
+                .token(List.of(pushToken))
+                .android(androidConfigBuilder.build())
+                .data(data)
                 .build();
     }
 

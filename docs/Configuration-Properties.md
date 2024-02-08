@@ -59,7 +59,7 @@ The Push Server uses the following public configuration properties:
 | `powerauth.push.service.apns.idlePingInterval` | `60000`     | Interval in milliseconds specifying the frequency of APNS ping calls in idle state |
 | `powerauth.push.service.apns.concurrentConnections` | `1`         | Push message concurrency settings |
 
-# FCM Configuration
+## FCM Configuration
 
 | Property | Default | Note |
 |---|---|---|
@@ -71,6 +71,22 @@ The Push Server uses the following public configuration properties:
 | `powerauth.push.service.fcm.dataNotificationOnly` | `false` | Flag indicating that FCM service should never use "notification" format, only a data format with extra payload representing the notification |
 | `powerauth.push.service.fcm.sendMessageUrl` | `https://fcm.googleapis.com/v1/projects/%s/messages:send` | Default URL for the FCM service |
 | `powerauth.push.service.fcm.connect.timeout` | `5000` | Push message gateway connect timeout in milliseconds | 
+
+## HMS Configuration
+
+| Property                                          | Default                                                 | Note                                                                                                                                          |
+|---------------------------------------------------|---------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `powerauth.push.service.hms.proxy.enabled`        | `false`                                                 | Flag indicating if the communication needs to go through proxy.                                                                               |
+| `powerauth.push.service.hms.proxy.host`           | `127.0.0.1`                                             | Proxy host.                                                                                                                                   |
+| `powerauth.push.service.hms.proxy.port`           | `8080`                                                  | Proxy port.                                                                                                                                   |
+| `powerauth.push.service.hms.proxy.username`       | `_empty_`                                               | Proxy username.                                                                                                                               | 
+| `powerauth.push.service.hms.proxy.password`       | `_empty_`                                               | Proxy password.                                                                                                                               |
+| `powerauth.push.service.hms.dataNotificationOnly` | `false`                                                 | Flag indicating that HMS service should never use "notification" format, only a data format with extra payload representing the notification. |
+| `powerauth.push.service.hms.sendMessageUrl`       | `https://push-api.cloud.huawei.com/v2/%s/messages:send` | Default URL for the HMS service.                                                                                                              |
+| `powerauth.push.service.hms.tokenUrl`             | `https://oauth-login.cloud.huawei.com/oauth2/v3/token`  | Default URL for the HMS OAuth service to obtain an access token.                                                                              |
+| `powerauth.push.service.hms.connect.timeout`      | `5s`                                                    | Push message gateway connect timeout.                                                                                                         | 
+| `powerauth.push.service.hms.response.timeout`     | `60s`                                                   | Push message gateway maximum duration allowed between each network-level read operations.                                                     | 
+| `powerauth.push.service.hms.max-idle-time`        | `200s`                                                  | Push message gateway ConnectionProvider max idle time.                                                                                        | 
 
 ## Correlation HTTP Header Configuration
 

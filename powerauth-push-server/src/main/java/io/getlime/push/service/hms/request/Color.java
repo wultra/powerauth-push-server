@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Wultra s.r.o.
+ * Copyright 2024 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,39 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.getlime.push.service.hms.request;
 
-package io.getlime.push.model.entity;
-
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
- * Push server application credentials entity.
+ * HMS (Huawei Mobile Services) json mapping object.
  *
- * @author Roman Strobl, roman.strobl@wultra.com
+ * @author Lubos Racansky, lubos.racansky@wultra.com
  */
 @Getter
-@Setter
-public class PushServerApplication {
+@SuperBuilder
+@Jacksonized
+public class Color {
 
-    /**
-     * Application ID.
-     */
-    private String appId;
+    @Builder.Default
+    private final Float alpha = 1F;
 
-    /**
-     * Whether iOS is configured.
-     */
-    private Boolean ios;
+    @Builder.Default
+    private final Float red = 0F;
 
-    /**
-     * Whether Android is configured.
-     */
-    private Boolean android;
+    @Builder.Default
+    private final Float green = 0F;
 
-    /**
-     * Whether Huawei is configured.
-     */
-    private Boolean huawei;
+    @Builder.Default
+    private final Float blue = 0F;
 
 }

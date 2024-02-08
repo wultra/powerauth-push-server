@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Wultra s.r.o.
+ * Copyright 2024 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,39 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.getlime.push.model.request;
 
-package io.getlime.push.model.entity;
-
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Push server application credentials entity.
+ * Remove Huawei configuration request.
  *
- * @author Roman Strobl, roman.strobl@wultra.com
+ * @author Lubos Racansky, lubos.racansky@wultra.com
  */
 @Getter
 @Setter
-public class PushServerApplication {
+public class RemoveHuaweiRequest {
 
     /**
      * Application ID.
      */
+    @NotBlank
+    @Schema(description = "Application ID.")
     private String appId;
 
     /**
-     * Whether iOS is configured.
+     * No-arg constructor.
      */
-    private Boolean ios;
+    public RemoveHuaweiRequest() {
+    }
 
     /**
-     * Whether Android is configured.
+     * Constructor with application credentials entity ID.
+     * @param appId Application credentials entity ID.
      */
-    private Boolean android;
-
-    /**
-     * Whether Huawei is configured.
-     */
-    private Boolean huawei;
+    public RemoveHuaweiRequest(String appId) {
+        this.appId = appId;
+    }
 
 }

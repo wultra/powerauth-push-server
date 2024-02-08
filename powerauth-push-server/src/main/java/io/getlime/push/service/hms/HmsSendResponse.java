@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Wultra s.r.o.
+ * Copyright 2024 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,34 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package io.getlime.push.model.enumeration;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package io.getlime.push.service.hms;
 
 /**
- * Enum representing mobile platforms.
+ * HMS send response.
  *
- * @author Petr Dvorak, petr@wultra.com
+ * @author Lubos Racansky, lubos.racansky@wultra.com
  */
-public enum MobilePlatform {
-
-    /**
-     * iOS Platform.
-     */
-    @JsonProperty("ios")
-    IOS,
-
-    /**
-     * Android Platform.
-     */
-    @JsonProperty("android")
-    ANDROID,
-
-    /**
-     * Huawei Platform.
-     */
-    @JsonProperty("huawei")
-    HUAWEI
+public record HmsSendResponse(String code, String msg, String requestId) {
 
 }

@@ -13,27 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.repository.model;
+package io.getlime.push.service.hms.request;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Platform enum for {@link PushDeviceRegistrationEntity#getPlatform()}.
+ * HMS (Huawei Mobile Services) json mapping object.
  *
  * @author Lubos Racansky, lubos.racansky@wultra.com
  */
-public enum Platform {
+@Getter
+@SuperBuilder
+@Jacksonized
+public class ApnsConfig {
 
-    /**
-     * iOS Platform.
-     */
-    IOS,
+    @JsonProperty("hms_options")
+    private final ApnsHmsOptions hmsOptions;
 
-    /**
-     * Android Platform.
-     */
-    ANDROID,
+    @JsonProperty("headers")
+    private final ApnsHeaders apnsHeaders;
 
-    /**
-     * Huawei Platform.
-     */
-    HUAWEI;
+    @Builder.Default
+    private Map<String, Object> payload = new HashMap<>();
 }

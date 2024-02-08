@@ -17,16 +17,14 @@ package io.getlime.push.model.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Get application credentials entity detail request.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
-@Getter
-@Setter
+@Data
 public class GetApplicationDetailRequest {
 
     /**
@@ -49,6 +47,12 @@ public class GetApplicationDetailRequest {
     private boolean includeAndroid;
 
     /**
+     * Whether to include Huawei details.
+     */
+    @Schema(description = "Whether to include Huawei details.")
+    private boolean includeHuawei;
+
+    /**
      * Default constructor.
      */
     public GetApplicationDetailRequest() {
@@ -68,10 +72,11 @@ public class GetApplicationDetailRequest {
      * @param includeIos Whether to include iOS details.
      * @param includeAndroid Whether to include Android details.
      */
-    public GetApplicationDetailRequest(String appId, boolean includeIos, boolean includeAndroid) {
+    public GetApplicationDetailRequest(String appId, boolean includeIos, boolean includeAndroid, boolean includeHuawei) {
         this.appId = appId;
         this.includeIos = includeIos;
         this.includeAndroid = includeAndroid;
+        this.includeHuawei = includeHuawei;
     }
 
 }

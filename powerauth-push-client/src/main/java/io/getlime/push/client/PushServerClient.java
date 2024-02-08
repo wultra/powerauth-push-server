@@ -499,17 +499,14 @@ public class PushServerClient {
 
     /**
      * Get detail for an application credentials entity.
-     * @param appId Application credentials entity ID.
-     * @param includeIos Whether to include iOS details.
-     * @param includeAndroid Whether to include Android details.
+     * @param request Application detail request.
      * @return Application credentials entity detail.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(String appId, boolean includeIos, boolean includeAndroid) throws PushServerClientException {
-        GetApplicationDetailRequest request = new GetApplicationDetailRequest(appId, includeIos, includeAndroid);
-        logger.info("Calling push server to retrieve application detail, ID: {} - start", appId);
+    public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(final GetApplicationDetailRequest request) throws PushServerClientException {
+        logger.info("Calling push server to retrieve application detail, ID: {} - start", request.getAppId());
         final ObjectResponse<GetApplicationDetailResponse> response = postObjectImpl("/admin/app/detail", new ObjectRequest<>(request), GetApplicationDetailResponse.class);
-        logger.info("Calling push server to retrieve application detail, ID: {} - finish", appId);
+        logger.info("Calling push server to retrieve application detail, ID: {} - finish", request.getAppId());
         return response;
     }
 
@@ -589,6 +586,35 @@ public class PushServerClient {
         logger.info("Calling push server to remove android, ID: {} - start", appId);
         final Response response = postObjectImpl("/admin/app/android/remove", new ObjectRequest<>(request));
         logger.info("Calling push server to remove android, ID: {} - finish", appId);
+        return response;
+    }
+
+    /**
+     * Update Huawei details for an application credentials entity.
+     *
+     * @param request Update Huawei request.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response updateHuawei(final UpdateHuaweiRequest request) throws PushServerClientException {
+        logger.info("Calling push server to update Huawei, ID: {} - start", request.getAppId());
+        final Response response = putObjectImpl("/admin/app/huawei/update", new ObjectRequest<>(request));
+        logger.info("Calling push server to update Huawei, ID: {} - finish", request.getAppId());
+        return response;
+    }
+
+    /**
+     * Remove Huawei record from an application credentials entity.
+     *
+     * @param appId Application credentials entity ID.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response removeHuawei(String appId) throws PushServerClientException {
+        final RemoveHuaweiRequest request = new RemoveHuaweiRequest(appId);
+        logger.info("Calling push server to remove Huawei, ID: {} - start", appId);
+        final Response response = postObjectImpl("/admin/app/huawei/remove", new ObjectRequest<>(request));
+        logger.info("Calling push server to remove Huawei, ID: {} - finish", appId);
         return response;
     }
 

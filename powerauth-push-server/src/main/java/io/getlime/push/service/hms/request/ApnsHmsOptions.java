@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Wultra s.r.o.
+ * Copyright 2024 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,34 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package io.getlime.push.model.enumeration;
+package io.getlime.push.service.hms.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 /**
- * Enum representing mobile platforms.
+ * HMS (Huawei Mobile Services) json mapping object.
  *
- * @author Petr Dvorak, petr@wultra.com
+ * @author Lubos Racansky, lubos.racansky@wultra.com
  */
-public enum MobilePlatform {
+@Getter
+@SuperBuilder
+@Jacksonized
+public class ApnsHmsOptions {
 
-    /**
-     * iOS Platform.
-     */
-    @JsonProperty("ios")
-    IOS,
-
-    /**
-     * Android Platform.
-     */
-    @JsonProperty("android")
-    ANDROID,
-
-    /**
-     * Huawei Platform.
-     */
-    @JsonProperty("huawei")
-    HUAWEI
+    @JsonProperty("target_user_type")
+    private final Integer targetUserType;
 
 }

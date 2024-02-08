@@ -32,6 +32,7 @@ import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
 import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
 import io.getlime.push.service.fcm.FcmClient;
+import io.getlime.push.service.hms.HmsClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,6 +142,15 @@ public class PushMessageSenderService {
                         final String token = device.getPushToken();
                         final PushMessageSendResult.PlatformResult platformResult = sendResult.getAndroid();
                         pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
+                    } else if (platform == Platform.HUAWEI) {
+                        if (pushClient.getHmsClient() == null) {
+                            logger.error("Push message cannot be sent to HMS because HMS is not configured in push server.");
+                            arriveAndDeregisterPhaserForMode(phaser, mode);
+                            continue;
+                        }
+                        final String token = device.getPushToken();
+                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getHuawei();
+                        pushSendingWorker.sendMessageToHuawei(pushClient.getHmsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
                     }
                 }
             }
@@ -225,6 +235,8 @@ public class PushMessageSenderService {
                     pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getIosBundle(), createPushSendingCallback(token, pushMessageObject, pushClient));
             case ANDROID ->
                     pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
+            case HUAWEI ->
+                    pushSendingWorker.sendMessageToHuawei(pushClient.getHmsClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
         }
     }
 
@@ -261,7 +273,7 @@ public class PushMessageSenderService {
         }
     }
 
-    // Prepare and cache APNS and FCM clients for provided app
+    // Prepare and cache APNS, FCM, and HMS clients for provided app
     private AppRelatedPushClient prepareClients(String appId) throws PushServerException {
         synchronized (this) {
             AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
@@ -276,9 +288,13 @@ public class PushMessageSenderService {
                     final FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
                     pushClient.setFcmClient(fcmClient);
                 }
+                if (credentials.getHmsClientId() != null) {
+                    final HmsClient hmsClient = pushSendingWorker.prepareHmsClient(credentials);
+                    pushClient.setHmsClient(hmsClient);
+                }
                 pushClient.setAppCredentials(credentials);
                 appRelatedPushClientMap.put(appId, pushClient);
-                logger.info("Creating APNS and FCM clients for app {}", appId);
+                logger.info("Creating APNS, FCM, and HMS clients for app {}", appId);
             }
             return pushClient;
         }
