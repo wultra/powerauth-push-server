@@ -43,6 +43,7 @@ import io.getlime.push.service.fcm.model.FcmSuccessResponse;
 import io.getlime.push.service.hms.HmsClient;
 import io.getlime.push.service.hms.HmsSendResponse;
 import io.getlime.push.service.hms.request.AndroidNotification.Importance;
+import io.getlime.push.service.hms.request.ClickAction;
 import io.getlime.push.util.CaCertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -348,7 +349,10 @@ public class PushSendingWorker {
                 .bodyLocKey(pushMessageBody.getBodyLocKey())
                 .icon(pushMessageBody.getIcon())
                 .sound(pushMessageBody.getSound())
-                .tag(pushMessageBody.getCategory());
+                .tag(pushMessageBody.getCategory())
+                .clickAction(ClickAction.builder()
+                        .type(ClickAction.TYPE_START_APP)
+                        .build());
 
         if (pushMessageBody.getTitleLocArgs() != null) {
             notificationBuilder.titleLocArgs(List.of(pushMessageBody.getTitleLocArgs()));

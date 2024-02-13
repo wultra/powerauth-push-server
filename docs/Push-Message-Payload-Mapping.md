@@ -1,6 +1,7 @@
 # Push Message Payload Mapping
 
-The push server provides a convenient wrapper on top of the push messages sent to various platforms (APNS, FCM). This chapter describes what fields of the abstract push message are mapped to particular fields of APNS or FCM payload.
+The push server provides a convenient wrapper on top of the push messages sent to various platforms (APNS, FCM, HMS).
+This chapter describes what fields of the abstract push message are mapped to particular fields of APNS, FCM, or HMS payload.
 
 ## Abstract Push Message Object
 
@@ -82,3 +83,26 @@ For the documentation of the FCM payload reference, please read the official Goo
 ### Silent Messages
 
 In case a push message is marked with the `silent` flag, we do not add attributes that trigger visible push notifications (attributes with `notification.*` path), even if they are present in the abstract push message object.
+
+
+## HMS Mapping
+
+Attributes of the abstract push message object are mapped to HMS payload in following way:
+
+| Abstract Message Attribute | HMS Mapped Attributes         | Type                       | Description                                                                                                        |
+|----------------------------|-------------------------------|----------------------------|--------------------------------------------------------------------------------------------------------------------|
+| `title`                    | `notification.title`          |                            |                                                                                                                    |
+| `titleLocKey`              | `notification.title_loc_key`  |                            |                                                                                                                    |
+| `titleLocArgs`             | `notification.title_loc_args` |                            |                                                                                                                    |
+| `body`                     | `notification.body`           |                            |                                                                                                                    |
+| `bodyLocKey`               | `notification.body_loc_key`   |                            |                                                                                                                    |
+| `bodyLocArgs`              | `notification.body_loc_args`  |                            |                                                                                                                    |
+| `badge`                    | _ignored_                     |                            |                                                                                                                    |
+| `category`                 | `notification.tag`            |                            |                                                                                                                    |
+| `sound`                    | `notification.sound`          |                            |                                                                                                                    |
+| `icon`                     | `notification.icon`           |                            |                                                                                                                    |
+| `collapseKey`              | `collapse_key`                | String containing Integer  | Mode for the Push Kit server to cache messages sent to an offline device. `-1` (default): All messages are cached. |
+| `validUntil`               | _ignored_                     |                            |                                                                                                                    |
+| `extras`                   | `data`                        |                            |                                                                                                                    |
+
+For details, see [Huawei documentation](https://developer.huawei.com/consumer/en/doc/HMSCore-References/https-send-api-0000001050986197).

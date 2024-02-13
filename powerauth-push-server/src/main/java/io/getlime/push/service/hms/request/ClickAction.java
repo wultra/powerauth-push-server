@@ -30,6 +30,11 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class ClickAction {
 
+    /**
+     * Tap to start the app.
+     */
+    public static final Integer TYPE_START_APP = 3;
+
     private final Integer type;
 
     private final String intent;
