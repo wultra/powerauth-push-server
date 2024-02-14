@@ -45,6 +45,7 @@ import io.getlime.push.service.hms.HmsSendResponse;
 import io.getlime.push.service.hms.request.AndroidNotification.Importance;
 import io.getlime.push.service.hms.request.ClickAction;
 import io.getlime.push.util.CaCertUtil;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -333,7 +334,7 @@ public class PushSendingWorker {
      */
     private io.getlime.push.service.hms.request.Message buildHmsMessage(final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken) throws PushServerException {
         final var androidConfigBuilder = io.getlime.push.service.hms.request.AndroidConfig.builder()
-                .collapseKey(Integer.valueOf(pushMessageBody.getCollapseKey()));
+                .collapseKey(NumberUtils.createInteger(pushMessageBody.getCollapseKey()));
 
         calculateTtl(pushMessageBody.getValidUntil())
                 .map(Object::toString)
