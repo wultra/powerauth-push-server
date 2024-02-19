@@ -19,16 +19,17 @@ Value `false` represents the production environment.
 
 ## Application Configuration
 
-The host may be overridden per application in the database table [push_app_credentials.ios_environment](./Push-Server-Database#push-service-credentials-table).
+The host may be overridden per application.
 
-You may use the following values in the column `ios_environment`:
+You may use the following values in the attribute `environment` via REST API [PUT /admin/app/ios/update](./Push-Server-API#update-ios-configuration):
 
 - `null` - environment is decided by the configuration of server property `powerauth.push.service.apns.useDevelopment`
 - `development` - use APNs development environment
 - `production` - use APNs production environment
 
-It is possible to set this value via REST API [PUT /admin/app/ios/update](./Push-Server-API#update-ios-configuration) in the attribute `environment`.
 Or see `curl` command example at [Update APNs Configuration](./Push-Server-Administration#update-apns-configuration).
+
+The value is stored in the database [push_app_credentials.ios_environment](./Push-Server-Database#push-service-credentials-table).
 
 
 ## Application Logs
