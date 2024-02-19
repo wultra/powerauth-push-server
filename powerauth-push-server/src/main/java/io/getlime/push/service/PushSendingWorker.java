@@ -412,16 +412,14 @@ public class PushSendingWorker {
     /**
      * Prepare and connect APNs client.
      *
-     * @param teamId APNs team ID.
-     * @param keyId APNs key ID.
-     * @param apnsPrivateKey Bytes of the APNs private key (contents of the *.p8 file).
-     * @param environment APNs environment. The "development" or "production" values can be used to override global
-     *                    settings. If "null" or unknown value is passed, the global configuration is used.
+     * @param credentials Application Credentials.
      * @return New instance of APNs client.
-     * @throws PushServerException In case an error occurs (private key is invalid, unable to connect
-     *   to APNs service due to SSL issue, ...).
+     * @throws PushServerException In case an error occurs (private key is invalid, unable to connect to APNs service due to SSL issue, ...).
+     * @implSpec APNS environment {@code development} or {@code production} values can be used to override global settings.
+     * If {@code null} or unknown value is passed, the global configuration is used.
      */
-    ApnsClient prepareApnsClient(String teamId, String keyId, byte[] apnsPrivateKey, String environment) throws PushServerException {
+    ApnsClient prepareApnsClient(final AppCredentialsEntity credentials) throws PushServerException {
+        final String environment = credentials.getIosEnvironment();
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder()
                 .setProxyHandlerFactory(apnsClientProxy())
                 .setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections())
@@ -429,28 +427,33 @@ public class PushSendingWorker {
                 .setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()))
                 .setTrustedServerCertificateChain(caCertUtil.allCerts());
 
+        final String appId = credentials.getAppId();
         // Determine the APNs environment by looking at per-app config first and if no recognized value is present,
         // use the default configuration. Note that "equalsIgnoreCase" optimizes for null parameter, so the first two
         // if-else branches are performed quickly (we do not need to worry about the fact that "null" will likely be
         // the most common value there).
         if ("development".equalsIgnoreCase(environment)) {
-            logger.info("Using APNs development host.");
+            logger.info("Using APNs development host, application ID: {}", appId);
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
         } else if ("production".equalsIgnoreCase(environment)) {
-            logger.info("Using APNs production host.");
+            logger.info("Using APNs production host, application ID: {}", appId);
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
         } else {
             if (environment != null) {
-                logger.warn("Invalid APNS host environment specified: \"{}\". Use \"development\" or \"production\".", environment);
+                logger.warn("Invalid APNS host environment specified: \"{}\". Use \"development\" or \"production\", application ID: {}", environment, appId);
             }
             if (pushServiceConfiguration.isApnsUseDevelopment()) {
-                logger.info("Using APNs development host by applying the global push server configuration.");
+                logger.info("Using APNs development host by applying the global push server configuration, application ID: {}", appId);
                 apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
             } else {
-                logger.info("Using APNs production host by applying the global push server configuration.");
+                logger.info("Using APNs production host by applying the global push server configuration, application ID: {}", appId);
                 apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
             }
         }
+
+        final String teamId = credentials.getIosTeamId();
+        final String keyId = credentials.getIosKeyId();
+        final byte[] apnsPrivateKey = credentials.getIosPrivateKey();
 
         try {
             final ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);
