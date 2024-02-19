@@ -15,6 +15,8 @@
  */
 package io.getlime.push.model.request;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -61,7 +63,7 @@ public class UpdateIosRequest {
      * APNs environment.
      */
     @Schema(description = "APNs environment.")
-    private String environment;
+    private Environment environment;
 
     /**
      * Base64 encoded private key.
@@ -85,13 +87,35 @@ public class UpdateIosRequest {
      * @param environment The APNs environment (per-app config).
      * @param privateKeyBase64 Base64 encoded private key.
      */
-    public UpdateIosRequest(String appId, String bundle, String keyId, String teamId, String environment, String privateKeyBase64) {
+    public UpdateIosRequest(String appId, String bundle, String keyId, String teamId, Environment environment, String privateKeyBase64) {
         this.appId = appId;
         this.bundle = bundle;
         this.keyId = keyId;
         this.teamId = teamId;
         this.environment = environment;
         this.privateKeyBase64 = privateKeyBase64;
+    }
+
+    public enum Environment {
+        DEVELOPMENT("development"),
+
+        PRODUCTION("production");
+
+        private final String key;
+
+        Environment(final String key) {
+            this.key = key;
+        }
+
+        @JsonCreator
+        public static Environment fromString(String key) {
+            return key == null ? null : Environment.valueOf(key.toUpperCase());
+        }
+
+        @JsonValue
+        public String getKey() {
+            return key;
+        }
     }
 
 }

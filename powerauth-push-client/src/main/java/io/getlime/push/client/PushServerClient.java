@@ -535,7 +535,7 @@ public class PushServerClient {
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public Response updateIos(String appId, String bundle, String keyId, String teamId, String environment, byte[] privateKey) throws PushServerClientException {
+    public Response updateIos(String appId, String bundle, String keyId, String teamId, UpdateIosRequest.Environment environment, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
         final UpdateIosRequest request = new UpdateIosRequest(appId, bundle, keyId, teamId, environment, privateKeyBase64);
         logger.info("Calling push server to update iOS, ID: {} - start", appId);

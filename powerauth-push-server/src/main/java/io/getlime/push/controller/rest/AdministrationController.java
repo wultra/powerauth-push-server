@@ -226,11 +226,17 @@ public class AdministrationController {
         appCredentialsEntity.setIosTeamId(requestObject.getTeamId());
         appCredentialsEntity.setIosKeyId(requestObject.getKeyId());
         appCredentialsEntity.setIosBundle(requestObject.getBundle());
-        appCredentialsEntity.setIosEnvironment(requestObject.getEnvironment());
+        appCredentialsEntity.setIosEnvironment(convert(requestObject.getEnvironment()));
         appCredentialsRepository.save(appCredentialsEntity);
         appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
         logger.info("The updateIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
+    }
+
+    private static String convert(final UpdateIosRequest.Environment environment) {
+        return Optional.ofNullable(environment)
+                .map(UpdateIosRequest.Environment::getKey)
+                .orElse(null);
     }
 
     /**
