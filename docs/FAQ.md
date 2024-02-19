@@ -6,7 +6,7 @@
 When iOS notifications do not work, double-check APNS configuration.
 Mainly the host, the key, and the bundle.
 
-APNs expose two hosts, production `api.push.apple.com` and development `api.sandbox.push.apple.com`.
+APNs expose two hosts, production and development.
 
 The typical misconfiguration is the usage of the dev key or the dev bundle with the production host or vice versa.
 
