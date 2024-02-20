@@ -25,6 +25,7 @@ import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.entity.*;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.enumeration.Mode;
 import io.getlime.push.model.request.*;
@@ -535,7 +536,7 @@ public class PushServerClient {
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public Response updateIos(String appId, String bundle, String keyId, String teamId, UpdateIosRequest.Environment environment, byte[] privateKey) throws PushServerClientException {
+    public Response updateIos(String appId, String bundle, String keyId, String teamId, ApnsEnvironment environment, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
         final UpdateIosRequest request = new UpdateIosRequest(appId, bundle, keyId, teamId, environment, privateKeyBase64);
         logger.info("Calling push server to update iOS, ID: {} - start", appId);

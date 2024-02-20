@@ -17,6 +17,7 @@ package io.getlime.push.model.request;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -55,7 +56,7 @@ class UpdateIosRequestTest {
 
     @ParameterizedTest
     @CsvSource({"development,DEVELOPMENT", "DEVELOPMENT,DEVELOPMENT", "production,PRODUCTION", "PRODUCTION,PRODUCTION"})
-    void testEnvironment(final String jsonParam, final UpdateIosRequest.Environment expected) throws Exception {
+    void testEnvironment(final String jsonParam, final ApnsEnvironment expected) throws Exception {
         final String json = """
                 {"environment":"%s"}
                 """.formatted(jsonParam);

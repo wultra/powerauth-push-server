@@ -16,6 +16,7 @@
 package io.getlime.push.model.response;
 
 import io.getlime.push.model.entity.PushServerApplication;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import lombok.Data;
 
 /**
@@ -49,7 +50,7 @@ public class GetApplicationDetailResponse {
     /**
      * APNs environment.
      */
-    private String iosEnvironment;
+    private ApnsEnvironment iosEnvironment;
 
     /**
      * Android project ID record.

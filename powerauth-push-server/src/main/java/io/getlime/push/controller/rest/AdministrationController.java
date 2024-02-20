@@ -23,6 +23,7 @@ import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushServerApplication;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.request.*;
 import io.getlime.push.model.response.CreateApplicationResponse;
 import io.getlime.push.model.response.GetApplicationDetailResponse;
@@ -158,7 +159,7 @@ public class AdministrationController {
             response.setIosBundle(appCredentialsEntity.getIosBundle());
             response.setIosKeyId(appCredentialsEntity.getIosKeyId());
             response.setIosTeamId(appCredentialsEntity.getIosTeamId());
-            response.setIosEnvironment(appCredentialsEntity.getIosEnvironment());
+            response.setIosEnvironment(ApnsEnvironment.fromString(appCredentialsEntity.getIosEnvironment()));
         }
         if (requestObject.isIncludeAndroid()) {
             response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
@@ -233,9 +234,9 @@ public class AdministrationController {
         return new Response();
     }
 
-    private static String convert(final UpdateIosRequest.Environment environment) {
+    private static String convert(final ApnsEnvironment environment) {
         return Optional.ofNullable(environment)
-                .map(UpdateIosRequest.Environment::getKey)
+                .map(ApnsEnvironment::getKey)
                 .orElse(null);
     }
 
