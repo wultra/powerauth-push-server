@@ -281,7 +281,7 @@ public class PushMessageSenderService {
                 final AppCredentialsEntity credentials = getAppCredentials(appId);
                 pushClient = new AppRelatedPushClient();
                 if (credentials.getIosPrivateKey() != null) {
-                    final ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials.getIosTeamId(), credentials.getIosKeyId(), credentials.getIosPrivateKey(), credentials.getIosEnvironment());
+                    final ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials);
                     pushClient.setApnsClient(apnsClient);
                 }
                 if (credentials.getAndroidPrivateKey() != null) {
