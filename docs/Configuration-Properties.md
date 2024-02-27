@@ -79,3 +79,8 @@ The Push Server uses the following public configuration properties:
 | `powerauth.service.correlation-header.name` | `X-Correlation-ID` | Correlation header name |
 | `powerauth.service.correlation-header.value.validation-regexp` | `[a-zA-Z0-9\\-]{8,1024}` | Regular expression for correlation header value validation |
 | `logging.pattern.console` | [See application.properties](https://github.com/wultra/powerauth-push-server/blob/develop/powerauth-push-server/src/main/resources/application.properties#L105) | Logging pattern for console which includes the correlation header value |
+
+## Monitoring and Observability
+
+The WAR file includes the `micrometer-registry-prometheus` dependency.
+Discuss its configuration with the [Spring Boot documentation](https://docs.spring.io/spring-boot/docs/2.7.18/reference/html/actuator.html#actuator.metrics).
