@@ -115,8 +115,8 @@ public class CaCertUtil {
 
     private X509Certificate certificateFromPem(String pem) throws CertificateException {
         final byte[] decoded = Base64.getDecoder().decode(pem
-                .replaceAll(BEGIN_CERT, "")
-                .replaceAll(END_CERT, "")
+                .replace(BEGIN_CERT, "")
+                .replace(END_CERT, "")
                 .replaceAll("\\s", "")
         );
         return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(decoded));
