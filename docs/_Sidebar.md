@@ -22,6 +22,8 @@
 
 [Push Server Administration](./Push-Server-Administration.md)
 
+[FAQ](./FAQ.md)
+
 **Technical Topics**
 
 [Mapping Abstract Payload to APNS/FCM/HMS](./Push-Message-Payload-Mapping.md)
