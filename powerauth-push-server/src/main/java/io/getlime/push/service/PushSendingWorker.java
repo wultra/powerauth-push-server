@@ -188,7 +188,7 @@ public class PushSendingWorker {
                 final MessagingErrorCode errorCode = fcmConverter.convertExceptionToErrorCode(restClientException);
                 logger.warn("FCM server returned error response: {}.", (restClientException).getResponse());
                 switch (errorCode) {
-                    case UNREGISTERED -> {
+                    case UNREGISTERED, INVALID_ARGUMENT -> {
                         logger.info("Push message rejected by FCM gateway, device registration for token: {} is invalid and will be removed. Error: {}", pushToken, errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                         return;
@@ -200,7 +200,7 @@ public class PushSendingWorker {
                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
                         return;
                     }
-                    case SENDER_ID_MISMATCH, THIRD_PARTY_AUTH_ERROR, INVALID_ARGUMENT -> {
+                    case SENDER_ID_MISMATCH, THIRD_PARTY_AUTH_ERROR-> {
                         logger.warn("Push message rejected by FCM gateway. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         return;
