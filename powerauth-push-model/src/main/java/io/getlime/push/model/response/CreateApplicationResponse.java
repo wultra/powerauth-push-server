@@ -15,13 +15,21 @@
  */
 package io.getlime.push.model.response;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Response after creating Push Server application credentials entity based on existing PowerAuth server application.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
+@Getter
+@Setter
 public class CreateApplicationResponse {
 
+    /**
+     * Application ID.
+     */
     private String appId;
 
     /**
@@ -38,19 +46,4 @@ public class CreateApplicationResponse {
         this.appId = appId;
     }
 
-    /**
-     * Get application credentials entity ID.
-     * @return Application credentials entity ID.
-     */
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set application credentials entity ID.
-     * @param appId Application credentials entity ID.
-     */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
 }

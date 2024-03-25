@@ -15,6 +15,10 @@
  */
 package io.getlime.push.repository.model.aggregate;
 
+import io.getlime.push.repository.model.Platform;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Object used in sending campaigns, as an aggregate object for storing information about
  * user, device (including platform), app and campaign.
@@ -25,14 +29,43 @@ package io.getlime.push.repository.model.aggregate;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Getter
+@Setter
 public class UserDevice {
 
+    /**
+     * User ID.
+     */
     private String userId;
+
+    /**
+     * Device ID.
+     */
     private Long deviceId;
+
+    /**
+     * Activation ID.
+     */
     private String activationId;
+
+    /**
+     * Campaign ID.
+     */
     private Long campaignId;
+
+    /**
+     * Application ID.
+     */
     private Long appId;
-    private String platform;
+
+    /**
+     * Platform.
+     */
+    private Platform platform;
+
+    /**
+     * Push token.
+     */
     private String token;
 
     /**
@@ -45,125 +78,13 @@ public class UserDevice {
      * @param platform Platform.
      * @param token Push token.
      */
-    public UserDevice(String userId, Long deviceId, String activationId, Long campaignId, Long appId, String platform, String token) {
+    public UserDevice(String userId, Long deviceId, String activationId, Long campaignId, Long appId, Platform platform, String token) {
         this.userId = userId;
         this.deviceId = deviceId;
         this.activationId = activationId;
         this.campaignId = campaignId;
         this.appId = appId;
         this.platform = platform;
-        this.token = token;
-    }
-
-    /**
-     * Get user ID.
-     * @return User ID.
-     */
-    public String getUserId() {
-        return userId;
-    }
-
-    /**
-     * Set user ID.
-     * @param userId User ID.
-     */
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * Get device ID.
-     * @return Device ID.
-     */
-    public Long getDeviceId() {
-        return deviceId;
-    }
-
-    /**
-     * Set device ID.
-     * @param deviceId Device ID.
-     */
-    public void setDeviceId(Long deviceId) {
-        this.deviceId = deviceId;
-    }
-
-    /**
-     * Get activation ID.
-     * @return Activation ID.
-     */
-    public String getActivationId() {
-        return activationId;
-    }
-
-    /**
-     * Set activation ID.
-     * @param activationId Activation ID.
-     */
-    public void setActivationId(String activationId) {
-        this.activationId = activationId;
-    }
-
-    /**
-     * Get campaign ID.
-     * @return Campaign ID.
-     */
-    public Long getCampaignId() {
-        return campaignId;
-    }
-
-    /**
-     * Set campaign ID.
-     * @param campaignId Campaign ID.
-     */
-    public void setCampaignId(Long campaignId) {
-        this.campaignId = campaignId;
-    }
-
-    /**
-     * Get app ID.
-     * @return App ID.
-     */
-    public Long getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set app ID.
-     * @param appId App ID.
-     */
-    public void setAppId(Long appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * Get platform.
-     * @return Platform.
-     */
-    public String getPlatform() {
-        return platform;
-    }
-
-    /**
-     * Set platform.
-     * @param platform Platform.
-     */
-    public void setPlatform(String platform) {
-        this.platform = platform;
-    }
-
-    /**
-     * Get push token.
-     * @return Push token.
-     */
-    public String getToken() {
-        return token;
-    }
-
-    /**
-     * Set push token.
-     * @param token Push token.
-     */
-    public void setToken(String token) {
         this.token = token;
     }
 

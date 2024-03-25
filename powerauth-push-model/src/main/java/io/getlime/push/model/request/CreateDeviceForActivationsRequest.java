@@ -15,6 +15,15 @@
  */
 package io.getlime.push.model.request;
 
+import io.getlime.push.model.enumeration.MobilePlatform;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,67 +32,38 @@ import java.util.List;
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
+@Getter
+@Setter
 public class CreateDeviceForActivationsRequest {
 
+    /**
+     * Application ID.
+     */
+    @NotBlank
+    @Schema(description = "Application ID.")
     private String appId;
+
+    /**
+     * The push token is the value received from APNS, FCM, or HMS services without any modification.
+     */
+    @NotBlank
+    @Schema(description = "The push token is the value received from APNS, FCM, or HMS services without any modification.")
     private String token;
-    private String platform;
-    private final List<String> activationIds = new ArrayList<>();
 
     /**
-     * Get app ID associated with given device registration.
-     * @return App ID.
+     * The platform.
      */
-    public String getAppId() {
-        return appId;
-    }
+    @NotNull
+    private MobilePlatform platform;
 
     /**
-     * Set app ID associated with given device registration.
-     * @param appId App ID.
+     * Activation IDs.
      */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * Get APNs / FCM push token.
-     * @return Push token value.
-     */
-    public String getToken() {
-        return token;
-    }
-
-    /**
-     * Set APNs / FCM push token.
-     * @param token Push token value.
-     */
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    /**
-     * Get the platform name, either "ios" or "android".
-     * @return Platform name, "ios" or "android".
-     */
-    public String getPlatform() {
-        return platform;
-    }
-
-    /**
-     * Set the platform name.
-     * @param platform Platform name.
-     */
-    public void setPlatform(String platform) {
-        this.platform = platform;
-    }
-
-    /**
-     * Get PowerAuth activation IDs associated with given device registration.
-     * @return Activation ID.
-     */
-    public List<String> getActivationIds() {
-        return activationIds;
-    }
+    @NotEmpty
+    @ArraySchema(
+            arraySchema = @Schema(description = "Activation IDs."),
+            schema = @Schema(description = "Activation ID.", format = "UUID (level 4)", maxLength = 37, example = "099e5e30-47b1-41c7-b49b-3bf28e811fca")
+    )
+    private final List<@NotBlank String> activationIds = new ArrayList<>();
 
 }

@@ -17,82 +17,37 @@
 package io.getlime.push.model.response;
 
 import io.getlime.push.model.entity.PushMessageBody;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Response object used for getting a campaign
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
+@Getter
+@Setter
 public class CampaignResponse {
 
+    /**
+     * Campaign ID.
+     */
     private Long id;
+
+    /**
+     * Application ID.
+     */
     private String appId;
+
+    /**
+     * If the message is sent.
+     */
     private boolean sent;
+
+    /**
+     * Push message body.
+     */
     private PushMessageBody message;
-
-    /**
-     * Get campaign ID.
-     * @return Campaign ID.
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Set campaign ID.
-     * @param id Campaign ID.
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * Get app ID.
-     * @return App ID.
-     */
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set app ID.
-     * @param appId App ID.
-     */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * Check if the message is sent.
-     * @return True if sent, false otherwise.
-     */
-    public boolean isSent() {
-        return sent;
-    }
-
-    /**
-     * Set if the message was sent.
-     * @param sent True if sent, false otherwise.
-     */
-    public void setSent(boolean sent) {
-        this.sent = sent;
-    }
-
-    /**
-     * Get push message body.
-     * @return Push message body.
-     */
-    public PushMessageBody getMessage() {
-        return message;
-    }
-
-    /**
-     * Set push message body.
-     * @param message Push message body.
-     */
-    public void setMessage(PushMessageBody message) {
-        this.message = message;
-    }
 
     @Override
     public boolean equals(Object o) {

@@ -49,12 +49,6 @@ public class UpdateIosRequestValidator {
         if (request.getPrivateKeyBase64() == null || request.getPrivateKeyBase64().isEmpty()) {
             return "Private key must not be empty.";
         }
-        if (request.getEnvironment() != null) { // non-null value present (null is legitimate value)
-            final String env = request.getEnvironment();
-            if (!env.equalsIgnoreCase("development") && !env.equalsIgnoreCase("production")) {
-                return "Environment must be either \"null\" (inherits settings from global server configuration), or one of \"development\" or \"production\" values.";
-            }
-        }
         return null;
     }
 

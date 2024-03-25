@@ -15,45 +15,32 @@
  */
 package io.getlime.push.model.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Class representing request object responsible for device registration removal.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Getter
+@Setter
 public class DeleteDeviceRequest {
 
+    /**
+     * Application ID.
+     */
+    @NotBlank
+    @Schema(description = "Application ID.")
     private String appId;
+
+    /**
+     * Push token value.
+     */
+    @NotBlank
+    @Schema(description = "Push token value.")
     private String token;
 
-    /**
-     * Get app ID.
-     * @return App ID.
-     */
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set app ID.
-     * @param appId App ID.
-     */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * Get push token value.
-     * @return Push token.
-     */
-    public String getToken() {
-        return token;
-    }
-
-    /**
-     * Set push token value.
-     * @param token Push token.
-     */
-    public void setToken(String token) {
-        this.token = token;
-    }
 }

@@ -16,9 +16,13 @@
 
 package io.getlime.push.configuration;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
+import java.time.Duration;
 
 /**
  * Configuration class for push server properties.
@@ -27,69 +31,176 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConfigurationProperties("ext")
+@Getter
+@Setter
 public class PushServiceConfiguration {
 
+    /**
+     * Push server name.
+     */
     @Value("${powerauth.push.service.applicationName}")
     private String pushServerName;
 
+    /**
+     * Push server display name.
+     */
     @Value("${powerauth.push.service.applicationDisplayName}")
     private String pushServerDisplayName;
 
+    /**
+     * Push server environment.
+     */
     @Value("${powerauth.push.service.applicationEnvironment}")
     private String pushServerEnvironment;
 
     // APNs Configuration
 
+    /**
+     * Flag indicating if a development or production environment should be used for APNs.
+     * {@code true} in case APNs should use DEV environment, {@code false} for PROD.
+     */
     @Value("${powerauth.push.service.apns.useDevelopment}")
     private boolean apnsUseDevelopment;
 
+    /**
+     * Whether proxy should be used for APNs.
+     */
     @Value("${powerauth.push.service.apns.proxy.enabled}")
     private boolean apnsProxyEnabled;
 
+    /**
+     * APNs proxy host.
+     */
     @Value("${powerauth.push.service.apns.proxy.host}")
     private String apnsProxyHost;
 
+    /**
+     * APNs proxy port.
+     */
     @Value("${powerauth.push.service.apns.proxy.port}")
     private int apnsProxyPort;
 
+    /**
+     * APNs proxy username.
+     */
     @Value("${powerauth.push.service.apns.proxy.username}")
     private String apnsProxyUsername;
 
+    /**
+     * APNs proxy password.
+     */
     @Value("${powerauth.push.service.apns.proxy.password}")
     private String apnsProxyPassword;
 
     // FCM Configuration
 
+    /**
+     * Flag indicating if proxy is enabled for FCM communication.
+     */
     @Value("${powerauth.push.service.fcm.proxy.enabled}")
     private boolean fcmProxyEnabled;
 
+    /**
+     * FCM proxy URL.
+     */
     @Value("${powerauth.push.service.fcm.proxy.host}")
     private String fcmProxyHost;
 
+    /**
+     * FCM proxy port.
+     */
     @Value("${powerauth.push.service.fcm.proxy.port}")
     private int fcmProxyPort;
 
+    /**
+     * FCM proxy username.
+     */
     @Value("${powerauth.push.service.fcm.proxy.username}")
     private String fcmProxyUsername;
 
+    /**
+     * FCM proxy password.
+     */
     @Value("${powerauth.push.service.fcm.proxy.password}")
     private String fcmProxyPassword;
 
+    /**
+     * Get status if notification is set to be sent only through data map
+     * True in case FCM notification should always be a "data" notification, even for messages with title and message, false otherwise.
+     */
     @Value("${powerauth.push.service.fcm.dataNotificationOnly}")
     private boolean fcmDataNotificationOnly;
 
+    /**
+     * FCM send message endpoint URL.
+     */
     @Value("${powerauth.push.service.fcm.sendMessageUrl}")
     private String fcmSendMessageUrl;
 
-    // Campaign Configuration
+    /**
+     * Flag indicating if proxy is enabled for HMS communication.
+     */
+    @Value("${powerauth.push.service.hms.proxy.enabled}")
+    private boolean hmsProxyEnabled;
+
+    /**
+     * HMS proxy URL.
+     */
+    @Value("${powerauth.push.service.hms.proxy.host}")
+    private String hmsProxyHost;
+
+    /**
+     * HMS proxy port.
+     */
+    @Value("${powerauth.push.service.hms.proxy.port}")
+    private int hmsProxyPort;
+
+    /**
+     * HMS proxy username.
+     */
+    @Value("${powerauth.push.service.hms.proxy.username}")
+    private String hmsProxyUsername;
+
+    /**
+     * HMS proxy password.
+     */
+    @Value("${powerauth.push.service.hms.proxy.password}")
+    private String hmsProxyPassword;
+
+    /**
+     * Get status if notification is set to be sent only through data map
+     * True in case HMS notification should always be a "data" notification, even for messages with title and message, false otherwise.
+     */
+    @Value("${powerauth.push.service.hms.dataNotificationOnly}")
+    private boolean hmsDataNotificationOnly;
+
+    /**
+     * HMS send message endpoint URL.
+     */
+    @Value("${powerauth.push.service.hms.sendMessageUrl}")
+    private String hmsSendMessageUrl;
+
+    /**
+     * HMS OAuth service URL to obtain an access token.
+     */
+    @Value("${powerauth.push.service.hms.tokenUrl}")
+    private String hmsTokenUrl;
+
+    /**
+     * The batch size used while sending a push campaign.
+     */
     @Value("${powerauth.push.service.campaign.batchSize}")
     private int campaignBatchSize;
 
-    // Whether to store messages
+    /**
+     * Whether to store messages.
+     */
     @Value("${powerauth.push.service.message.storage.enabled}")
     private boolean messageStorageEnabled;
 
-    // Whether multiple activations are enabled per registered device
+    /**
+     *  Whether multiple activations are enabled per registered device.
+     */
     @Value("${powerauth.push.service.registration.multipleActivations.enabled}")
     private boolean registrationOfMultipleActivationsEnabled;
 
@@ -104,6 +215,24 @@ public class PushServiceConfiguration {
      */
     @Value("${powerauth.push.service.apns.connect.timeout}")
     private int apnsConnectTimeout;
+
+    /**
+     * HMS connect timeout.
+     */
+    @Value("${powerauth.push.service.hms.connect.timeout}")
+    private Duration hmsConnectTimeout;
+
+    /**
+     * HMS maximum duration allowed between each network-level read operations.
+     */
+    @Value("${powerauth.push.service.hms.response.timeout}")
+    private Duration hmsResponseTimeout;
+
+    /**
+     * HMS ConnectionProvider max idle time.
+     */
+    @Value("${powerauth.push.service.hms.max-idle-time}")
+    private Duration hmsMaxIdleTime;
 
     /**
      * APNS concurrent connections.
@@ -123,387 +252,4 @@ public class PushServiceConfiguration {
     @Value("${powerauth.push.java.cacerts.password}")
     private String javaCaCertificatesPassword;
 
-    /**
-     * Get push server name.
-     * @return Push server name.
-     */
-    public String getPushServerName() {
-        return pushServerName;
-    }
-
-    /**
-     * Set push server name.
-     * @param pushServerName Push server name.
-     */
-    public void setPushServerName(String pushServerName) {
-        this.pushServerName = pushServerName;
-    }
-
-    /**
-     * Get push server display name.
-     * @return Push server display name.
-     */
-    public String getPushServerDisplayName() {
-        return pushServerDisplayName;
-    }
-
-    /**
-     * Set push server display name.
-     * @param pushServerDisplayName Push server display name.
-     */
-    public void setPushServerDisplayName(String pushServerDisplayName) {
-        this.pushServerDisplayName = pushServerDisplayName;
-    }
-
-    /**
-     * Get push server environment.
-     * @return Push server environment.
-     */
-    public String getPushServerEnvironment() {
-        return pushServerEnvironment;
-    }
-
-    /**
-     * Set push server environment.
-     * @param pushServerEnvironment Push server environment.
-     */
-    public void setPushServerEnvironment(String pushServerEnvironment) {
-        this.pushServerEnvironment = pushServerEnvironment;
-    }
-
-    /**
-     * Flag indicating if a development or production environment should be used for APNs.
-     * @return True in case APNs should use DEV environment, false for PROD.
-     */
-    public boolean isApnsUseDevelopment() {
-        return apnsUseDevelopment;
-    }
-
-    /**
-     * Set if development environment should be used, instead of production.
-     * @param apnsUseDevelopment True in case APNs should use DEV environment, false for PROD.
-     */
-    public void setApnsUseDevelopment(boolean apnsUseDevelopment) {
-        this.apnsUseDevelopment = apnsUseDevelopment;
-    }
-
-    /**
-     * Flag indicating if proxy should be used for APNs.
-     * @return True if proxy should be used for APNs, false otherwise.
-     */
-    public boolean isApnsProxyEnabled() {
-        return apnsProxyEnabled;
-    }
-
-    /**
-     * Set if proxy should be used for APNs.
-     * @param apnsProxyEnabled True if proxy should be used for APNs, false otherwise.
-     */
-    public void setApnsProxyEnabled(boolean apnsProxyEnabled) {
-        this.apnsProxyEnabled = apnsProxyEnabled;
-    }
-
-    /**
-     * Get APNs proxy URL address.
-     * @return APNs proxy URL address.
-     */
-    public String getApnsProxyHost() {
-        return apnsProxyHost;
-    }
-
-    /**
-     * Set APNs proxy URL address.
-     * @param apnsProxyHost APNs proxy URL address.
-     */
-    public void setApnsProxyHost(String apnsProxyHost) {
-        this.apnsProxyHost = apnsProxyHost;
-    }
-
-    /**
-     * Get APNs proxy port.
-     * @return APNs proxy port.
-     */
-    public int getApnsProxyPort() {
-        return apnsProxyPort;
-    }
-
-    /**
-     * Set APNs proxy port.
-     * @param apnsProxyPort APNs proxy port.
-     */
-    public void setApnsProxyPort(int apnsProxyPort) {
-        this.apnsProxyPort = apnsProxyPort;
-    }
-
-    /**
-     * Get APNs proxy username.
-     * @return APNs proxy username.
-     */
-    public String getApnsProxyUsername() {
-        return apnsProxyUsername;
-    }
-
-    /**
-     * Set APNs proxy username.
-     * @param apnsProxyUsername APNs proxy username.
-     */
-    public void setApnsProxyUsername(String apnsProxyUsername) {
-        this.apnsProxyUsername = apnsProxyUsername;
-    }
-
-    /**
-     * Get APNs proxy password.
-     * @return APNs proxy password.
-     */
-    public String getApnsProxyPassword() {
-        return apnsProxyPassword;
-    }
-
-    /**
-     * Set APNs proxy password.
-     * @param apnsProxyPassword APNs proxy password.
-     */
-    public void setApnsProxyPassword(String apnsProxyPassword) {
-        this.apnsProxyPassword = apnsProxyPassword;
-    }
-
-    /**
-     * Flag indicating if proxy is enabled for FCM communication.
-     * @return True if FCM uses proxy, false otherwise.
-     */
-    public boolean isFcmProxyEnabled() {
-        return fcmProxyEnabled;
-    }
-
-    /**
-     * Set if proxy should be used for FCM communication.
-     * @param fcmProxyEnabled True if FCM uses proxy, false otherwise.
-     */
-    public void setFcmProxyEnabled(boolean fcmProxyEnabled) {
-        this.fcmProxyEnabled = fcmProxyEnabled;
-    }
-
-    /**
-     * Get FCM proxy URL.
-     * @return FCM proxy URL.
-     */
-    public String getFcmProxyHost() {
-        return fcmProxyHost;
-    }
-
-    /**
-     * Set FCM proxy URL.
-     * @param fcmProxyHost FCM proxy URL.
-     */
-    public void setFcmProxyHost(String fcmProxyHost) {
-        this.fcmProxyHost = fcmProxyHost;
-    }
-
-    /**
-     * Get FCM proxy port.
-     * @return FCM proxy port.
-     */
-    public int getFcmProxyPort() {
-        return fcmProxyPort;
-    }
-
-    /**
-     * Set FCM proxy port.
-     * @param fcmProxyPort FCM proxy port.
-     */
-    public void setFcmProxyPort(int fcmProxyPort) {
-        this.fcmProxyPort = fcmProxyPort;
-    }
-
-    /**
-     * Get FCM proxy username.
-     * @return FCM proxy username.
-     */
-    public String getFcmProxyUsername() {
-        return fcmProxyUsername;
-    }
-
-    /**
-     * Set FCM proxy username.
-     * @param fcmProxyUsername FCM proxy username.
-     */
-    public void setFcmProxyUsername(String fcmProxyUsername) {
-        this.fcmProxyUsername = fcmProxyUsername;
-    }
-
-    /**
-     * Get FCM proxy password.
-     * @return FCM proxy password.
-     */
-    public String getFcmProxyPassword() {
-        return fcmProxyPassword;
-    }
-
-    /**
-     * Set FCM proxy password.
-     * @param fcmProxyPassword FCM proxy password.
-     */
-    public void setFcmProxyPassword(String fcmProxyPassword) {
-        this.fcmProxyPassword = fcmProxyPassword;
-    }
-
-    /**
-     * Get status if notification is set to be sent only through data map
-     * @return True in case FCM notification should always be a "data" notification, even for messages with title and message, false otherwise.
-     */
-    public boolean isFcmDataNotificationOnly() {
-        return fcmDataNotificationOnly;
-    }
-
-    /**
-     * Set if notification should be send only through data map
-     * @param fcmDataNotificationOnly True in case FCM notification should always be a "data" notification, even for messages with title and message, false otherwise.
-     */
-    public void setFcmDataNotificationOnly(boolean fcmDataNotificationOnly) {
-        this.fcmDataNotificationOnly = fcmDataNotificationOnly;
-    }
-
-    /**
-     * Get FCM send message endpoint URL.
-     * @return FCM send message endpoint URL.
-     */
-    public String getFcmSendMessageUrl() {
-        return fcmSendMessageUrl;
-    }
-
-    /**
-     * Set FCM send message endpoint URL.
-     * @param fcmSendMessageUrl FCM send message endpoint URL.
-     */
-    public void setFcmSendMessageUrl(String fcmSendMessageUrl) {
-        this.fcmSendMessageUrl = fcmSendMessageUrl;
-    }
-
-    /**
-     * Get the batch size used while sending a push campaign.
-     * @return Batch size.
-     */
-    public int getCampaignBatchSize() {
-        return campaignBatchSize;
-    }
-
-    /**
-     * Set the batch size used while sending a push campaign.
-     * @param campaignBatchSize Batch size.
-     */
-    public void setCampaignBatchSize(int campaignBatchSize) {
-        this.campaignBatchSize = campaignBatchSize;
-    }
-
-    /**
-     * Get whether persistent message storage is enabled.
-     * @return Whether persistent message storage is enabled.
-     */
-    public boolean isMessageStorageEnabled() {
-        return messageStorageEnabled;
-    }
-
-    /**
-     * Set whether persistent message storage is enabled.
-     * @param messageStorageEnabled Whether persistent message storage is enabled.
-     */
-    public void setMessageStorageEnabled(boolean messageStorageEnabled) {
-        this.messageStorageEnabled = messageStorageEnabled;
-    }
-
-    /**
-     * Get whether multiple activations are enabled per registered device.
-     * @return Whether multiple activations are enabled per registered device.
-     */
-    public boolean isRegistrationOfMultipleActivationsEnabled() {
-        return registrationOfMultipleActivationsEnabled;
-    }
-
-    /**
-     * Set whether multiple activations are enabled per registered device.
-     * @param registrationOfMultipleActivationsEnabled Whether multiple activations are enabled per registered device.
-     */
-    public void setRegistrationOfMultipleActivationsEnabled(boolean registrationOfMultipleActivationsEnabled) {
-        this.registrationOfMultipleActivationsEnabled = registrationOfMultipleActivationsEnabled;
-    }
-
-    /**
-     * Get FCM connect timeout in milliseconds.
-     * @return FCM connect timeout.
-     */
-    public int getFcmConnectTimeout() {
-        return fcmConnectTimeout;
-    }
-
-    /**
-     * Set FCM connect timeout in milliseconds.
-     * @param fcmConnectTimeout FCM connect timeout.
-     */
-    public void setFcmConnectTimeout(int fcmConnectTimeout) {
-        this.fcmConnectTimeout = fcmConnectTimeout;
-    }
-
-    /**
-     * Get APNS connect timeout in milliseconds.
-     * @return APNS connect timeout.
-     */
-    public int getApnsConnectTimeout() {
-        return apnsConnectTimeout;
-    }
-
-    /**
-     * Set APNS connect timeout in milliseconds.
-     * @param apnsConnectTimeout APNS connect timeout.
-     */
-    public void setApnsConnectTimeout(int apnsConnectTimeout) {
-        this.apnsConnectTimeout = apnsConnectTimeout;
-    }
-
-    /**
-     * Get APNS concurrent connections.
-     * @return APNS concurrent connections.
-     */
-    public int getConcurrentConnections() {
-        return concurrentConnections;
-    }
-
-    /**
-     * Set APNS concurrent connections.
-     * @param concurrentConnections APNS concurrent connections.
-     */
-    public void setConcurrentConnections(int concurrentConnections) {
-        this.concurrentConnections = concurrentConnections;
-    }
-
-    /**
-     * Get idle ping interval.
-     * @return Idle ping interval.
-     */
-    public long getIdlePingInterval() {
-        return idlePingInterval;
-    }
-
-    /**
-     * Set idle ping interval.
-     * @param idlePingInterval Idle ping interval.
-     */
-    public void setIdlePingInterval(long idlePingInterval) {
-        this.idlePingInterval = idlePingInterval;
-    }
-
-    /**
-     * Get Java security CA certs file password.
-     * @return Java security CA certs file password.
-     */
-    public String getJavaCaCertificatesPassword() {
-        return javaCaCertificatesPassword;
-    }
-
-    /**
-     * Set Java security CA certs file password.
-     * @param javaCaCertificatesPassword Java security CA certs file password.
-     */
-    public void setJavaCaCertificatesPassword(String javaCaCertificatesPassword) {
-        this.javaCaCertificatesPassword = javaCaCertificatesPassword;
-    }
 }

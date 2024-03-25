@@ -19,6 +19,8 @@ package io.getlime.push.repository.model;
 import io.getlime.push.repository.converter.PushMessageStatusConverter;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -31,6 +33,8 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "push_message")
+@Getter
+@Setter
 public class PushMessageEntity implements Serializable {
 
     /**
@@ -133,147 +137,4 @@ public class PushMessageEntity implements Serializable {
     @Convert(converter = PushMessageStatusConverter.class)
     private Status status;
 
-    /**
-     * Get message ID.
-     * @return Message ID.
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Set message ID.
-     * @param id Message ID.
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * Get device ID.
-     * @return Device ID.
-     */
-    public Long getDeviceId() {
-        return deviceId;
-    }
-
-    /**
-     * Set device ID.
-     * @param deviceId Device ID.
-     */
-    public void setDeviceId(Long deviceId) {
-        this.deviceId = deviceId;
-    }
-
-    /**
-     * Get user ID.
-     * @return User ID.
-     */
-    public String getUserId() {
-        return userId;
-    }
-
-    /**
-     * Set user ID.
-     * @param userId User ID.
-     */
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * Get activation ID.
-     * @return Activation ID.
-     */
-    public String getActivationId() {
-        return activationId;
-    }
-
-    /**
-     * Set activation ID.
-     * @param activationId Activation ID.
-     */
-    public void setActivationId(String activationId) {
-        this.activationId = activationId;
-    }
-
-    /**
-     * Get info if the message is silent.
-     * @return True if the message is silent, false otherwise.
-     */
-    public Boolean getSilent() {
-        return silent;
-    }
-
-    /**
-     * Set info if the message is silent.
-     * @param silent True if the message is silent, false otherwise.
-     */
-    public void setSilent(Boolean silent) {
-        this.silent = silent;
-    }
-
-    /**
-     * Get info if the message is personal.
-     * @return True if the message is personal, false otherwise.
-     */
-    public Boolean getPersonal() {
-        return personal;
-    }
-
-    /**
-     * Set info if the message is personal.
-     * @param personal True if the message is personal, false otherwise.
-     */
-    public void setPersonal(Boolean personal) {
-        this.personal = personal;
-    }
-
-    /**
-     * Get message body.
-     * @return Message body.
-     */
-    public String getMessageBody() {
-        return messageBody;
-    }
-
-    /**
-     * Set message body.
-     * @param messageBody Message body.
-     */
-    public void setMessageBody(String messageBody) {
-        this.messageBody = messageBody;
-    }
-
-    /**
-     * Get timestamp created.
-     * @return Timestamp created.
-     */
-    public Date getTimestampCreated() {
-        return timestampCreated;
-    }
-
-    /**
-     * Set timestamp created.
-     * @param timestampCreated Timestamp created.
-     */
-    public void setTimestampCreated(Date timestampCreated) {
-        this.timestampCreated = timestampCreated;
-    }
-
-    /**
-     * Get status.
-     * @return Status.
-     */
-    public Status getStatus() {
-        return status;
-    }
-
-    /**
-     * Set status.
-     * @param status Status.
-     */
-    public void setStatus(Status status) {
-        this.status = status;
-    }
 }

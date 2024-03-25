@@ -17,6 +17,9 @@
 package io.getlime.push.repository.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -27,6 +30,8 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "push_campaign")
+@Getter
+@Setter
 public class PushCampaignEntity implements Serializable {
 
     /**
@@ -39,7 +44,7 @@ public class PushCampaignEntity implements Serializable {
     private Long id;
 
     /**
-     * App ID.
+     * App credentials.
      */
     @ManyToOne
     @JoinColumn(name = "app_id", referencedColumnName = "id", nullable = false, updatable = false)
@@ -75,115 +80,4 @@ public class PushCampaignEntity implements Serializable {
     @Column(name = "timestamp_completed")
     private Date timestampCompleted;
 
-    /**
-     * Get campaign ID.
-     * @return Campaign ID.
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Set campaign ID.
-     * @param id Campaign ID.
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * Get app ID.
-     * @return App ID.
-     */
-    public AppCredentialsEntity getAppCredentials() {
-        return appCredentials;
-    }
-
-    /**
-     * Set app credentials.
-     * @param appCredentials App credentials.
-     */
-    public void setAppCredentials(AppCredentialsEntity appCredentials) {
-        this.appCredentials = appCredentials;
-    }
-
-    /**
-     * Get message.
-     * @return Message.
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
-     * Set message.
-     * @param message Message.
-     */
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    /**
-     * Check if the campaign is sent.
-     * @return True if the campaign is set, false otherwise.
-     */
-    public boolean isSent() {
-        return sent;
-    }
-
-    /**
-     * Set if the campaign is set.
-     * @param sent True if the campaign is set, false otherwise.
-     */
-    public void setSent(boolean sent) {
-        this.sent = sent;
-    }
-
-    /**
-     * Get timestamp created.
-     * @return Timestamp created.
-     */
-    public Date getTimestampCreated() {
-        return timestampCreated;
-    }
-
-    /**
-     * Set timestamp created.
-     * @param timestampCreated Timestamp created.
-     */
-    public void setTimestampCreated(Date timestampCreated) {
-        this.timestampCreated = timestampCreated;
-    }
-
-    /**
-     * Get timestamp sent.
-     * @return Timestamp sent.
-     */
-    public Date getTimestampSent() {
-        return timestampSent;
-    }
-
-    /**
-     * Set timestamp sent.
-     * @param timestampSent Timestamp sent.
-     */
-    public void setTimestampSent(Date timestampSent) {
-        this.timestampSent = timestampSent;
-    }
-
-    /**
-     * Get timestamp completed.
-     * @return Timestamp completed.
-     */
-    public Date getTimestampCompleted() {
-        return timestampCompleted;
-    }
-
-    /**
-     * Set timestamp completed.
-     * @param timestampCompleted Timestamp completed.
-     */
-    public void setTimestampCompleted(Date timestampCompleted) {
-        this.timestampCompleted = timestampCompleted;
-    }
 }

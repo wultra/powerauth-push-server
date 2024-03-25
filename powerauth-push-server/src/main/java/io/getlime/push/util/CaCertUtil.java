@@ -17,17 +17,14 @@
 package io.getlime.push.util;
 
 import io.getlime.push.configuration.PushServiceConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -43,31 +40,24 @@ import java.util.List;
  * @author Petr Dvorak, petr@wultra.com
  */
 @Service
+@AllArgsConstructor
+@Slf4j
 public class CaCertUtil {
-
-    private static final Logger logger = LoggerFactory.getLogger(CaCertUtil.class);
 
     // Include those constants to remove dependency on X509Factory.BEGIN_CERT and X509Factory.END_CERT.
     private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
     private static final String END_CERT = "-----END CERTIFICATE-----";
 
-    private static final String[] embeddedCertificates = {
-            "cacert/GeoTrust_Global_CA.pem",
-            "cacert/AAACertificateServices.pem",
-            "cacert/COMODORSAAAACA.pem",
-            "cacert/USERTrustRSAAAACA.pem"
-    };
+    private static final List<String> EMBEDDED_CERTIFICATES = List.of(
+            "classpath:/cacert/GeoTrust_Global_CA.pem",
+            "classpath:/cacert/AAACertificateServices.pem",
+            "classpath:/cacert/COMODORSAAAACA.pem",
+            "classpath:/cacert/USERTrustRSAAAACA.pem"
+    );
 
     private final PushServiceConfiguration pushServiceConfiguration;
 
-    /**
-     * Constructor with push service configuration.
-     * @param pushServiceConfiguration Push server configuration.
-     */
-    @Autowired
-    public CaCertUtil(PushServiceConfiguration pushServiceConfiguration) {
-        this.pushServiceConfiguration = pushServiceConfiguration;
-    }
+    private final ResourceLoader resourceLoader;
 
     /**
      * Obtain all registered CA certificates.
@@ -98,13 +88,15 @@ public class CaCertUtil {
         }
 
         // Add the locally stored CA certificates required by Apple for APNs
-        for (String certPath : embeddedCertificates) {
+        for (String certPath : EMBEDDED_CERTIFICATES) {
             try {
                 logger.info("Importing embedded certificate: {}", certPath);
-                final File resource = new ClassPathResource(certPath).getFile();
-                final String certString = Files.readString(resource.toPath());
-                final X509Certificate cert = certificateFromPem(certString);
-                result.add(cert);
+                final Resource resource = resourceLoader.getResource(certPath);
+                try (final InputStream inputStream = resource.getInputStream()) {
+                    final String certString = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                    final X509Certificate cert = certificateFromPem(certString);
+                    result.add(cert);
+                }
             } catch (CertificateException | IOException e) {
                 logger.error("Certificate error: {}", e.getMessage(), e);
             }
@@ -115,8 +107,8 @@ public class CaCertUtil {
 
     private X509Certificate certificateFromPem(String pem) throws CertificateException {
         final byte[] decoded = Base64.getDecoder().decode(pem
-                .replaceAll(BEGIN_CERT, "")
-                .replaceAll(END_CERT, "")
+                .replace(BEGIN_CERT, "")
+                .replace(END_CERT, "")
                 .replaceAll("\\s", "")
         );
         return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(decoded));

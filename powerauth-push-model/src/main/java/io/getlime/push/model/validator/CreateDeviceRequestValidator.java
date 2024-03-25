@@ -41,8 +41,8 @@ public class CreateDeviceRequestValidator {
         if (request.getActivationId() == null) {
             return "Activation ID must not be null.";
         }
-        if (request.getPlatform() == null || request.getPlatform().isEmpty()) {
-            return "Platform must not be null or empty.";
+        if (request.getPlatform() == null) {
+            return "Platform must not be null.";
         }
         if (request.getToken() == null || request.getToken().isEmpty()) {
             return "Push token must not be null or empty.";
@@ -68,8 +68,8 @@ public class CreateDeviceRequestValidator {
         if (request.getActivationIds().isEmpty()) {
             return "Activation ID list must not empty.";
         }
-        if (request.getPlatform() == null || request.getPlatform().isEmpty()) {
-            return "Platform must not be null or empty.";
+        if (request.getPlatform() == null) {
+            return "Platform must not be null.";
         }
         if (request.getToken() == null || request.getToken().isEmpty()) {
             return "Push token must not be null or empty.";

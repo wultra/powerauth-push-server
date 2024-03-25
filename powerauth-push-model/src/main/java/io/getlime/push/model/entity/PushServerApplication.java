@@ -16,62 +16,36 @@
 
 package io.getlime.push.model.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Push server application credentials entity.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
+@Getter
+@Setter
 public class PushServerApplication {
 
+    /**
+     * Application ID.
+     */
     private String appId;
+
+    /**
+     * Whether iOS is configured.
+     */
     private Boolean ios;
+
+    /**
+     * Whether Android is configured.
+     */
     private Boolean android;
 
     /**
-     * Get application ID.
-     * @return Application ID.
+     * Whether Huawei is configured.
      */
-    public String getAppId() {
-        return appId;
-    }
+    private Boolean huawei;
 
-    /**
-     * Set application ID.
-     * @param appId Application ID.
-     */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * Get whether iOS is configured.
-     * @return Whether iOS is configured.
-     */
-    public Boolean getIos() {
-        return ios;
-    }
-
-    /**
-     * Set whether iOS is configured.
-     * @param ios Whether iOS is configured.
-     */
-    public void setIos(Boolean ios) {
-        this.ios = ios;
-    }
-
-    /**
-     * Get whether Android is configured.
-     * @return Whether Android is configured.
-     */
-    public Boolean getAndroid() {
-        return android;
-    }
-
-    /**
-     * Set whether Android is configured.
-     * @param android Whether Android is configured.
-     */
-    public void setAndroid(Boolean android) {
-        this.android = android;
-    }
 }

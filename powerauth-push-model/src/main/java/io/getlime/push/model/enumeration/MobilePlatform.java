@@ -16,6 +16,8 @@
 
 package io.getlime.push.model.enumeration;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Enum representing mobile platforms.
  *
@@ -26,25 +28,19 @@ public enum MobilePlatform {
     /**
      * iOS Platform.
      */
-    iOS,
+    @JsonProperty("ios")
+    IOS,
 
     /**
      * Android Platform.
      */
-    Android;
+    @JsonProperty("android")
+    ANDROID,
 
     /**
-     * Converter convenience method for obtaining String from enum.
-     * @return String representation of the enum.
+     * Huawei Platform.
      */
-    public String value() {
-        if (this.equals(MobilePlatform.iOS)) {
-            return "ios";
-        } else if (this.equals(MobilePlatform.Android)) {
-            return "android";
-        } else {
-            return "android"; // guess android by default
-        }
-    }
+    @JsonProperty("huawei")
+    HUAWEI
 
 }

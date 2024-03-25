@@ -17,8 +17,6 @@
 package io.getlime.push.repository.converter;
 
 import io.getlime.push.repository.model.PushMessageEntity;
-import org.springframework.stereotype.Component;
-
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
@@ -27,7 +25,6 @@ import jakarta.persistence.Converter;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-@Component
 @Converter
 public class PushMessageStatusConverter implements AttributeConverter<PushMessageEntity.Status, Integer> {
 

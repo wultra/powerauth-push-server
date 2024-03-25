@@ -16,28 +16,21 @@
 
 package io.getlime.push.model.response;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Object response for deleting a campaign
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
+@Getter
+@Setter
 public class DeleteCampaignResponse {
+
+    /**
+     * If campaign is deleted.
+     */
     private boolean deleted;
-
-    /**
-     * Check if campaign is deleted.
-     * @return True if campaign is deleted, false otherwise.
-     */
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    /**
-     * Set if the campaign is deleted.
-     * @param deleted True if campaign is deleted, false otherwise.
-     */
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
 
 }

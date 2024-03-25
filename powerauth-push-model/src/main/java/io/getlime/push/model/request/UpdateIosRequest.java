@@ -15,18 +15,60 @@
  */
 package io.getlime.push.model.request;
 
+import io.getlime.push.model.enumeration.ApnsEnvironment;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Update iOS configuration request.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
+@Getter
+@Setter
 public class UpdateIosRequest {
 
+    /**
+     * Application ID.
+     */
+    @NotBlank
+    @Schema(description = "Application ID.")
     private String appId;
+
+    /**
+     * iOS bundle.
+     */
+    @NotBlank
+    @Schema(description = "iOS bundle.")
     private String bundle;
+
+    /**
+     * iOS key ID.
+     */
+    @NotBlank
+    @Schema(description = "iOS key ID.")
     private String keyId;
+
+    /**
+     * iOS team ID.
+     */
+    @NotBlank
+    @Schema(description = "iOS team ID.")
     private String teamId;
-    private String environment;
+
+    /**
+     * APNs environment.
+     */
+    @Schema(description = "APNs environment.")
+    private ApnsEnvironment environment;
+
+    /**
+     * Base64 encoded private key.
+     */
+    @NotBlank
+    @Schema(description = "Base64 encoded private key.")
     private String privateKeyBase64;
 
     /**
@@ -44,7 +86,7 @@ public class UpdateIosRequest {
      * @param environment The APNs environment (per-app config).
      * @param privateKeyBase64 Base64 encoded private key.
      */
-    public UpdateIosRequest(String appId, String bundle, String keyId, String teamId, String environment, String privateKeyBase64) {
+    public UpdateIosRequest(String appId, String bundle, String keyId, String teamId, ApnsEnvironment environment, String privateKeyBase64) {
         this.appId = appId;
         this.bundle = bundle;
         this.keyId = keyId;
@@ -53,99 +95,4 @@ public class UpdateIosRequest {
         this.privateKeyBase64 = privateKeyBase64;
     }
 
-    /**
-     * Get application credentials entity ID.
-     * @return Application credentials entity ID.
-     */
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set application credentials entity ID.
-     * @param appId Application credentials entity ID.
-     */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * Get the iOS bundle record.
-     * @return The iOS bundle record.
-     */
-    public String getBundle() {
-        return bundle;
-    }
-
-    /**
-     * Set the iOS bundle record.
-     * @param bundle The iOS bundle record.
-     */
-    public void setBundle(String bundle) {
-        this.bundle = bundle;
-    }
-
-    /**
-     * Get the iOS key ID record.
-     * @return The iOS key ID record.
-     */
-    public String getKeyId() {
-        return keyId;
-    }
-
-    /**
-     * Set the iOS key ID record.
-     * @param keyId The iOS key ID record.
-     */
-    public void setKeyId(String keyId) {
-        this.keyId = keyId;
-    }
-
-    /**
-     * Get the iOS team ID record.
-     * @return The iOS team ID record.
-     */
-    public String getTeamId() {
-        return teamId;
-    }
-
-    /**
-     * Set the iOS team ID record.
-     * @param teamId The iOS team ID record.
-     */
-    public void setTeamId(String teamId) {
-        this.teamId = teamId;
-    }
-
-    /**
-     * Get APNs environment.
-     * @return APNs environment.
-     */
-    public String getEnvironment() {
-        return environment;
-    }
-
-    /**
-     * Set APNs environment.
-     * @param environment APNs environment.
-     */
-    public void setEnvironment(String environment) {
-        this.environment = environment;
-    }
-
-    /**
-     * Get base64 encoded private key.
-     * @return Base 64 encoded private key.
-     */
-    public String getPrivateKeyBase64() {
-        return privateKeyBase64;
-    }
-
-    /**
-     * Set base64 encoded private key.
-     * @param privateKeyBase64 Base 64 encoded private key.
-     */
-    public void setPrivateKeyBase64(String privateKeyBase64) {
-        this.privateKeyBase64 = privateKeyBase64;
-    }
 }

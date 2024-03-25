@@ -18,12 +18,17 @@ package io.getlime.push.service;
 import com.eatthepath.pushy.apns.ApnsClient;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.fcm.FcmClient;
+import io.getlime.push.service.hms.HmsClient;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Class storing app credentials and clients.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Getter
+@Setter
 public class AppRelatedPushClient {
 
     /**
@@ -42,50 +47,8 @@ public class AppRelatedPushClient {
     private FcmClient fcmClient;
 
     /**
-     * Get app credentials.
-     * @return App credentials.
+     * HMS client instance, used for Huawei Mobile Services.
      */
-    public AppCredentialsEntity getAppCredentials() {
-        return appCredentials;
-    }
+    private HmsClient hmsClient;
 
-    /**
-     * Set app credentials.
-     * @param appCredentials App credentials.
-     */
-    public void setAppCredentials(AppCredentialsEntity appCredentials) {
-        this.appCredentials = appCredentials;
-    }
-
-    /**
-     * Get APNs client.
-     * @return APNs client.
-     */
-    public ApnsClient getApnsClient() {
-        return apnsClient;
-    }
-
-    /**
-     * Set APNs client.
-     * @param apnsClient APNs client.
-     */
-    public void setApnsClient(ApnsClient apnsClient) {
-        this.apnsClient = apnsClient;
-    }
-
-    /**
-     * Get FCM client.
-     * @return FCM client.
-     */
-    public FcmClient getFcmClient() {
-        return fcmClient;
-    }
-
-    /**
-     * Set FCM client.
-     * @param fcmClient FCM client.
-     */
-    public void setFcmClient(FcmClient fcmClient) {
-        this.fcmClient = fcmClient;
-    }
 }

@@ -15,16 +15,42 @@
  */
 package io.getlime.push.model.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
 /**
  * Get application credentials entity detail request.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
+@Data
 public class GetApplicationDetailRequest {
 
+    /**
+     * Application ID.
+     */
+    @NotBlank
+    @Schema(description = "Application ID.")
     private String appId;
+
+    /**
+     * Whether to include iOS details.
+     */
+    @Schema(description = "Whether to include iOS details.")
     private boolean includeIos;
+
+    /**
+     * Whether to include Android details.
+     */
+    @Schema(description = "Whether to include Android details.")
     private boolean includeAndroid;
+
+    /**
+     * Whether to include Huawei details.
+     */
+    @Schema(description = "Whether to include Huawei details.")
+    private boolean includeHuawei;
 
     /**
      * Default constructor.
@@ -46,57 +72,11 @@ public class GetApplicationDetailRequest {
      * @param includeIos Whether to include iOS details.
      * @param includeAndroid Whether to include Android details.
      */
-    public GetApplicationDetailRequest(String appId, boolean includeIos, boolean includeAndroid) {
+    public GetApplicationDetailRequest(String appId, boolean includeIos, boolean includeAndroid, boolean includeHuawei) {
         this.appId = appId;
         this.includeIos = includeIos;
         this.includeAndroid = includeAndroid;
+        this.includeHuawei = includeHuawei;
     }
 
-    /**
-     * Get application credentials entity ID.
-     * @return Application credentials entity ID.
-     */
-    public String getAppId() {
-        return appId;
-    }
-
-    /**
-     * Set application credentials entity ID.
-     * @param appId Application credentials entity ID.
-     */
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
-
-    /**
-     * Get whether to include iOS details.
-     * @return Whether to include iOS details.
-     */
-    public boolean getIncludeIos() {
-        return includeIos;
-    }
-
-    /**
-     * Set whether to include iOS details.
-     * @param includeIos Whether to include iOS details.
-     */
-    public void setIncludeIos(boolean includeIos) {
-        this.includeIos = includeIos;
-    }
-
-    /**
-     * Get whether to include Android details.
-     * @return Whether to include Android details.
-     */
-    public boolean getIncludeAndroid() {
-        return includeAndroid;
-    }
-
-    /**
-     * Set whgether to include Android details.
-     * @param includeAndroid Whether to include Android details.
-     */
-    public void setIncludeAndroid(boolean includeAndroid) {
-        this.includeAndroid = includeAndroid;
-    }
 }

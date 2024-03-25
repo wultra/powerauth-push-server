@@ -16,6 +16,9 @@
 package io.getlime.push.repository.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -24,9 +27,10 @@ import java.util.Date;
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-
 @Entity
 @Table(name = "push_campaign_user")
+@Getter
+@Setter
 public class PushCampaignUserEntity implements Serializable {
 
     /**
@@ -56,67 +60,4 @@ public class PushCampaignUserEntity implements Serializable {
     @Column(name = "timestamp_created", nullable = false, updatable = false)
     private Date timestampCreated;
 
-    /**
-     * Get campaign user ID.
-     * @return Campaign user ID.
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Set campaign user ID.
-     * @param id Campaign user ID.
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * Get campaign ID.
-     * @return Campaign ID.
-     */
-    public Long getCampaignId() {
-        return campaignId;
-    }
-
-    /**
-     * Set campaign ID.
-     * @param campaignId Campaign ID.
-     */
-    public void setCampaignId(Long campaignId) {
-        this.campaignId = campaignId;
-    }
-
-    /**
-     * Get user ID.
-     * @return User ID.
-     */
-    public String getUserId() {
-        return userId;
-    }
-
-    /**
-     * Set user ID.
-     * @param userId User ID.
-     */
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * Get timestamp created.
-     * @return Timestamp created.
-     */
-    public Date getTimestampCreated() {
-        return timestampCreated;
-    }
-
-    /**
-     * Set timestamp created.
-     * @param timestampCreated Timestamp created.
-     */
-    public void setTimestampCreated(Date timestampCreated) {
-        this.timestampCreated = timestampCreated;
-    }
 }

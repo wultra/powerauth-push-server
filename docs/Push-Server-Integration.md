@@ -33,13 +33,8 @@ In order to connect to the PowerAuth Push Server, you need to add following conf
 public class PowerAuthPushConfiguration {
 
   @Bean
-  public PushServerClient pushServerClient() {
-      try {
-          return new PushServerClient(powerAuthPushServiceUrl);
-      } catch (PushServerClientException ex) {
-          logger.error(ex.getMessage(), ex);
-          return null;
-      }
+  public PushServerClient pushServerClient() throws PushServerClientException {
+      return new PushServerClient(powerAuthPushServiceUrl);
   }
 
 }
@@ -52,8 +47,8 @@ public class PowerAuthPushConfiguration {
 In order to implement generic device registration, implement a custom registration RESTful Endpoint that calls the Push Server under the hood, for example like so:
 
 ```java
-@Controller
-@RequestMapping(value = "push")
+@RestController
+@RequestMapping("push")
 public class DeviceRegistrationController {
 
     @Autowired
@@ -61,8 +56,8 @@ public class DeviceRegistrationController {
 
     private static final Long APP_ID = 1; // Replace by your app ID or use a configuration class
 
-    @RequestMapping(value="device/create", method = RequestMethod.POST)
-    public @ResponseBody String registerDevice(@RequestBody Map<String,String> request) {
+    @PostMapping("device/create")
+    public String registerDevice(@RequestBody Map<String,String> request) {
 
         // Get the values from the request
         String platform = request.get("platform");
@@ -142,9 +137,8 @@ In testing or development environments, you may disable SSL validation by settin
 
 ```java
 @Bean
-public PushServerClient pushServerClient() {
-    PushServerClient client = new PushServerClient();
-    client.setServiceBaseUrl(powerAuthPushServiceUrl);
+public PushServerClient pushServerClient() throws PushServerClientException {
+    PushServerClient client = new PushServerClient(powerAuthPushServiceUrl);
     // whether invalid SSL certificates should be accepted
     if (acceptInvalidSslCertificate) {
         sslConfigurationService.trustAllCertificates();
