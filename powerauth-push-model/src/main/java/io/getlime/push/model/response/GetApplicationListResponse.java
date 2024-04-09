@@ -16,6 +16,8 @@
 package io.getlime.push.model.response;
 
 import io.getlime.push.model.entity.PushServerApplication;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +27,13 @@ import java.util.List;
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
+@Getter
+@Setter
 public class GetApplicationListResponse {
 
+    /**
+     * Application list.
+     */
     private List<PushServerApplication> applicationList = new ArrayList<>();
 
     /**
@@ -43,19 +50,4 @@ public class GetApplicationListResponse {
         this.applicationList = applicationList;
     }
 
-    /**
-     * Get application list.
-     * @return Application list.
-     */
-    public List<PushServerApplication> getApplicationList() {
-        return applicationList;
-    }
-
-    /**
-     * Set application list.
-     * @param applicationList Application list.
-     */
-    public void setApplicationList(List<PushServerApplication> applicationList) {
-        this.applicationList = applicationList;
-    }
 }

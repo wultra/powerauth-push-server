@@ -25,6 +25,7 @@ import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.model.base.PagedResponse;
 import io.getlime.push.model.entity.*;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.enumeration.Mode;
 import io.getlime.push.model.request.*;
@@ -111,7 +112,7 @@ public class PushServerClient {
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setAppId(appId);
         request.setToken(token);
-        request.setPlatform(platform.value());
+        request.setPlatform(platform);
         request.setActivationId(activationId);
 
         // Validate request on the client side.
@@ -120,9 +121,9 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform.value());
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform);
         Response response = postObjectImpl("/push/device/create", new ObjectRequest<>(request));
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform.value());
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform);
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -141,7 +142,7 @@ public class PushServerClient {
         CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
         request.setAppId(appId);
         request.setToken(token);
-        request.setPlatform(platform.value());
+        request.setPlatform(platform);
         request.getActivationIds().addAll(activationIds);
 
         // Validate request on the client side.
@@ -150,9 +151,9 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform.value());
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform);
         Response response = postObjectImpl("/push/device/create/multi", new ObjectRequest<>(request));
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform.value());
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform);
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -499,17 +500,14 @@ public class PushServerClient {
 
     /**
      * Get detail for an application credentials entity.
-     * @param appId Application credentials entity ID.
-     * @param includeIos Whether to include iOS details.
-     * @param includeAndroid Whether to include Android details.
+     * @param request Application detail request.
      * @return Application credentials entity detail.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(String appId, boolean includeIos, boolean includeAndroid) throws PushServerClientException {
-        GetApplicationDetailRequest request = new GetApplicationDetailRequest(appId, includeIos, includeAndroid);
-        logger.info("Calling push server to retrieve application detail, ID: {} - start", appId);
+    public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(final GetApplicationDetailRequest request) throws PushServerClientException {
+        logger.info("Calling push server to retrieve application detail, ID: {} - start", request.getAppId());
         final ObjectResponse<GetApplicationDetailResponse> response = postObjectImpl("/admin/app/detail", new ObjectRequest<>(request), GetApplicationDetailResponse.class);
-        logger.info("Calling push server to retrieve application detail, ID: {} - finish", appId);
+        logger.info("Calling push server to retrieve application detail, ID: {} - finish", request.getAppId());
         return response;
     }
 
@@ -538,7 +536,7 @@ public class PushServerClient {
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public Response updateIos(String appId, String bundle, String keyId, String teamId, String environment, byte[] privateKey) throws PushServerClientException {
+    public Response updateIos(String appId, String bundle, String keyId, String teamId, ApnsEnvironment environment, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
         final UpdateIosRequest request = new UpdateIosRequest(appId, bundle, keyId, teamId, environment, privateKeyBase64);
         logger.info("Calling push server to update iOS, ID: {} - start", appId);
@@ -589,6 +587,35 @@ public class PushServerClient {
         logger.info("Calling push server to remove android, ID: {} - start", appId);
         final Response response = postObjectImpl("/admin/app/android/remove", new ObjectRequest<>(request));
         logger.info("Calling push server to remove android, ID: {} - finish", appId);
+        return response;
+    }
+
+    /**
+     * Update Huawei details for an application credentials entity.
+     *
+     * @param request Update Huawei request.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response updateHuawei(final UpdateHuaweiRequest request) throws PushServerClientException {
+        logger.info("Calling push server to update Huawei, ID: {} - start", request.getAppId());
+        final Response response = putObjectImpl("/admin/app/huawei/update", new ObjectRequest<>(request));
+        logger.info("Calling push server to update Huawei, ID: {} - finish", request.getAppId());
+        return response;
+    }
+
+    /**
+     * Remove Huawei record from an application credentials entity.
+     *
+     * @param appId Application credentials entity ID.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response removeHuawei(String appId) throws PushServerClientException {
+        final RemoveHuaweiRequest request = new RemoveHuaweiRequest(appId);
+        logger.info("Calling push server to remove Huawei, ID: {} - start", appId);
+        final Response response = postObjectImpl("/admin/app/huawei/remove", new ObjectRequest<>(request));
+        logger.info("Calling push server to remove Huawei, ID: {} - finish", appId);
         return response;
     }
 

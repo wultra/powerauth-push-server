@@ -143,7 +143,8 @@ Send a system status response, with basic information about the running applicat
 
 ## Device
 
-Represents mobile device with iOS or Android that is capable to receive a push notification. Device has to first register with APNS or FCM to obtain push token.
+Represents mobile device with iOS, Android or Huawei that is capable to receive a push notification.
+Device has to first register with APNS, FCM, or HMS to obtain push token.
 Then it has to forward the push token to the push server end-point. After that push server is able to send push notification to the device.
 
 <!-- begin api POST /push/device/create -->
@@ -181,7 +182,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
-- `platform` - `ios`, `android`
+- `platform` - `ios`, `android`, `huawei`
 - `activationId` - Activation identifier
 
 #### Response 200
@@ -231,7 +232,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
-- `platform` - `ios`, `android`
+- `platform` - `ios`, `android`, `huawei`
 - `activationIds` - Associated activation identifiers
 
 #### Response 200
@@ -412,6 +413,12 @@ Send a single push message to given user via provided application, optionally to
         "pending": 0,
         "failed": 0,
         "total": 1
+      },
+      "huawei": {
+        "sent": 1,
+        "pending": 0,
+        "failed": 0,
+        "total": 1
       }
     }
   }
@@ -529,6 +536,12 @@ Sends a message batch - each item in the batch represents a message to given use
         "total": 1
       },
       "android": {
+        "sent": 1,
+        "pending": 0,
+        "failed": 0,
+        "total": 1
+      },
+      "huawei": {
         "sent": 1,
         "pending": 0,
         "failed": 0,
@@ -1108,7 +1121,8 @@ Get list of all applications.
       {
         "appId": "mobile-app",
         "ios": true,
-        "android": true
+        "android": true,
+        "huawei": true
       }
     ]
   }
@@ -1146,7 +1160,8 @@ Get list of applications which have not been configured yet.
       {
         "appId": "mobile-app-other",
         "ios": null,
-        "android": null
+        "android": null,
+        "huawei": null
       }
     ]
   }
@@ -1193,12 +1208,14 @@ Get detail of an application.
     "application": {
       "appId": "mobile-app",
       "ios": true,
-      "android": true
+      "android": true,
+      "huawai": true
     },
     "iosBundle": "some.bundle.id",
     "iosKeyId": "KEYID123456",
     "iosTeamId": "TEAMID123456",
-    "androidProjectId": "PROJECTID123"
+    "androidProjectId": "PROJECTID123",
+    "huaweiProjectId": "HMS123"
   }
 }
 ```
@@ -1384,6 +1401,84 @@ Remove FCM configuration for Android push messages.
     <tr>
         <td>Resource URI</td>
         <td>/admin/app/android/remove</td>
+    </tr>
+</table>
+<!-- end -->
+
+```json
+{
+  "requestObject": {
+    "appId": "mobile-app"
+  }
+}
+```
+
+#### Response 200
+
+```json
+{
+  "status": "OK"
+}
+```
+<!-- end -->
+
+<!-- begin api PUT /admin/app/huawei/update -->
+### Update Huawei Configuration
+
+Update an Huawei configuration.
+
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/huawei/update</td>
+    </tr>
+</table>
+<!-- end -->
+
+```json
+{
+  "requestObject": {
+    "appId": "mobile-app",
+    "projectId": "PROJECTID123",
+    "clientId": "oAuth 2.0 client ID",
+    "clientSecret": "oAuth 2.0 client secret"
+  }
+}
+```
+
+#### Response 200
+
+```json
+{
+  "status": "OK"
+}
+```
+<!-- end -->
+
+<!-- begin api DELETE /admin/app/huawei/remove -->
+### Remove Huawei Configuration
+
+Remove configuration for Huawei push messages.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / DELETE</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/huawei/remove</td>
     </tr>
 </table>
 <!-- end -->

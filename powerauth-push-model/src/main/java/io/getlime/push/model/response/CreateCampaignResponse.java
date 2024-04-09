@@ -17,29 +17,21 @@
 package io.getlime.push.model.response;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Response object for creating a campaign
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
-
-
+@Getter
+@Setter
 public class CreateCampaignResponse {
+
+    /**
+     * Campaign ID.
+     */
     private Long id;
 
-    /**
-     * Get campaign ID.
-     * @return Campaign ID.
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Set campaign ID.
-     * @param id Campaign ID.
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
 }

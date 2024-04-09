@@ -11,7 +11,7 @@
     <parent>
         <artifactId>powerauth-push-server-parent</artifactId>
         <groupId>io.getlime.security</groupId>
-        <version>1.6.0</version>
+        <version>1.7.0</version>
     </parent>
 
     <dependencies>
@@ -33,6 +33,18 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations-jakarta</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

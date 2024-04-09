@@ -22,6 +22,8 @@ import com.eatthepath.pushy.apns.proxy.HttpProxyHandlerFactory;
 import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
 import com.eatthepath.pushy.apns.util.TokenUtil;
 import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.Message;
@@ -33,11 +35,17 @@ import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageAttributes;
 import io.getlime.push.model.entity.PushMessageBody;
 import io.getlime.push.model.enumeration.Priority;
+import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.apns.ApnsRejectionReason;
 import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.fcm.FcmModelConverter;
 import io.getlime.push.service.fcm.model.FcmSuccessResponse;
+import io.getlime.push.service.hms.HmsClient;
+import io.getlime.push.service.hms.HmsSendResponse;
+import io.getlime.push.service.hms.request.AndroidNotification.Importance;
+import io.getlime.push.service.hms.request.ClickAction;
 import io.getlime.push.util.CaCertUtil;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,6 +140,17 @@ public class PushSendingWorker {
     }
 
     /**
+     * Prepares an HMS (Huawei Mobile Services) service client.
+     *
+     * @param credentials Credentials.
+     * @return A new instance of HMS client.
+     */
+    HmsClient prepareHmsClient(final AppCredentialsEntity credentials) {
+        logger.info("Initializing HmsClient");
+        return new HmsClient(pushServiceConfiguration, credentials);
+    }
+
+    /**
      * Send message to Android platform.
      * @param fcmClient Instance of the FCM client used for sending the notifications.
      * @param pushMessageBody Push message contents.
@@ -211,6 +230,40 @@ public class PushSendingWorker {
     }
 
     /**
+     * Send message to Huawei platform.
+     *
+     * @param hmsClient Instance of the HMS client used for sending the notifications.
+     * @param pushMessageBody Push message contents.
+     * @param attributes Push message attributes.
+     * @param priority Push message priority.
+     * @param pushToken Push token used to deliver the message.
+     * @param callback Callback that is called after the asynchronous executions is completed.
+     * @throws PushServerException In case any issue happens while sending the push message.
+     */
+    void sendMessageToHuawei(final HmsClient hmsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) throws PushServerException {
+        final io.getlime.push.service.hms.request.Message message = buildHmsMessage(pushMessageBody, attributes, priority, pushToken);
+
+        final Consumer<HmsSendResponse> successConsumer = response -> {
+            final String requestId = response.requestId();
+            if (HmsClient.SUCCESS_CODE.equals(response.code())) {
+                logger.info("Notification sent successfully, request ID: {}", requestId);
+                callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
+            } else {
+                logger.error("Notification sending failed, request ID: {}, code: {}, message: {}", requestId, response.code(), response.msg());
+                callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
+            }
+        };
+
+        final Consumer<Throwable> throwableConsumer = throwable -> {
+            logger.error("Invalid response received from HSM, notification sending failed.", throwable);
+            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
+        };
+
+        hmsClient.sendMessage(message, false)
+                .subscribe(successConsumer, throwableConsumer);
+    }
+
+    /**
      * Build Android Message object from Push message body.
      * @param pushMessageBody Push message body.
      * @param attributes Push message attributes.
@@ -231,17 +284,8 @@ public class PushSendingWorker {
         final AndroidConfig.Builder androidConfigBuilder = AndroidConfig.builder()
                 .setCollapseKey(pushMessageBody.getCollapseKey());
 
-        // Calculate TTL and set it if the TTL is within reasonable limits
-        final Instant validUntil = pushMessageBody.getValidUntil();
-        if (validUntil != null) {
-            final long validUntilMs = validUntil.toEpochMilli();
-            final long currentTimeMs = System.currentTimeMillis();
-            final long ttlInSeconds = (validUntilMs - currentTimeMs) / 1000;
-
-            if (ttlInSeconds > 0 && ttlInSeconds < ANDROID_TTL_SECONDS_MAX) {
-                androidConfigBuilder.setTtl(ttlInSeconds);
-            }
-        }
+        calculateTtl(pushMessageBody.getValidUntil())
+                .ifPresent(androidConfigBuilder::setTtl);
 
         final AndroidNotification.Priority deliveryPriority = (Priority.NORMAL == priority) ?
                 AndroidNotification.Priority.DEFAULT : AndroidNotification.Priority.HIGH;
@@ -267,7 +311,7 @@ public class PushSendingWorker {
 
         if (pushServiceConfiguration.isFcmDataNotificationOnly()) { // notification only through data map
             data.put(FCM_NOTIFICATION_KEY, fcmConverter.convertNotificationToString(notification));
-        } else if (attributes == null || !attributes.getSilent()) { // if there are no attributes, assume the message is not silent
+        } else if (isMessageNotSilent(attributes)) {
             androidConfigBuilder.setNotification(notification);
         }
 
@@ -278,21 +322,104 @@ public class PushSendingWorker {
                 .build();
     }
 
+    /**
+     * Build HMS Message object from Push message body.
+     *
+     * @param pushMessageBody Push message body.
+     * @param attributes Push message attributes.
+     * @param priority Push message priority.
+     * @param pushToken Push token.
+     * @return HMS Message object.
+     * @throws PushServerException In case any issue happens while building the push message.
+     */
+    private io.getlime.push.service.hms.request.Message buildHmsMessage(final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken) throws PushServerException {
+        final var androidConfigBuilder = io.getlime.push.service.hms.request.AndroidConfig.builder()
+                .collapseKey(NumberUtils.createInteger(pushMessageBody.getCollapseKey()));
+
+        calculateTtl(pushMessageBody.getValidUntil())
+                .map(Object::toString)
+                .ifPresent(androidConfigBuilder::ttl);
+
+        final Importance importance = (priority == Priority.NORMAL) ? Importance.NORMAL : Importance.HIGH;
+
+        final var notificationBuilder = io.getlime.push.service.hms.request.AndroidNotification.builder()
+                .importance(importance)
+                .title(pushMessageBody.getTitle())
+                .titleLocKey(pushMessageBody.getTitleLocKey())
+                .body(pushMessageBody.getBody())
+                .bodyLocKey(pushMessageBody.getBodyLocKey())
+                .icon(pushMessageBody.getIcon())
+                .sound(pushMessageBody.getSound())
+                .tag(pushMessageBody.getCategory())
+                .clickAction(ClickAction.builder()
+                        .type(ClickAction.TYPE_START_APP)
+                        .build());
+
+        if (pushMessageBody.getTitleLocArgs() != null) {
+            notificationBuilder.titleLocArgs(List.of(pushMessageBody.getTitleLocArgs()));
+        }
+        if (pushMessageBody.getBodyLocArgs() != null) {
+            notificationBuilder.bodyLocArgs(List.of(pushMessageBody.getBodyLocArgs()));
+        }
+
+        if (isMessageNotSilent(attributes)) {
+            androidConfigBuilder.notification(notificationBuilder.build());
+        }
+
+        final Map<String, Object> extras = pushMessageBody.getExtras();
+        final String data;
+        if (extras == null) {
+            data = null;
+        } else {
+            try {
+                data = new ObjectMapper().writeValueAsString(extras);
+            } catch (JsonProcessingException e) {
+                throw new PushServerException("Failed to serialize extras to JSON", e);
+            }
+        }
+
+        return io.getlime.push.service.hms.request.Message.builder()
+                .token(List.of(pushToken))
+                .android(androidConfigBuilder.build())
+                .data(data)
+                .build();
+    }
+
+    private static boolean isMessageNotSilent(final PushMessageAttributes attributes) {
+        // if there are no attributes, assume the message is not silent
+        return attributes == null || !attributes.getSilent();
+    }
+
+    /**
+     * Calculate TTL and return it if the TTL is within reasonable limits.
+     *
+     * @param validUntil Valid until.
+     * @return TTL in seconds or empty.
+     */
+    private static Optional<Long> calculateTtl(final Instant validUntil) {
+        if (validUntil != null) {
+            final long ttlInSeconds = Duration.between(Instant.now(), validUntil).toSeconds();
+
+            if (ttlInSeconds > 0 && ttlInSeconds < ANDROID_TTL_SECONDS_MAX) {
+                return Optional.of(ttlInSeconds);
+            }
+        }
+        return Optional.empty();
+    }
+
     // iOS related methods
 
     /**
      * Prepare and connect APNs client.
      *
-     * @param teamId APNs team ID.
-     * @param keyId APNs key ID.
-     * @param apnsPrivateKey Bytes of the APNs private key (contents of the *.p8 file).
-     * @param environment APNs environment. The "development" or "production" values can be used to override global
-     *                    settings. If "null" or unknown value is passed, the global configuration is used.
+     * @param credentials Application Credentials.
      * @return New instance of APNs client.
-     * @throws PushServerException In case an error occurs (private key is invalid, unable to connect
-     *   to APNs service due to SSL issue, ...).
+     * @throws PushServerException In case an error occurs (private key is invalid, unable to connect to APNs service due to SSL issue, ...).
+     * @implSpec APNS environment {@code development} or {@code production} values can be used to override global settings.
+     * If {@code null} or unknown value is passed, the global configuration is used.
      */
-    ApnsClient prepareApnsClient(String teamId, String keyId, byte[] apnsPrivateKey, String environment) throws PushServerException {
+    ApnsClient prepareApnsClient(final AppCredentialsEntity credentials) throws PushServerException {
+        final String environment = credentials.getIosEnvironment();
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder()
                 .setProxyHandlerFactory(apnsClientProxy())
                 .setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections())
@@ -300,28 +427,33 @@ public class PushSendingWorker {
                 .setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()))
                 .setTrustedServerCertificateChain(caCertUtil.allCerts());
 
+        final String appId = credentials.getAppId();
         // Determine the APNs environment by looking at per-app config first and if no recognized value is present,
         // use the default configuration. Note that "equalsIgnoreCase" optimizes for null parameter, so the first two
         // if-else branches are performed quickly (we do not need to worry about the fact that "null" will likely be
         // the most common value there).
         if ("development".equalsIgnoreCase(environment)) {
-            logger.info("Using APNs development host.");
+            logger.info("Using APNs development host, application ID: {}", appId);
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
         } else if ("production".equalsIgnoreCase(environment)) {
-            logger.info("Using APNs production host.");
+            logger.info("Using APNs production host, application ID: {}", appId);
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
         } else {
             if (environment != null) {
-                logger.warn("Invalid APNS host environment specified: \"{}\". Use \"development\" or \"production\".", environment);
+                logger.warn("Invalid APNS host environment specified: \"{}\". Use \"development\" or \"production\", application ID: {}", environment, appId);
             }
             if (pushServiceConfiguration.isApnsUseDevelopment()) {
-                logger.info("Using APNs development host by applying the global push server configuration.");
+                logger.info("Using APNs development host by applying the global push server configuration, application ID: {}", appId);
                 apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
             } else {
-                logger.info("Using APNs production host by applying the global push server configuration.");
+                logger.info("Using APNs production host by applying the global push server configuration, application ID: {}", appId);
                 apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
             }
         }
+
+        final String teamId = credentials.getIosTeamId();
+        final String keyId = credentials.getIosKeyId();
+        final byte[] apnsPrivateKey = credentials.getIosPrivateKey();
 
         try {
             final ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);

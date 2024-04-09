@@ -8,13 +8,13 @@
 
     <groupId>io.getlime.security</groupId>
     <artifactId>powerauth-push-server-parent</artifactId>
-    <version>1.6.0</version>
+    <version>1.7.0</version>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.6</version>
+        <version>3.2.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -69,23 +69,21 @@
 
     <properties>
         <!--  Wultra Dependencies  -->
-        <wultra-core.version>1.8.0</wultra-core.version>
-        <powerauth.version>1.6.0</powerauth.version>
-        <powerauth-crypto.version>1.6.0</powerauth-crypto.version>
-        <powerauth-restful-integration.version>1.6.0</powerauth-restful-integration.version>
+        <wultra-core.version>1.9.0</wultra-core.version>
+        <powerauth.version>1.7.0</powerauth.version>
+        <powerauth-crypto.version>1.7.0</powerauth-crypto.version>
+        <powerauth-restful-integration.version>1.7.0</powerauth-restful-integration.version>
 
         <!-- Library Versions -->
-        <pushy.version>0.15.3</pushy.version>
-        <google-api-client.version>1.35.2</google-api-client.version>
+        <pushy.version>0.15.4</pushy.version>
+        <google-api-client.version>2.4.0</google-api-client.version>
         <firebase-admin.version>9.2.0</firebase-admin.version>
         <bc.version>1.77</bc.version>
         <logstash.version>7.4</logstash.version>
-        <!--  TODO (racansky, 2023-12-08) temporarily override the version 1.4.11 from spring boot version because of CVE  -->
-        <logback.version>1.4.14</logback.version>
 
         <!-- Documentation Dependencies -->
-        <springdoc-openapi-starter-webmvc-ui.version>2.3.0</springdoc-openapi-starter-webmvc-ui.version>
-        <swagger-annotations-jakarta.version>2.2.20</swagger-annotations-jakarta.version>
+        <springdoc-openapi-starter-webmvc-ui.version>2.5.0</springdoc-openapi-starter-webmvc-ui.version>
+        <swagger-annotations-jakarta.version>2.2.21</swagger-annotations-jakarta.version>
 
         <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
     </properties>
@@ -143,6 +141,14 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludedGroups>external-service</excludedGroups>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>

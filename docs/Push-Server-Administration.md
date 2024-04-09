@@ -35,42 +35,40 @@ curl --request GET \
 ```sh
 curl --request POST \
   --url http://localhost:8080/powerauth-push-server/admin/app/create \
-  --header 'content-type: application/json' \
-  --data '{
+  --json '{
   "requestObject": {
     "appId": 1
   }
 }'
 ```
 
-Update the `appId` value with requested PowerAuth application ID. The value `id` from response object will be used for identification of the Push Server application.
+Update the `appId` value with requested PowerAuth application ID. The value `appId` from response object will be used for identification of the Push Server application.
 
 ### Get Application Detail
 
 ```sh
 curl --request POST \
   --url http://localhost:8080/powerauth-push-server/admin/app/detail \
-  --header 'content-type: application/json' \
-  --data '{
+  --json '{
   "requestObject": {
-    "id": 1,
+    "appId": 1,
     "includeIos": true,
-    "includeAndroid": true
+    "includeAndroid": true,
+    "includeHuawei": true
   }
 }'
 ```
 
-Update the `id` value with requested Push Server application ID.
+Update the `appId` value with requested Push Server application ID.
 
 ### Update APNs Configuration
 
 ```sh
 curl --request POST \
   --url http://localhost:8080/powerauth-push-server/admin/app/ios/update \
-  --header 'content-type: application/json' \
-  --data '{
+  --json '{
   "requestObject": {
-    "id": 1,
+    "appId": 1,
     "bundle": "com.wultra.myApp",
     "keyId": "keyId",
     "teamId": "teamId",
@@ -79,7 +77,7 @@ curl --request POST \
 }'
 ```
 
-Set the `id` value for Push Server application ID to want to update.
+Set the `appId` value for Push Server application ID to want to update.
 
 Enter the base64-encoded value of APNs private key into `privateKeyBase64`.
 
@@ -94,32 +92,30 @@ base64 -i <in-file> -o <outfile>
 ```sh
 curl --request DELETE \
   --url http://localhost:8080/powerauth-push-server/admin/app/ios/remove \
-  --cookie JSESSIONID=76D3CE8C7F92E1FC090A79886E43B235 \
-  --data '{
+  --json '{
   "requestObject": {
-    "id": 1
+    "appId": 1
   }
 }'
 ```
 
-Set the `id` value for the Push Server application ID you want to update.
+Set the `appId` value for the Push Server application ID you want to update.
 
 ### Update FCM Configuration
 
 ```sh
 curl --request POST \
   --url http://localhost:8080/powerauth-push-server/admin/app/android/update \
-  --header 'content-type: application/json' \
-  --data '{
+  --json '{
   "requestObject": {
-    "id": 1,
+    "appId": 1,
     "projectId": "projectId",
     "privateKeyBase64": "a2V5"
   }
 }'
 ```
 
-Set the `id` value for Push Server application ID to want to update.
+Set the `appId` value for Push Server application ID to want to update.
 
 Enter the base64-encoded value of FCM private key into `privateKeyBase64`.
 
@@ -134,15 +130,46 @@ base64 -i <in-file> -o <outfile>
 ```sh
 curl --request DELETE \
   --url http://localhost:8080/powerauth-push-server/admin/app/android/remove \
-  --header 'content-type: application/json' \
-  --data '{
+  --json '{
   "requestObject": {
-    "id": 1
+    "appId": 1
   }
 }'
 ```
 
-Set the `id` value for the Push Server application ID you want to update.
+Set the `appId` value for the Push Server application ID you want to delete.
+
+
+### Update Huawei Configuration
+
+```sh
+curl --request POST \
+  --url http://localhost:8080/powerauth-push-server/admin/app/huawei/update \
+  --json '{
+  "requestObject": {
+    "appId": 1,
+    "projectId": "projectId",
+    "clientId": "oAuth 2.0 client ID",
+    "clientSecret": "oAuth 2.0 client secret"
+  }
+}'
+```
+
+Set the `appId` value for Push Server application ID to want to update.
+
+### Remove Huawei Configuration
+
+```sh
+curl --request DELETE \
+  --url http://localhost:8080/powerauth-push-server/admin/app/huawei/remove \
+  --json '{
+  "requestObject": {
+    "appId": 1
+  }
+}'
+```
+
+Set the `appId` value for the Push Server application ID you want to delete.
 
 ## Administration using SQL Database
 
