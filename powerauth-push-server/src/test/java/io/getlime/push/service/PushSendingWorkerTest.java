@@ -63,7 +63,7 @@ class PushSendingWorkerTest {
         final RestClientException simulatedException = new RestClientException("Simulated INVALID_ARGUMENT error");
         when(fcmModelConverter.convertExceptionToErrorCode(simulatedException)).thenReturn(MessagingErrorCode.INVALID_ARGUMENT);
         doAnswer(invocation -> {
-            Consumer<Throwable> onError = invocation.getArgument(3);
+            final Consumer<Throwable> onError = invocation.getArgument(3);
             onError.accept(simulatedException);
             return null;
         }).when(fcmClient).exchange(any(), anyBoolean(), any(), any());
