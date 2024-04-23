@@ -200,12 +200,6 @@
             <version>${powerauth-restful-integration.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
-            <version>${bc.version}</version>
-            <scope>test</scope>
-        </dependency>
 
         <!-- Documentation -->
         <dependency>

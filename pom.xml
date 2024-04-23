@@ -78,7 +78,6 @@
         <pushy.version>0.15.4</pushy.version>
         <google-api-client.version>2.4.0</google-api-client.version>
         <firebase-admin.version>9.2.0</firebase-admin.version>
-        <bc.version>1.78.1</bc.version>
         <logstash.version>7.4</logstash.version>
 
         <!-- Documentation Dependencies -->

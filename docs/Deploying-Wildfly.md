@@ -88,10 +88,3 @@ powerauth.service.url=https://[host]:[port]/powerauth-java-server/rest
 ```
 
 Push Server Spring application uses the `ext` Spring profile which activates overriding of default properties by `application-ext.properties`.
-
-### Bouncy Castle Installation
-
-The Bouncy Castle module for JBoss / Wildfly needs to be enabled as a global module for Push Server.
-
-Follow the instructions in the [Installing Bouncy Castle](https://github.com/wultra/powerauth-server/blob/develop/docs/Installing-Bouncy-Castle.md) chapter of PowerAuth Server documentation.
-Note that the instructions differ based on Java version and application server type.
