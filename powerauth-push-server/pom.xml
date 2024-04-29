@@ -224,18 +224,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <!-- Fix startup issue on Java 11 on Wildfly 'Unable to instantiate proxy using Objenesis' -->
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Dependencies>jdk.unsupported</Dependencies>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
