@@ -182,8 +182,8 @@ public class PushMessageSenderService {
                     }
                 }
                 platformResult.setTotal(platformResult.getTotal() + 1);
-            } catch (Exception t) {
-                logger.error("System error when sending notification: {}", t.getMessage(), t);
+            } catch (Exception e) {
+                logger.error("System error when sending notification: {}", e.getMessage(), e);
             } finally {
                 arriveAndDeregisterPhaserForMode(phaser, mode);
             }
