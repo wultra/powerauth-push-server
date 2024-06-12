@@ -14,12 +14,14 @@ The Push Server uses the following public configuration properties:
 
 ##  PowerAuth Service Configuration
 
-| Property | Default | Note |
-|---|---|---|
-| `powerauth.service.url` | `http://localhost:8080/powerauth-java-server/rest` | PowerAuth service REST API base URL | 
-| `powerauth.service.security.clientToken` | `_empty_` | PowerAuth REST API authentication token | 
-| `powerauth.service.security.clientSecret` | `_empty_` | PowerAuth REST API authentication secret / password |
-| `powerauth.service.ssl.acceptInvalidSslCertificate` | `false` | Flag indicating if connections using untrusted TLS certificate should be made to the PowerAuth Service |
+| Property                                             | Default                                            | Note                                                                                                   |
+|------------------------------------------------------|----------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| `powerauth.service.url`                              | `http://localhost:8080/powerauth-java-server/rest` | PowerAuth service REST API base URL                                                                    |
+| `powerauth.service.restClientConfig.responseTimeout` | `60s`                                              | PowerAuth REST API response timeout.                                                                   |
+| `powerauth.service.restClientConfig.maxIdleTime`     | `200s`                                             | PowerAuth REST API max idle time.                                                                      |
+| `powerauth.service.security.clientToken`             | `_empty_`                                          | PowerAuth REST API authentication token                                                                | 
+| `powerauth.service.security.clientSecret`            | `_empty_`                                          | PowerAuth REST API authentication secret / password                                                    |
+| `powerauth.service.ssl.acceptInvalidSslCertificate`  | `false`                                            | Flag indicating if connections using untrusted TLS certificate should be made to the PowerAuth Service |
 
 ## PowerAuth Push Service Configuration
 
