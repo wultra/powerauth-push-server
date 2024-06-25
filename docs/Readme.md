@@ -18,6 +18,7 @@ PowerAuth Push Server is an optional application that facilitates sending APNs /
 - [PowerAuth Push Server RESTful API](./Push-Server-API.md)
 - [PowerAuth Push Server Database Structure](./Push-Server-Database.md)
 - [PowerAuth Push Server Administration](./Push-Server-Administration.md)
+- [FAQ](./FAQ.md)
 
 ## Technical Topics
 
