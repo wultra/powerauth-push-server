@@ -74,7 +74,7 @@ public class InboxService {
     public GetInboxMessageDetailResponse postMessage(CreateInboxMessageRequest request) throws AppNotFoundException {
         final List<AppCredentialsEntity> apps = fetchAppsForAppIds(request.getApplications());
         if (apps.size() != request.getApplications().size()) {
-            logger.info("Application list received: {}, apps configured in the system: {}.", request.getApplications(), apps.stream().map(AppCredentialsEntity::getAppId));
+            logger.info("Application list received: {}, apps configured in the system: {}.", request.getApplications(), apps.stream().map(AppCredentialsEntity::getAppId).toList());
             throw new AppNotFoundException("Application list contained an app that is not configured in the system.");
         }
         final String userId = request.getUserId();
@@ -98,7 +98,7 @@ public class InboxService {
     public ListOfInboxMessages fetchMessageListForUser(String userId, List<String> appIds, boolean onlyUnread, Pageable pageable) throws AppNotFoundException {
         final List<AppCredentialsEntity> apps = fetchAppsForAppIds(appIds);
         if (apps.size() != appIds.size()) {
-            logger.info("Application list received: {}, apps configured in the system: {}.", appIds, apps.stream().map(AppCredentialsEntity::getAppId));
+            logger.info("Application list received: {}, apps configured in the system: {}.", appIds, apps.stream().map(AppCredentialsEntity::getAppId).toList());
             throw new AppNotFoundException("Application list contained an app that is not configured in the system.");
         }
 

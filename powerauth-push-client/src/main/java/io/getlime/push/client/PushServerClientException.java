@@ -30,7 +30,7 @@ public class PushServerClientException extends Exception {
     /**
      * Error object.
      */
-    private Error error;
+    private final Error error;
 
     /**
      * Constructor with message.
@@ -72,6 +72,16 @@ public class PushServerClientException extends Exception {
     }
 
     /**
+     * Constructor with message, cause and error object.
+     * @param message Message.
+     * @param cause Cause.
+     */
+    public PushServerClientException(String message, Throwable cause) {
+        super(message, cause);
+        this.error = new PushServerClientError(message);
+    }
+
+    /**
      * Constructor with cause and error object.
      * @param cause Cause.
      * @param error Error object.
@@ -92,14 +102,6 @@ public class PushServerClientException extends Exception {
      */
     public PushServerClientException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, Error error) {
         super(message, cause, enableSuppression, writableStackTrace);
-        this.error = error;
-    }
-
-    /**
-     * Set error object.
-     * @param error Error object.
-     */
-    public void setError(Error error) {
         this.error = error;
     }
 

@@ -16,8 +16,10 @@
 
 package io.getlime.push.client;
 
+import com.fasterxml.jackson.databind.Module;
 import com.wultra.core.rest.client.base.DefaultRestClient;
 import com.wultra.core.rest.client.base.RestClient;
+import com.wultra.core.rest.client.base.RestClientConfiguration;
 import com.wultra.core.rest.client.base.RestClientException;
 import io.getlime.core.rest.model.base.entity.Error;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
@@ -64,7 +66,22 @@ public class PushServerClient {
         try {
             this.restClient = DefaultRestClient.builder().baseUrl(serviceBaseUrl).build();
         } catch (RestClientException ex) {
-            throw new PushServerClientException("Rest client initialization failed, error: " + ex.getMessage());
+            throw new PushServerClientException("Rest client initialization failed, error: " + ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * Construct the push server client with the given configuration.
+     *
+     * @param config REST client configuration.
+     * @param modules Optional jackson modules.
+     * @throws PushServerClientException Thrown in case REST client initialization fails.
+     */
+    public PushServerClient(final RestClientConfiguration config, final Module... modules) throws PushServerClientException {
+        try {
+            this.restClient = new DefaultRestClient(config, modules);
+        } catch (RestClientException ex) {
+            throw new PushServerClientException("Rest client initialization failed, error: " + ex.getMessage(), ex);
         }
     }
 

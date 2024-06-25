@@ -46,14 +46,6 @@ powerauth.service.url=http://localhost:8080/powerauth-java-server/rest
 
 There are several optional configuration options you may want to set up.
 
-### Configuration of Push service URL
-
-Push server contains REST API which needs to be configured in case Push Server runs on non-standard port, non-standard context path or uses HTTPS. You can configure the service URL using following property:
-
-```
-powerauth.push.service.url=http://localhost:8080/powerauth-push-server
-```
-
 ### Enabling Storing of Sent Push Messages
 
 You can enable storing of sent messages in database using following property:
