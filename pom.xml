@@ -81,7 +81,7 @@
         <logstash.version>7.4</logstash.version>
 
         <!-- Documentation Dependencies -->
-        <springdoc-openapi-starter-webmvc-ui.version>2.5.0</springdoc-openapi-starter-webmvc-ui.version>
+        <springdoc-openapi-starter-webmvc-ui.version>2.6.0</springdoc-openapi-starter-webmvc-ui.version>
         <swagger-annotations-jakarta.version>2.2.22</swagger-annotations-jakarta.version>
 
         <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
