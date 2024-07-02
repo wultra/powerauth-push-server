@@ -56,7 +56,7 @@ public class InboxMessageConverter {
         destination.setInboxId(id.toString());
         destination.setUserId(userId);
         destination.setApplications(apps);
-        destination.setMessageType(source.getType().getValue());
+        destination.setType(source.getType().getValue());
         destination.setSubject(source.getSubject());
         destination.setSummary(source.getSummary());
         destination.setBody(source.getBody());
@@ -77,7 +77,7 @@ public class InboxMessageConverter {
         final GetInboxMessageDetailResponse destination = new GetInboxMessageDetailResponse();
         destination.setId(source.getInboxId());
         destination.setUserId(source.getUserId());
-        destination.setType(MessageType.fromLowerCaseString(source.getMessageType()));
+        destination.setType(MessageType.fromLowerCaseString(source.getType()));
         destination.setSubject(source.getSubject());
         destination.setSummary(source.getSummary());
         destination.setBody(source.getBody());
@@ -100,7 +100,7 @@ public class InboxMessageConverter {
         }
         final InboxMessage destination = new InboxMessage();
         destination.setId(source.getInboxId());
-        destination.setType(MessageType.fromLowerCaseString(source.getMessageType()));
+        destination.setType(MessageType.fromLowerCaseString(source.getType()));
         destination.setSubject(source.getSubject());
         destination.setSummary(source.getSummary());
         destination.setRead(source.isRead());
