@@ -55,7 +55,7 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      * @param pageable Paging parameters.
      * @return List of messages for user ID with provided read state.
      */
-    @Query("SELECT DISTINCT o FROM InboxMessageEntity o INNER JOIN o.applications a WHERE o.userId = :userId AND a.appId in :applicationIds AND o.read = :read ORDER BY o.timestampCreated DESC")
+    @Query("SELECT DISTINCT o FROM InboxMessageEntity o INNER JOIN o.applications a WHERE o.userId = :userId AND a.appId in :applicationIds AND o.isRead = :read ORDER BY o.timestampCreated DESC")
     List<InboxMessageEntity> findAllByUserIdAndApplicationsContainingAndReadOrderByTimestampCreatedDesc(String userId, List<String> applicationIds, boolean read, Pageable pageable);
 
     /**
@@ -69,10 +69,10 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      * Return how many there are records for given user ID with provided read state.
      * @param userId User ID.
      * @param app Application.
-     * @param read Read status.
+     * @param isRead Read status.
      * @return Count of messages for given user in provided read state.
      */
-    long countAllByUserIdAndApplicationsContainingAndRead(String userId, AppCredentialsEntity app, boolean read);
+    long countAllByUserIdAndApplicationsContainingAndIsRead(String userId, AppCredentialsEntity app, boolean isRead);
 
     /**
      * Mark all user messages as read.
@@ -81,7 +81,7 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      * @param date Date to which mark the messages as read.
      * @return Number of messages which were read.
      */
-    @Query("UPDATE InboxMessageEntity i SET i.read = true, i.timestampRead = :date WHERE i.userId = :userId AND :app MEMBER OF i.applications AND i.read = false")
+    @Query("UPDATE InboxMessageEntity i SET i.isRead = true, i.timestampRead = :date WHERE i.userId = :userId AND :app MEMBER OF i.applications AND i.isRead = false")
     @Modifying
     int markAllAsRead(String userId, AppCredentialsEntity app, Date date);
 
