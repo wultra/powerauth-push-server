@@ -60,7 +60,7 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      */
     @Query("SELECT o FROM InboxMessageEntity o WHERE o.id IN (" +
             "SELECT DISTINCT o1.id FROM InboxMessageEntity o1 INNER JOIN o1.applications a " +
-            "WHERE o1.userId = :userId AND a.appId IN :applicationIds AND o1.isRead = :read" +
+            "WHERE o1.userId = :userId AND a.appId IN :applicationIds AND o1.read = :read" +
             ") ORDER BY o.timestampCreated DESC")
     List<InboxMessageEntity> findAllByUserIdAndApplicationsContainingAndReadOrderByTimestampCreatedDesc(String userId, List<String> applicationIds, boolean read, Pageable pageable);
 
