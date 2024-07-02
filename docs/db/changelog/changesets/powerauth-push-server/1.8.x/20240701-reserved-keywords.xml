@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="1" logicalFilePath="powerauth-push-server/1.8.x/20240701-reserved-keywords.xml" author="Roman Strobl">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="push_inbox"/>
+                <columnExists tableName="push_inbox" columnName="read"/>
+                <columnExists tableName="push_inbox" columnName="type"/>
+            </and>
+        </preConditions>
+        <comment>Rename columns read to is_read and type to message_type in push_inbox table</comment>
+        <renameColumn tableName="push_inbox" oldColumnName="read" newColumnName="is_read" columnDataType="boolean"/>
+        <renameColumn tableName="push_inbox" oldColumnName="type" newColumnName="message_type" columnDataType="varchar(32)"/>
+    </changeSet>
+
+</databaseChangeLog>
