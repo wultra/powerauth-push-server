@@ -76,8 +76,8 @@ public class InboxMessageEntity implements Serializable {
     /**
      * Message type.
      */
-    @Column(name = "message_type", nullable = false)
-    private String messageType;
+    @Column(name = "`type`", nullable = false)
+    private String type;
 
     /**
      * Message subject.
@@ -100,8 +100,8 @@ public class InboxMessageEntity implements Serializable {
     /**
      * Flag indicating if the message was read.
      */
-    @Column(name = "is_read")
-    private boolean isRead;
+    @Column(name = "`read`")
+    private boolean read;
 
     /**
      * Timestamp the message was created.
@@ -122,7 +122,7 @@ public class InboxMessageEntity implements Serializable {
         return inboxId.equals(that.inboxId)
                 && userId.equals(that.userId)
                 && applications.equals(that.applications)
-                && messageType.equals(that.messageType)
+                && type.equals(that.type)
                 && subject.equals(that.subject)
                 && summary.equals(that.summary)
                 && body.equals(that.body)
@@ -131,6 +131,6 @@ public class InboxMessageEntity implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(inboxId, userId, applications, messageType, subject, summary, body, timestampCreated);
+        return Objects.hash(inboxId, userId, applications, type, subject, summary, body, timestampCreated);
     }
 }

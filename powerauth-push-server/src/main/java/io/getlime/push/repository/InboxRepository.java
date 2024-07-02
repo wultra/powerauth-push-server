@@ -75,10 +75,10 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      * Return how many there are records for given user ID with provided read state.
      * @param userId User ID.
      * @param app Application.
-     * @param isRead Read status.
+     * @param read Read status.
      * @return Count of messages for given user in provided read state.
      */
-    long countAllByUserIdAndApplicationsContainingAndIsRead(String userId, AppCredentialsEntity app, boolean isRead);
+    long countAllByUserIdAndApplicationsContainingAndRead(String userId, AppCredentialsEntity app, boolean read);
 
     /**
      * Mark all user messages as read.
@@ -87,7 +87,7 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      * @param date Date to which mark the messages as read.
      * @return Number of messages which were read.
      */
-    @Query("UPDATE InboxMessageEntity i SET i.isRead = true, i.timestampRead = :date WHERE i.userId = :userId AND :app MEMBER OF i.applications AND i.isRead = false")
+    @Query("UPDATE InboxMessageEntity i SET i.read = true, i.timestampRead = :date WHERE i.userId = :userId AND :app MEMBER OF i.applications AND i.read = false")
     @Modifying
     int markAllAsRead(String userId, AppCredentialsEntity app, Date date);
 

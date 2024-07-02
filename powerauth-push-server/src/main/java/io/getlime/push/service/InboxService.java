@@ -134,7 +134,7 @@ public class InboxService {
     @Transactional(readOnly=true)
     public GetInboxMessageCountResponse fetchMessageCountForUser(String userId, String appId) throws AppNotFoundException {
         final AppCredentialsEntity app = fetchAppForAppId(appId);
-        final long countUnread = inboxRepository.countAllByUserIdAndApplicationsContainingAndIsRead(userId, app,false);
+        final long countUnread = inboxRepository.countAllByUserIdAndApplicationsContainingAndRead(userId, app,false);
         return new GetInboxMessageCountResponse(countUnread);
     }
 
