@@ -44,7 +44,10 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      * @param pageable Paging parameters.
      * @return List of messages for user ID.
      */
-    @Query("SELECT DISTINCT o FROM InboxMessageEntity o INNER JOIN o.applications a WHERE o.userId = :userId AND a.appId in :applicationIds ORDER BY o.timestampCreated DESC")
+    @Query("SELECT o FROM InboxMessageEntity o WHERE o.id IN (" +
+            "SELECT DISTINCT o1.id FROM InboxMessageEntity o1 INNER JOIN o1.applications a " +
+            "WHERE o1.userId = :userId AND a.appId IN :applicationIds" +
+            ") ORDER BY o.timestampCreated DESC")
     List<InboxMessageEntity> findInboxMessagesForUserAndApplications(String userId, List<String> applicationIds, Pageable pageable);
 
     /**
@@ -55,7 +58,10 @@ public interface InboxRepository extends PagingAndSortingRepository<InboxMessage
      * @param pageable Paging parameters.
      * @return List of messages for user ID with provided read state.
      */
-    @Query("SELECT DISTINCT o FROM InboxMessageEntity o INNER JOIN o.applications a WHERE o.userId = :userId AND a.appId in :applicationIds AND o.read = :read ORDER BY o.timestampCreated DESC")
+    @Query("SELECT o FROM InboxMessageEntity o WHERE o.id IN (" +
+            "SELECT DISTINCT o1.id FROM InboxMessageEntity o1 INNER JOIN o1.applications a " +
+            "WHERE o1.userId = :userId AND a.appId IN :applicationIds AND o1.read = :read" +
+            ") ORDER BY o.timestampCreated DESC")
     List<InboxMessageEntity> findAllByUserIdAndApplicationsContainingAndReadOrderByTimestampCreatedDesc(String userId, List<String> applicationIds, boolean read, Pageable pageable);
 
     /**
