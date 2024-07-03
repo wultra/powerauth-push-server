@@ -76,7 +76,7 @@ public class InboxMessageEntity implements Serializable {
     /**
      * Message type.
      */
-    @Column(name = "type", nullable = false)
+    @Column(name = "`type`", nullable = false)
     private String type;
 
     /**
@@ -100,7 +100,7 @@ public class InboxMessageEntity implements Serializable {
     /**
      * Flag indicating if the message was read.
      */
-    @Column(name = "read")
+    @Column(name = "`read`")
     private boolean read;
 
     /**
