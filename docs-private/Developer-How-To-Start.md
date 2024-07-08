@@ -21,3 +21,22 @@ Others (like URL, username, password) depend on your environment.
 ```shell
 liquibase --changelog-file=./docs/db/changelog/changesets/powerauth-push-server/db.changelog-module.xml --url=jdbc:postgresql://localhost:5432/powerauth --username=powerauth status
 ``` 
+
+#### PostgreSQL
+
+```shell
+liquibase --changeLogFile=./docs/db/changelog/changesets/powerauth-push-server/db.changelog-module.xml --output-file=./docs/sql/postgresql/migration_1.7.0_1.8.0.sql updateSQL --url=offline:postgresql
+```
+
+#### Oracle
+
+```shell
+liquibase --changeLogFile=./docs/db/changelog/changesets/powerauth-push-server/db.changelog-module.xml --output-file=./docs/sql/oracle/migration_1.7.0_1.8.0.sql updateSQL --url=offline:oracle
+```
+
+
+#### MSSQL
+
+```shell
+liquibase --changeLogFile=./docs/db/changelog/changesets/powerauth-push-server/db.changelog-module.xml --output-file=./docs/sql/mssql/migration_1.7.0_1.8.0.sql updateSQL --url=offline:mssql
+```
