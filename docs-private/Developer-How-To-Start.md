@@ -22,6 +22,8 @@ Others (like URL, username, password) depend on your environment.
 liquibase --changelog-file=./docs/db/changelog/changesets/powerauth-push-server/db.changelog-module.xml --url=jdbc:postgresql://localhost:5432/powerauth --username=powerauth status
 ``` 
 
+To generate SQL script run following command:
+
 #### PostgreSQL
 
 ```shell
