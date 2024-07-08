@@ -7,7 +7,7 @@ This guide contains instructions for migration from PowerAuth Push Server versio
 
 For convenience, you can use liquibase for your database migration.
 
-**Important: Upgrading to version 1.8.x includes column renaming, resulting in incompatible changes. Therefore, ensure all Push Server nodes are upgraded simultaneously during a scheduled service window.**
+**Important: Upgrading to version 1.8.x includes database column renaming required for the Inbox functionality, resulting in incompatible changes. Therefore, ensure all Push Server nodes are upgraded simultaneously during a scheduled service window.**
 
 If you prefer to make manual DB schema changes, please use the following SQL scripts:
 
