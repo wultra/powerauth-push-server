@@ -8,13 +8,13 @@
 
     <groupId>io.getlime.security</groupId>
     <artifactId>powerauth-push-server-parent</artifactId>
-    <version>1.7.0</version>
+    <version>1.8.0</version>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.4</version>
+        <version>3.3.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -69,21 +69,20 @@
 
     <properties>
         <!--  Wultra Dependencies  -->
-        <wultra-core.version>1.9.0</wultra-core.version>
-        <powerauth.version>1.7.0</powerauth.version>
-        <powerauth-crypto.version>1.7.0</powerauth-crypto.version>
-        <powerauth-restful-integration.version>1.7.0</powerauth-restful-integration.version>
+        <wultra-core.version>1.10.0</wultra-core.version>
+        <powerauth.version>1.8.0</powerauth.version>
+        <powerauth-crypto.version>1.8.0</powerauth-crypto.version>
+        <powerauth-restful-integration.version>1.8.0</powerauth-restful-integration.version>
 
         <!-- Library Versions -->
         <pushy.version>0.15.4</pushy.version>
-        <google-api-client.version>2.4.0</google-api-client.version>
-        <firebase-admin.version>9.2.0</firebase-admin.version>
-        <bc.version>1.77</bc.version>
+        <google-api-client.version>2.6.0</google-api-client.version>
+        <firebase-admin.version>9.3.0</firebase-admin.version>
         <logstash.version>7.4</logstash.version>
 
         <!-- Documentation Dependencies -->
-        <springdoc-openapi-starter-webmvc-ui.version>2.5.0</springdoc-openapi-starter-webmvc-ui.version>
-        <swagger-annotations-jakarta.version>2.2.21</swagger-annotations-jakarta.version>
+        <springdoc-openapi-starter-webmvc-ui.version>2.6.0</springdoc-openapi-starter-webmvc-ui.version>
+        <swagger-annotations-jakarta.version>2.2.22</swagger-annotations-jakarta.version>
 
         <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
     </properties>

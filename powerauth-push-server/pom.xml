@@ -11,7 +11,7 @@
     <parent>
         <groupId>io.getlime.security</groupId>
         <artifactId>powerauth-push-server-parent</artifactId>
-        <version>1.7.0</version>
+        <version>1.8.0</version>
     </parent>
 
     <dependencyManagement>
@@ -200,12 +200,6 @@
             <version>${powerauth-restful-integration.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
-            <version>${bc.version}</version>
-            <scope>test</scope>
-        </dependency>
 
         <!-- Documentation -->
         <dependency>
@@ -229,18 +223,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <!-- Fix startup issue on Java 11 on Wildfly 'Unable to instantiate proxy using Objenesis' -->
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Dependencies>jdk.unsupported</Dependencies>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -6,7 +6,7 @@ Push Server contains the following configuration in `jboss-deployment-structure.
 
 ```xml
 <?xml version="1.0"?>
-<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.2">
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.3">
   <deployment>
     <exclude-subsystems>
       <!-- disable the logging subsystem because the application manages its own logging independently -->
@@ -83,15 +83,14 @@ Use the `logback.xml` file to configure logging, for example:
 The `application-ext.properties` file is used to override default configuration properties, for example:
 
 ```
+spring.datasource.jndi-name=java:/jdbc/powerauth
+
 # PowerAuth 2.0 Client configuration
 powerauth.service.url=https://[host]:[port]/powerauth-java-server/rest
 ```
 
+Mind that you should specify `spring.datasource.jndi-name` to use the application server datasource (its declaration is out of the scope of this guideline).
+When configure `spring.datasource.url`, the hikari connection pool is used.
+Spring Boot running on WildFly or JBoos initializes [JtaTransactionManager](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/jta/JtaTransactionManager.html).
+
 Push Server Spring application uses the `ext` Spring profile which activates overriding of default properties by `application-ext.properties`.
-
-### Bouncy Castle Installation
-
-The Bouncy Castle module for JBoss / Wildfly needs to be enabled as a global module for Push Server.
-
-Follow the instructions in the [Installing Bouncy Castle](https://github.com/wultra/powerauth-server/blob/develop/docs/Installing-Bouncy-Castle.md) chapter of PowerAuth Server documentation.
-Note that the instructions differ based on Java version and application server type.
