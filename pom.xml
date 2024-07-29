@@ -78,7 +78,7 @@
         <pushy.version>0.15.4</pushy.version>
         <google-api-client.version>2.6.0</google-api-client.version>
         <firebase-admin.version>9.3.0</firebase-admin.version>
-        <logstash.version>7.4</logstash.version>
+        <logstash.version>8.0</logstash.version>
 
         <!-- Documentation Dependencies -->
         <springdoc-openapi-starter-webmvc-ui.version>2.6.0</springdoc-openapi-starter-webmvc-ui.version>
