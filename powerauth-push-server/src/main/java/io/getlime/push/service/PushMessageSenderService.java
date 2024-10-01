@@ -261,16 +261,24 @@ public class PushMessageSenderService {
     }
 
     // Return list of devices related to given user or activation ID (if present). List of devices is related to particular application as well.
-    private List<PushDeviceRegistrationEntity> getPushDevices(Long id, String userId, String activationId) throws PushServerException {
+    private List<PushDeviceRegistrationEntity> getPushDevices(Long appCredentialsId, String userId, String activationId) throws PushServerException {
         if (userId == null || userId.isEmpty()) {
             logger.error("No userId was specified");
             throw new PushServerException("No userId was specified");
         }
+
+        final List<PushDeviceRegistrationEntity> devices;
         if (activationId != null) { // in case the message should go to the specific device
-            return pushDeviceRepository.findByUserIdAndAppCredentialsIdAndActivationId(userId, id, activationId);
+            devices = pushDeviceRepository.findByUserIdAndAppCredentialsIdAndActivationId(userId, appCredentialsId, activationId);
         } else {
-            return pushDeviceRepository.findByUserIdAndAppCredentialsId(userId, id);
+            devices = pushDeviceRepository.findByUserIdAndAppCredentialsId(userId, appCredentialsId);
         }
+
+        if (devices.isEmpty()) {
+            logger.warn("No device found for userId={}, appCredentialsId={}, activationId={}", userId, appCredentialsId, activationId);
+        }
+
+        return devices;
     }
 
     // Prepare and cache APNS, FCM, and HMS clients for provided app
