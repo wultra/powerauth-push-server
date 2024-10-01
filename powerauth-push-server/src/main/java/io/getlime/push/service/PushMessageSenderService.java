@@ -275,7 +275,7 @@ public class PushMessageSenderService {
         }
 
         if (devices.isEmpty()) {
-            throw new PushServerException("No device found for userId=%s, appCredentialsId=%s, activationId=%s".formatted(userId, appCredentialsId, activationId));
+            logger.warn("No device found for userId={}, appCredentialsId={}, activationId={}", userId, appCredentialsId, activationId);
         }
 
         return devices;
