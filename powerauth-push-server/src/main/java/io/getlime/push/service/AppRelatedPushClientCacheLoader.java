@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Specialization of {@link CacheLoader} for {@link AppRelatedPushClient}.
@@ -45,7 +46,7 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
     @Override
     public AppRelatedPushClient reload(final String key, final AppRelatedPushClient oldValue) throws Exception {
         final LocalDateTime lastUpdated = appCredentialsRepository.findFirstByAppId(key).map(AppCredentialsEntity::getTimestampLastUpdated).orElse(null);
-        if (oldValue.getTimestampLastUpdated().equals(lastUpdated)) {
+        if (Objects.equals(oldValue.getAppCredentials().getTimestampLastUpdated(), lastUpdated)) {
             logger.debug("LastUpdated is same for app: {}", key);
             return oldValue;
         }
@@ -80,7 +81,6 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
             pushClient.setHmsClient(hmsClient);
         }
         pushClient.setAppCredentials(credentials);
-        pushClient.setTimestampLastUpdated(credentials.getTimestampLastUpdated());
         return pushClient;
     }
 }

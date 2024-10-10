@@ -22,8 +22,6 @@ import io.getlime.push.service.hms.HmsClient;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 /**
  * Class storing app credentials and clients.
  *
@@ -53,5 +51,4 @@ public class AppRelatedPushClient {
      */
     private HmsClient hmsClient;
 
-    private LocalDateTime timestampLastUpdated;
 }
