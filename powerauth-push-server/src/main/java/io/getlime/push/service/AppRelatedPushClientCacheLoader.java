@@ -80,6 +80,7 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
             pushClient.setHmsClient(hmsClient);
         }
         pushClient.setAppCredentials(credentials);
+        pushClient.setTimestampLastUpdated(credentials.getTimestampLastUpdated());
         return pushClient;
     }
 }
