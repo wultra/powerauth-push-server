@@ -22,6 +22,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * Class representing application tokens used to authenticate against APNs, FCM, or HMS services.
@@ -111,5 +112,12 @@ public class AppCredentialsEntity implements Serializable {
      */
     @Column(name = "hms_client_secret")
     private String hmsClientSecret;
+
+    // TODO Lubos - db documentation and liquibase scripts, test
+    @Column(name = "timestamp_created", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime timestampCreated = LocalDateTime.now();
+
+    @Column(name = "timestamp_last_updated")
+    private LocalDateTime timestampLastUpdated;
 
 }

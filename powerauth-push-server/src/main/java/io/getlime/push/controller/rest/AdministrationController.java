@@ -15,6 +15,7 @@
  */
 package io.getlime.push.controller.rest;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.wultra.security.powerauth.client.PowerAuthClient;
 import com.wultra.security.powerauth.client.model.entity.Application;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
@@ -31,7 +32,7 @@ import io.getlime.push.model.response.GetApplicationListResponse;
 import io.getlime.push.model.validator.*;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
-import io.getlime.push.service.batch.storage.AppCredentialStorage;
+import io.getlime.push.service.AppRelatedPushClient;
 import io.getlime.push.service.http.HttpCustomizationService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -53,7 +54,7 @@ public class AdministrationController {
 
     private final PowerAuthClient powerAuthClient;
     private final AppCredentialsRepository appCredentialsRepository;
-    private final AppCredentialStorage appCredentialStorage;
+    private final LoadingCache<String, AppRelatedPushClient> appRelatedPushClientCache;
     private final HttpCustomizationService httpCustomizationService;
 
     /**
@@ -213,7 +214,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosBundle(requestObject.getBundle());
         appCredentialsEntity.setIosEnvironment(convert(requestObject.getEnvironment()));
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
+        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The updateIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
@@ -248,7 +249,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosBundle(null);
         appCredentialsEntity.setIosEnvironment(null);
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
+        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The removeIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
@@ -275,7 +276,7 @@ public class AdministrationController {
         appCredentialsEntity.setAndroidPrivateKey(privateKeyBytes);
         appCredentialsEntity.setAndroidProjectId(requestObject.getProjectId());
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
+        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The updateAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
@@ -301,7 +302,7 @@ public class AdministrationController {
         appCredentialsEntity.setAndroidPrivateKey(null);
         appCredentialsEntity.setAndroidProjectId(null);
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
+        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The removeAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
@@ -323,7 +324,7 @@ public class AdministrationController {
         appCredentialsEntity.setHmsClientId(requestObject.getClientId());
         appCredentialsEntity.setHmsClientSecret(requestObject.getClientSecret());
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
+        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The update Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
@@ -345,7 +346,7 @@ public class AdministrationController {
         appCredentialsEntity.setHmsClientSecret(null);
         appCredentialsEntity.setHmsClientId(null);
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
+        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The remove Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }

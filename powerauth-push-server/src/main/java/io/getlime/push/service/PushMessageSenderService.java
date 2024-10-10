@@ -16,7 +16,7 @@
 
 package io.getlime.push.service;
 
-import com.eatthepath.pushy.apns.ApnsClient;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.*;
@@ -30,9 +30,6 @@ import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.Platform;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
-import io.getlime.push.service.batch.storage.AppCredentialStorage;
-import io.getlime.push.service.fcm.FcmClient;
-import io.getlime.push.service.hms.HmsClient;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -54,7 +51,7 @@ public class PushMessageSenderService {
     private final AppCredentialsRepository appCredentialsRepository;
     private final PushDeviceRepository pushDeviceRepository;
     private final PushMessageDAO pushMessageDAO;
-    private final AppCredentialStorage appCredentialStorage;
+    private final LoadingCache<String, AppRelatedPushClient> appRelatedPushClientCache;
     private final PushServiceConfiguration configuration;
 
     /**
@@ -67,7 +64,6 @@ public class PushMessageSenderService {
      * @throws PushServerException In case push message sending fails.
      */
     public BasePushMessageSendResult sendPushMessage(final String appId, final Mode mode, List<PushMessage> pushMessageList) throws PushServerException {
-        // Prepare clients
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
         // Prepare synchronization primitive for parallel push message sending
@@ -200,7 +196,6 @@ public class PushMessageSenderService {
      * the error can be found in exception message.
      */
     public void sendCampaignMessage(final String appId, Platform platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, Priority priority, String userId, Long deviceId, String activationId) throws PushServerException {
-
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
         final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, activationId, deviceId);
@@ -256,32 +251,12 @@ public class PushMessageSenderService {
         return devices;
     }
 
-    // Prepare and cache APNS, FCM, and HMS clients for provided app
     private AppRelatedPushClient prepareClients(String appId) throws PushServerException {
-        synchronized (this) {
-            AppRelatedPushClient pushClient = appCredentialStorage.get(appId);
-            if (pushClient == null) {
-                final AppCredentialsEntity credentials = getAppCredentials(appId);
-                pushClient = new AppRelatedPushClient();
-                if (credentials.getIosPrivateKey() != null) {
-                    final ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials);
-                    pushClient.setApnsClient(apnsClient);
-                }
-                if (credentials.getAndroidPrivateKey() != null) {
-                    final FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
-                    pushClient.setFcmClient(fcmClient);
-                }
-                if (credentials.getHmsClientId() != null) {
-                    final HmsClient hmsClient = pushSendingWorker.prepareHmsClient(credentials);
-                    pushClient.setHmsClient(hmsClient);
-                }
-                pushClient.setAppCredentials(credentials);
-                // TODO (racansky, 2024-10-10) refactor #get and #put to Cache#get(K key, Function<K, V> mappingFunction)
-                appCredentialStorage.put(appId, pushClient);
-                logger.info("Creating APNS, FCM, and HMS clients for app {}", appId);
-            }
-            return pushClient;
+        final AppRelatedPushClient pushClient = appRelatedPushClientCache.get(appId);
+        if (pushClient == null) {
+            throw new PushServerException("AppCredentials not found: " + appId);
         }
+        return pushClient;
     }
 
 
