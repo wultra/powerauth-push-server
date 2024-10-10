@@ -31,12 +31,11 @@ import io.getlime.push.model.response.GetApplicationListResponse;
 import io.getlime.push.model.validator.*;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
-import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
+import io.getlime.push.service.batch.storage.AppCredentialStorage;
 import io.getlime.push.service.http.HttpCustomizationService;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -46,31 +45,16 @@ import java.util.*;
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
+@Slf4j
+@AllArgsConstructor
 @RestController
 @RequestMapping(value = "admin/app")
 public class AdministrationController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdministrationController.class);
-
     private final PowerAuthClient powerAuthClient;
     private final AppCredentialsRepository appCredentialsRepository;
-    private final AppCredentialStorageMap appCredentialStorageMap;
+    private final AppCredentialStorage appCredentialStorage;
     private final HttpCustomizationService httpCustomizationService;
-
-    /**
-     * Constructor with injected fields.
-     * @param powerAuthClient PowerAuth service client.
-     * @param appCredentialsRepository Application credentials repository.
-     * @param appCredentialStorageMap Application credentials storage map.
-     * @param httpCustomizationService HTTP customization service.
-     */
-    @Autowired
-    public AdministrationController(PowerAuthClient powerAuthClient, AppCredentialsRepository appCredentialsRepository, AppCredentialStorageMap appCredentialStorageMap, HttpCustomizationService httpCustomizationService) {
-        this.powerAuthClient = powerAuthClient;
-        this.appCredentialsRepository = appCredentialsRepository;
-        this.appCredentialStorageMap = appCredentialStorageMap;
-        this.httpCustomizationService = httpCustomizationService;
-    }
 
     /**
      * List applications configured in Push Server.
@@ -229,7 +213,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosBundle(requestObject.getBundle());
         appCredentialsEntity.setIosEnvironment(convert(requestObject.getEnvironment()));
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
         logger.info("The updateIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
@@ -264,7 +248,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosBundle(null);
         appCredentialsEntity.setIosEnvironment(null);
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
         logger.info("The removeIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
@@ -291,7 +275,7 @@ public class AdministrationController {
         appCredentialsEntity.setAndroidPrivateKey(privateKeyBytes);
         appCredentialsEntity.setAndroidProjectId(requestObject.getProjectId());
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
         logger.info("The updateAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
@@ -317,7 +301,7 @@ public class AdministrationController {
         appCredentialsEntity.setAndroidPrivateKey(null);
         appCredentialsEntity.setAndroidProjectId(null);
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
         logger.info("The removeAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
@@ -339,7 +323,7 @@ public class AdministrationController {
         appCredentialsEntity.setHmsClientId(requestObject.getClientId());
         appCredentialsEntity.setHmsClientSecret(requestObject.getClientSecret());
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
         logger.info("The update Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }
@@ -361,7 +345,7 @@ public class AdministrationController {
         appCredentialsEntity.setHmsClientSecret(null);
         appCredentialsEntity.setHmsClientId(null);
         appCredentialsRepository.save(appCredentialsEntity);
-        appCredentialStorageMap.cleanByKey(appCredentialsEntity.getAppId());
+        appCredentialStorage.cleanByKey(appCredentialsEntity.getAppId());
         logger.info("The remove Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
         return new Response();
     }

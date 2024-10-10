@@ -15,43 +15,45 @@
  */
 package io.getlime.push.service.batch.storage;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.getlime.push.service.AppRelatedPushClient;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.time.Duration;
 
 /**
  * Simple in-memory storage cache for app credentials and push service clients.
- * Uses {@link ConcurrentHashMap} as an underlying storage.
+ * Uses {@link Cache} as an underlying storage.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-public class AppCredentialStorageMap implements ItemStorageMap<String, AppRelatedPushClient> {
+public class AppCredentialStorage implements ItemStorage<String, AppRelatedPushClient> {
 
-    private final ConcurrentMap<String, AppRelatedPushClient> map = new ConcurrentHashMap<>();
+    private final Cache<String, AppRelatedPushClient> cache;
+
+    /**
+     * All-arg constructor.
+     *
+     * @param expireAfterWrite The length of time after an entry is created that it should be automatically removed.
+     */
+    public AppCredentialStorage(final Duration expireAfterWrite) {
+         cache = Caffeine.newBuilder()
+                .expireAfterWrite(expireAfterWrite)
+                .build();
+    }
 
     @Override
     public AppRelatedPushClient get(String key) {
-        return map.get(key);
+        return cache.getIfPresent(key);
     }
 
     @Override
     public void put(String key, AppRelatedPushClient value) {
-        map.put(key, value);
+        cache.put(key, value);
     }
 
     @Override
-    public boolean contains(String key) {
-        return map.containsKey(key);
-    }
-
-    @Override
-    public void cleanAll() {
-        map.clear();
-    }
-
-    @Override
-    public void cleanByKey(String key) {
-        map.remove(key);
+    public void cleanByKey(final String key) {
+        cache.invalidate(key);
     }
 }

@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
-public class CampaignMessageStorageMap implements ItemStorageMap<Long, PushCampaignEntity> {
+public class CampaignMessageStorage implements ItemStorage<Long, PushCampaignEntity> {
 
     private final ConcurrentMap<Long, PushCampaignEntity> mapStorage = new ConcurrentHashMap<>();
 
@@ -40,16 +40,6 @@ public class CampaignMessageStorageMap implements ItemStorageMap<Long, PushCampa
     @Override
     public void put(Long key, PushCampaignEntity value) {
         mapStorage.put(key, value);
-    }
-
-    @Override
-    public boolean contains(Long key) {
-        return mapStorage.containsKey(key);
-    }
-
-    @Override
-    public void cleanAll() {
-        mapStorage.clear();
     }
 
     @Override

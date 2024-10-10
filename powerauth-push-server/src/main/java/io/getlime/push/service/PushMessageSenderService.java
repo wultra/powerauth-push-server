@@ -30,12 +30,11 @@ import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.Platform;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
-import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
+import io.getlime.push.service.batch.storage.AppCredentialStorage;
 import io.getlime.push.service.fcm.FcmClient;
 import io.getlime.push.service.hms.HmsClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,41 +45,17 @@ import java.util.concurrent.Phaser;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Slf4j
+@AllArgsConstructor
 @Service
 public class PushMessageSenderService {
-
-    private static final Logger logger = LoggerFactory.getLogger(PushMessageSenderService.class);
 
     private final PushSendingWorker pushSendingWorker;
     private final AppCredentialsRepository appCredentialsRepository;
     private final PushDeviceRepository pushDeviceRepository;
     private final PushMessageDAO pushMessageDAO;
-    private final AppCredentialStorageMap appRelatedPushClientMap;
+    private final AppCredentialStorage appCredentialStorage;
     private final PushServiceConfiguration configuration;
-
-    /**
-     * Constructor with autowired dependencies.
-     * @param appCredentialsRepository App credentials repository.
-     * @param pushDeviceRepository Push service repository.
-     * @param pushMessageDAO Push message DAO.
-     * @param pushSendingWorker Push sending worker.
-     * @param appRelatedPushClientMap Map with cached push clients in a map.
-     * @param configuration Push service configuration.
-     */
-    @Autowired
-    public PushMessageSenderService(AppCredentialsRepository appCredentialsRepository,
-                                    PushDeviceRepository pushDeviceRepository,
-                                    PushMessageDAO pushMessageDAO,
-                                    PushSendingWorker pushSendingWorker,
-                                    AppCredentialStorageMap appRelatedPushClientMap,
-                                    PushServiceConfiguration configuration) {
-        this.appCredentialsRepository = appCredentialsRepository;
-        this.pushDeviceRepository = pushDeviceRepository;
-        this.pushMessageDAO = pushMessageDAO;
-        this.pushSendingWorker = pushSendingWorker;
-        this.appRelatedPushClientMap = appRelatedPushClientMap;
-        this.configuration = configuration;
-    }
 
     /**
      * Send push notifications to given application.
@@ -284,7 +259,7 @@ public class PushMessageSenderService {
     // Prepare and cache APNS, FCM, and HMS clients for provided app
     private AppRelatedPushClient prepareClients(String appId) throws PushServerException {
         synchronized (this) {
-            AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
+            AppRelatedPushClient pushClient = appCredentialStorage.get(appId);
             if (pushClient == null) {
                 final AppCredentialsEntity credentials = getAppCredentials(appId);
                 pushClient = new AppRelatedPushClient();
@@ -301,7 +276,8 @@ public class PushMessageSenderService {
                     pushClient.setHmsClient(hmsClient);
                 }
                 pushClient.setAppCredentials(credentials);
-                appRelatedPushClientMap.put(appId, pushClient);
+                // TODO (racansky, 2024-10-10) refactor #get and #put to Cache#get(K key, Function<K, V> mappingFunction)
+                appCredentialStorage.put(appId, pushClient);
                 logger.info("Creating APNS, FCM, and HMS clients for app {}", appId);
             }
             return pushClient;

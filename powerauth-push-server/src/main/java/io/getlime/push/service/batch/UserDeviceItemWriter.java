@@ -24,7 +24,7 @@ import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.aggregate.UserDevice;
 import io.getlime.push.repository.serialization.JsonSerialization;
 import io.getlime.push.service.PushMessageSenderService;
-import io.getlime.push.service.batch.storage.CampaignMessageStorageMap;
+import io.getlime.push.service.batch.storage.CampaignMessageStorage;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
@@ -45,7 +45,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
     private final JsonSerialization jsonSerialization;
 
     // Non-autowired fields
-    private final CampaignMessageStorageMap campaignStorageMap = new CampaignMessageStorageMap();
+    private final CampaignMessageStorage campaignMessageStorage = new CampaignMessageStorage();
 
     /**
      * Constructor with autowired dependencies.
@@ -77,11 +77,11 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
             final String activationId = device.getActivationId();
 
             // Load and cache campaign information
-            PushCampaignEntity campaign = campaignStorageMap.get(campaignId);
+            PushCampaignEntity campaign = campaignMessageStorage.get(campaignId);
             if (campaign == null) {
                 campaign = pushCampaignRepository.findById(campaignId).orElseThrow(() ->
                     new PushServerException("Campaign with entered ID does not exist"));
-                campaignStorageMap.put(campaignId, campaign);
+                campaignMessageStorage.put(campaignId, campaign);
             }
             final PushMessageBody messageBody = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
 
