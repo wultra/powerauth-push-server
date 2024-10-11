@@ -11,7 +11,7 @@
     <parent>
         <artifactId>powerauth-push-server-parent</artifactId>
         <groupId>io.getlime.security</groupId>
-        <version>1.9.0-SNAPSHOT</version>
+        <version>1.9.0</version>
     </parent>
 
     <dependencies>
