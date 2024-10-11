@@ -45,11 +45,19 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
 
     @Override
     public AppRelatedPushClient reload(final String key, final AppRelatedPushClient oldValue) throws Exception {
-        final LocalDateTime lastUpdated = appCredentialsRepository.findFirstByAppId(key).map(AppCredentialsEntity::getTimestampLastUpdated).orElse(null);
-        if (Objects.equals(oldValue.getAppCredentials().getTimestampLastUpdated(), lastUpdated)) {
+        final AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(key).orElse(null);
+        if (credentials == null) {
+            logger.debug("AppCredentials does not exist anymore for app: {}", key);
+            return null;
+        }
+
+        final LocalDateTime lastUpdatedInDb = credentials.getTimestampLastUpdated();
+        final LocalDateTime lastUpdatedInCache = oldValue.getAppCredentials().getTimestampLastUpdated();
+        if (Objects.equals(lastUpdatedInCache, lastUpdatedInDb)) {
             logger.debug("LastUpdated is same for app: {}", key);
             return oldValue;
         }
+
         logger.debug("LastUpdated differs for app: {}", key);
         return load(key);
     }
@@ -68,19 +76,23 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
 
     private AppRelatedPushClient createPushClient(final AppCredentialsEntity credentials) throws PushServerException {
         final AppRelatedPushClient pushClient = new AppRelatedPushClient();
+        pushClient.setAppCredentials(credentials);
+
         if (credentials.getIosPrivateKey() != null) {
             final ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials);
             pushClient.setApnsClient(apnsClient);
         }
+
         if (credentials.getAndroidPrivateKey() != null) {
             final FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
             pushClient.setFcmClient(fcmClient);
         }
+
         if (credentials.getHmsClientId() != null) {
             final HmsClient hmsClient = pushSendingWorker.prepareHmsClient(credentials);
             pushClient.setHmsClient(hmsClient);
         }
-        pushClient.setAppCredentials(credentials);
+
         return pushClient;
     }
 }
