@@ -24,12 +24,14 @@ import io.getlime.push.repository.model.PushCampaignEntity;
 import io.getlime.push.repository.model.aggregate.UserDevice;
 import io.getlime.push.repository.serialization.JsonSerialization;
 import io.getlime.push.service.PushMessageSenderService;
-import io.getlime.push.service.batch.storage.CampaignMessageStorage;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Item writer that send notification to directed device and save message to database.
@@ -45,7 +47,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
     private final JsonSerialization jsonSerialization;
 
     // Non-autowired fields
-    private final CampaignMessageStorage campaignMessageStorage = new CampaignMessageStorage();
+    private final ConcurrentMap<Long, PushCampaignEntity> campaignMessageStorage = new ConcurrentHashMap<>();
 
     /**
      * Constructor with autowired dependencies.
@@ -76,13 +78,12 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
             final Long deviceId = device.getDeviceId();
             final String activationId = device.getActivationId();
 
-            // Load and cache campaign information
-            PushCampaignEntity campaign = campaignMessageStorage.get(campaignId);
+            final PushCampaignEntity campaign = campaignMessageStorage.computeIfAbsent(campaignId, k ->
+                    pushCampaignRepository.findById(k).orElse(null));
             if (campaign == null) {
-                campaign = pushCampaignRepository.findById(campaignId).orElseThrow(() ->
-                    new PushServerException("Campaign with entered ID does not exist"));
-                campaignMessageStorage.put(campaignId, campaign);
+                throw new PushServerException("Campaign with entered ID: %s does not exist".formatted(campaign));
             }
+
             final PushMessageBody messageBody = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
 
             // Send the push message using push sender service
