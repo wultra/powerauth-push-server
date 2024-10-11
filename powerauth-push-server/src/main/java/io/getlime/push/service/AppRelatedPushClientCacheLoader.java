@@ -43,6 +43,12 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
 
     private final PushSendingWorker pushSendingWorker;
 
+    /**
+     * Smartly reload {@link AppRelatedPushClient}.
+     * Fetch {@link AppCredentialsEntity#getTimestampLastUpdated()} and reload only if the value differs from the value store in the cache.
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     public AppRelatedPushClient reload(final String key, final AppRelatedPushClient oldValue) throws Exception {
         final AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(key).orElse(null);
