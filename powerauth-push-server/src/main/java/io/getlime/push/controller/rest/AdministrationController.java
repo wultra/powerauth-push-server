@@ -39,6 +39,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -213,6 +214,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosKeyId(requestObject.getKeyId());
         appCredentialsEntity.setIosBundle(requestObject.getBundle());
         appCredentialsEntity.setIosEnvironment(convert(requestObject.getEnvironment()));
+        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The updateIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
@@ -248,6 +250,7 @@ public class AdministrationController {
         appCredentialsEntity.setIosKeyId(null);
         appCredentialsEntity.setIosBundle(null);
         appCredentialsEntity.setIosEnvironment(null);
+        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The removeIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
@@ -275,6 +278,7 @@ public class AdministrationController {
         final byte[] privateKeyBytes = Base64.getDecoder().decode(requestObject.getPrivateKeyBase64());
         appCredentialsEntity.setAndroidPrivateKey(privateKeyBytes);
         appCredentialsEntity.setAndroidProjectId(requestObject.getProjectId());
+        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The updateAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
@@ -301,6 +305,7 @@ public class AdministrationController {
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
         appCredentialsEntity.setAndroidPrivateKey(null);
         appCredentialsEntity.setAndroidProjectId(null);
+        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The removeAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
@@ -323,6 +328,7 @@ public class AdministrationController {
         appCredentialsEntity.setHmsProjectId(requestObject.getProjectId());
         appCredentialsEntity.setHmsClientId(requestObject.getClientId());
         appCredentialsEntity.setHmsClientSecret(requestObject.getClientSecret());
+        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The update Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
@@ -345,6 +351,7 @@ public class AdministrationController {
         appCredentialsEntity.setHmsProjectId(null);
         appCredentialsEntity.setHmsClientSecret(null);
         appCredentialsEntity.setHmsClientId(null);
+        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
         logger.info("The remove Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
