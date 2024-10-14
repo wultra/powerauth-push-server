@@ -65,22 +65,23 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
         }
 
         logger.debug("LastUpdated differs for app: {}", appId);
-        return load(appId);
+        return createPushClient(credentials);
     }
 
     @Override
-    public AppRelatedPushClient load(final String key) throws Exception {
-        final AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(key).orElse(null);
+    public AppRelatedPushClient load(final String appId) throws Exception {
+        final AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(appId).orElse(null);
         if (credentials == null) {
-            logger.debug("AppCredentials does not exist for app: {}", key);
+            logger.debug("AppCredentials does not exist for app: {}", appId);
             return null;
         }
 
-        logger.info("Creating APNS, FCM, and HMS clients for app: {}", key);
         return createPushClient(credentials);
     }
 
     private AppRelatedPushClient createPushClient(final AppCredentialsEntity credentials) throws PushServerException {
+        logger.info("Creating APNS, FCM, and HMS clients for app: {}", credentials.getAppId());
+
         final AppRelatedPushClient pushClient = new AppRelatedPushClient();
         pushClient.setAppCredentials(credentials);
 
