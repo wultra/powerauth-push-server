@@ -50,22 +50,22 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
      * {@inheritDoc}
      */
     @Override
-    public AppRelatedPushClient reload(final String key, final AppRelatedPushClient oldValue) throws Exception {
-        final AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(key).orElse(null);
+    public AppRelatedPushClient reload(final String appId, final AppRelatedPushClient oldAppRelatedPushClient) throws Exception {
+        final AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(appId).orElse(null);
         if (credentials == null) {
-            logger.debug("AppCredentials does not exist anymore for app: {}", key);
+            logger.debug("AppCredentials does not exist anymore for app: {}", appId);
             return null;
         }
 
         final LocalDateTime lastUpdatedInDb = credentials.getTimestampLastUpdated();
-        final LocalDateTime lastUpdatedInCache = oldValue.getAppCredentials().getTimestampLastUpdated();
+        final LocalDateTime lastUpdatedInCache = oldAppRelatedPushClient.getAppCredentials().getTimestampLastUpdated();
         if (Objects.equals(lastUpdatedInCache, lastUpdatedInDb)) {
-            logger.debug("LastUpdated is same for app: {}", key);
-            return oldValue;
+            logger.debug("LastUpdated is same for app: {}", appId);
+            return oldAppRelatedPushClient;
         }
 
-        logger.debug("LastUpdated differs for app: {}", key);
-        return load(key);
+        logger.debug("LastUpdated differs for app: {}", appId);
+        return load(appId);
     }
 
     @Override
