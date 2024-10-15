@@ -137,7 +137,7 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
         byte[] applicationSecretBytes = applicationSecret.getBytes(StandardCharsets.UTF_8);
 
         final String protocolVersion = "3.1";
-        final EncryptorParameters encryptorParameters = new EncryptorParameters(protocolVersion, applicationKey, null);
+        final EncryptorParameters encryptorParameters = new EncryptorParameters(protocolVersion, applicationKey, null, null);
         final ClientEncryptorSecrets encryptorSecrets = new ClientEncryptorSecrets(masterPK, applicationSecretBytes);
         final ClientEncryptor clientEncryptor = encryptorFactory.getClientEncryptor(EncryptorId.ACTIVATION_LAYER_2, encryptorParameters, encryptorSecrets);
         final ByteArrayOutputStream baosL2 = new ByteArrayOutputStream();

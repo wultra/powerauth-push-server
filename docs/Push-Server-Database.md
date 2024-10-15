@@ -92,7 +92,9 @@ CREATE TABLE push_app_credentials (
     ios_bundle VARCHAR(255),
     ios_environment VARCHAR(32),
     android_private_key BYTEA,
-    android_project_id VARCHAR(255)
+    android_project_id VARCHAR(255),
+    timestamp_created TIMESTAMP(6) DEFAULT NOW() NOT NULL,
+    timestamp_last_updated TIMESTAMP(6)
 );
 
 CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials (app_id);
@@ -100,17 +102,19 @@ CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials (app_id);
 
 #### Columns
 
-| Name                  | Type         | Info                              | Note                                                                                                                                                                     |
-|-----------------------|--------------|-----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`                  | INTEGER      | primary key, index, autoincrement | Unique credential record ID.                                                                                                                                             |
-| `app_id`              | VARCHAR(255) | index                             | Associated application ID.                                                                                                                                               |
-| `ios_key_id`          | VARCHAR(255) | -                                 | Key ID used for identifying a private key in APNs service.                                                                                                               |
-| `ios_private_key`     | BYTEA        | -                                 | Binary representation of P8 file with private key used for Apple's APNs service.                                                                                         |
-| `ios_team_id`         | VARCHAR(255) | -                                 | Team ID used for sending push notifications.                                                                                                                             |
-| `ios_bundle`          | VARCHAR(255) | -                                 | Application bundle ID, used as a APNs "topic".                                                                                                                           |
-| `ios_environment`     | VARCHAR(32)  | -                                 | Per-application APNs environment setting. `NULL` or unknown value inherits from global server configuration, values `development` or `production` override the settings. |
-| `android_private_key` | BYTEA        | -                                 | Firebase service account private key used when obtaining access tokens for FCM HTTP v1 API.                                                                              |
-| `android_project_id`  | VARCHAR(255) | -                                 | Firebase project ID, used when sending push messages using FCM.                                                                                                          |
+| Name                     | Type         | Info                                 | Note                                                                                                                                                                     |
+|--------------------------|--------------|--------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `id`                     | INTEGER      | primary key, index, autoincrement    | Unique credential record ID.                                                                                                                                             |
+| `app_id`                 | VARCHAR(255) | index                                | Associated application ID.                                                                                                                                               |
+| `ios_key_id`             | VARCHAR(255) | -                                    | Key ID used for identifying a private key in APNs service.                                                                                                               |
+| `ios_private_key`        | BYTEA        | -                                    | Binary representation of P8 file with private key used for Apple's APNs service.                                                                                         |
+| `ios_team_id`            | VARCHAR(255) | -                                    | Team ID used for sending push notifications.                                                                                                                             |
+| `ios_bundle`             | VARCHAR(255) | -                                    | Application bundle ID, used as a APNs "topic".                                                                                                                           |
+| `ios_environment`        | VARCHAR(32)  | -                                    | Per-application APNs environment setting. `NULL` or unknown value inherits from global server configuration, values `development` or `production` override the settings. |
+| `android_private_key`    | BYTEA        | -                                    | Firebase service account private key used when obtaining access tokens for FCM HTTP v1 API.                                                                              |
+| `android_project_id`     | VARCHAR(255) | -                                    | Firebase project ID, used when sending push messages using FCM.                                                                                                          |
+| `timestamp_created`      | TIMESTAMP    | `NOT NULL DEFAULT CURRENT_TIMESTAMP` | Timestamp when the record was created.                                                                                                                                   |
+| `timestamp_last_updated` | TIMESTAMP    |                                      | Timestamp when the record was last updated.                                                                                                                              |
 
 #### Keys
 

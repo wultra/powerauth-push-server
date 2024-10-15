@@ -94,6 +94,8 @@ public class MockPowerAuthController {
     public ObjectResponse<GetActivationStatusResponse> getActivationStatus(@RequestBody ObjectRequest<GetActivationStatusRequest> request) {
         final GetActivationStatusResponse response = new GetActivationStatusResponse();
         response.setActivationId(request.getRequestObject().getActivationId());
+        response.setUserId(PushServerTestClientFactory.TEST_USER_ID);
+
         if (blockedActivations.contains(request.getRequestObject().getActivationId())) {
             response.setActivationStatus(ActivationStatus.BLOCKED);
         } else {
