@@ -53,7 +53,7 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
     public AppRelatedPushClient reload(final String appId, final AppRelatedPushClient oldAppRelatedPushClient) throws Exception {
         final AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(appId).orElse(null);
         if (credentials == null) {
-            logger.debug("AppCredentials does not exist anymore for app: {}", appId);
+            logger.warn("AppCredentials does not exist anymore for app: {}", appId);
             return null;
         }
 
