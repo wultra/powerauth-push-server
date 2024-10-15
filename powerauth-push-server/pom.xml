@@ -158,6 +158,11 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
         <!-- For run at Apple M1 architecture -->
         <dependency>
             <groupId>io.netty</groupId>
