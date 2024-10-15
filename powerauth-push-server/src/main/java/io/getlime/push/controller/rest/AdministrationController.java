@@ -15,9 +15,6 @@
  */
 package io.getlime.push.controller.rest;
 
-import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.wultra.security.powerauth.client.PowerAuthClient;
-import com.wultra.security.powerauth.client.model.entity.Application;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
@@ -30,17 +27,14 @@ import io.getlime.push.model.response.CreateApplicationResponse;
 import io.getlime.push.model.response.GetApplicationDetailResponse;
 import io.getlime.push.model.response.GetApplicationListResponse;
 import io.getlime.push.model.validator.*;
-import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
-import io.getlime.push.service.AppRelatedPushClient;
-import io.getlime.push.service.http.HttpCustomizationService;
+import io.getlime.push.service.AdministrationService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
 
 /**
  * Controller for administering the push server.
@@ -53,10 +47,7 @@ import java.util.*;
 @RequestMapping(value = "admin/app")
 public class AdministrationController {
 
-    private final PowerAuthClient powerAuthClient;
-    private final AppCredentialsRepository appCredentialsRepository;
-    private final LoadingCache<String, AppRelatedPushClient> appRelatedPushClientCache;
-    private final HttpCustomizationService httpCustomizationService;
+    private final AdministrationService administrationService;
 
     /**
      * List applications configured in Push Server.
@@ -65,18 +56,9 @@ public class AdministrationController {
     @GetMapping(value = "list")
     public ObjectResponse<GetApplicationListResponse> listApplications() {
         logger.debug("Received listApplications request");
+        final List<PushServerApplication> applications = administrationService.findAllApplications();
         final GetApplicationListResponse response = new GetApplicationListResponse();
-        final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
-        final List<PushServerApplication> appList = new ArrayList<>();
-        for (AppCredentialsEntity appCredentialsEntity : appCredentials) {
-            final PushServerApplication app = new PushServerApplication();
-            app.setAppId(appCredentialsEntity.getAppId());
-            app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-            app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
-            app.setHuawei(isHuawei(appCredentialsEntity));
-            appList.add(app);
-        }
-        response.setApplicationList(appList);
+        response.setApplicationList(applications);
         logger.debug("The listApplications request succeeded");
         return new ObjectResponse<>(response);
     }
@@ -90,27 +72,9 @@ public class AdministrationController {
     public ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() throws PushServerException {
         try {
             logger.debug("Received listUnconfiguredApplications request");
+            final List<PushServerApplication> applications = administrationService.findUnconfiguredApplications();
             final GetApplicationListResponse response = new GetApplicationListResponse();
-
-            // Get all applications in PA Server
-            final List<Application> applicationList = getApplicationList().getApplications();
-
-            // Get all applications that are already set up
-            final Iterable<AppCredentialsEntity> appCredentials = appCredentialsRepository.findAll();
-
-            // Compute intersection by app ID
-            final Set<String> identifiers = new HashSet<>();
-            for (AppCredentialsEntity appCred: appCredentials) {
-                identifiers.add(appCred.getAppId());
-            }
-            for (Application app : applicationList) {
-                if (!identifiers.contains(app.getApplicationId())) {
-                    final PushServerApplication applicationToAdd = new PushServerApplication();
-                    applicationToAdd.setAppId(app.getApplicationId());
-                    // add apps in intersection
-                    response.getApplicationList().add(applicationToAdd);
-                }
-            }
+            response.setApplicationList(applications);
             logger.debug("The listUnconfiguredApplications request succeeded");
             return new ObjectResponse<>(response);
         } catch (PowerAuthClientException ex) {
@@ -134,7 +98,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         final GetApplicationDetailResponse response = new GetApplicationDetailResponse();
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
+        final AppCredentialsEntity appCredentialsEntity = administrationService.findAppCredentials(requestObject.getAppId());
         final PushServerApplication app = new PushServerApplication();
         app.setAppId(appCredentialsEntity.getAppId());
         app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
@@ -174,18 +138,8 @@ public class AdministrationController {
             throw new PushServerException("Request object must not be empty");
         }
         logger.info("Received createApplication request, application ID: {}", requestObject.getAppId());
-        String errorMessage = CreateApplicationRequestValidator.validate(requestObject);
-        final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findFirstByAppId(requestObject.getAppId());
-        if (appCredentialsEntityOptional.isPresent()) {
-            errorMessage = "Application already exists";
-        }
-        if (errorMessage != null) {
-            throw new PushServerException(errorMessage);
-        }
-        final AppCredentialsEntity appCredentialsEntity = new AppCredentialsEntity();
-        appCredentialsEntity.setAppId(requestObject.getAppId());
-        final AppCredentialsEntity newAppCredentialsEntity = appCredentialsRepository.save(appCredentialsEntity);
-        final CreateApplicationResponse response = new CreateApplicationResponse(newAppCredentialsEntity.getAppId());
+        final AppCredentialsEntity appCredentials = administrationService.createAppCredentials(requestObject);
+        final CreateApplicationResponse response = new CreateApplicationResponse(appCredentials.getAppId());
         logger.info("The createApplication request succeeded, application ID: {}", requestObject.getAppId());
         return new ObjectResponse<>(response);
     }
@@ -207,24 +161,8 @@ public class AdministrationController {
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
-        final byte[] privateKeyBytes = Base64.getDecoder().decode(requestObject.getPrivateKeyBase64());
-        appCredentialsEntity.setIosPrivateKey(privateKeyBytes);
-        appCredentialsEntity.setIosTeamId(requestObject.getTeamId());
-        appCredentialsEntity.setIosKeyId(requestObject.getKeyId());
-        appCredentialsEntity.setIosBundle(requestObject.getBundle());
-        appCredentialsEntity.setIosEnvironment(convert(requestObject.getEnvironment()));
-        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
-        appCredentialsRepository.save(appCredentialsEntity);
-        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
-        logger.info("The updateIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        administrationService.updateIosAppCredentials(requestObject);
         return new Response();
-    }
-
-    private static String convert(final ApnsEnvironment environment) {
-        return Optional.ofNullable(environment)
-                .map(ApnsEnvironment::getKey)
-                .orElse(null);
     }
 
     /**
@@ -244,16 +182,7 @@ public class AdministrationController {
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
-        appCredentialsEntity.setIosPrivateKey(null);
-        appCredentialsEntity.setIosTeamId(null);
-        appCredentialsEntity.setIosKeyId(null);
-        appCredentialsEntity.setIosBundle(null);
-        appCredentialsEntity.setIosEnvironment(null);
-        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
-        appCredentialsRepository.save(appCredentialsEntity);
-        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
-        logger.info("The removeIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        administrationService.removeIosAppCredentials(requestObject.getAppId());
         return new Response();
     }
 
@@ -274,14 +203,7 @@ public class AdministrationController {
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
-        final byte[] privateKeyBytes = Base64.getDecoder().decode(requestObject.getPrivateKeyBase64());
-        appCredentialsEntity.setAndroidPrivateKey(privateKeyBytes);
-        appCredentialsEntity.setAndroidProjectId(requestObject.getProjectId());
-        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
-        appCredentialsRepository.save(appCredentialsEntity);
-        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
-        logger.info("The updateAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        administrationService.updateAndroidAppCredentials(requestObject);
         return new Response();
     }
 
@@ -302,13 +224,7 @@ public class AdministrationController {
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
-        appCredentialsEntity.setAndroidPrivateKey(null);
-        appCredentialsEntity.setAndroidProjectId(null);
-        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
-        appCredentialsRepository.save(appCredentialsEntity);
-        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
-        logger.info("The removeAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        administrationService.removeAndroidAppCredentials(requestObject.getAppId());
         return new Response();
     }
 
@@ -323,15 +239,7 @@ public class AdministrationController {
     public Response updateHuawei(@Valid @RequestBody ObjectRequest<UpdateHuaweiRequest> request) throws PushServerException {
         final UpdateHuaweiRequest requestObject = request.getRequestObject();
         logger.info("Received update Huawei request, application ID: {}", requestObject.getAppId());
-
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
-        appCredentialsEntity.setHmsProjectId(requestObject.getProjectId());
-        appCredentialsEntity.setHmsClientId(requestObject.getClientId());
-        appCredentialsEntity.setHmsClientSecret(requestObject.getClientSecret());
-        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
-        appCredentialsRepository.save(appCredentialsEntity);
-        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
-        logger.info("The update Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        administrationService.updateHuaweiAppCredentials(requestObject);
         return new Response();
     }
 
@@ -346,33 +254,7 @@ public class AdministrationController {
     public Response removeHuawei(@Valid @RequestBody ObjectRequest<RemoveHuaweiRequest> request) throws PushServerException {
         final RemoveHuaweiRequest requestObject = request.getRequestObject();
         logger.info("Received remove Huawei request, application ID: {}", requestObject.getAppId());
-
-        final AppCredentialsEntity appCredentialsEntity = findAppCredentialsEntityById(requestObject.getAppId());
-        appCredentialsEntity.setHmsProjectId(null);
-        appCredentialsEntity.setHmsClientSecret(null);
-        appCredentialsEntity.setHmsClientId(null);
-        appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
-        appCredentialsRepository.save(appCredentialsEntity);
-        appRelatedPushClientCache.refresh(appCredentialsEntity.getAppId());
-        logger.info("The remove Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        administrationService.removeHuaweiAppCredentials(requestObject.getAppId());
         return new Response();
-    }
-
-    /**
-     * Find app credentials entity by ID.
-     * @param powerAuthAppId App credentials ID.
-     * @return App credentials entity.
-     * @throws PushServerException Thrown when application credentials entity does not exists.
-     */
-    private AppCredentialsEntity findAppCredentialsEntityById(String powerAuthAppId) throws PushServerException {
-        return appCredentialsRepository.findFirstByAppId(powerAuthAppId).orElseThrow(() ->
-                new PushServerException("Application credentials with entered ID does not exist"));
-    }
-
-    private com.wultra.security.powerauth.client.model.response.GetApplicationListResponse getApplicationList() throws PowerAuthClientException {
-        return powerAuthClient.getApplicationList(
-                httpCustomizationService.getQueryParams(),
-                httpCustomizationService.getHttpHeaders()
-        );
     }
 }
