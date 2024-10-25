@@ -164,13 +164,15 @@ class PushServerTests {
     }
 
     @Test
-    @SuppressWarnings("unchecked") //known parameters of HashMap
     void sendPushMessageTest() throws Exception {
-        boolean result = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.ANDROID, powerAuthTestClient.getActivationId());
+        final boolean result = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.ANDROID, powerAuthTestClient.getActivationId());
         assertTrue(result);
-        PushMessage pushMessage = new PushMessage();
-        PushMessageAttributes attributes = new PushMessageAttributes();
-        PushMessageBody pushMessageBody = new PushMessageBody();
+
+        final PushMessageAttributes attributes = new PushMessageAttributes();
+        attributes.setSilent(false);
+        attributes.setPersonal(true);
+
+        final PushMessageBody pushMessageBody = new PushMessageBody();
         pushMessageBody.setTitle("Balance update");
         pushMessageBody.setBody("Your balance is now $745.00");
         pushMessageBody.setBadge(3);
@@ -178,30 +180,28 @@ class PushServerTests {
         pushMessageBody.setCategory("balance-update");
         pushMessageBody.setCollapseKey("balance-update");
         pushMessageBody.setValidUntil(Instant.now());
-        pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
-        attributes.setSilent(false);
-        attributes.setPersonal(true);
-        pushMessage.setUserId("Test_User");
+        pushMessageBody.setExtras(Map.of("_comment", "Any custom data."));
+
+        final PushMessage pushMessage = new PushMessage();
+        pushMessage.setUserId(PushServerTestClientFactory.TEST_USER_ID);
         pushMessage.setActivationId(powerAuthTestClient.getActivationId());
         pushMessage.setAttributes(attributes);
         pushMessage.setBody(pushMessageBody);
-        pushMessage.setAttributes(attributes);
-        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessage(powerAuthTestClient.getApplicationId(), Mode.SYNCHRONOUS, pushMessage);
+
+        final ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessage(powerAuthTestClient.getApplicationId(), Mode.SYNCHRONOUS, pushMessage);
         assertEquals("OK", actual.getStatus());
-        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
+
+        final List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         pushDeviceRepository.deleteAll(devices);
     }
 
 
     @Test
-    @SuppressWarnings("unchecked") //known parameters of HashMap
     void sendPushMessageBatchTest() throws Exception {
         boolean result = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.ANDROID, powerAuthTestClient.getActivationId());
         assertTrue(result);
-        List<PushMessage> batch = new ArrayList<>();
-        PushMessage pushMessage = new PushMessage();
-        PushMessageAttributes attributes = new PushMessageAttributes();
-        PushMessageBody pushMessageBody = new PushMessageBody();
+
+        final PushMessageBody pushMessageBody = new PushMessageBody();
         pushMessageBody.setTitle("Balance update");
         pushMessageBody.setBody("Your balance is now $745.00");
         pushMessageBody.setBadge(3);
@@ -209,18 +209,24 @@ class PushServerTests {
         pushMessageBody.setCategory("balance-update");
         pushMessageBody.setCollapseKey("balance-update");
         pushMessageBody.setValidUntil(Instant.now());
-        pushMessageBody.setExtras((Map<String, Object>) new HashMap<String, Object>().put("_comment", "Any custom data."));
+        pushMessageBody.setExtras(Map.of("_comment", "Any custom data."));
+
+        final PushMessageAttributes attributes = new PushMessageAttributes();
         attributes.setSilent(false);
         attributes.setPersonal(true);
-        pushMessage.setUserId("Test_User");
+
+        final PushMessage pushMessage = new PushMessage();
+        pushMessage.setUserId(PushServerTestClientFactory.TEST_USER_ID);
         pushMessage.setActivationId(powerAuthTestClient.getActivationId());
         pushMessage.setAttributes(attributes);
         pushMessage.setBody(pushMessageBody);
-        pushMessage.setAttributes(attributes);
-        batch.add(pushMessage);
-        ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessageBatch(powerAuthTestClient.getApplicationId(), Mode.SYNCHRONOUS, batch);
+
+        final List<PushMessage> batch = List.of(pushMessage);
+
+        final ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessageBatch(powerAuthTestClient.getApplicationId(), Mode.SYNCHRONOUS, batch);
         assertEquals("OK", actual.getStatus());
-        List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
+
+        final List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
         pushDeviceRepository.deleteAll(devices);
     }
 
@@ -289,14 +295,18 @@ class PushServerTests {
 
     @Test
     void sendTestingCampaignTest() throws Exception {
-        boolean actual = pushServerClient.sendTestCampaign(1L, "Test_User");
+        boolean result = pushServerClient.createDevice(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN, MobilePlatform.ANDROID, powerAuthTestClient.getActivationId());
+        assertTrue(result);
+
+        final Long campaignId = createCampaign().getResponseObject().getId();
+        boolean actual = pushServerClient.sendTestCampaign(campaignId, PushServerTestClientFactory.TEST_USER_ID);
         assertTrue(actual);
     }
 
     @Test
     void sendCampaignTest() throws Exception {
-        createCampaign();
-        boolean result = pushServerClient.sendCampaign(1L);
+        final Long campaignId = createCampaign().getResponseObject().getId();
+        boolean result = pushServerClient.sendCampaign(campaignId);
         assertTrue(result);
     }
 

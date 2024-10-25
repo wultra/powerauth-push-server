@@ -8,6 +8,7 @@ You can download DDL scripts for supported databases:
 
 - [PostgreSQL](./sql/postgresql/create_push_server_schema.sql)
 - [Oracle](./sql/oracle/create_push_server_schema.sql)
+- [MS SQL](./sql/mssql/create_push_server_schema.sql)
 
 ## Tables
 
@@ -25,26 +26,6 @@ You can download DDL scripts for supported databases:
 ### Push Devices Table
 
 Stores push tokens specific for a given device.
-
-#### Schema
-
-```sql
-CREATE TABLE push_device_registration (
-    id INTEGER NOT NULL CONSTRAINT push_device_registration_pkey PRIMARY KEY,
-    activation_id VARCHAR(37),
-    user_id VARCHAR(255),
-    app_id INTEGER NOT NULL,
-    platform VARCHAR(255) NOT NULL,
-    push_token VARCHAR(255) NOT NULL,
-    timestamp_last_registered TIMESTAMP(6) NOT NULL,
-    is_active BOOLEAN
-);
-
-CREATE INDEX push_device_app_token ON push_device_registration (app_id, push_token);
-CREATE INDEX push_device_user_app ON push_device_registration (user_id, app_id);
-CREATE UNIQUE INDEX push_device_activation ON push_device_registration (activation_id);
-CREATE UNIQUE INDEX push_device_activation_token ON push_device_registration (activation_id, push_token);
-```
 
 #### Columns
 
@@ -80,37 +61,21 @@ CREATE UNIQUE INDEX push_device_activation_token ON push_device_registration (ac
 
 Stores per-app credentials used for communication with APNs / FCM.
 
-#### Schema
-
-```sql
-CREATE TABLE push_app_credentials (
-    id INTEGER NOT NULL CONSTRAINT push_app_credentials_pkey PRIMARY KEY,
-    app_id VARCHAR(255) NOT NULL,
-    ios_key_id VARCHAR(255),
-    ios_private_key BYTEA,
-    ios_team_id VARCHAR(255),
-    ios_bundle VARCHAR(255),
-    ios_environment VARCHAR(32),
-    android_private_key BYTEA,
-    android_project_id VARCHAR(255)
-);
-
-CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials (app_id);
-```
-
 #### Columns
 
-| Name                  | Type         | Info                              | Note                                                                                                                                                                     |
-|-----------------------|--------------|-----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`                  | INTEGER      | primary key, index, autoincrement | Unique credential record ID.                                                                                                                                             |
-| `app_id`              | VARCHAR(255) | index                             | Associated application ID.                                                                                                                                               |
-| `ios_key_id`          | VARCHAR(255) | -                                 | Key ID used for identifying a private key in APNs service.                                                                                                               |
-| `ios_private_key`     | BYTEA        | -                                 | Binary representation of P8 file with private key used for Apple's APNs service.                                                                                         |
-| `ios_team_id`         | VARCHAR(255) | -                                 | Team ID used for sending push notifications.                                                                                                                             |
-| `ios_bundle`          | VARCHAR(255) | -                                 | Application bundle ID, used as a APNs "topic".                                                                                                                           |
-| `ios_environment`     | VARCHAR(32)  | -                                 | Per-application APNs environment setting. `NULL` or unknown value inherits from global server configuration, values `development` or `production` override the settings. |
-| `android_private_key` | BYTEA        | -                                 | Firebase service account private key used when obtaining access tokens for FCM HTTP v1 API.                                                                              |
-| `android_project_id`  | VARCHAR(255) | -                                 | Firebase project ID, used when sending push messages using FCM.                                                                                                          |
+| Name                     | Type         | Info                                 | Note                                                                                                                                                                     |
+|--------------------------|--------------|--------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `id`                     | INTEGER      | primary key, index, autoincrement    | Unique credential record ID.                                                                                                                                             |
+| `app_id`                 | VARCHAR(255) | index                                | Associated application ID.                                                                                                                                               |
+| `ios_key_id`             | VARCHAR(255) | -                                    | Key ID used for identifying a private key in APNs service.                                                                                                               |
+| `ios_private_key`        | BYTEA        | -                                    | Binary representation of P8 file with private key used for Apple's APNs service.                                                                                         |
+| `ios_team_id`            | VARCHAR(255) | -                                    | Team ID used for sending push notifications.                                                                                                                             |
+| `ios_bundle`             | VARCHAR(255) | -                                    | Application bundle ID, used as a APNs "topic".                                                                                                                           |
+| `ios_environment`        | VARCHAR(32)  | -                                    | Per-application APNs environment setting. `NULL` or unknown value inherits from global server configuration, values `development` or `production` override the settings. |
+| `android_private_key`    | BYTEA        | -                                    | Firebase service account private key used when obtaining access tokens for FCM HTTP v1 API.                                                                              |
+| `android_project_id`     | VARCHAR(255) | -                                    | Firebase project ID, used when sending push messages using FCM.                                                                                                          |
+| `timestamp_created`      | TIMESTAMP    | `NOT NULL DEFAULT CURRENT_TIMESTAMP` | Timestamp when the record was created.                                                                                                                                   |
+| `timestamp_last_updated` | TIMESTAMP    |                                      | Timestamp when the record was last updated.                                                                                                                              |
 
 #### Keys
 
@@ -129,24 +94,6 @@ CREATE UNIQUE INDEX push_app_cred_app ON push_app_credentials (app_id);
 ### Push Messages Table
 
 Stores individual messages that were sent by the push server and their sent status.
-
-#### Schema
-
-```sql
-CREATE TABLE push_message (
-    id INTEGER NOT NULL CONSTRAINT push_message_pkey PRIMARY KEY,
-    device_registration_id INTEGER NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
-    activation_id VARCHAR(37),
-    is_silent BOOLEAN DEFAULT false NOT NULL,
-    is_personal BOOLEAN DEFAULT false NOT NULL,
-    message_body TEXT NOT NULL,
-    timestamp_created TIMESTAMP(6) NOT NULL,
-    status INTEGER NOT NULL
-);
-
-CREATE INDEX push_message_status ON push_message (status);
-```
 
 #### Columns
 
@@ -180,22 +127,6 @@ CREATE INDEX push_message_status ON push_message (status);
 
 Stores particular campaigns together with notification messages.
 
-#### Schema
-
-```sql
-CREATE TABLE push_campaign (
-    id INTEGER NOT NULL CONSTRAINT push_campaign_pkey PRIMARY KEY,
-    app_id INTEGER NOT NULL,
-    message TEXT NOT NULL,
-    is_sent BOOLEAN DEFAULT false NOT NULL,
-    timestamp_created TIMESTAMP(6) NOT NULL,
-    timestamp_sent TIMESTAMP(6),
-    timestamp_completed TIMESTAMP(6)
-);
-
-CREATE INDEX push_campaign_sent ON push_campaign (is_sent);
-```
-
 #### Columns
 
 | Name                  | Type      | Info                              | Note                                                          |
@@ -226,20 +157,6 @@ CREATE INDEX push_campaign_sent ON push_campaign (is_sent);
 
 Stores users who are going to get notification from specific campaign.
 
-#### Schema
-
-```sql
-CREATE TABLE push_campaign_user (
-    id INTEGER NOT NULL CONSTRAINT push_campaign_user_pkey PRIMARY KEY,
-    campaign_id INTEGER NOT NULL,
-    user_id INTEGER NOT NULL,
-    timestamp_created TIMESTAMP(6) NOT NULL
-);
-
-CREATE INDEX push_campaign_user_campaign ON push_campaign_user (campaign_id, user_id);
-CREATE INDEX push_campaign_user_detail ON push_campaign_user (user_id);
-```
-
 #### Columns
 
 | Name                | Type      | Info                              | Note                                                                 |
@@ -267,27 +184,6 @@ CREATE INDEX push_campaign_user_detail ON push_campaign_user (user_id);
 ### Message Inbox
 
 Stores the messages to be delivered to particular users.
-
-#### Schema
-
-```sql
-CREATE TABLE push_inbox (
-    id INTEGER NOT NULL CONSTRAINT push_inbox_pk PRIMARY KEY,
-    inbox_id VARCHAR(37) NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
-    type VARCHAR(32) NOT NULL;
-    subject TEXT NOT NULL,
-    summary TEXT NOT NULL;
-    body TEXT NOT NULL,
-    read BOOLEAN DEFAULT false NOT NULL,
-    timestamp_created TIMESTAMP NOT NULL,
-    timestamp_read TIMESTAMP
-);
-
-CREATE INDEX push_inbox_id ON push_inbox (inbox_id);
-CREATE INDEX push_inbox_user ON push_inbox (user_id);
-CREATE INDEX push_inbox_user_read ON push_inbox (user_id, read);
-```
 
 #### Columns
 
@@ -324,16 +220,6 @@ CREATE INDEX push_inbox_user_read ON push_inbox (user_id, read);
 
 Stores the messages to application mapping.
 
-#### Schema
-
-```sql
-CREATE TABLE push_inbox_app (
-    app_credentials_id INTEGER NOT NULL,
-    inbox_id           INTEGER NOT NULL,
-    CONSTRAINT push_inbox_app_pk PRIMARY KEY (inbox_id, app_credentials_id)
-);
-```
-
 #### Columns
 
 | Name                 | Type       | Info | Note                        |
@@ -363,11 +249,6 @@ CREATE TABLE push_inbox_app (
 
 Sequence for application credentials registered in the system.
 
-#### Schema
-
-```sql
-CREATE SEQUENCE push_credentials_seq;
-```
 <!-- end -->
 
 <!-- begin database sequence push_device_registration_seq -->
@@ -375,11 +256,6 @@ CREATE SEQUENCE push_credentials_seq;
 
 Sequence for device registrations in the system.
 
-#### Schema
-
-```sql
-CREATE SEQUENCE push_device_registration_seq;
-```
 <!-- end -->
 
 <!-- begin database sequence push_message_seq -->
@@ -387,11 +263,6 @@ CREATE SEQUENCE push_device_registration_seq;
 
 Sequence for push messages sent by the system.
 
-#### Schema
-
-```sql
-CREATE SEQUENCE push_message_seq;
-```
 <!-- end -->
 
 <!-- begin database sequence push_campaign_seq -->
@@ -399,11 +270,6 @@ CREATE SEQUENCE push_message_seq;
 
 Sequence for push campaigns that are created in the system.
 
-#### Schema
-
-```sql
-CREATE SEQUENCE push_campaign_seq;
-```
 <!-- end -->
 
 <!-- begin database sequence push_campaign_user_seq -->
@@ -411,9 +277,4 @@ CREATE SEQUENCE push_campaign_seq;
 
 Sequence for user assignments to campaigns.
 
-#### Schema
-
-```sql
-CREATE SEQUENCE push_campaign_user_seq;
-```
 <!-- end -->

@@ -8,13 +8,13 @@
 
     <groupId>io.getlime.security</groupId>
     <artifactId>powerauth-push-server-parent</artifactId>
-    <version>1.8.0</version>
+    <version>1.9.0</version>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.2</version>
+        <version>3.3.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -69,22 +69,20 @@
 
     <properties>
         <!--  Wultra Dependencies  -->
-        <wultra-core.version>1.10.0</wultra-core.version>
-        <powerauth.version>1.8.0</powerauth.version>
-        <powerauth-crypto.version>1.8.0</powerauth-crypto.version>
-        <powerauth-restful-integration.version>1.8.0</powerauth-restful-integration.version>
+        <wultra-core.version>1.11.0</wultra-core.version>
+        <powerauth.version>1.9.0</powerauth.version>
+        <powerauth-crypto.version>1.9.0</powerauth-crypto.version>
+        <powerauth-restful-integration.version>1.9.0</powerauth-restful-integration.version>
 
         <!-- Library Versions -->
         <pushy.version>0.15.4</pushy.version>
-        <google-api-client.version>2.6.0</google-api-client.version>
+        <google-api-client.version>2.7.0</google-api-client.version>
         <firebase-admin.version>9.3.0</firebase-admin.version>
-        <logstash.version>7.4</logstash.version>
+        <logstash.version>8.0</logstash.version>
 
         <!-- Documentation Dependencies -->
         <springdoc-openapi-starter-webmvc-ui.version>2.6.0</springdoc-openapi-starter-webmvc-ui.version>
-        <swagger-annotations-jakarta.version>2.2.22</swagger-annotations-jakarta.version>
-
-        <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
+        <swagger-annotations-jakarta.version>2.2.25</swagger-annotations-jakarta.version>
     </properties>
 
     <dependencyManagement>
@@ -161,10 +159,38 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-maven-plugin</artifactId>
+                <version>1.18.20.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>${lombok.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/delombok</outputDirectory>
+                    <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+                    <addOutputDirectory>false</addOutputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>delombok</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
+                    <sourcepath>${project.build.directory}/delombok</sourcepath>
                     <failOnError>false</failOnError>
                 </configuration>
                 <executions>

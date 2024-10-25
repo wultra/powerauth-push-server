@@ -3,7 +3,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
-    <include file="20240708-column-renaming-keywords.xml" relativeToChangelogFile="true" />
-    <include file="20241010-add-tag-1.8.0.xml" relativeToChangelogFile="true" />
+    <include file="20241011-app-credentials-timestamp.xml" relativeToChangelogFile="true" />
+    <include file="20241011-add-tag-1.9.0.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

@@ -16,7 +16,7 @@
 
 package io.getlime.push.service;
 
-import com.eatthepath.pushy.apns.ApnsClient;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.*;
@@ -30,12 +30,8 @@ import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.Platform;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
-import io.getlime.push.service.batch.storage.AppCredentialStorageMap;
-import io.getlime.push.service.fcm.FcmClient;
-import io.getlime.push.service.hms.HmsClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,41 +42,17 @@ import java.util.concurrent.Phaser;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Slf4j
+@AllArgsConstructor
 @Service
 public class PushMessageSenderService {
-
-    private static final Logger logger = LoggerFactory.getLogger(PushMessageSenderService.class);
 
     private final PushSendingWorker pushSendingWorker;
     private final AppCredentialsRepository appCredentialsRepository;
     private final PushDeviceRepository pushDeviceRepository;
     private final PushMessageDAO pushMessageDAO;
-    private final AppCredentialStorageMap appRelatedPushClientMap;
+    private final LoadingCache<String, AppRelatedPushClient> appRelatedPushClientCache;
     private final PushServiceConfiguration configuration;
-
-    /**
-     * Constructor with autowired dependencies.
-     * @param appCredentialsRepository App credentials repository.
-     * @param pushDeviceRepository Push service repository.
-     * @param pushMessageDAO Push message DAO.
-     * @param pushSendingWorker Push sending worker.
-     * @param appRelatedPushClientMap Map with cached push clients in a map.
-     * @param configuration Push service configuration.
-     */
-    @Autowired
-    public PushMessageSenderService(AppCredentialsRepository appCredentialsRepository,
-                                    PushDeviceRepository pushDeviceRepository,
-                                    PushMessageDAO pushMessageDAO,
-                                    PushSendingWorker pushSendingWorker,
-                                    AppCredentialStorageMap appRelatedPushClientMap,
-                                    PushServiceConfiguration configuration) {
-        this.appCredentialsRepository = appCredentialsRepository;
-        this.pushDeviceRepository = pushDeviceRepository;
-        this.pushMessageDAO = pushMessageDAO;
-        this.pushSendingWorker = pushSendingWorker;
-        this.appRelatedPushClientMap = appRelatedPushClientMap;
-        this.configuration = configuration;
-    }
 
     /**
      * Send push notifications to given application.
@@ -92,7 +64,6 @@ public class PushMessageSenderService {
      * @throws PushServerException In case push message sending fails.
      */
     public BasePushMessageSendResult sendPushMessage(final String appId, final Mode mode, List<PushMessage> pushMessageList) throws PushServerException {
-        // Prepare clients
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
         // Prepare synchronization primitive for parallel push message sending
@@ -225,7 +196,6 @@ public class PushMessageSenderService {
      * the error can be found in exception message.
      */
     public void sendCampaignMessage(final String appId, Platform platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, Priority priority, String userId, Long deviceId, String activationId) throws PushServerException {
-
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
         final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, activationId, deviceId);
@@ -261,43 +231,32 @@ public class PushMessageSenderService {
     }
 
     // Return list of devices related to given user or activation ID (if present). List of devices is related to particular application as well.
-    private List<PushDeviceRegistrationEntity> getPushDevices(Long id, String userId, String activationId) throws PushServerException {
+    private List<PushDeviceRegistrationEntity> getPushDevices(Long appCredentialsId, String userId, String activationId) throws PushServerException {
         if (userId == null || userId.isEmpty()) {
             logger.error("No userId was specified");
             throw new PushServerException("No userId was specified");
         }
+
+        final List<PushDeviceRegistrationEntity> devices;
         if (activationId != null) { // in case the message should go to the specific device
-            return pushDeviceRepository.findByUserIdAndAppCredentialsIdAndActivationId(userId, id, activationId);
+            devices = pushDeviceRepository.findByUserIdAndAppCredentialsIdAndActivationId(userId, appCredentialsId, activationId);
         } else {
-            return pushDeviceRepository.findByUserIdAndAppCredentialsId(userId, id);
+            devices = pushDeviceRepository.findByUserIdAndAppCredentialsId(userId, appCredentialsId);
         }
+
+        if (devices.isEmpty()) {
+            logger.warn("No device found for userId={}, appCredentialsId={}, activationId={}", userId, appCredentialsId, activationId);
+        }
+
+        return devices;
     }
 
-    // Prepare and cache APNS, FCM, and HMS clients for provided app
     private AppRelatedPushClient prepareClients(String appId) throws PushServerException {
-        synchronized (this) {
-            AppRelatedPushClient pushClient = appRelatedPushClientMap.get(appId);
-            if (pushClient == null) {
-                final AppCredentialsEntity credentials = getAppCredentials(appId);
-                pushClient = new AppRelatedPushClient();
-                if (credentials.getIosPrivateKey() != null) {
-                    final ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials);
-                    pushClient.setApnsClient(apnsClient);
-                }
-                if (credentials.getAndroidPrivateKey() != null) {
-                    final FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
-                    pushClient.setFcmClient(fcmClient);
-                }
-                if (credentials.getHmsClientId() != null) {
-                    final HmsClient hmsClient = pushSendingWorker.prepareHmsClient(credentials);
-                    pushClient.setHmsClient(hmsClient);
-                }
-                pushClient.setAppCredentials(credentials);
-                appRelatedPushClientMap.put(appId, pushClient);
-                logger.info("Creating APNS, FCM, and HMS clients for app {}", appId);
-            }
-            return pushClient;
+        final AppRelatedPushClient pushClient = appRelatedPushClientCache.get(appId);
+        if (pushClient == null) {
+            throw new PushServerException("AppCredentials not found: " + appId);
         }
+        return pushClient;
     }
 
 
