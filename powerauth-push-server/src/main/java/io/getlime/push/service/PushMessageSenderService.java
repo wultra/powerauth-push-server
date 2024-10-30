@@ -96,31 +96,31 @@ public class PushMessageSenderService {
                     registerPhaserForMode(phaser, mode);
 
                     final Platform platform = device.getPlatform();
-                    if (platform == Platform.IOS) {
+                    if (platform == Platform.IOS || platform == Platform.APNS) {
                         if (pushClient.getApnsClient() == null) {
                             logger.error("Push message cannot be sent to APNS because APNS is not configured in push server.");
                             arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
                         }
-                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getIos();
-                        pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
-                    } else if (platform == Platform.ANDROID) {
+                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getApns();
+                        pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getApnsBundle(), createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
+                    } else if (platform == Platform.ANDROID || platform == Platform.FCM) {
                         if (pushClient.getFcmClient() == null) {
                             logger.error("Push message cannot be sent to FCM because FCM is not configured in push server.");
                             arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
                         }
                         final String token = device.getPushToken();
-                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getAndroid();
+                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getFcm();
                         pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
-                    } else if (platform == Platform.HUAWEI) {
+                    } else if (platform == Platform.HUAWEI || platform == Platform.HMS) {
                         if (pushClient.getHmsClient() == null) {
                             logger.error("Push message cannot be sent to HMS because HMS is not configured in push server.");
                             arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
                         }
                         final String token = device.getPushToken();
-                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getHuawei();
+                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getHms();
                         pushSendingWorker.sendMessageToHuawei(pushClient.getHmsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
                     }
                 }
@@ -202,7 +202,7 @@ public class PushMessageSenderService {
 
         switch (platform) {
             case IOS ->
-                    pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getIosBundle(), createPushSendingCallback(token, pushMessageObject, pushClient));
+                    pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getApnsBundle(), createPushSendingCallback(token, pushMessageObject, pushClient));
             case ANDROID ->
                     pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
             case HUAWEI ->
@@ -222,12 +222,6 @@ public class PushMessageSenderService {
                 }
             }
         };
-    }
-
-    // Lookup application credentials by appID and throw exception in case application is not found.
-    private AppCredentialsEntity getAppCredentials(String appId) throws PushServerException {
-        return appCredentialsRepository.findFirstByAppId(appId).orElseThrow(() ->
-            new PushServerException("Application not found: " + appId));
     }
 
     // Return list of devices related to given user or activation ID (if present). List of devices is related to particular application as well.

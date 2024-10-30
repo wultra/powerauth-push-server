@@ -107,7 +107,7 @@ public class PushServerClient {
      *
      * @param appId PowerAuth application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
-     * @param platform Mobile platform (iOS, Android).
+     * @param platform Mobile platform (APNs, FCM, HMS).
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
@@ -120,7 +120,7 @@ public class PushServerClient {
      *
      * @param appId PowerAuth application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
-     * @param platform Mobile platform (iOS, Android).
+     * @param platform Mobile platform (APNs, FCM, HMS).
      * @param activationId PowerAuth activation ID.
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
@@ -150,7 +150,7 @@ public class PushServerClient {
      *
      * @param appId PowerAuth application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
-     * @param platform Mobile platform (iOS, Android).
+     * @param platform Mobile platform (APNs, FCM, HMS).
      * @param activationIds PowerAuth activation IDs.
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
@@ -544,15 +544,19 @@ public class PushServerClient {
 
     /**
      * Update iOS details for an application credentials entity.
+     *
+     * @deprecated use {@link #updateApns(String, String, String, String, ApnsEnvironment, byte[])}
+     *
      * @param appId ID of application credentials entity.
      * @param bundle The iOS bundle record.
-     * @param keyId The iOS key record.
+     * @param keyId The iOS key ID record.
      * @param teamId The iOS team ID record.
      * @param environment The APNs environment.
      * @param privateKey The iOS private key bytes.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
+    @Deprecated
     public Response updateIos(String appId, String bundle, String keyId, String teamId, ApnsEnvironment environment, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
         final UpdateIosRequest request = new UpdateIosRequest(appId, bundle, keyId, teamId, environment, privateKeyBase64);
@@ -563,11 +567,36 @@ public class PushServerClient {
     }
 
     /**
+     * Update APNs details for an application credentials entity.
+     *
+     * @param appId ID of application credentials entity.
+     * @param bundle The APNs bundle record.
+     * @param keyId The APNs key ID record.
+     * @param teamId The APNs team ID record.
+     * @param environment The APNs environment.
+     * @param privateKey The APNs private key bytes.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response updateApns(String appId, String bundle, String keyId, String teamId, ApnsEnvironment environment, byte[] privateKey) throws PushServerClientException {
+        final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
+        final UpdateApnsRequest request = new UpdateApnsRequest(appId, bundle, keyId, teamId, environment, privateKeyBase64);
+        logger.info("Calling push server to update APNs, ID: {} - start", appId);
+        final Response response = putObjectImpl("/admin/app/apns/update", new ObjectRequest<>(request));
+        logger.info("Calling push server to update APNs, ID: {} - finish", appId);
+        return response;
+    }
+
+    /**
      * Remove iOS record from an application credentials entity.
+     *
+     * @deprecated use {@link #removeApns(String)}
+     *
      * @param appId Application credentials entity ID.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
+    @Deprecated
     public Response removeIos(String appId) throws PushServerClientException {
         final RemoveIosRequest request = new RemoveIosRequest(appId);
         logger.info("Calling push server to remove iOS, ID: {} - start", appId);
@@ -577,13 +606,32 @@ public class PushServerClient {
     }
 
     /**
+     * Remove APNs record from an application credentials entity.
+     *
+     * @param appId Application credentials entity ID.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response removeApns(String appId) throws PushServerClientException {
+        final RemoveApnsRequest request = new RemoveApnsRequest(appId);
+        logger.info("Calling push server to remove APNs, ID: {} - start", appId);
+        final Response response = postObjectImpl("/admin/app/apns/remove", new ObjectRequest<>(request));
+        logger.info("Calling push server to remove APNs, ID: {} - finish", appId);
+        return response;
+    }
+
+    /**
      * Update Android details for an application credentials entity.
+     *
+     * @deprecated use {@link #updateApns(String, String, String, String, ApnsEnvironment, byte[])}
+     *
      * @param appId Application credentials entity ID.
      * @param projectId The Android project ID record.
      * @param privateKey The Android private key bytes.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
+    @Deprecated
     public Response updateAndroid(String appId, String projectId, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
         final UpdateAndroidRequest request = new UpdateAndroidRequest(appId, projectId, privateKeyBase64);
@@ -594,11 +642,33 @@ public class PushServerClient {
     }
 
     /**
+     * Update FCM details for an application credentials entity.
+     *
+     * @param appId Application credentials entity ID.
+     * @param projectId The FCM project ID record.
+     * @param privateKey The FCM private key bytes.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response updateFcm(String appId, String projectId, byte[] privateKey) throws PushServerClientException {
+        final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
+        final UpdateFcmRequest request = new UpdateFcmRequest(appId, projectId, privateKeyBase64);
+        logger.info("Calling push server to update FCM, ID: {} - start", appId);
+        final Response response = putObjectImpl("/admin/app/fcm/update", new ObjectRequest<>(request));
+        logger.info("Calling push server to update FCM, ID: {} - finish", appId);
+        return response;
+    }
+
+    /**
      * Remove Android record from an application credentials entity.
+     *
+     * @deprecated use {@link #removeFcm(String)}
+     *
      * @param appId Application credentials entity ID.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
+    @Deprecated
     public Response removeAndroid(String appId) throws PushServerClientException {
         final RemoveAndroidRequest request = new RemoveAndroidRequest(appId);
         logger.info("Calling push server to remove android, ID: {} - start", appId);
@@ -608,12 +678,30 @@ public class PushServerClient {
     }
 
     /**
+     * Remove FCM record from an application credentials entity.
+     *
+     * @param appId Application credentials entity ID.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response removeFcm(String appId) throws PushServerClientException {
+        final RemoveFcmRequest request = new RemoveFcmRequest(appId);
+        logger.info("Calling push server to remove FCM, ID: {} - start", appId);
+        final Response response = postObjectImpl("/admin/app/fcm/remove", new ObjectRequest<>(request));
+        logger.info("Calling push server to remove FCM, ID: {} - finish", appId);
+        return response;
+    }
+
+    /**
      * Update Huawei details for an application credentials entity.
+     *
+     * @deprecated use {@link #updateHms(UpdateHmsRequest)}
      *
      * @param request Update Huawei request.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
+    @Deprecated
     public Response updateHuawei(final UpdateHuaweiRequest request) throws PushServerClientException {
         logger.info("Calling push server to update Huawei, ID: {} - start", request.getAppId());
         final Response response = putObjectImpl("/admin/app/huawei/update", new ObjectRequest<>(request));
@@ -622,17 +710,49 @@ public class PushServerClient {
     }
 
     /**
+     * Update HMS details for an application credentials entity.
+     *
+     * @param request Update HMS request.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response updateHms(final UpdateHmsRequest request) throws PushServerClientException {
+        logger.info("Calling push server to update HMS, ID: {} - start", request.getAppId());
+        final Response response = putObjectImpl("/admin/app/hms/update", new ObjectRequest<>(request));
+        logger.info("Calling push server to update HMS, ID: {} - finish", request.getAppId());
+        return response;
+    }
+
+    /**
      * Remove Huawei record from an application credentials entity.
+     * 
+     * @deprecated use {@link #removeHms(String)}
      *
      * @param appId Application credentials entity ID.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
+    @Deprecated
     public Response removeHuawei(String appId) throws PushServerClientException {
         final RemoveHuaweiRequest request = new RemoveHuaweiRequest(appId);
         logger.info("Calling push server to remove Huawei, ID: {} - start", appId);
         final Response response = postObjectImpl("/admin/app/huawei/remove", new ObjectRequest<>(request));
         logger.info("Calling push server to remove Huawei, ID: {} - finish", appId);
+        return response;
+    }
+
+    /**
+     * Remove HMS record from an application credentials entity.
+     *
+     * @param appId Application credentials entity ID.
+     * @return Response from server.
+     * @throws PushServerClientException Thrown when communication with Push Server fails.
+     */
+    public Response removeHms(String appId) throws PushServerClientException {
+        final RemoveHmsRequest request = new RemoveHmsRequest(appId);
+        logger.info("Calling push server to remove HMS, ID: {} - start", appId);
+        final Response response = postObjectImpl("/admin/app/hms/remove", new ObjectRequest<>(request));
+        logger.info("Calling push server to remove HMS, ID: {} - finish", appId);
         return response;
     }
 

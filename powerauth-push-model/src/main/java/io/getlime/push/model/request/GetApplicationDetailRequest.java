@@ -35,22 +35,22 @@ public class GetApplicationDetailRequest {
     private String appId;
 
     /**
-     * Whether to include iOS details.
+     * Whether to include APNs details.
      */
-    @Schema(description = "Whether to include iOS details.")
-    private boolean includeIos;
+    @Schema(description = "Whether to include APNs details.")
+    private boolean includeApns;
 
     /**
-     * Whether to include Android details.
+     * Whether to include FCM details.
      */
-    @Schema(description = "Whether to include Android details.")
-    private boolean includeAndroid;
+    @Schema(description = "Whether to include FCM details.")
+    private boolean includeFcm;
 
     /**
      * Whether to include Huawei details.
      */
-    @Schema(description = "Whether to include Huawei details.")
-    private boolean includeHuawei;
+    @Schema(description = "Whether to include HMS details.")
+    private boolean includeHms;
 
     /**
      * Default constructor.
@@ -69,14 +69,15 @@ public class GetApplicationDetailRequest {
     /**
      * Constructor with details.
      * @param appId Application credentials entity ID.
-     * @param includeIos Whether to include iOS details.
-     * @param includeAndroid Whether to include Android details.
+     * @param includeApns Whether to include APNs details.
+     * @param includeFcm Whether to include FCM details.
+     * @param includeHms Whether to include HSM details.
      */
-    public GetApplicationDetailRequest(String appId, boolean includeIos, boolean includeAndroid, boolean includeHuawei) {
+    public GetApplicationDetailRequest(String appId, boolean includeApns, boolean includeFcm, boolean includeHms) {
         this.appId = appId;
-        this.includeIos = includeIos;
-        this.includeAndroid = includeAndroid;
-        this.includeHuawei = includeHuawei;
+        this.includeApns = includeApns;
+        this.includeFcm = includeFcm;
+        this.includeHms = includeHms;
     }
 
 }

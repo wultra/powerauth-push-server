@@ -407,7 +407,7 @@ public class PushSendingWorker {
         return Optional.empty();
     }
 
-    // iOS related methods
+    // APNs related methods
 
     /**
      * Prepare and connect APNs client.
@@ -419,7 +419,7 @@ public class PushSendingWorker {
      * If {@code null} or unknown value is passed, the global configuration is used.
      */
     ApnsClient prepareApnsClient(final AppCredentialsEntity credentials) throws PushServerException {
-        final String environment = credentials.getIosEnvironment();
+        final String environment = credentials.getApnsEnvironment();
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder()
                 .setProxyHandlerFactory(apnsClientProxy())
                 .setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections())
@@ -451,9 +451,9 @@ public class PushSendingWorker {
             }
         }
 
-        final String teamId = credentials.getIosTeamId();
-        final String keyId = credentials.getIosKeyId();
-        final byte[] apnsPrivateKey = credentials.getIosPrivateKey();
+        final String teamId = credentials.getApnsTeamId();
+        final String keyId = credentials.getApnsKeyId();
+        final byte[] apnsPrivateKey = credentials.getApnsPrivateKey();
 
         try {
             final ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);

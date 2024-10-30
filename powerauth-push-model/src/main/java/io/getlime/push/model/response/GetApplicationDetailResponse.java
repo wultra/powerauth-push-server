@@ -33,33 +33,33 @@ public class GetApplicationDetailResponse {
     private PushServerApplication application;
 
     /**
-     * iOS bundle.
+     * APNs bundle.
      */
-    private String iosBundle;
+    private String apnsBundle;
 
     /**
-     * iOS key ID.
+     * APNs key ID.
      */
-    private String iosKeyId;
+    private String apnsKeyId;
 
     /**
-     * iOS team ID.
+     * APNs team ID.
      */
-    private String iosTeamId;
+    private String apnsTeamId;
 
     /**
      * APNs environment.
      */
-    private ApnsEnvironment iosEnvironment;
+    private ApnsEnvironment apnsEnvironment;
 
     /**
-     * Android project ID record.
+     * FCM project ID record.
      */
-    private String androidProjectId;
+    private String fcmProjectId;
 
     /**
-     * Huawei project ID.
+     * HMS project ID record.
      */
-    private String huaweiProjectId;
+    private String hmsProjectId;
 
 }

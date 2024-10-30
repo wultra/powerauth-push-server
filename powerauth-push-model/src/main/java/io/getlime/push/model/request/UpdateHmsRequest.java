@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Wultra s.r.o.
+ * Copyright 2024 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,39 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.getlime.push.model.request;
 
-package io.getlime.push.model.entity;
-
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Push server application credentials entity.
+ * Update HMS configuration request.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 @Getter
 @Setter
-public class PushServerApplication {
+public class UpdateHmsRequest {
 
     /**
      * Application ID.
      */
+    @NotBlank
+    @Schema(description = "Application ID.")
     private String appId;
 
     /**
-     * Whether APNs is configured.
+     * HMS project ID.
      */
-    private Boolean apns;
+    @NotBlank
+    @Schema(description = "HMS project ID.")
+    private String projectId;
 
     /**
-     * Whether FCM is configured.
+     * HMS OAuth 2.0 client ID.
      */
-    private Boolean fcm;
+    @NotBlank
+    @Schema(description = "HMS OAuth 2.0 client ID.")
+    private String clientId;
 
     /**
-     * Whether HMS is configured.
+     * HMS OAuth 2.0 client secret.
      */
-    private Boolean hms;
+    @NotBlank
+    @Schema(description = "HMS OAuth 2.0 client secret.")
+    private String clientSecret;
 
 }

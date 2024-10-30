@@ -85,13 +85,13 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
         final AppRelatedPushClient pushClient = new AppRelatedPushClient();
         pushClient.setAppCredentials(credentials);
 
-        if (credentials.getIosPrivateKey() != null) {
+        if (credentials.getApnsPrivateKey() != null) {
             final ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials);
             pushClient.setApnsClient(apnsClient);
         }
 
-        if (credentials.getAndroidPrivateKey() != null) {
-            final FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
+        if (credentials.getFcmPrivateKey() != null) {
+            final FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getFcmProjectId(), credentials.getFcmPrivateKey());
             pushClient.setFcmClient(fcmClient);
         }
 

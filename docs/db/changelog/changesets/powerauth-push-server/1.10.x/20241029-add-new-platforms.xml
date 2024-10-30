@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Add new APNS columns -->
+    <changeSet id="1" logicalFilePath="powerauth-push-server/1.10.x/20241029-add-new-platforms.xml" author="Roman Strobl">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="push_app_credentials" columnName="apns_private_key"/>
+                <columnExists tableName="push_app_credentials" columnName="apns_team_id"/>
+                <columnExists tableName="push_app_credentials" columnName="apns_key_id"/>
+                <columnExists tableName="push_app_credentials" columnName="apns_bundle"/>
+                <columnExists tableName="push_app_credentials" columnName="apns_environment"/>
+            </not>
+        </preConditions>
+        <comment>Add columns apns_private_key, apns_team_id, apns_key_id, apns_bundle, and apns_environment to push_app_credentials table</comment>
+        <addColumn tableName="push_app_credentials">
+            <column name="apns_private_key" type="${blob_type}" />
+            <column name="apns_team_id" type="varchar(255)" />
+            <column name="apns_key_id" type="varchar(255)" />
+            <column name="apns_bundle" type="varchar(255)" />
+            <column name="apns_environment" type="varchar(255)" />
+        </addColumn>
+    </changeSet>
+
+    <!-- Add new FCM columns -->
+    <changeSet id="2" logicalFilePath="powerauth-push-server/1.10.x/20241029-add-new-platforms.xml" author="Roman Strobl">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="push_app_credentials" columnName="fcm_private_key"/>
+                <columnExists tableName="push_app_credentials" columnName="fcm_project_id"/>
+            </not>
+        </preConditions>
+        <comment>Add columns fcm_private_key and fcm_project_id to push_app_credentials table</comment>
+        <addColumn tableName="push_app_credentials">
+            <column name="fcm_private_key" type="${blob_type}" />
+            <column name="fcm_project_id" type="varchar(255)" />
+        </addColumn>
+    </changeSet>
+
+    <!-- Migrate app credentials: iOS to APNs -->
+    <changeSet id="3" logicalFilePath="powerauth-push-server/1.10.x/20241029-migrate-ios-to-apns.xml" author="Roman Strobl">
+        <preConditions onFail="MARK_RAN">
+            <!-- Ensure this runs only if the apns_* columns were created in this script -->
+            <and>
+                <changeSetExecuted id="1" author="Roman Strobl" />
+                <columnExists tableName="push_app_credentials" columnName="apns_private_key"/>
+                <columnExists tableName="push_app_credentials" columnName="apns_team_id"/>
+                <columnExists tableName="push_app_credentials" columnName="apns_key_id"/>
+                <columnExists tableName="push_app_credentials" columnName="apns_bundle"/>
+                <columnExists tableName="push_app_credentials" columnName="apns_environment"/>
+            </and>
+        </preConditions>
+        <comment>Migrate existing ios_* columns to apns_* columns</comment>
+        <update tableName="push_app_credentials">
+            <column name="apns_private_key" valueComputed="ios_private_key"/>
+            <column name="apns_team_id" valueComputed="ios_team_id"/>
+            <column name="apns_key_id" valueComputed="ios_key_id"/>
+            <column name="apns_bundle" valueComputed="ios_bundle"/>
+            <column name="apns_environment" valueComputed="ios_environment"/>
+        </update>
+    </changeSet>
+
+    <!-- Migrate Android to FCM -->
+    <changeSet id="4" logicalFilePath="powerauth-push-server/1.10.x/20241029-migrate-android-to-fcm.xml" author="Roman Strobl">
+        <preConditions onFail="MARK_RAN">
+            <!-- Ensure this runs only if the fcm_* columns were created in this script -->
+            <and>
+                <changeSetExecuted id="2" author="Roman Strobl" />
+                <columnExists tableName="push_app_credentials" columnName="fcm_private_key"/>
+                <columnExists tableName="push_app_credentials" columnName="fcm_project_id"/>
+            </and>
+        </preConditions>
+        <comment>Migrate existing android_* columns to fcm_* columns</comment>
+        <update tableName="push_app_credentials">
+            <column name="fcm_private_key" valueComputed="android_private_key"/>
+            <column name="fcm_project_id" valueComputed="android_project_id"/>
+        </update>
+    </changeSet>
+
+    <!-- Migrate device registrations: ios to apns -->
+    <changeSet id="5" logicalFilePath="powerauth-push-server/1.10.x/20241029-migrate-ios-to-apns.xml" author="Roman Strobl">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="push_device_registration" columnName="platform"/>
+        </preConditions>
+        <comment>Migrate device registrations from iOS to APNs</comment>
+        <update tableName="push_device_registration">
+            <column name="platform" value="apns"/>
+            <where>platform = 'ios'</where>
+        </update>
+    </changeSet>
+
+    <!-- Migrate device registrations: android to fcm -->
+    <changeSet id="6" logicalFilePath="powerauth-push-server/1.10.x/20241029-migrate-ios-to-apns.xml" author="Roman Strobl">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="push_device_registration" columnName="platform"/>
+        </preConditions>
+        <comment>Migrate device registrations from iOS to APNs</comment>
+        <update tableName="push_device_registration">
+            <column name="platform" value="fcm"/>
+            <where>platform = 'android'</where>
+        </update>
+    </changeSet>
+
+    <!-- Migrate device registrations: huawei to hms -->
+    <changeSet id="7" logicalFilePath="powerauth-push-server/1.10.x/20241029-migrate-ios-to-apns.xml" author="Roman Strobl">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="push_device_registration" columnName="platform"/>
+        </preConditions>
+        <comment>Migrate device registrations from iOS to APNs</comment>
+        <update tableName="push_device_registration">
+            <column name="platform" value="hms"/>
+            <where>platform = 'huawei'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

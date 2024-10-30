@@ -13,53 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.getlime.push.repository.model;
+package io.getlime.push.model.request;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Platform enum for {@link PushDeviceRegistrationEntity#getPlatform()}.
+ * Remove FCM configuration request.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
- * @author Lubos Racansky, lubos.racansky@wultra.com
  */
-public enum Platform {
+@Getter
+@Setter
+public class RemoveFcmRequest {
 
     /**
-     * iOS Platform.
-     *
-     * @deprecated use {@link #APNS}
+     * Application ID.
      */
-    @Deprecated
-    IOS,
+    @NotBlank
+    @Schema(description = "Application ID.")
+    private String appId;
 
     /**
-     * Android Platform.
-     *
-     * @deprecated use {@link #FCM}
+     * Default constructor.
      */
-    @Deprecated
-    ANDROID,
+    public RemoveFcmRequest() {
+    }
 
     /**
-     * Huawei Platform.
-     *
-     * @deprecated use {$link HMS}
+     * Constructor with application credentials entity ID.
+     * @param appId Application credentials entity ID.
      */
-    @Deprecated
-    HUAWEI,
-
-    /**
-     * Apple Push Notification service (APNs) platform.
-     */
-    APNS,
-
-    /**
-     * Google Firebase Cloud Message (FCM) platform.
-     */
-    FCM,
-
-    /**
-     * Huawei Mobile Services (HMS) platform.
-     */
-    HMS
+    public RemoveFcmRequest(String appId) {
+        this.appId = appId;
+    }
 
 }

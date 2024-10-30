@@ -52,9 +52,9 @@ curl --request POST \
   --json '{
   "requestObject": {
     "appId": 1,
-    "includeIos": true,
-    "includeAndroid": true,
-    "includeHuawei": true
+    "includeApns": true,
+    "includeFcm": true,
+    "includeHms": true
   }
 }'
 ```
@@ -65,7 +65,7 @@ Update the `appId` value with requested Push Server application ID.
 
 ```sh
 curl --request POST \
-  --url http://localhost:8080/powerauth-push-server/admin/app/ios/update \
+  --url http://localhost:8080/powerauth-push-server/admin/app/apns/update \
   --json '{
   "requestObject": {
     "appId": 1,
@@ -91,7 +91,7 @@ base64 -i <in-file> -o <outfile>
 
 ```sh
 curl --request DELETE \
-  --url http://localhost:8080/powerauth-push-server/admin/app/ios/remove \
+  --url http://localhost:8080/powerauth-push-server/admin/app/apns/remove \
   --json '{
   "requestObject": {
     "appId": 1
@@ -105,7 +105,7 @@ Set the `appId` value for the Push Server application ID you want to update.
 
 ```sh
 curl --request POST \
-  --url http://localhost:8080/powerauth-push-server/admin/app/android/update \
+  --url http://localhost:8080/powerauth-push-server/admin/app/fcm/update \
   --json '{
   "requestObject": {
     "appId": 1,
@@ -129,7 +129,7 @@ base64 -i <in-file> -o <outfile>
 
 ```sh
 curl --request DELETE \
-  --url http://localhost:8080/powerauth-push-server/admin/app/android/remove \
+  --url http://localhost:8080/powerauth-push-server/admin/app/fcm/remove \
   --json '{
   "requestObject": {
     "appId": 1
@@ -140,11 +140,11 @@ curl --request DELETE \
 Set the `appId` value for the Push Server application ID you want to delete.
 
 
-### Update Huawei Configuration
+### Update HMS Configuration
 
 ```sh
 curl --request POST \
-  --url http://localhost:8080/powerauth-push-server/admin/app/huawei/update \
+  --url http://localhost:8080/powerauth-push-server/admin/app/hms/update \
   --json '{
   "requestObject": {
     "appId": 1,
@@ -157,11 +157,11 @@ curl --request POST \
 
 Set the `appId` value for Push Server application ID to want to update.
 
-### Remove Huawei Configuration
+### Remove HMS Configuration
 
 ```sh
 curl --request DELETE \
-  --url http://localhost:8080/powerauth-push-server/admin/app/huawei/remove \
+  --url http://localhost:8080/powerauth-push-server/admin/app/hms/remove \
   --json '{
   "requestObject": {
     "appId": 1
