@@ -37,7 +37,7 @@ public class CreateApplicationRequest {
     private String appId;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public CreateApplicationRequest() {
     }

@@ -45,17 +45,17 @@ public class UpdateApnsRequest {
     private String bundle;
 
     /**
-     * iOS key ID.
+     * APNs key ID.
      */
     @NotBlank
-    @Schema(description = "iOS key ID.")
+    @Schema(description = "APNs key ID.")
     private String keyId;
 
     /**
-     * iOS team ID.
+     * Team ID.
      */
     @NotBlank
-    @Schema(description = "iOS team ID.")
+    @Schema(description = "Team ID.")
     private String teamId;
 
     /**
@@ -72,7 +72,7 @@ public class UpdateApnsRequest {
     private String privateKeyBase64;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public UpdateApnsRequest() {
     }
@@ -81,8 +81,8 @@ public class UpdateApnsRequest {
      * Constructor with details.
      * @param appId Application credentials entity ID.
      * @param bundle The iOS bundle record.
-     * @param keyId The iOS key ID record.
-     * @param teamId The iOS team ID record.
+     * @param keyId The APNs key ID record.
+     * @param teamId The Team ID record.
      * @param environment The APNs environment (per-app config).
      * @param privateKeyBase64 Base64 encoded private key.
      */

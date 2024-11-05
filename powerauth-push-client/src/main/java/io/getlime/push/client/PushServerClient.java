@@ -549,10 +549,10 @@ public class PushServerClient {
      *
      * @param appId ID of application credentials entity.
      * @param bundle The iOS bundle record.
-     * @param keyId The iOS key ID record.
-     * @param teamId The iOS team ID record.
+     * @param keyId The APNs key ID record.
+     * @param teamId The Team ID record.
      * @param environment The APNs environment.
-     * @param privateKey The iOS private key bytes.
+     * @param privateKey The APNs private key bytes.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
@@ -570,9 +570,9 @@ public class PushServerClient {
      * Update APNs details for an application credentials entity.
      *
      * @param appId ID of application credentials entity.
-     * @param bundle The APNs bundle record.
+     * @param bundle The iOS bundle record.
      * @param keyId The APNs key ID record.
-     * @param teamId The APNs team ID record.
+     * @param teamId The Team ID record.
      * @param environment The APNs environment.
      * @param privateKey The APNs private key bytes.
      * @return Response from server.

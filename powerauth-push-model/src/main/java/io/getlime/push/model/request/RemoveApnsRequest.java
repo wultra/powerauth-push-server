@@ -37,7 +37,7 @@ public class RemoveApnsRequest {
     private String appId;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public RemoveApnsRequest() {
     }

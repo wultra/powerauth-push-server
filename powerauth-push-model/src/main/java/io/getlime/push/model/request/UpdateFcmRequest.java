@@ -51,7 +51,7 @@ public class UpdateFcmRequest {
     private String privateKeyBase64;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public UpdateFcmRequest() {
     }

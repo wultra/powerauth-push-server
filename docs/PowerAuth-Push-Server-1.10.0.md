@@ -30,10 +30,6 @@ The changes are reflected in the Push Server database:
 - new FCM database columns in table `push_app_credentials`:
   - added column `fcm_private_key`, value copied from column `android_private_key`
   - added column `fcm_project_id`, value copied from column `android_project_id`
-- updated platforms in table `push_device_registration`:
-  - values in column `platform` changed from `ios` to `apns`
-  - values in column `platform` changed from `android` to `fcm`
-  - values in column `platform` changed from `huawei` to `hms`
 
 New endpoints were added into the REST API to migrate to new platform enumerations:
 - `POST/PUT /admin/app/apns/update` - deprecating `POST/PUT /admin/app/ios/update`

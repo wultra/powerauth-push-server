@@ -28,7 +28,7 @@ public class BasePushMessageSendResult {
     private final Mode mode;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public BasePushMessageSendResult() {
         this.mode = Mode.SYNCHRONOUS;

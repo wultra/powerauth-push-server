@@ -53,7 +53,7 @@ public class GetApplicationDetailRequest {
     private boolean includeHms;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public GetApplicationDetailRequest() {
     }

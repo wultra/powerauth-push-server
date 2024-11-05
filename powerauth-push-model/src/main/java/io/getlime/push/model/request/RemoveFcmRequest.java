@@ -37,7 +37,7 @@ public class RemoveFcmRequest {
     private String appId;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public RemoveFcmRequest() {
     }

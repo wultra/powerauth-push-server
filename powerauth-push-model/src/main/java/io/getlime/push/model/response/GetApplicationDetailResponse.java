@@ -33,7 +33,7 @@ public class GetApplicationDetailResponse {
     private PushServerApplication application;
 
     /**
-     * APNs bundle.
+     * iOS bundle.
      */
     private String apnsBundle;
 
@@ -43,7 +43,7 @@ public class GetApplicationDetailResponse {
     private String apnsKeyId;
 
     /**
-     * APNs team ID.
+     * Team ID.
      */
     private String apnsTeamId;
 

@@ -2,6 +2,7 @@
 
 This page contains PowerAuth Push Server migration instructions.
 
+- [PowerAuth Push Server 1.10.0](./PowerAuth-Push-Server-1.10.0.md)
 - [PowerAuth Push Server 1.9.0](./PowerAuth-Push-Server-1.9.0.md)
 - [PowerAuth Push Server 1.8.0](./PowerAuth-Push-Server-1.8.0.md)
 - [PowerAuth Push Server 1.7.0](./PowerAuth-Push-Server-1.7.0.md)

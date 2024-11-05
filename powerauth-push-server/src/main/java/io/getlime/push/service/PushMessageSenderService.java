@@ -26,7 +26,6 @@ import io.getlime.push.model.validator.PushMessageValidator;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.dao.PushMessageDAO;
-import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.Platform;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
@@ -103,7 +102,7 @@ public class PushMessageSenderService {
                             continue;
                         }
                         final PushMessageSendResult.PlatformResult platformResult = sendResult.getApns();
-                        pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getApnsBundle(), createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
+                        pushSendingWorker.sendMessageToApns(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getApnsBundle(), createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
                     } else if (platform == Platform.ANDROID || platform == Platform.FCM) {
                         if (pushClient.getFcmClient() == null) {
                             logger.error("Push message cannot be sent to FCM because FCM is not configured in push server.");
@@ -112,7 +111,7 @@ public class PushMessageSenderService {
                         }
                         final String token = device.getPushToken();
                         final PushMessageSendResult.PlatformResult platformResult = sendResult.getFcm();
-                        pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
+                        pushSendingWorker.sendMessageToFcm(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
                     } else if (platform == Platform.HUAWEI || platform == Platform.HMS) {
                         if (pushClient.getHmsClient() == null) {
                             logger.error("Push message cannot be sent to HMS because HMS is not configured in push server.");
@@ -121,7 +120,7 @@ public class PushMessageSenderService {
                         }
                         final String token = device.getPushToken();
                         final PushMessageSendResult.PlatformResult platformResult = sendResult.getHms();
-                        pushSendingWorker.sendMessageToHuawei(pushClient.getHmsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
+                        pushSendingWorker.sendMessageToHms(pushClient.getHmsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
                     }
                 }
             }
@@ -201,12 +200,12 @@ public class PushMessageSenderService {
         final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, activationId, deviceId);
 
         switch (platform) {
-            case IOS ->
-                    pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getApnsBundle(), createPushSendingCallback(token, pushMessageObject, pushClient));
-            case ANDROID ->
-                    pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
-            case HUAWEI ->
-                    pushSendingWorker.sendMessageToHuawei(pushClient.getHmsClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
+            case IOS, APNS ->
+                    pushSendingWorker.sendMessageToApns(pushClient.getApnsClient(), pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getApnsBundle(), createPushSendingCallback(token, pushMessageObject, pushClient));
+            case ANDROID, FCM ->
+                    pushSendingWorker.sendMessageToFcm(pushClient.getFcmClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
+            case HUAWEI, HMS ->
+                    pushSendingWorker.sendMessageToHms(pushClient.getHmsClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
         }
     }
 

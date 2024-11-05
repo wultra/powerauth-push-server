@@ -45,7 +45,7 @@ public class PushMessageSendResult extends BasePushMessageSendResult {
     private final PlatformResult hms;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public PushMessageSendResult() {
         this.apns = new PlatformResult();

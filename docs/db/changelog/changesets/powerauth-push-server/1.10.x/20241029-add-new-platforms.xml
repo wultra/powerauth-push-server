@@ -79,40 +79,4 @@
         </update>
     </changeSet>
 
-    <!-- Migrate device registrations: ios to apns -->
-    <changeSet id="5" logicalFilePath="powerauth-push-server/1.10.x/20241029-migrate-ios-to-apns.xml" author="Roman Strobl">
-        <preConditions onFail="MARK_RAN">
-            <columnExists tableName="push_device_registration" columnName="platform"/>
-        </preConditions>
-        <comment>Migrate device registrations from iOS to APNs</comment>
-        <update tableName="push_device_registration">
-            <column name="platform" value="apns"/>
-            <where>platform = 'ios'</where>
-        </update>
-    </changeSet>
-
-    <!-- Migrate device registrations: android to fcm -->
-    <changeSet id="6" logicalFilePath="powerauth-push-server/1.10.x/20241029-migrate-ios-to-apns.xml" author="Roman Strobl">
-        <preConditions onFail="MARK_RAN">
-            <columnExists tableName="push_device_registration" columnName="platform"/>
-        </preConditions>
-        <comment>Migrate device registrations from iOS to APNs</comment>
-        <update tableName="push_device_registration">
-            <column name="platform" value="fcm"/>
-            <where>platform = 'android'</where>
-        </update>
-    </changeSet>
-
-    <!-- Migrate device registrations: huawei to hms -->
-    <changeSet id="7" logicalFilePath="powerauth-push-server/1.10.x/20241029-migrate-ios-to-apns.xml" author="Roman Strobl">
-        <preConditions onFail="MARK_RAN">
-            <columnExists tableName="push_device_registration" columnName="platform"/>
-        </preConditions>
-        <comment>Migrate device registrations from iOS to APNs</comment>
-        <update tableName="push_device_registration">
-            <column name="platform" value="hms"/>
-            <where>platform = 'huawei'</where>
-        </update>
-    </changeSet>
-
 </databaseChangeLog>

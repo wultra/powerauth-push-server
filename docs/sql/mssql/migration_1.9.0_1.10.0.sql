@@ -33,18 +33,4 @@ GO
 UPDATE push_app_credentials SET fcm_private_key = android_private_key, fcm_project_id = android_project_id;
 GO
 
--- Changeset powerauth-push-server/1.10.x/20241029-migrate-ios-to-apns.xml::5::Roman Strobl
--- Migrate device registrations from iOS to APNs
-UPDATE push_device_registration SET platform = 'apns' WHERE platform = 'ios';
-GO
-
--- Changeset powerauth-push-server/1.10.x/20241029-migrate-ios-to-apns.xml::6::Roman Strobl
--- Migrate device registrations from iOS to APNs
-UPDATE push_device_registration SET platform = 'fcm' WHERE platform = 'android';
-GO
-
--- Changeset powerauth-push-server/1.10.x/20241029-migrate-ios-to-apns.xml::7::Roman Strobl
--- Migrate device registrations from iOS to APNs
-UPDATE push_device_registration SET platform = 'hms' WHERE platform = 'huawei';
-GO
 

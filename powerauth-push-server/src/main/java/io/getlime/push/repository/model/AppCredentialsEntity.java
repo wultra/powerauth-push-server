@@ -123,7 +123,7 @@ public class AppCredentialsEntity implements Serializable {
     private byte[] apnsPrivateKey;
 
     /**
-     * APNs Team ID.
+     * Team ID.
      */
     @Column(name = "apns_team_id")
     private String apnsTeamId;
@@ -135,7 +135,7 @@ public class AppCredentialsEntity implements Serializable {
     private String apnsKeyId;
 
     /**
-     * APNs bundle ID.
+     * iOS bundle ID.
      */
     @Column(name = "apns_bundle")
     private String apnsBundle;
