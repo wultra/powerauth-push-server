@@ -57,11 +57,11 @@ public class AdministrationController {
     @GetMapping(value = "list")
     @Operation(summary = "List all applications", description = "List all application registered in Push Server")
     public ObjectResponse<GetApplicationListResponse> listApplications() {
-        logger.debug("Received listApplications request");
+        logger.debug("action: listApplications, state: initiated");
         final List<PushServerApplication> applications = administrationService.findAllApplications();
         final GetApplicationListResponse response = new GetApplicationListResponse();
         response.setApplicationList(applications);
-        logger.debug("The listApplications request succeeded");
+        logger.debug("action: listApplications, state: succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -74,11 +74,11 @@ public class AdministrationController {
     @Operation(summary = "List unconfigured applications", description = "List unconfigured application in Push Server")
     public ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() throws PushServerException {
         try {
-            logger.debug("Received listUnconfiguredApplications request");
+            logger.debug("action: listUnconfiguredApplications, state: initiated");
             final List<PushServerApplication> applications = administrationService.findUnconfiguredApplications();
             final GetApplicationListResponse response = new GetApplicationListResponse();
             response.setApplicationList(applications);
-            logger.debug("The listUnconfiguredApplications request succeeded");
+            logger.debug("action: listUnconfiguredApplications, state: succeeded");
             return new ObjectResponse<>(response);
         } catch (PowerAuthClientException ex) {
             logger.warn(ex.getMessage(), ex);
@@ -95,7 +95,7 @@ public class AdministrationController {
     @PostMapping(value = "detail")
     @Operation(summary = "Get application detail", description = "Obtain registered application detail")
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(@RequestBody ObjectRequest<GetApplicationDetailRequest> request) throws PushServerException {
-        logger.debug("Received getApplicationDetail request");
+        logger.debug("action: getApplicationDetail, state: initiated");
         final GetApplicationDetailRequest requestObject = request.getRequestObject();
         final String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
         if (errorMessage != null) {
@@ -121,7 +121,7 @@ public class AdministrationController {
         if (requestObject.isIncludeHms()) {
             response.setHmsProjectId(appCredentialsEntity.getHmsProjectId());
         }
-        logger.debug("The getApplicationDetail request succeeded");
+        logger.debug("action: getApplicationDetail, state: succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -142,10 +142,10 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received createApplication request, application ID: {}", requestObject.getAppId());
+        logger.info("action: createApplication, state: initiated, applicationId: {}", requestObject.getAppId());
         final AppCredentialsEntity appCredentials = administrationService.createAppCredentials(requestObject);
         final CreateApplicationResponse response = new CreateApplicationResponse(appCredentials.getAppId());
-        logger.info("The createApplication request succeeded, application ID: {}", requestObject.getAppId());
+        logger.info("action: createApplication, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new ObjectResponse<>(response);
     }
 
@@ -162,12 +162,13 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received updateIos request, application ID: {}", requestObject.getAppId());
+        logger.info("action: updateIos, state: initiated, applicationId: {}", requestObject.getAppId());
         final String errorMessage = UpdateIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         administrationService.updateIosAppCredentials(requestObject);
+        logger.info("action: updateIos, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -184,12 +185,13 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received updateApns request, application ID: {}", requestObject.getAppId());
+        logger.info("action: updateApns, state: initiated, applicationId: {}", requestObject.getAppId());
         final String errorMessage = UpdateApnsRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         administrationService.updateApnsAppCredentials(requestObject);
+        logger.info("action: updateApns, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -206,12 +208,13 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received removeIos request, application ID: {}", requestObject.getAppId());
+        logger.info("action: removeIos, state: initiated, applicationId: {}", requestObject.getAppId());
         String errorMessage = RemoveIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         administrationService.removeIosAppCredentials(requestObject.getAppId());
+        logger.info("action: removeIos, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -227,8 +230,9 @@ public class AdministrationController {
         if (appId == null) {
             throw new PushServerException("Parameter appId must not be empty");
         }
-        logger.info("Received removeApns request, application ID: {}", appId);
+        logger.info("action: removeApns, state: initiated, applicationId: {}", appId);
         administrationService.removeApnsAppCredentials(appId);
+        logger.info("action: removeApns, state: succeeded, applicationId: {}", appId);
         return new Response();
     }
 
@@ -245,12 +249,13 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received updateAndroid request, application ID: {}", requestObject.getAppId());
+        logger.info("action: updateAndroid, state: initiated, applicationId: {}", requestObject.getAppId());
         String errorMessage = UpdateAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         administrationService.updateAndroidAppCredentials(requestObject);
+        logger.info("action: updateAndroid, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -267,12 +272,13 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received updateFcm request, application ID: {}", requestObject.getAppId());
+        logger.info("action: updateFcm, state: initiated, applicationId: {}", requestObject.getAppId());
         String errorMessage = UpdateFcmRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         administrationService.updateFcmAppCredentials(requestObject);
+        logger.info("action: updateFcm, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -289,12 +295,13 @@ public class AdministrationController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received removeAndroid request, application ID: {}", requestObject.getAppId());
+        logger.info("action: removeAndroid, state: initiated, applicationId: {}", requestObject.getAppId());
         String errorMessage = RemoveAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         administrationService.removeAndroidAppCredentials(requestObject.getAppId());
+        logger.info("action: removeAndroid, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -310,8 +317,9 @@ public class AdministrationController {
         if (appId == null) {
             throw new PushServerException("Parameter appId must not be empty");
         }
-        logger.info("Received removeFcm request, application ID: {}", appId);
+        logger.info("action: removeFcm, state: initiated, applicationId: {}", appId);
         administrationService.removeFcmAppCredentials(appId);
+        logger.info("action: removeFcm, state: succeeded, applicationId: {}", appId);
         return new Response();
     }
 
@@ -326,8 +334,9 @@ public class AdministrationController {
     @Operation(summary = "Update Huawei configuration (deprecated)", description = "Update Huawei configuration endpoint (deprecated), use the /admin/app/hms/update endpoint")
     public Response updateHuawei(@Valid @RequestBody ObjectRequest<UpdateHuaweiRequest> request) throws PushServerException {
         final UpdateHuaweiRequest requestObject = request.getRequestObject();
-        logger.info("Received updateHuawei request, application ID: {}", requestObject.getAppId());
+        logger.info("action: updateHuawei, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.updateHuaweiAppCredentials(requestObject);
+        logger.info("action: updateHuawei, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -342,8 +351,9 @@ public class AdministrationController {
     @Operation(summary = "Update HMS configuration", description = "Update HMS configuration in Push server")
     public Response updateHms(@Valid @RequestBody ObjectRequest<UpdateHmsRequest> request) throws PushServerException {
         final UpdateHmsRequest requestObject = request.getRequestObject();
-        logger.info("Received updateHms request, application ID: {}", requestObject.getAppId());
+        logger.info("action: updateHms, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.updateHmsAppCredentials(requestObject);
+        logger.info("action: updateHms, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -358,8 +368,9 @@ public class AdministrationController {
     @Operation(summary = "Remove Huawei configuration (deprecated)", description = "Remove Huawei configuration endpoint (deprecated), use the /admin/app/hms/remove endpoint")
     public Response removeHuawei(@Valid @RequestBody ObjectRequest<RemoveHuaweiRequest> request) throws PushServerException {
         final RemoveHuaweiRequest requestObject = request.getRequestObject();
-        logger.info("Received removeHuawei request, application ID: {}", requestObject.getAppId());
+        logger.info("action: removeHuawei, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.removeHuaweiAppCredentials(requestObject.getAppId());
+        logger.info("action: removeHuawei, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -376,8 +387,9 @@ public class AdministrationController {
         if (appId == null) {
             throw new PushServerException("Parameter appId must not be empty");
         }
-        logger.info("Received removeHms request, application ID: {}", appId);
+        logger.info("action: removeHms, state: initiated, applicationId: {}", appId);
         administrationService.removeHmsAppCredentials(appId);
+        logger.info("action: removeHms, state: succeeded, applicationId: {}", appId);
         return new Response();
     }
 
