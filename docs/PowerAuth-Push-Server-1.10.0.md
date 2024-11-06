@@ -32,12 +32,12 @@ The changes are reflected in the Push Server database:
   - added column `fcm_project_id`, value copied from column `android_project_id`
 
 New endpoints were added into the REST API to migrate to new platform enumerations:
-- `POST/PUT /admin/app/apns/update` - deprecating `POST/PUT /admin/app/ios/update`
-- `POST/DELETE /admin/app/apns/remove` - deprecating `POST/DELETE /admin/app/ios/remove`
-- `POST/PUT /admin/app/fcm/update` - deprecating `POST/PUT /admin/app/android/update`
-- `POST/DELETE /admin/app/fcm/remove` - deprecating `POST/DELETE /admin/app/android/remove`
-- `POST/PUT /admin/app/hms/update` - deprecating `POST/PUT /admin/app/huawei/update`
-- `POST/DELETE /admin/app/hms/remove` - deprecating `POST/DELETE /admin/app/huawei/remove`
+- `POST/PUT /admin/app/apns` - deprecating `POST/PUT /admin/app/ios/update`
+- `DELETE /admin/app/apns` - deprecating `POST/DELETE /admin/app/ios/remove`
+- `POST/PUT /admin/app/fcm` - deprecating `POST/PUT /admin/app/android/update`
+- `DELETE /admin/app/fcm` - deprecating `POST/DELETE /admin/app/android/remove`
+- `POST/PUT /admin/app/hms` - deprecating `POST/PUT /admin/app/huawei/update`
+- `DELETE /admin/app/hms` - deprecating `POST/DELETE /admin/app/huawei/remove`
 
 The application list endpoint `POST /admin/app/list` uses new platform enumerations in the response.
 
