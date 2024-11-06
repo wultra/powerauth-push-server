@@ -177,7 +177,7 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @RequestMapping(value = "apns/update", method = { RequestMethod.POST, RequestMethod.PUT })
+    @RequestMapping(value = "apns", method = { RequestMethod.POST, RequestMethod.PUT })
     @Operation(summary = "Update APNs configuration", description = "Update APNs configuration in Push server")
     public Response updateApns(@RequestBody ObjectRequest<UpdateApnsRequest> request) throws PushServerException {
         final UpdateApnsRequest requestObject = request.getRequestObject();
@@ -217,23 +217,18 @@ public class AdministrationController {
 
     /**
      * Remove APNs configuration.
-     * @param request Remove APNs configuration request.
+     * @param appId Application identifier.
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @RequestMapping(value = "apns/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
+    @RequestMapping(value = "apns", method = RequestMethod.DELETE)
     @Operation(summary = "Remove APNs configuration", description = "Remove APNs configuration from Push server")
-    public Response removeApns(@RequestBody ObjectRequest<RemoveApnsRequest> request) throws PushServerException {
-        final RemoveApnsRequest requestObject = request.getRequestObject();
-        if (requestObject == null) {
-            throw new PushServerException("Request object must not be empty");
+    public Response removeApns(@RequestParam("appId") String appId) throws PushServerException {
+        if (appId == null) {
+            throw new PushServerException("Parameter appId must not be empty");
         }
-        logger.info("Received removeApns request, application ID: {}", requestObject.getAppId());
-        String errorMessage = RemoveApnsRequestValidator.validate(requestObject);
-        if (errorMessage != null) {
-            throw new PushServerException(errorMessage);
-        }
-        administrationService.removeApnsAppCredentials(requestObject.getAppId());
+        logger.info("Received removeApns request, application ID: {}", appId);
+        administrationService.removeApnsAppCredentials(appId);
         return new Response();
     }
 
@@ -265,7 +260,7 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @RequestMapping(value = "fcm/update", method = { RequestMethod.POST, RequestMethod.PUT })
+    @RequestMapping(value = "fcm", method = { RequestMethod.POST, RequestMethod.PUT })
     @Operation(summary = "Update FCM configuration", description = "Update FCM configuration in Push server")
     public Response updateFcm(@RequestBody ObjectRequest<UpdateFcmRequest> request) throws PushServerException {
         final UpdateFcmRequest requestObject = request.getRequestObject();
@@ -305,23 +300,18 @@ public class AdministrationController {
 
     /**
      * Remove FCM configuration.
-     * @param request Remove FCM configuration request.
+     * @param appId Application identifier.
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @RequestMapping(value = "fcm/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
+    @RequestMapping(value = "fcm", method = RequestMethod.DELETE)
     @Operation(summary = "Remove FCM configuration", description = "Remove FCM configuration from Push server")
-    public Response removeFcm(@RequestBody ObjectRequest<RemoveFcmRequest> request) throws PushServerException {
-        final RemoveFcmRequest requestObject = request.getRequestObject();
-        if (requestObject == null) {
-            throw new PushServerException("Request object must not be empty");
+    public Response removeFcm(@RequestParam("appId") String appId) throws PushServerException {
+        if (appId == null) {
+            throw new PushServerException("Parameter appId must not be empty");
         }
-        logger.info("Received removeFcm request, application ID: {}", requestObject.getAppId());
-        String errorMessage = RemoveFcmRequestValidator.validate(requestObject);
-        if (errorMessage != null) {
-            throw new PushServerException(errorMessage);
-        }
-        administrationService.removeFcmAppCredentials(requestObject.getAppId());
+        logger.info("Received removeFcm request, application ID: {}", appId);
+        administrationService.removeFcmAppCredentials(appId);
         return new Response();
     }
 
@@ -348,7 +338,7 @@ public class AdministrationController {
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @RequestMapping(value = "hms/update", method = { RequestMethod.POST, RequestMethod.PUT })
+    @RequestMapping(value = "hms", method = { RequestMethod.POST, RequestMethod.PUT })
     @Operation(summary = "Update HMS configuration", description = "Update HMS configuration in Push server")
     public Response updateHms(@Valid @RequestBody ObjectRequest<UpdateHmsRequest> request) throws PushServerException {
         final UpdateHmsRequest requestObject = request.getRequestObject();
@@ -376,16 +366,18 @@ public class AdministrationController {
     /**
      * Remove HMS configuration.
      *
-     * @param request Remove HMS configuration request.
+     * @param appId Application identifier.
      * @return Response.
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
-    @RequestMapping(value = "hms/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
+    @RequestMapping(value = "hms", method = RequestMethod.DELETE)
     @Operation(summary = "Remove HMS configuration", description = "Remove HMS configuration from Push server")
-    public Response removeHms(@Valid @RequestBody ObjectRequest<RemoveHmsRequest> request) throws PushServerException {
-        final RemoveHmsRequest requestObject = request.getRequestObject();
-        logger.info("Received removeHms request, application ID: {}", requestObject.getAppId());
-        administrationService.removeHmsAppCredentials(requestObject.getAppId());
+    public Response removeHms(@RequestParam String appId) throws PushServerException {
+        if (appId == null) {
+            throw new PushServerException("Parameter appId must not be empty");
+        }
+        logger.info("Received removeHms request, application ID: {}", appId);
+        administrationService.removeHmsAppCredentials(appId);
         return new Response();
     }
 

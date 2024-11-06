@@ -613,9 +613,8 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response removeApns(String appId) throws PushServerClientException {
-        final RemoveApnsRequest request = new RemoveApnsRequest(appId);
         logger.info("Calling push server to remove APNs, ID: {} - start", appId);
-        final Response response = postObjectImpl("/admin/app/apns/remove", new ObjectRequest<>(request));
+        final Response response = deleteImpl("/admin/app/apns/remove?appId=" + appId);
         logger.info("Calling push server to remove APNs, ID: {} - finish", appId);
         return response;
     }
@@ -685,9 +684,8 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response removeFcm(String appId) throws PushServerClientException {
-        final RemoveFcmRequest request = new RemoveFcmRequest(appId);
         logger.info("Calling push server to remove FCM, ID: {} - start", appId);
-        final Response response = postObjectImpl("/admin/app/fcm/remove", new ObjectRequest<>(request));
+        final Response response = deleteImpl("/admin/app/fcm?appId=" + appId);
         logger.info("Calling push server to remove FCM, ID: {} - finish", appId);
         return response;
     }
@@ -749,9 +747,8 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response removeHms(String appId) throws PushServerClientException {
-        final RemoveHmsRequest request = new RemoveHmsRequest(appId);
         logger.info("Calling push server to remove HMS, ID: {} - start", appId);
-        final Response response = postObjectImpl("/admin/app/hms/remove", new ObjectRequest<>(request));
+        final Response response = deleteImpl("/admin/app/hms?appId=" + appId);
         logger.info("Calling push server to remove HMS, ID: {} - finish", appId);
         return response;
     }
@@ -990,6 +987,22 @@ public class PushServerClient {
         } catch (RestClientException ex) {
             logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP POST request failed."));
+        }
+    }
+
+    /**
+     * Prepare DELETE response. Uses default {@link Response} type reference for response.
+     *
+     * @param url specific url of method
+     * @return Object obtained after processing the response JSON.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    private Response deleteImpl(String url) throws PushServerClientException {
+        try {
+            return restClient.delete(url, new ParameterizedTypeReference<Response>(){}).getBody();
+        } catch (RestClientException ex) {
+            logger.debug(ex.getMessage(), ex);
+            throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP DELETE request failed."));
         }
     }
 
