@@ -18,8 +18,7 @@ package io.getlime.push.model.request;
 import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * Update APNs configuration request.
@@ -28,6 +27,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UpdateApnsRequest {
 
     /**
@@ -70,29 +72,5 @@ public class UpdateApnsRequest {
     @NotBlank
     @Schema(description = "Base64 encoded private key.")
     private String privateKeyBase64;
-
-    /**
-     * No-arg constructor.
-     */
-    public UpdateApnsRequest() {
-    }
-
-    /**
-     * Constructor with details.
-     * @param appId Application credentials entity ID.
-     * @param bundle The iOS bundle record.
-     * @param keyId The APNs key ID record.
-     * @param teamId The Team ID record.
-     * @param environment The APNs environment (per-app config).
-     * @param privateKeyBase64 Base64 encoded private key.
-     */
-    public UpdateApnsRequest(String appId, String bundle, String keyId, String teamId, ApnsEnvironment environment, String privateKeyBase64) {
-        this.appId = appId;
-        this.bundle = bundle;
-        this.keyId = keyId;
-        this.teamId = teamId;
-        this.environment = environment;
-        this.privateKeyBase64 = privateKeyBase64;
-    }
 
 }

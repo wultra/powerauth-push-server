@@ -17,8 +17,7 @@ package io.getlime.push.model.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * Update FCM configuration request.
@@ -27,6 +26,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UpdateFcmRequest {
 
     /**
@@ -49,23 +51,5 @@ public class UpdateFcmRequest {
     @NotBlank
     @Schema(description = "Base64 encoded FCM private key.")
     private String privateKeyBase64;
-
-    /**
-     * No-arg constructor.
-     */
-    public UpdateFcmRequest() {
-    }
-
-    /**
-     * Constructor with details.
-     * @param appId Application credentials entity ID.
-     * @param projectId FCM project ID record.
-     * @param privateKeyBase64 Base 64 encoded FCM private key.
-     */
-    public UpdateFcmRequest(String appId, String projectId, String privateKeyBase64) {
-        this.appId = appId;
-        this.projectId = projectId;
-        this.privateKeyBase64 = privateKeyBase64;
-    }
 
 }

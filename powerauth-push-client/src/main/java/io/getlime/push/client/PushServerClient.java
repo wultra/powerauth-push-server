@@ -545,7 +545,7 @@ public class PushServerClient {
     /**
      * Update iOS details for an application credentials entity.
      *
-     * @deprecated use {@link #updateApns(String, String, String, String, ApnsEnvironment, byte[])}
+     * @deprecated use {@link #updateApns(UpdateApnsRequest)}
      *
      * @param appId ID of application credentials entity.
      * @param bundle The iOS bundle record.
@@ -569,21 +569,14 @@ public class PushServerClient {
     /**
      * Update APNs details for an application credentials entity.
      *
-     * @param appId ID of application credentials entity.
-     * @param bundle The iOS bundle record.
-     * @param keyId The APNs key ID record.
-     * @param teamId The Team ID record.
-     * @param environment The APNs environment.
-     * @param privateKey The APNs private key bytes.
+     * @param updateRequest Update APNS request.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public Response updateApns(String appId, String bundle, String keyId, String teamId, ApnsEnvironment environment, byte[] privateKey) throws PushServerClientException {
-        final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
-        final UpdateApnsRequest request = new UpdateApnsRequest(appId, bundle, keyId, teamId, environment, privateKeyBase64);
-        logger.info("Calling push server to update APNs, ID: {} - start", appId);
-        final Response response = putObjectImpl("/admin/app/apns/update", new ObjectRequest<>(request));
-        logger.info("Calling push server to update APNs, ID: {} - finish", appId);
+    public Response updateApns(final UpdateApnsRequest updateRequest) throws PushServerClientException {
+        logger.info("Calling push server to update APNs, ID: {} - start", updateRequest.getAppId());
+        final Response response = putObjectImpl("/admin/app/apns/update", new ObjectRequest<>(updateRequest));
+        logger.info("Calling push server to update APNs, ID: {} - finish", updateRequest.getAppId());
         return response;
     }
 
@@ -622,7 +615,7 @@ public class PushServerClient {
     /**
      * Update Android details for an application credentials entity.
      *
-     * @deprecated use {@link #updateApns(String, String, String, String, ApnsEnvironment, byte[])}
+     * @deprecated use {@link #updateFcm(UpdateFcmRequest)}
      *
      * @param appId Application credentials entity ID.
      * @param projectId The Android project ID record.
@@ -643,18 +636,14 @@ public class PushServerClient {
     /**
      * Update FCM details for an application credentials entity.
      *
-     * @param appId Application credentials entity ID.
-     * @param projectId The FCM project ID record.
-     * @param privateKey The FCM private key bytes.
+     * @param updateRequest Update FCM request.
      * @return Response from server.
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
-    public Response updateFcm(String appId, String projectId, byte[] privateKey) throws PushServerClientException {
-        final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
-        final UpdateFcmRequest request = new UpdateFcmRequest(appId, projectId, privateKeyBase64);
-        logger.info("Calling push server to update FCM, ID: {} - start", appId);
-        final Response response = putObjectImpl("/admin/app/fcm/update", new ObjectRequest<>(request));
-        logger.info("Calling push server to update FCM, ID: {} - finish", appId);
+    public Response updateFcm(final UpdateFcmRequest updateRequest) throws PushServerClientException {
+        logger.info("Calling push server to update FCM, ID: {} - start", updateRequest.getAppId());
+        final Response response = putObjectImpl("/admin/app/fcm/update", new ObjectRequest<>(updateRequest));
+        logger.info("Calling push server to update FCM, ID: {} - finish", updateRequest.getAppId());
         return response;
     }
 
