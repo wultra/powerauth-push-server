@@ -18,6 +18,7 @@ package io.getlime.push.model.request;
 import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 /**
@@ -63,6 +64,7 @@ public class UpdateApnsRequest {
     /**
      * APNs environment.
      */
+    @NotNull
     @Schema(description = "APNs environment.")
     private ApnsEnvironment environment;
 

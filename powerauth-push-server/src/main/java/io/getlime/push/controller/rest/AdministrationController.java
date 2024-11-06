@@ -180,16 +180,12 @@ public class AdministrationController {
      */
     @RequestMapping(value = "apns", method = { RequestMethod.POST, RequestMethod.PUT })
     @Operation(summary = "Update APNs configuration", description = "Update APNs configuration in Push server")
-    public Response updateApns(@RequestBody ObjectRequest<UpdateApnsRequest> request) throws PushServerException {
+    public Response updateApns(@Valid @RequestBody ObjectRequest<UpdateApnsRequest> request) throws PushServerException {
         final UpdateApnsRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
         logger.info("action: updateApns, state: initiated, applicationId: {}", requestObject.getAppId());
-        final String errorMessage = UpdateApnsRequestValidator.validate(requestObject);
-        if (errorMessage != null) {
-            throw new PushServerException(errorMessage);
-        }
         administrationService.updateApnsAppCredentials(requestObject);
         logger.info("action: updateApns, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
@@ -267,16 +263,12 @@ public class AdministrationController {
      */
     @RequestMapping(value = "fcm", method = { RequestMethod.POST, RequestMethod.PUT })
     @Operation(summary = "Update FCM configuration", description = "Update FCM configuration in Push server")
-    public Response updateFcm(@RequestBody ObjectRequest<UpdateFcmRequest> request) throws PushServerException {
+    public Response updateFcm(@Valid @RequestBody ObjectRequest<UpdateFcmRequest> request) throws PushServerException {
         final UpdateFcmRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
         logger.info("action: updateFcm, state: initiated, applicationId: {}", requestObject.getAppId());
-        String errorMessage = UpdateFcmRequestValidator.validate(requestObject);
-        if (errorMessage != null) {
-            throw new PushServerException(errorMessage);
-        }
         administrationService.updateFcmAppCredentials(requestObject);
         logger.info("action: updateFcm, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
