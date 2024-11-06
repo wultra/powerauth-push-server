@@ -91,12 +91,7 @@ base64 -i <in-file> -o <outfile>
 
 ```sh
 curl --request DELETE \
-  --url http://localhost:8080/powerauth-push-server/admin/app/apns \
-  --json '{
-  "requestObject": {
-    "appId": 1
-  }
-}'
+  --url http://localhost:8080/powerauth-push-server/admin/app/apns?appId=mobile-app
 ```
 
 Set the `appId` value for the Push Server application ID you want to update.
@@ -129,12 +124,7 @@ base64 -i <in-file> -o <outfile>
 
 ```sh
 curl --request DELETE \
-  --url http://localhost:8080/powerauth-push-server/admin/app/fcm \
-  --json '{
-  "requestObject": {
-    "appId": 1
-  }
-}'
+  --url http://localhost:8080/powerauth-push-server/admin/app/fcm?appId=mobile-app
 ```
 
 Set the `appId` value for the Push Server application ID you want to delete.
@@ -161,12 +151,7 @@ Set the `appId` value for Push Server application ID to want to update.
 
 ```sh
 curl --request DELETE \
-  --url http://localhost:8080/powerauth-push-server/admin/app/hms \
-  --json '{
-  "requestObject": {
-    "appId": 1
-  }
-}'
+  --url http://localhost:8080/powerauth-push-server/admin/app/hms?appId=mobile-app
 ```
 
 Set the `appId` value for the Push Server application ID you want to delete.
