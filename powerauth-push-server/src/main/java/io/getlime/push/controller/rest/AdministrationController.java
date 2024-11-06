@@ -156,7 +156,7 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "ios/update", method = { RequestMethod.POST, RequestMethod.PUT })
-    @Operation(summary = "Update iOS configuration (deprecated)", description = "Update iOS configuration endpoint (deprecated), use the /admin/app/apns/update endpoint")
+    @Operation(summary = "Update iOS configuration (deprecated)", description = "Update iOS configuration endpoint (deprecated), use the POST /admin/app/apns endpoint")
     public Response updateIos(@RequestBody ObjectRequest<UpdateIosRequest> request) throws PushServerException {
         final UpdateIosRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
@@ -198,7 +198,7 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "ios/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
-    @Operation(summary = "Remove iOS configuration (deprecated)", description = "Remove iOS configuration endpoint (deprecated), use the /admin/app/apns/remove endpoint")
+    @Operation(summary = "Remove iOS configuration (deprecated)", description = "Remove iOS configuration endpoint (deprecated), use the DELETE /admin/app/apns endpoint")
     public Response removeIos(@RequestBody ObjectRequest<RemoveIosRequest> request) throws PushServerException {
         final RemoveIosRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
@@ -239,7 +239,7 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "android/update", method = { RequestMethod.POST, RequestMethod.PUT })
-    @Operation(summary = "Update Android configuration (deprecated)", description = "Update Android configuration endpoint (deprecated), use the /admin/app/fcm/update endpoint")
+    @Operation(summary = "Update Android configuration (deprecated)", description = "Update Android configuration endpoint (deprecated), use the POST /admin/app/fcm endpoint")
     public Response updateAndroid(@RequestBody ObjectRequest<UpdateAndroidRequest> request) throws PushServerException {
         final UpdateAndroidRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
@@ -281,7 +281,7 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "android/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
-    @Operation(summary = "Remove Android configuration (deprecated)", description = "Remove Android configuration endpoint (deprecated), use the /admin/app/fcm/remove endpoint")
+    @Operation(summary = "Remove Android configuration (deprecated)", description = "Remove Android configuration endpoint (deprecated), use the DELETE /admin/app/fcm endpoint")
     public Response removeAndroid(@RequestBody ObjectRequest<RemoveAndroidRequest> request) throws PushServerException {
         final RemoveAndroidRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
@@ -323,7 +323,7 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "huawei/update", method = { RequestMethod.POST, RequestMethod.PUT })
-    @Operation(summary = "Update Huawei configuration (deprecated)", description = "Update Huawei configuration endpoint (deprecated), use the /admin/app/hms/update endpoint")
+    @Operation(summary = "Update Huawei configuration (deprecated)", description = "Update Huawei configuration endpoint (deprecated), use the POST /admin/app/hms endpoint")
     public Response updateHuawei(@Valid @RequestBody ObjectRequest<UpdateHuaweiRequest> request) throws PushServerException {
         final UpdateHuaweiRequest requestObject = request.getRequestObject();
         logger.info("action: updateHuawei, state: initiated, applicationId: {}", requestObject.getAppId());
@@ -357,7 +357,7 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "huawei/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
-    @Operation(summary = "Remove Huawei configuration (deprecated)", description = "Remove Huawei configuration endpoint (deprecated), use the /admin/app/hms/remove endpoint")
+    @Operation(summary = "Remove Huawei configuration (deprecated)", description = "Remove Huawei configuration endpoint (deprecated), use the DELETE /admin/app/hms endpoint")
     public Response removeHuawei(@Valid @RequestBody ObjectRequest<RemoveHuaweiRequest> request) throws PushServerException {
         final RemoveHuaweiRequest requestObject = request.getRequestObject();
         logger.info("action: removeHuawei, state: initiated, applicationId: {}", requestObject.getAppId());

@@ -65,7 +65,7 @@ Update the `appId` value with requested Push Server application ID.
 
 ```sh
 curl --request POST \
-  --url http://localhost:8080/powerauth-push-server/admin/app/apns/update \
+  --url http://localhost:8080/powerauth-push-server/admin/app/apns \
   --json '{
   "requestObject": {
     "appId": 1,
@@ -91,7 +91,7 @@ base64 -i <in-file> -o <outfile>
 
 ```sh
 curl --request DELETE \
-  --url http://localhost:8080/powerauth-push-server/admin/app/apns/remove \
+  --url http://localhost:8080/powerauth-push-server/admin/app/apns \
   --json '{
   "requestObject": {
     "appId": 1
@@ -105,7 +105,7 @@ Set the `appId` value for the Push Server application ID you want to update.
 
 ```sh
 curl --request POST \
-  --url http://localhost:8080/powerauth-push-server/admin/app/fcm/update \
+  --url http://localhost:8080/powerauth-push-server/admin/app/fcm \
   --json '{
   "requestObject": {
     "appId": 1,
@@ -129,7 +129,7 @@ base64 -i <in-file> -o <outfile>
 
 ```sh
 curl --request DELETE \
-  --url http://localhost:8080/powerauth-push-server/admin/app/fcm/remove \
+  --url http://localhost:8080/powerauth-push-server/admin/app/fcm \
   --json '{
   "requestObject": {
     "appId": 1
@@ -144,7 +144,7 @@ Set the `appId` value for the Push Server application ID you want to delete.
 
 ```sh
 curl --request POST \
-  --url http://localhost:8080/powerauth-push-server/admin/app/hms/update \
+  --url http://localhost:8080/powerauth-push-server/admin/app/hms \
   --json '{
   "requestObject": {
     "appId": 1,
@@ -161,7 +161,7 @@ Set the `appId` value for Push Server application ID to want to update.
 
 ```sh
 curl --request DELETE \
-  --url http://localhost:8080/powerauth-push-server/admin/app/hms/remove \
+  --url http://localhost:8080/powerauth-push-server/admin/app/hms \
   --json '{
   "requestObject": {
     "appId": 1

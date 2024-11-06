@@ -575,7 +575,7 @@ public class PushServerClient {
      */
     public Response updateApns(final UpdateApnsRequest updateRequest) throws PushServerClientException {
         logger.info("Calling push server to update APNs, ID: {} - start", updateRequest.getAppId());
-        final Response response = putObjectImpl("/admin/app/apns/update", new ObjectRequest<>(updateRequest));
+        final Response response = putObjectImpl("/admin/app/apns", new ObjectRequest<>(updateRequest));
         logger.info("Calling push server to update APNs, ID: {} - finish", updateRequest.getAppId());
         return response;
     }
@@ -607,7 +607,7 @@ public class PushServerClient {
      */
     public Response removeApns(String appId) throws PushServerClientException {
         logger.info("Calling push server to remove APNs, ID: {} - start", appId);
-        final Response response = deleteImpl("/admin/app/apns/remove?appId=" + appId);
+        final Response response = deleteImpl("/admin/app/apns?appId=" + appId);
         logger.info("Calling push server to remove APNs, ID: {} - finish", appId);
         return response;
     }
@@ -642,7 +642,7 @@ public class PushServerClient {
      */
     public Response updateFcm(final UpdateFcmRequest updateRequest) throws PushServerClientException {
         logger.info("Calling push server to update FCM, ID: {} - start", updateRequest.getAppId());
-        final Response response = putObjectImpl("/admin/app/fcm/update", new ObjectRequest<>(updateRequest));
+        final Response response = putObjectImpl("/admin/app/fcm", new ObjectRequest<>(updateRequest));
         logger.info("Calling push server to update FCM, ID: {} - finish", updateRequest.getAppId());
         return response;
     }
@@ -705,7 +705,7 @@ public class PushServerClient {
      */
     public Response updateHms(final UpdateHmsRequest request) throws PushServerClientException {
         logger.info("Calling push server to update HMS, ID: {} - start", request.getAppId());
-        final Response response = putObjectImpl("/admin/app/hms/update", new ObjectRequest<>(request));
+        final Response response = putObjectImpl("/admin/app/hms", new ObjectRequest<>(request));
         logger.info("Calling push server to update HMS, ID: {} - finish", request.getAppId());
         return response;
     }

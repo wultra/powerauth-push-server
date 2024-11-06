@@ -59,18 +59,18 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 - `GET` [/admin/app/unconfigured/list](#list-unconfigured-applications) - List unconfigured applications
 - `POST` [/admin/app/detail](#application-detail) - Get application detail
 - `POST` [/admin/app/create](#create-application) - Create application
-- `POST` / `PUT` [/admin/apns/update](#update-apns-configuration) - Update APNs configuration
-- `POST` / `PUT` [/admin/ios/update](#update-ios-configuration) - Update iOS configuration (deprecated)
-- `POST` / `DELETE` [/admin/apns/remove](#remove-apns-configuration) - Remove APNs configuration
-- `POST` / `DELETE` [/admin/ios/remove](#remove-ios-configuration) - Remove iOS configuration (deprecated)
-- `POST` / `PUT` [/admin/fcm/update](#update-fcm-configuration) - Update FCM configuration
-- `POST` / `PUT` [/admin/android/update](#update-android-configuration) - Update Android configuration (deprecated)
-- `POST` / `DELETE` [/admin/fcm/remove](#remove-fcm-configuration) - Remove FCM configuration
-- `POST` / `DELETE` [/admin/android/remove](#remove-android-configuration) - Remove Android configuration (deprecated)
-- `POST` / `PUT` [/admin/hms/update](#update-hms-configuration) - Update HMS configuration
-- `POST` / `PUT` [/admin/huawei/update](#update-huawei-configuration) - Update Huawei configuration (deprecated)
-- `POST` / `DELETE` [/admin/hms/remove](#remove-hms-configuration) - Remove HMS configuration
-- `POST` / `DELETE` [/admin/huawei/remove](#remove-huawei-configuration) - Remove Huawei configuration (deprecated)
+- `POST` / `PUT` [/admin/app/apns](#update-apns-configuration) - Update APNs configuration
+- `POST` / `PUT` [/admin/app/ios/update](#update-ios-configuration) - Update iOS configuration (deprecated)
+- `DELETE` [/admin/app/apns](#remove-apns-configuration) - Remove APNs configuration
+- `POST` / `DELETE` [/admin/app/ios/remove](#remove-ios-configuration) - Remove iOS configuration (deprecated)
+- `POST` / `PUT` [/admin/app/fcm](#update-fcm-configuration) - Update FCM configuration
+- `POST` / `PUT` [/admin/app/android/update](#update-android-configuration) - Update Android configuration (deprecated)
+- `DELETE` [/admin/app/fcm](#remove-fcm-configuration) - Remove FCM configuration
+- `POST` / `DELETE` [/admin/app/android/remove](#remove-android-configuration) - Remove Android configuration (deprecated)
+- `POST` / `PUT` [/admin/app/hms](#update-hms-configuration) - Update HMS configuration
+- `POST` / `PUT` [/admin/app/huawei/update](#update-huawei-configuration) - Update Huawei configuration (deprecated)
+- `DELETE` [/admin/app/hms](#remove-hms-configuration) - Remove HMS configuration
+- `POST` / `DELETE` [/admin/app/huawei/remove](#remove-huawei-configuration) - Remove Huawei configuration (deprecated)
 
 #### Service Status
 
@@ -1270,7 +1270,7 @@ Create a new supported application.
 ```
 <!-- end -->
 
-<!-- begin api PUT /admin/app/apns/update -->
+<!-- begin api PUT /admin/app/apns -->
 ### Update APNs Configuration
 
 Update an APNs configuration.
@@ -1285,7 +1285,7 @@ Update an APNs configuration.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/admin/app/apns/update</td>
+        <td>/admin/app/apns</td>
     </tr>
 </table>
 <!-- end -->
@@ -1364,7 +1364,7 @@ You can use following `environment` values in request:
 ```
 <!-- end -->
 
-<!-- begin api DELETE /admin/app/apns/remove -->
+<!-- begin api DELETE /admin/app/apns -->
 ### Remove APNs Configuration
 
 Remove an APNs configuration.
@@ -1375,22 +1375,14 @@ Remove an APNs configuration.
 <table>
     <tr>
         <td>Method</td>
-        <td><code>POST / DELETE</code></td>
+        <td><code>DELETE</code></td>
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/admin/app/apns/remove</td>
+        <td>/admin/app/apns?appId=mobile-app</td>
     </tr>
 </table>
 <!-- end -->
-
-```json
-{
-  "requestObject": {
-    "appId": "mobile-app"
-  }
-}
-```
 
 #### Response 200
 
@@ -1438,7 +1430,7 @@ Remove an iOS configuration (deprecated).
 ```
 <!-- end -->
 
-<!-- begin api PUT /admin/app/FCM/update -->
+<!-- begin api PUT /admin/app/fcm -->
 ### Update FCM Configuration
 
 Update an FCM configuration.
@@ -1453,7 +1445,7 @@ Update an FCM configuration.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/admin/app/fcm/update</td>
+        <td>/admin/app/fcm</td>
     </tr>
 </table>
 <!-- end -->
@@ -1516,7 +1508,7 @@ Update an Android configuration (deprecated).
 ```
 <!-- end -->
 
-<!-- begin api DELETE /admin/app/fcm/remove -->
+<!-- begin api DELETE /admin/app/fcm -->
 ### Remove FCM Configuration
 
 Remove FCM configuration.
@@ -1527,22 +1519,14 @@ Remove FCM configuration.
 <table>
     <tr>
         <td>Method</td>
-        <td><code>POST / DELETE</code></td>
+        <td><code>DELETE</code></td>
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/admin/app/fcm/remove</td>
+        <td>/admin/app/fcm?appId=mobile-app</td>
     </tr>
 </table>
 <!-- end -->
-
-```json
-{
-  "requestObject": {
-    "appId": "mobile-app"
-  }
-}
-```
 
 #### Response 200
 
@@ -1590,7 +1574,7 @@ Remove FCM configuration for Android push messages (deprecated).
 ```
 <!-- end -->
 
-<!-- begin api PUT /admin/app/hms/update -->
+<!-- begin api PUT /admin/app/hms -->
 ### Update HMS Configuration
 
 Update an HMS configuration.
@@ -1605,7 +1589,7 @@ Update an HMS configuration.
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/admin/app/hms/update</td>
+        <td>/admin/app/hms</td>
     </tr>
 </table>
 <!-- end -->
@@ -1671,7 +1655,7 @@ Update an Huawei configuration (deprecated).
 ```
 <!-- end -->
 
-<!-- begin api DELETE /admin/app/hms/remove -->
+<!-- begin api DELETE /admin/app/hms -->
 ### Remove HMS Configuration
 
 Remove configuration for HMS push messages.
@@ -1682,22 +1666,14 @@ Remove configuration for HMS push messages.
 <table>
     <tr>
         <td>Method</td>
-        <td><code>POST / DELETE</code></td>
+        <td><code>DELETE</code></td>
     </tr>
     <tr>
         <td>Resource URI</td>
-        <td>/admin/app/hms/remove</td>
+        <td>/admin/app/hms?appId=mobile-app</td>
     </tr>
 </table>
 <!-- end -->
-
-```json
-{
-  "requestObject": {
-    "appId": "mobile-app"
-  }
-}
-```
 
 #### Response 200
 
