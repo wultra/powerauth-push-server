@@ -29,6 +29,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class UpdateFcmRequest {
 
     /**
