@@ -72,7 +72,7 @@ public class UpdateIosRequest {
     private String privateKeyBase64;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public UpdateIosRequest() {
     }

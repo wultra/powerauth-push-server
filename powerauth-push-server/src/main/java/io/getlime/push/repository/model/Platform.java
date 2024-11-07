@@ -18,22 +18,48 @@ package io.getlime.push.repository.model;
 /**
  * Platform enum for {@link PushDeviceRegistrationEntity#getPlatform()}.
  *
+ * @author Roman Strobl, roman.strobl@wultra.com
  * @author Lubos Racansky, lubos.racansky@wultra.com
  */
 public enum Platform {
 
     /**
      * iOS Platform.
+     *
+     * @deprecated use {@link #APNS}
      */
+    @Deprecated
     IOS,
 
     /**
      * Android Platform.
+     *
+     * @deprecated use {@link #FCM}
      */
+    @Deprecated
     ANDROID,
 
     /**
      * Huawei Platform.
+     *
+     * @deprecated use {$link HMS}
      */
-    HUAWEI;
+    @Deprecated
+    HUAWEI,
+
+    /**
+     * Apple Push Notification service (APNs) platform.
+     */
+    APNS,
+
+    /**
+     * Google Firebase Cloud Message (FCM) platform.
+     */
+    FCM,
+
+    /**
+     * Huawei Mobile Services (HMS) platform.
+     */
+    HMS
+
 }

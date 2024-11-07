@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Wultra s.r.o.
+ * Copyright 2024 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,24 @@
  */
 package io.getlime.push.model.request;
 
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 /**
- * Request to create Push Server application credentials entity based on existing PowerAuth server application.
+ * Update APNs configuration request.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 @Getter
 @Setter
-public class CreateApplicationRequest {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+public class UpdateApnsRequest {
 
     /**
      * Application ID.
@@ -37,17 +42,38 @@ public class CreateApplicationRequest {
     private String appId;
 
     /**
-     * No-arg constructor.
+     * iOS bundle.
      */
-    public CreateApplicationRequest() {
-    }
+    @NotBlank
+    @Schema(description = "iOS bundle.")
+    private String bundle;
 
     /**
-     * Constructor with PowerAuth server application ID.
-     * @param appId  PowerAuth server application ID.
+     * APNs key ID.
      */
-    public CreateApplicationRequest(String appId) {
-        this.appId = appId;
-    }
+    @NotBlank
+    @Schema(description = "APNs key ID.")
+    private String keyId;
+
+    /**
+     * Team ID.
+     */
+    @NotBlank
+    @Schema(description = "Team ID.")
+    private String teamId;
+
+    /**
+     * APNs environment.
+     */
+    @NotNull
+    @Schema(description = "APNs environment.")
+    private ApnsEnvironment environment;
+
+    /**
+     * Base64 encoded private key.
+     */
+    @NotBlank
+    @Schema(description = "Base64 encoded private key.")
+    private String privateKeyBase64;
 
 }

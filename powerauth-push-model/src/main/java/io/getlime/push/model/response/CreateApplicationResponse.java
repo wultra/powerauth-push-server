@@ -33,7 +33,7 @@ public class CreateApplicationResponse {
     private String appId;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public CreateApplicationResponse() {
     }

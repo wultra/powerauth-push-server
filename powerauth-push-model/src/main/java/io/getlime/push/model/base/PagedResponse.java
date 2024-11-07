@@ -33,7 +33,7 @@ public class PagedResponse<T> extends ObjectResponse<T> {
     private int size;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public PagedResponse() {
         super();

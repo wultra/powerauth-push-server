@@ -59,7 +59,7 @@ class PushSendingWorkerTest {
     private PushSendingWorker tested;
 
     @Test
-    void testSendMessageToAndroidError() throws FcmMissingTokenException {
+    void testSendMessageToFcmError() throws FcmMissingTokenException {
         final RestClientException simulatedException = new RestClientException("Simulated INVALID_ARGUMENT error");
         when(fcmModelConverter.convertExceptionToErrorCode(simulatedException)).thenReturn(MessagingErrorCode.INVALID_ARGUMENT);
         doAnswer(invocation -> {
@@ -68,7 +68,7 @@ class PushSendingWorkerTest {
             return null;
         }).when(fcmClient).exchange(any(), anyBoolean(), any(), any());
 
-        tested.sendMessageToAndroid(fcmClient, new PushMessageBody(), new PushMessageAttributes(), Priority.HIGH, "dummyToken", callback);
+        tested.sendMessageToFcm(fcmClient, new PushMessageBody(), new PushMessageAttributes(), Priority.HIGH, "dummyToken", callback);
         verify(callback).didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
     }
 

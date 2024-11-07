@@ -28,6 +28,7 @@ import io.getlime.push.model.request.ReadInboxMessageRequest;
 import io.getlime.push.model.response.GetInboxMessageCountResponse;
 import io.getlime.push.model.response.GetInboxMessageDetailResponse;
 import io.getlime.push.service.InboxService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,7 @@ public class InboxController {
      * @throws AppNotFoundException In case an application for which this message was intended was not found.
      */
     @PostMapping("messages")
+    @Operation(summary = "Post a message to inbox", description = "Post a message to inbox to be delivered to users")
     public ObjectResponse<GetInboxMessageDetailResponse> postMessage(
             @Valid @RequestBody ObjectRequest<CreateInboxMessageRequest> request) throws AppNotFoundException {
         return new ObjectResponse<>(inboxService.postMessage(request.getRequestObject()));
@@ -86,6 +88,7 @@ public class InboxController {
      * @throws AppNotFoundException In case an application specified in the request intended was not found.
      */
     @GetMapping("messages/list")
+    @Operation(summary = "List messages in inbox", description = "List messages in inbox of a user")
     public PagedResponse<ListOfInboxMessages> fetchMessageListForUser(
             @NotNull @Size(min = 1, max = 255) @RequestParam("userId") String userId,
             @NotNull @Size(min = 1, max = 255) @RequestParam("applications") @Schema(type = "string", example = "app-id-01,app-id-02") String applications,
@@ -102,6 +105,7 @@ public class InboxController {
      * @throws AppNotFoundException In case an application specified in the request intended was not found.
      */
     @GetMapping("messages/count")
+    @Operation(summary = "Count messages in inbox", description = "Count messages in inbox of a user")
     public ObjectResponse<GetInboxMessageCountResponse> fetchMessageCountForUser(
             @NotNull @Size(min = 1, max = 255) @RequestParam("userId") String userId,
             @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId) throws AppNotFoundException {
@@ -116,6 +120,7 @@ public class InboxController {
      * @throws AppNotFoundException In case an application specified in the request intended was not found.
      */
     @PostMapping("messages/read-all")
+    @Operation(summary = "Mark all messages as read", description = "Mark all messages as read for a user")
     public Response readAllMessages(
             @Valid @RequestBody ObjectRequest<ReadAllInboxMessagesRequest> request) throws AppNotFoundException {
         final ReadAllInboxMessagesRequest requestObject = request.getRequestObject();
@@ -131,6 +136,7 @@ public class InboxController {
      * @throws InboxMessageNotFoundException In case a given message was not found.
      */
     @GetMapping("messages/detail")
+    @Operation(summary = "Get a message detail", description = "Fetch given inbox message detail")
     public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(
             @NotNull @RequestParam("id") String inboxId) throws InboxMessageNotFoundException {
         return new ObjectResponse<>(inboxService.fetchMessageDetail(inboxId));
@@ -143,6 +149,7 @@ public class InboxController {
      * @throws InboxMessageNotFoundException In case a given message was not found.
      */
     @PostMapping("messages/read")
+    @Operation(summary = "Mark a message as read", description = "Mark given inbox message as read")
     public ObjectResponse<GetInboxMessageDetailResponse> readMessage(
             @Valid @RequestBody ObjectRequest<ReadInboxMessageRequest> request) throws InboxMessageNotFoundException {
         final ReadInboxMessageRequest requestObject = request.getRequestObject();

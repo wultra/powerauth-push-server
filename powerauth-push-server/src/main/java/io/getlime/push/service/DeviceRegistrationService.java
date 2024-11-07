@@ -262,6 +262,9 @@ public class DeviceRegistrationService {
             case IOS -> Platform.IOS;
             case ANDROID -> Platform.ANDROID;
             case HUAWEI -> Platform.HUAWEI;
+            case APNS -> Platform.APNS;
+            case FCM -> Platform.FCM;
+            case HMS -> Platform.HMS;
         };
     }
 

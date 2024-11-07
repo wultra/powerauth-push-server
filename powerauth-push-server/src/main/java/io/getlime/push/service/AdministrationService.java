@@ -22,10 +22,7 @@ import com.wultra.security.powerauth.client.model.error.PowerAuthClientException
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushServerApplication;
 import io.getlime.push.model.enumeration.ApnsEnvironment;
-import io.getlime.push.model.request.CreateApplicationRequest;
-import io.getlime.push.model.request.UpdateAndroidRequest;
-import io.getlime.push.model.request.UpdateHuaweiRequest;
-import io.getlime.push.model.request.UpdateIosRequest;
+import io.getlime.push.model.request.*;
 import io.getlime.push.model.validator.CreateApplicationRequestValidator;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
@@ -57,20 +54,30 @@ public class AdministrationService {
     private final LoadingCache<String, AppRelatedPushClient> appRelatedPushClientCache;
     private final HttpCustomizationService httpCustomizationService;
 
+    /**
+     * Find all applications.
+     *
+     * @return List of Push Server application.
+     */
     @Transactional(readOnly = true)
     public List<PushServerApplication> findAllApplications() {
         return StreamSupport.stream(appCredentialsRepository.findAll().spliterator(),false)
                 .map(appCredentialsEntity -> {
                     final PushServerApplication app = new PushServerApplication();
                     app.setAppId(appCredentialsEntity.getAppId());
-                    app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-                    app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
-                    app.setHuawei(isHuawei(appCredentialsEntity));
+                    app.setApns(appCredentialsEntity.getApnsPrivateKey() != null);
+                    app.setFcm(appCredentialsEntity.getFcmPrivateKey() != null);
+                    app.setHms(isHms(appCredentialsEntity));
                     return app;
                 })
                 .toList();
     }
 
+    /**
+     * Find all unconfigured applications.
+     * @return List of unconfigured Push Server applications.
+     * @throws PowerAuthClientException Thrown in case request fails.
+     */
     @Transactional(readOnly = true)
     public List<PushServerApplication> findUnconfiguredApplications() throws PowerAuthClientException {
         // Get all applications in PA Server
@@ -97,11 +104,23 @@ public class AdministrationService {
         return result;
     }
 
+    /**
+     * Find application credentials entity.
+     * @param appId Application identifier.
+     * @return Application credentials entity.
+     * @throws PushServerException Thrown when application credentials entity does not exist.
+     */
     @Transactional(readOnly = true)
     public AppCredentialsEntity findAppCredentials(final String appId) throws PushServerException {
         return findAppCredentialsByAppId(appId);
     }
 
+    /**
+     * Create application credentials.
+     * @param request Create application request.
+     * @return Application credentials entity.
+     * @throws PushServerException Thrown in case application already exists.
+     */
     public AppCredentialsEntity createAppCredentials(final CreateApplicationRequest request) throws PushServerException {
         String errorMessage = CreateApplicationRequestValidator.validate(request);
         final Optional<AppCredentialsEntity> appCredentialsEntityOptional = appCredentialsRepository.findFirstByAppId(request.getAppId());
@@ -116,55 +135,166 @@ public class AdministrationService {
         return appCredentialsRepository.save(appCredentialsEntity);
     }
 
+    /**
+     * Update iOS application credentials.
+     *
+     * @deprecated use {@link #updateApnsAppCredentials(UpdateApnsRequest)}
+     *
+     * @param request Update iOS application credentials request.
+     * @throws PushServerException Thrown in case application does not exist.
+     */
+    @Deprecated
     public void updateIosAppCredentials(final UpdateIosRequest request) throws PushServerException {
+        final UpdateApnsRequest apnsRequest = new UpdateApnsRequest();
+        apnsRequest.setAppId(request.getAppId());
+        apnsRequest.setPrivateKeyBase64(request.getPrivateKeyBase64());
+        apnsRequest.setTeamId(request.getTeamId());
+        apnsRequest.setKeyId(request.getKeyId());
+        apnsRequest.setBundle(request.getBundle());
+        apnsRequest.setEnvironment(request.getEnvironment());
+        updateApnsAppCredentials(apnsRequest);
+    }
+
+    /**
+     * Update APNs application credentials.
+     *
+     * @param request Update APNs application credentials request.
+     * @throws PushServerException Thrown in case application does not exist.
+     */
+    public void updateApnsAppCredentials(final UpdateApnsRequest request) throws PushServerException {
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsByAppId(request.getAppId());
         final byte[] privateKeyBytes = Base64.getDecoder().decode(request.getPrivateKeyBase64());
-        appCredentialsEntity.setIosPrivateKey(privateKeyBytes);
-        appCredentialsEntity.setIosTeamId(request.getTeamId());
-        appCredentialsEntity.setIosKeyId(request.getKeyId());
-        appCredentialsEntity.setIosBundle(request.getBundle());
-        appCredentialsEntity.setIosEnvironment(convert(request.getEnvironment()));
+        appCredentialsEntity.setApnsPrivateKey(privateKeyBytes);
+        appCredentialsEntity.setApnsTeamId(request.getTeamId());
+        appCredentialsEntity.setApnsKeyId(request.getKeyId());
+        appCredentialsEntity.setApnsBundle(request.getBundle());
+        appCredentialsEntity.setApnsEnvironment(convert(request.getEnvironment()));
         appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         refreshCacheAfterCommit(appCredentialsEntity.getAppId());
-        logger.info("The updateIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        logger.info("The updateApns request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
     }
 
+    /**
+     * Remove iOS application credentials.
+     *
+     * @deprecated use {@link #removeApnsAppCredentials(String)}
+     *
+     * @param appId Application identifier.
+     * @throws PushServerException Thrown in case application does not exist.
+     */
+    @Deprecated
     public void removeIosAppCredentials(final String appId) throws PushServerException {
+        removeApnsAppCredentials(appId);
+    }
+
+    /**
+     * Remove APNs application credentials.
+     *
+     * @param appId Application identifier.
+     *
+     * @throws PushServerException Thrown in case application does not exist.
+     */
+    public void removeApnsAppCredentials(final String appId) throws PushServerException {
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsByAppId(appId);
-        appCredentialsEntity.setIosPrivateKey(null);
-        appCredentialsEntity.setIosTeamId(null);
-        appCredentialsEntity.setIosKeyId(null);
-        appCredentialsEntity.setIosBundle(null);
-        appCredentialsEntity.setIosEnvironment(null);
+        appCredentialsEntity.setApnsPrivateKey(null);
+        appCredentialsEntity.setApnsTeamId(null);
+        appCredentialsEntity.setApnsKeyId(null);
+        appCredentialsEntity.setApnsBundle(null);
+        appCredentialsEntity.setApnsEnvironment(null);
         appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         refreshCacheAfterCommit(appCredentialsEntity.getAppId());
-        logger.info("The removeIos request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        logger.info("The removeApns request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
     }
 
+    /**
+     * Update Android application credentials.
+     *
+     * @deprecated use {@link #updateFcmAppCredentials(UpdateFcmRequest)}
+     *
+     * @param request Update Android application credentials request.
+     * @throws PushServerException  Thrown in case application does not exist.
+     */
+    @Deprecated
     public void updateAndroidAppCredentials(final UpdateAndroidRequest request) throws PushServerException {
+        final UpdateFcmRequest fcmRequest = new UpdateFcmRequest();
+        fcmRequest.setAppId(request.getAppId());
+        fcmRequest.setPrivateKeyBase64(request.getPrivateKeyBase64());
+        fcmRequest.setProjectId(request.getProjectId());
+        updateFcmAppCredentials(fcmRequest);
+    }
+
+    /**
+     * Update FCM application credentials.
+     *
+     * @param request Update FCM request.
+     * @throws PushServerException Thrown when application credentials entity does not exist.
+     */
+    public void updateFcmAppCredentials(final UpdateFcmRequest request) throws PushServerException {
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsByAppId(request.getAppId());
         final byte[] privateKeyBytes = Base64.getDecoder().decode(request.getPrivateKeyBase64());
-        appCredentialsEntity.setAndroidPrivateKey(privateKeyBytes);
-        appCredentialsEntity.setAndroidProjectId(request.getProjectId());
+        appCredentialsEntity.setFcmPrivateKey(privateKeyBytes);
+        appCredentialsEntity.setFcmProjectId(request.getProjectId());
         appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         refreshCacheAfterCommit(appCredentialsEntity.getAppId());
-        logger.info("The updateAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        logger.info("The updateFcm request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
     }
 
+    /**
+     * Remove Android application credentials.
+     *
+     * @deprecated use {@link #removeFcmAppCredentials(String)}
+     *
+     * @param appId Application identifier.
+     * @throws PushServerException Thrown when application credentials entity does not exist.
+     */
     public void removeAndroidAppCredentials(final String appId) throws PushServerException {
+        removeFcmAppCredentials(appId);
+    }
+
+    /**
+     * Remove FCM application credentials.
+     *
+     * @param appId Application identifier.
+     * @throws PushServerException Thrown when application credentials entity does not exist.
+     */
+    public void removeFcmAppCredentials(final String appId) throws PushServerException {
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsByAppId(appId);
-        appCredentialsEntity.setAndroidPrivateKey(null);
-        appCredentialsEntity.setAndroidProjectId(null);
+        appCredentialsEntity.setFcmPrivateKey(null);
+        appCredentialsEntity.setFcmProjectId(null);
         appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         refreshCacheAfterCommit(appCredentialsEntity.getAppId());
-        logger.info("The removeAndroid request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        logger.info("The removeFcm request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
     }
 
+    /**
+     * Update Huawei application credentials.
+     *
+     * @deprecated use {@link #updateHmsAppCredentials(UpdateHmsRequest)}
+     *
+     * @param request Update Huawei application credentials request.
+     * @throws PushServerException Thrown when application credentials entity does not exist.
+     */
+    @Deprecated
     public void updateHuaweiAppCredentials(final UpdateHuaweiRequest request) throws PushServerException {
+        final UpdateHmsRequest hmsRequest = new UpdateHmsRequest();
+        hmsRequest.setAppId(request.getAppId());
+        hmsRequest.setProjectId(request.getProjectId());
+        hmsRequest.setClientId(request.getClientId());
+        hmsRequest.setClientSecret(request.getClientSecret());
+        updateHmsAppCredentials(hmsRequest);
+    }
+
+    /**
+     * Update HMS application credentials.
+     *
+     * @param request Update HMS application credentials request.
+     * @throws PushServerException Thrown when application credentials entity does not exist.
+     */
+    public void updateHmsAppCredentials(final UpdateHmsRequest request) throws PushServerException {
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsByAppId(request.getAppId());
         appCredentialsEntity.setHmsProjectId(request.getProjectId());
         appCredentialsEntity.setHmsClientId(request.getClientId());
@@ -172,10 +302,29 @@ public class AdministrationService {
         appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         refreshCacheAfterCommit(appCredentialsEntity.getAppId());
-        logger.info("The update Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        logger.info("The updateHms request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
     }
 
+    /**
+     * Remove Huawei application credentials.
+     *
+     * @deprecated use {@link #removeHmsAppCredentials(String)}
+     *
+     * @param appId Application identifier.
+     * @throws PushServerException Thrown when application credentials entity does not exist.
+     */
+    @Deprecated
     public void removeHuaweiAppCredentials(final String appId) throws PushServerException {
+        removeHmsAppCredentials(appId);
+    }
+
+    /**
+     * Remove HMS application credentials.
+     *
+     * @param appId Application identifier.
+     * @throws PushServerException Thrown when application credentials entity does not exist.
+     */
+    public void removeHmsAppCredentials(final String appId) throws PushServerException {
         final AppCredentialsEntity appCredentialsEntity = findAppCredentialsByAppId(appId);
         appCredentialsEntity.setHmsProjectId(null);
         appCredentialsEntity.setHmsClientSecret(null);
@@ -183,7 +332,7 @@ public class AdministrationService {
         appCredentialsEntity.setTimestampLastUpdated(LocalDateTime.now());
         appCredentialsRepository.save(appCredentialsEntity);
         refreshCacheAfterCommit(appId);
-        logger.info("The remove Huawei request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
+        logger.info("The removeHms request succeeded, application credentials entity ID: {}", appCredentialsEntity.getId());
     }
 
     private void refreshCacheAfterCommit(final String appId) {
@@ -199,7 +348,7 @@ public class AdministrationService {
      * Find app credentials entity by ID.
      * @param powerAuthAppId App credentials ID.
      * @return App credentials entity.
-     * @throws PushServerException Thrown when application credentials entity does not exists.
+     * @throws PushServerException Thrown when application credentials entity does not exist.
      */
     private AppCredentialsEntity findAppCredentialsByAppId(String powerAuthAppId) throws PushServerException {
         return appCredentialsRepository.findFirstByAppId(powerAuthAppId).orElseThrow(() ->
@@ -219,7 +368,7 @@ public class AdministrationService {
                 .orElse(null);
     }
 
-    private static boolean isHuawei(final AppCredentialsEntity appCredentialsEntity) {
+    private static boolean isHms(final AppCredentialsEntity appCredentialsEntity) {
         return appCredentialsEntity.getHmsClientSecret() != null && appCredentialsEntity.getHmsClientId() != null;
     }
 }

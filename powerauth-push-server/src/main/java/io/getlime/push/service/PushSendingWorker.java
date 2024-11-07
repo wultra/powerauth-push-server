@@ -159,7 +159,7 @@ public class PushSendingWorker {
      * @param pushToken Push token used to deliver the message.
      * @param callback Callback that is called after the asynchronous executions is completed.
      */
-    void sendMessageToAndroid(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) {
+    void sendMessageToFcm(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) {
 
         // Build Android message
         final Message message = buildAndroidMessage(pushMessageBody, attributes, priority, pushToken);
@@ -240,7 +240,7 @@ public class PushSendingWorker {
      * @param callback Callback that is called after the asynchronous executions is completed.
      * @throws PushServerException In case any issue happens while sending the push message.
      */
-    void sendMessageToHuawei(final HmsClient hmsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) throws PushServerException {
+    void sendMessageToHms(final HmsClient hmsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) throws PushServerException {
         final io.getlime.push.service.hms.request.Message message = buildHmsMessage(pushMessageBody, attributes, priority, pushToken);
 
         final Consumer<HmsSendResponse> successConsumer = response -> {
@@ -407,7 +407,7 @@ public class PushSendingWorker {
         return Optional.empty();
     }
 
-    // iOS related methods
+    // APNs related methods
 
     /**
      * Prepare and connect APNs client.
@@ -419,7 +419,7 @@ public class PushSendingWorker {
      * If {@code null} or unknown value is passed, the global configuration is used.
      */
     ApnsClient prepareApnsClient(final AppCredentialsEntity credentials) throws PushServerException {
-        final String environment = credentials.getIosEnvironment();
+        final String environment = credentials.getApnsEnvironment();
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder()
                 .setProxyHandlerFactory(apnsClientProxy())
                 .setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections())
@@ -451,9 +451,9 @@ public class PushSendingWorker {
             }
         }
 
-        final String teamId = credentials.getIosTeamId();
-        final String keyId = credentials.getIosKeyId();
-        final byte[] apnsPrivateKey = credentials.getIosPrivateKey();
+        final String teamId = credentials.getApnsTeamId();
+        final String keyId = credentials.getApnsKeyId();
+        final byte[] apnsPrivateKey = credentials.getApnsPrivateKey();
 
         try {
             final ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);
@@ -505,7 +505,7 @@ public class PushSendingWorker {
      * @param iosTopic APNs topic, usually same as bundle ID.
      * @param callback Callback that is called after the asynchronous executions is completed.
      */
-    void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
+    void sendMessageToApns(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
         final boolean isSilent = attributes != null && attributes.getSilent(); // In case there are no attributes, the message is not silent

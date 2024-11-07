@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Wultra s.r.o.
+ * Copyright 2024 Wultra s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,20 @@ package io.getlime.push.model.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
- * Request to create Push Server application credentials entity based on existing PowerAuth server application.
+ * Update FCM configuration request.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 @Getter
 @Setter
-public class CreateApplicationRequest {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+public class UpdateFcmRequest {
 
     /**
      * Application ID.
@@ -37,17 +40,17 @@ public class CreateApplicationRequest {
     private String appId;
 
     /**
-     * No-arg constructor.
+     * FCM project ID.
      */
-    public CreateApplicationRequest() {
-    }
+    @NotBlank
+    @Schema(description = "FCM project ID.")
+    private String projectId;
 
     /**
-     * Constructor with PowerAuth server application ID.
-     * @param appId  PowerAuth server application ID.
+     * Base64 encoded FCM private key.
      */
-    public CreateApplicationRequest(String appId) {
-        this.appId = appId;
-    }
+    @NotBlank
+    @Schema(description = "Base64 encoded FCM private key.")
+    private String privateKeyBase64;
 
 }

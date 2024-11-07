@@ -36,7 +36,7 @@ public class DataIntegrityError extends Error {
         public static final String ERROR_DATA_INTEGRITY = "ERROR_DATA_INTEGRITY";
 
         /**
-         * Default constructor.
+         * No-arg constructor.
          */
         public Code() {
         }

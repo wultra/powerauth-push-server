@@ -36,7 +36,7 @@ public class WebServiceError extends Error {
         public static final String ERROR_PA_SERVER_COMM = "ERROR_PA_SERVER_COMM";
 
         /**
-         * Default constructor.
+         * No-arg constructor.
          */
         public Code() {
         }

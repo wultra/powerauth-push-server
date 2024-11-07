@@ -29,6 +29,7 @@ import io.getlime.push.model.response.GetApplicationListResponse;
 import io.getlime.push.model.validator.*;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.AdministrationService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,12 +55,13 @@ public class AdministrationController {
      * @return Application list response.
      */
     @GetMapping(value = "list")
+    @Operation(summary = "List all applications", description = "List all application registered in Push Server")
     public ObjectResponse<GetApplicationListResponse> listApplications() {
-        logger.debug("Received listApplications request");
+        logger.debug("action: listApplications, state: initiated");
         final List<PushServerApplication> applications = administrationService.findAllApplications();
         final GetApplicationListResponse response = new GetApplicationListResponse();
         response.setApplicationList(applications);
-        logger.debug("The listApplications request succeeded");
+        logger.debug("action: listApplications, state: succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -69,13 +71,14 @@ public class AdministrationController {
      * @throws PushServerException Throw in case communication with PowerAuth server fails.
      */
     @GetMapping(value = "unconfigured/list")
+    @Operation(summary = "List unconfigured applications", description = "List unconfigured application in Push Server")
     public ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() throws PushServerException {
         try {
-            logger.debug("Received listUnconfiguredApplications request");
+            logger.debug("action: listUnconfiguredApplications, state: initiated");
             final List<PushServerApplication> applications = administrationService.findUnconfiguredApplications();
             final GetApplicationListResponse response = new GetApplicationListResponse();
             response.setApplicationList(applications);
-            logger.debug("The listUnconfiguredApplications request succeeded");
+            logger.debug("action: listUnconfiguredApplications, state: succeeded");
             return new ObjectResponse<>(response);
         } catch (PowerAuthClientException ex) {
             logger.warn(ex.getMessage(), ex);
@@ -90,8 +93,9 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @PostMapping(value = "detail")
+    @Operation(summary = "Get application detail", description = "Obtain registered application detail")
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(@RequestBody ObjectRequest<GetApplicationDetailRequest> request) throws PushServerException {
-        logger.debug("Received getApplicationDetail request");
+        logger.debug("action: getApplicationDetail, state: initiated");
         final GetApplicationDetailRequest requestObject = request.getRequestObject();
         final String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
         if (errorMessage != null) {
@@ -101,23 +105,23 @@ public class AdministrationController {
         final AppCredentialsEntity appCredentialsEntity = administrationService.findAppCredentials(requestObject.getAppId());
         final PushServerApplication app = new PushServerApplication();
         app.setAppId(appCredentialsEntity.getAppId());
-        app.setIos(appCredentialsEntity.getIosPrivateKey() != null);
-        app.setAndroid(appCredentialsEntity.getAndroidPrivateKey() != null);
-        app.setHuawei(isHuawei(appCredentialsEntity));
+        app.setApns(appCredentialsEntity.getApnsPrivateKey() != null);
+        app.setFcm(appCredentialsEntity.getFcmPrivateKey() != null);
+        app.setHms(isHuawei(appCredentialsEntity));
         response.setApplication(app);
-        if (requestObject.isIncludeIos()) {
-            response.setIosBundle(appCredentialsEntity.getIosBundle());
-            response.setIosKeyId(appCredentialsEntity.getIosKeyId());
-            response.setIosTeamId(appCredentialsEntity.getIosTeamId());
-            response.setIosEnvironment(ApnsEnvironment.fromString(appCredentialsEntity.getIosEnvironment()));
+        if (requestObject.isIncludeApns()) {
+            response.setApnsBundle(appCredentialsEntity.getApnsBundle());
+            response.setApnsKeyId(appCredentialsEntity.getApnsKeyId());
+            response.setApnsTeamId(appCredentialsEntity.getApnsTeamId());
+            response.setApnsEnvironment(ApnsEnvironment.fromString(appCredentialsEntity.getApnsEnvironment()));
         }
-        if (requestObject.isIncludeAndroid()) {
-            response.setAndroidProjectId(appCredentialsEntity.getAndroidProjectId());
+        if (requestObject.isIncludeFcm()) {
+            response.setFcmProjectId(appCredentialsEntity.getFcmProjectId());
         }
-        if (requestObject.isIncludeHuawei()) {
-            response.setHuaweiProjectId(appCredentialsEntity.getHmsProjectId());
+        if (requestObject.isIncludeHms()) {
+            response.setHmsProjectId(appCredentialsEntity.getHmsProjectId());
         }
-        logger.debug("The getApplicationDetail request succeeded");
+        logger.debug("action: getApplicationDetail, state: succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -132,15 +136,16 @@ public class AdministrationController {
      * @throws PushServerException Thrown when request validation fails.
      */
     @PostMapping(value = "create")
+    @Operation(summary = "Create an application", description = "Register an application in Push server")
     public ObjectResponse<CreateApplicationResponse> createApplication(@RequestBody ObjectRequest<CreateApplicationRequest> request) throws PushServerException {
         final CreateApplicationRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received createApplication request, application ID: {}", requestObject.getAppId());
+        logger.info("action: createApplication, state: initiated, applicationId: {}", requestObject.getAppId());
         final AppCredentialsEntity appCredentials = administrationService.createAppCredentials(requestObject);
         final CreateApplicationResponse response = new CreateApplicationResponse(appCredentials.getAppId());
-        logger.info("The createApplication request succeeded, application ID: {}", requestObject.getAppId());
+        logger.info("action: createApplication, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new ObjectResponse<>(response);
     }
 
@@ -151,17 +156,38 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "ios/update", method = { RequestMethod.POST, RequestMethod.PUT })
+    @Operation(summary = "Update iOS configuration (deprecated)", description = "Update iOS configuration endpoint (deprecated), use the POST /admin/app/apns endpoint")
     public Response updateIos(@RequestBody ObjectRequest<UpdateIosRequest> request) throws PushServerException {
         final UpdateIosRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received updateIos request, application ID: {}", requestObject.getAppId());
+        logger.info("action: updateIos, state: initiated, applicationId: {}", requestObject.getAppId());
         final String errorMessage = UpdateIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         administrationService.updateIosAppCredentials(requestObject);
+        logger.info("action: updateIos, state: succeeded, applicationId: {}", requestObject.getAppId());
+        return new Response();
+    }
+
+    /**
+     * Update APNs configuration.
+     * @param request Update APNs configuration request.
+     * @return Response.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
+     */
+    @RequestMapping(value = "apns", method = { RequestMethod.POST, RequestMethod.PUT })
+    @Operation(summary = "Update APNs configuration", description = "Update APNs configuration in Push server")
+    public Response updateApns(@Valid @RequestBody ObjectRequest<UpdateApnsRequest> request) throws PushServerException {
+        final UpdateApnsRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
+        }
+        logger.info("action: updateApns, state: initiated, applicationId: {}", requestObject.getAppId());
+        administrationService.updateApnsAppCredentials(requestObject);
+        logger.info("action: updateApns, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -172,17 +198,37 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "ios/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
+    @Operation(summary = "Remove iOS configuration (deprecated)", description = "Remove iOS configuration endpoint (deprecated), use the DELETE /admin/app/apns endpoint")
     public Response removeIos(@RequestBody ObjectRequest<RemoveIosRequest> request) throws PushServerException {
         final RemoveIosRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received removeIos request, application ID: {}", requestObject.getAppId());
+        logger.info("action: removeIos, state: initiated, applicationId: {}", requestObject.getAppId());
         String errorMessage = RemoveIosRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         administrationService.removeIosAppCredentials(requestObject.getAppId());
+        logger.info("action: removeIos, state: succeeded, applicationId: {}", requestObject.getAppId());
+        return new Response();
+    }
+
+    /**
+     * Remove APNs configuration.
+     * @param appId Application identifier.
+     * @return Response.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
+     */
+    @RequestMapping(value = "apns", method = RequestMethod.DELETE)
+    @Operation(summary = "Remove APNs configuration", description = "Remove APNs configuration from Push server")
+    public Response removeApns(@RequestParam("appId") String appId) throws PushServerException {
+        if (appId == null) {
+            throw new PushServerException("Parameter appId must not be empty");
+        }
+        logger.info("action: removeApns, state: initiated, applicationId: {}", appId);
+        administrationService.removeApnsAppCredentials(appId);
+        logger.info("action: removeApns, state: succeeded, applicationId: {}", appId);
         return new Response();
     }
 
@@ -193,17 +239,38 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "android/update", method = { RequestMethod.POST, RequestMethod.PUT })
+    @Operation(summary = "Update Android configuration (deprecated)", description = "Update Android configuration endpoint (deprecated), use the POST /admin/app/fcm endpoint")
     public Response updateAndroid(@RequestBody ObjectRequest<UpdateAndroidRequest> request) throws PushServerException {
         final UpdateAndroidRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received updateAndroid request, application ID: {}", requestObject.getAppId());
+        logger.info("action: updateAndroid, state: initiated, applicationId: {}", requestObject.getAppId());
         String errorMessage = UpdateAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         administrationService.updateAndroidAppCredentials(requestObject);
+        logger.info("action: updateAndroid, state: succeeded, applicationId: {}", requestObject.getAppId());
+        return new Response();
+    }
+
+    /**
+     * Update FCM configuration.
+     * @param request Update FCM configuration request.
+     * @return Response.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
+     */
+    @RequestMapping(value = "fcm", method = { RequestMethod.POST, RequestMethod.PUT })
+    @Operation(summary = "Update FCM configuration", description = "Update FCM configuration in Push server")
+    public Response updateFcm(@Valid @RequestBody ObjectRequest<UpdateFcmRequest> request) throws PushServerException {
+        final UpdateFcmRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
+        }
+        logger.info("action: updateFcm, state: initiated, applicationId: {}", requestObject.getAppId());
+        administrationService.updateFcmAppCredentials(requestObject);
+        logger.info("action: updateFcm, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -214,17 +281,37 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "android/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
+    @Operation(summary = "Remove Android configuration (deprecated)", description = "Remove Android configuration endpoint (deprecated), use the DELETE /admin/app/fcm endpoint")
     public Response removeAndroid(@RequestBody ObjectRequest<RemoveAndroidRequest> request) throws PushServerException {
         final RemoveAndroidRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received removeAndroid request, application ID: {}", requestObject.getAppId());
+        logger.info("action: removeAndroid, state: initiated, applicationId: {}", requestObject.getAppId());
         String errorMessage = RemoveAndroidRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         administrationService.removeAndroidAppCredentials(requestObject.getAppId());
+        logger.info("action: removeAndroid, state: succeeded, applicationId: {}", requestObject.getAppId());
+        return new Response();
+    }
+
+    /**
+     * Remove FCM configuration.
+     * @param appId Application identifier.
+     * @return Response.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
+     */
+    @RequestMapping(value = "fcm", method = RequestMethod.DELETE)
+    @Operation(summary = "Remove FCM configuration", description = "Remove FCM configuration from Push server")
+    public Response removeFcm(@RequestParam("appId") String appId) throws PushServerException {
+        if (appId == null) {
+            throw new PushServerException("Parameter appId must not be empty");
+        }
+        logger.info("action: removeFcm, state: initiated, applicationId: {}", appId);
+        administrationService.removeFcmAppCredentials(appId);
+        logger.info("action: removeFcm, state: succeeded, applicationId: {}", appId);
         return new Response();
     }
 
@@ -236,10 +323,29 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "huawei/update", method = { RequestMethod.POST, RequestMethod.PUT })
+    @Operation(summary = "Update Huawei configuration (deprecated)", description = "Update Huawei configuration endpoint (deprecated), use the POST /admin/app/hms endpoint")
     public Response updateHuawei(@Valid @RequestBody ObjectRequest<UpdateHuaweiRequest> request) throws PushServerException {
         final UpdateHuaweiRequest requestObject = request.getRequestObject();
-        logger.info("Received update Huawei request, application ID: {}", requestObject.getAppId());
+        logger.info("action: updateHuawei, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.updateHuaweiAppCredentials(requestObject);
+        logger.info("action: updateHuawei, state: succeeded, applicationId: {}", requestObject.getAppId());
+        return new Response();
+    }
+
+    /**
+     * Update HMS configuration.
+     *
+     * @param request Update HMS configuration request.
+     * @return Response.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
+     */
+    @RequestMapping(value = "hms", method = { RequestMethod.POST, RequestMethod.PUT })
+    @Operation(summary = "Update HMS configuration", description = "Update HMS configuration in Push server")
+    public Response updateHms(@Valid @RequestBody ObjectRequest<UpdateHmsRequest> request) throws PushServerException {
+        final UpdateHmsRequest requestObject = request.getRequestObject();
+        logger.info("action: updateHms, state: initiated, applicationId: {}", requestObject.getAppId());
+        administrationService.updateHmsAppCredentials(requestObject);
+        logger.info("action: updateHms, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
 
@@ -251,10 +357,32 @@ public class AdministrationController {
      * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
      */
     @RequestMapping(value = "huawei/remove", method = { RequestMethod.POST, RequestMethod.DELETE })
+    @Operation(summary = "Remove Huawei configuration (deprecated)", description = "Remove Huawei configuration endpoint (deprecated), use the DELETE /admin/app/hms endpoint")
     public Response removeHuawei(@Valid @RequestBody ObjectRequest<RemoveHuaweiRequest> request) throws PushServerException {
         final RemoveHuaweiRequest requestObject = request.getRequestObject();
-        logger.info("Received remove Huawei request, application ID: {}", requestObject.getAppId());
+        logger.info("action: removeHuawei, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.removeHuaweiAppCredentials(requestObject.getAppId());
+        logger.info("action: removeHuawei, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new Response();
     }
+
+    /**
+     * Remove HMS configuration.
+     *
+     * @param appId Application identifier.
+     * @return Response.
+     * @throws PushServerException Thrown when application credentials entity could not be found or request validation fails.
+     */
+    @RequestMapping(value = "hms", method = RequestMethod.DELETE)
+    @Operation(summary = "Remove HMS configuration", description = "Remove HMS configuration from Push server")
+    public Response removeHms(@RequestParam String appId) throws PushServerException {
+        if (appId == null) {
+            throw new PushServerException("Parameter appId must not be empty");
+        }
+        logger.info("action: removeHms, state: initiated, applicationId: {}", appId);
+        administrationService.removeHmsAppCredentials(appId);
+        logger.info("action: removeHms, state: succeeded, applicationId: {}", appId);
+        return new Response();
+    }
+
 }

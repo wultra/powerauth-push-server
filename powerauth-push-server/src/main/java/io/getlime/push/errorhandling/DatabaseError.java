@@ -36,7 +36,7 @@ public class DatabaseError extends Error{
         public static final String ERROR_DATABASE = "ERROR_DATABASE";
 
         /**
-         * Default constructor.
+         * No-arg constructor.
          */
         public Code() {
         }

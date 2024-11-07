@@ -34,18 +34,18 @@ public class PushServerApplication {
     private String appId;
 
     /**
-     * Whether iOS is configured.
+     * Whether APNs is configured.
      */
-    private Boolean ios;
+    private Boolean apns;
 
     /**
-     * Whether Android is configured.
+     * Whether FCM is configured.
      */
-    private Boolean android;
+    private Boolean fcm;
 
     /**
-     * Whether Huawei is configured.
+     * Whether HMS is configured.
      */
-    private Boolean huawei;
+    private Boolean hms;
 
 }

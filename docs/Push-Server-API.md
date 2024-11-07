@@ -59,10 +59,18 @@ Following endpoints are published in PowerAuth Push Server RESTful API:
 - `GET` [/admin/app/unconfigured/list](#list-unconfigured-applications) - List unconfigured applications
 - `POST` [/admin/app/detail](#application-detail) - Get application detail
 - `POST` [/admin/app/create](#create-application) - Create application
-- `POST` / `PUT` [/admin/ios/update](#update-ios-configuration) - Update iOS configuration
-- `POST` / `DELETE` [/admin/ios/remove](#remove-ios-configuration) - Remove iOS configuration
-- `POST` / `PUT` [/admin/android/update](#update-android-configuration) - Update Android configuration
-- `POST` / `DELETE` [/admin/android/remove](#remove-android-configuration) - Remove Android configuration
+- `POST` / `PUT` [/admin/app/apns](#update-apns-configuration) - Update APNs configuration
+- `POST` / `PUT` [/admin/app/ios/update](#update-ios-configuration) - Update iOS configuration (deprecated)
+- `DELETE` [/admin/app/apns](#remove-apns-configuration) - Remove APNs configuration
+- `POST` / `DELETE` [/admin/app/ios/remove](#remove-ios-configuration) - Remove iOS configuration (deprecated)
+- `POST` / `PUT` [/admin/app/fcm](#update-fcm-configuration) - Update FCM configuration
+- `POST` / `PUT` [/admin/app/android/update](#update-android-configuration) - Update Android configuration (deprecated)
+- `DELETE` [/admin/app/fcm](#remove-fcm-configuration) - Remove FCM configuration
+- `POST` / `DELETE` [/admin/app/android/remove](#remove-android-configuration) - Remove Android configuration (deprecated)
+- `POST` / `PUT` [/admin/app/hms](#update-hms-configuration) - Update HMS configuration
+- `POST` / `PUT` [/admin/app/huawei/update](#update-huawei-configuration) - Update Huawei configuration (deprecated)
+- `DELETE` [/admin/app/hms](#remove-hms-configuration) - Remove HMS configuration
+- `POST` / `DELETE` [/admin/app/huawei/remove](#remove-huawei-configuration) - Remove Huawei configuration (deprecated)
 
 #### Service Status
 
@@ -174,7 +182,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
   "requestObject": {
     "appId": "mobile-app",
     "token": "1234567890987654321234567890",
-    "platform": "ios",
+    "platform": "apns",
     "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
   }
 }
@@ -182,7 +190,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
-- `platform` - `ios`, `android`, `huawei`
+- `platform` - `apns`, `fcm`, `hms`
 - `activationId` - Activation identifier
 
 #### Response 200
@@ -221,7 +229,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
   "requestObject": {
     "appId": "mobile-app",
     "token": "1234567890987654321234567890",
-    "platform": "ios",
+    "platform": "apns",
     "activationIds": [
       "49414e31-f3df-4cea-87e6-f214ca3b8412",
       "26c94bf8-f594-4bd8-9c51-93449926b644"
@@ -232,7 +240,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
-- `platform` - `ios`, `android`, `huawei`
+- `platform` - `apns`, `fcm`, `hms`
 - `activationIds` - Associated activation identifiers
 
 #### Response 200
@@ -402,19 +410,19 @@ Send a single push message to given user via provided application, optionally to
   "responseObject": {
     "mode": "SYNCHRONOUS",
     "result": {
-      "ios": {
+      "apns": {
         "sent": 1,
         "pending": 0,
         "failed": 0,
         "total": 1
       },
-      "android": {
+      "fcm": {
         "sent": 1,
         "pending": 0,
         "failed": 0,
         "total": 1
       },
-      "huawei": {
+      "hms": {
         "sent": 1,
         "pending": 0,
         "failed": 0,
@@ -529,19 +537,19 @@ Sends a message batch - each item in the batch represents a message to given use
   "responseObject": {
     "mode": "SYNCHRONOUS",
     "result": {
-      "ios": {
+      "apns": {
         "sent": 1,
         "pending": 0,
         "failed": 0,
         "total": 1
       },
-      "android": {
+      "fcm": {
         "sent": 1,
         "pending": 0,
         "failed": 0,
         "total": 1
       },
-      "huawei": {
+      "hms": {
         "sent": 1,
         "pending": 0,
         "failed": 0,
@@ -1120,9 +1128,9 @@ Get list of all applications.
     "applicationList": [
       {
         "appId": "mobile-app",
-        "ios": true,
-        "android": true,
-        "huawei": true
+        "apns": true,
+        "fcm": true,
+        "hms": true
       }
     ]
   }
@@ -1159,9 +1167,9 @@ Get list of applications which have not been configured yet.
     "applicationList": [
       {
         "appId": "mobile-app-other",
-        "ios": null,
-        "android": null,
-        "huawei": null
+        "apns": null,
+        "fcm": null,
+        "hms": null
       }
     ]
   }
@@ -1193,8 +1201,9 @@ Get detail of an application.
 {
   "requestObject": {
     "appId": "mobile-app",
-    "includeIos": true,
-    "includeAndroid": true
+    "includeApns": true,
+    "includeFcm": true,
+    "includeHms": true
   }
 }
 ```
@@ -1207,15 +1216,15 @@ Get detail of an application.
   "responseObject": {
     "application": {
       "appId": "mobile-app",
-      "ios": true,
-      "android": true,
-      "huawai": true
+      "apns": true,
+      "fcm": true,
+      "hms": true
     },
-    "iosBundle": "some.bundle.id",
-    "iosKeyId": "KEYID123456",
-    "iosTeamId": "TEAMID123456",
-    "androidProjectId": "PROJECTID123",
-    "huaweiProjectId": "HMS123"
+    "apnsBundle": "some.bundle.id",
+    "apnsKeyId": "KEYID123456",
+    "apnsTeamId": "TEAMID123456",
+    "fcmProjectId": "PROJECTID123",
+    "hmsProjectId": "HMS123"
   }
 }
 ```
@@ -1261,10 +1270,57 @@ Create a new supported application.
 ```
 <!-- end -->
 
+<!-- begin api PUT /admin/app/apns -->
+### Update APNs Configuration
+
+Update an APNs configuration.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/apns</td>
+    </tr>
+</table>
+<!-- end -->
+
+```json
+{
+  "requestObject": {
+    "appId": "mobile-app",
+    "bundle": "some.bundle.id",
+    "keyId": "KEYID123456",
+    "teamId": "TEAMID123456",
+    "environment": null,
+    "privateKeyBase64": "LS0tLS1CRUdJT..."
+  }
+}
+```
+
+You can use following `environment` values in request:
+- `null` - environment is decided by configuration of server property `powerauth.push.service.apns.useDevelopment`
+- `development` - use APNs development environment
+- `production` - use APNs production environment
+
+#### Response 200
+
+```json
+{
+  "status": "OK"
+}
+```
+<!-- end -->
+
 <!-- begin api PUT /admin/app/ios/update -->
 ### Update iOS Configuration
 
-Update an iOS configuration.
+Update an iOS configuration (deprecated).
 
 #### Request
 
@@ -1308,10 +1364,39 @@ You can use following `environment` values in request:
 ```
 <!-- end -->
 
+<!-- begin api DELETE /admin/app/apns -->
+### Remove APNs Configuration
+
+Remove an APNs configuration.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>DELETE</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/apns?appId=mobile-app</td>
+    </tr>
+</table>
+<!-- end -->
+
+#### Response 200
+
+```json
+{
+  "status": "OK"
+}
+```
+<!-- end -->
+
 <!-- begin api DELETE /admin/app/ios/remove -->
 ### Remove iOS Configuration
 
-Remove an iOS configuration.
+Remove an iOS configuration (deprecated).
 
 #### Request
 
@@ -1345,11 +1430,49 @@ Remove an iOS configuration.
 ```
 <!-- end -->
 
+<!-- begin api PUT /admin/app/fcm -->
+### Update FCM Configuration
+
+Update an FCM configuration.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/fcm</td>
+    </tr>
+</table>
+<!-- end -->
+
+```json
+{
+  "requestObject": {
+    "appId": "mobile-app",
+    "projectId": "PROJECTID123",
+    "privateKeyBase64": "ewogICJ0eXBlIjog..."
+  }
+}
+```
+
+#### Response 200
+
+```json
+{
+  "status": "OK"
+}
+```
+<!-- end -->
+
 <!-- begin api PUT /admin/app/android/update -->
 ### Update Android Configuration
 
-Update an Android configuration.
-
+Update an Android configuration (deprecated).
 
 #### Request
 
@@ -1385,10 +1508,39 @@ Update an Android configuration.
 ```
 <!-- end -->
 
+<!-- begin api DELETE /admin/app/fcm -->
+### Remove FCM Configuration
+
+Remove FCM configuration.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>DELETE</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/fcm?appId=mobile-app</td>
+    </tr>
+</table>
+<!-- end -->
+
+#### Response 200
+
+```json
+{
+  "status": "OK"
+}
+```
+<!-- end -->
+
 <!-- begin api DELETE /admin/app/android/remove -->
 ### Remove Android Configuration
 
-Remove FCM configuration for Android push messages.
+Remove FCM configuration for Android push messages (deprecated).
 
 #### Request
 
@@ -1422,10 +1574,50 @@ Remove FCM configuration for Android push messages.
 ```
 <!-- end -->
 
+<!-- begin api PUT /admin/app/hms -->
+### Update HMS Configuration
+
+Update an HMS configuration.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>POST / PUT</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/hms</td>
+    </tr>
+</table>
+<!-- end -->
+
+```json
+{
+  "requestObject": {
+    "appId": "mobile-app",
+    "projectId": "PROJECTID123",
+    "clientId": "oAuth 2.0 client ID",
+    "clientSecret": "oAuth 2.0 client secret"
+  }
+}
+```
+
+#### Response 200
+
+```json
+{
+  "status": "OK"
+}
+```
+<!-- end -->
+
 <!-- begin api PUT /admin/app/huawei/update -->
 ### Update Huawei Configuration
 
-Update an Huawei configuration.
+Update an Huawei configuration (deprecated).
 
 
 #### Request
@@ -1463,10 +1655,39 @@ Update an Huawei configuration.
 ```
 <!-- end -->
 
+<!-- begin api DELETE /admin/app/hms -->
+### Remove HMS Configuration
+
+Remove configuration for HMS push messages.
+
+#### Request
+
+<!-- begin remove -->
+<table>
+    <tr>
+        <td>Method</td>
+        <td><code>DELETE</code></td>
+    </tr>
+    <tr>
+        <td>Resource URI</td>
+        <td>/admin/app/hms?appId=mobile-app</td>
+    </tr>
+</table>
+<!-- end -->
+
+#### Response 200
+
+```json
+{
+  "status": "OK"
+}
+```
+<!-- end -->
+
 <!-- begin api DELETE /admin/app/huawei/remove -->
 ### Remove Huawei Configuration
 
-Remove configuration for Huawei push messages.
+Remove configuration for Huawei push messages (deprecated).
 
 #### Request
 
