@@ -15,6 +15,7 @@
  */
 package io.getlime.push.model.request;
 
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.MobilePlatform;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -55,6 +56,11 @@ public class CreateDeviceForActivationsRequest {
      */
     @NotNull
     private MobilePlatform platform;
+
+    /**
+     * Environment for APNs (optional).
+     */
+    private ApnsEnvironment environment;
 
     /**
      * Activation IDs.

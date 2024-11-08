@@ -15,6 +15,7 @@
  */
 package io.getlime.push.repository.model.aggregate;
 
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.repository.model.Platform;
 import lombok.Getter;
 import lombok.Setter;
@@ -64,6 +65,11 @@ public class UserDevice {
     private Platform platform;
 
     /**
+     * APNs environment (optional).
+     */
+    private ApnsEnvironment environment;
+
+    /**
      * Push token.
      */
     private String token;
@@ -76,15 +82,17 @@ public class UserDevice {
      * @param campaignId Campaign ID.
      * @param appId App ID.
      * @param platform Platform.
+     * @param environment APNs environment (optional).
      * @param token Push token.
      */
-    public UserDevice(String userId, Long deviceId, String activationId, Long campaignId, Long appId, Platform platform, String token) {
+    public UserDevice(String userId, Long deviceId, String activationId, Long campaignId, Long appId, Platform platform, ApnsEnvironment environment, String token) {
         this.userId = userId;
         this.deviceId = deviceId;
         this.activationId = activationId;
         this.campaignId = campaignId;
         this.appId = appId;
         this.platform = platform;
+        this.environment = environment;
         this.token = token;
     }
 
@@ -98,6 +106,7 @@ public class UserDevice {
         if (!campaignId.equals(that.campaignId)) return false;
         if (!appId.equals(that.appId)) return false;
         if (!platform.equals(that.platform)) return false;
+        if (environment != that.environment) return false;
         return token.equals(that.token);
     }
 
@@ -106,6 +115,7 @@ public class UserDevice {
         int result = campaignId.hashCode();
         result = 31 * result + appId.hashCode();
         result = 31 * result + platform.hashCode();
+        result = 31 * result + environment.hashCode();
         result = 31 * result + token.hashCode();
         return result;
     }

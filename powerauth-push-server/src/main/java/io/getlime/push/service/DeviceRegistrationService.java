@@ -21,6 +21,7 @@ import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import com.wultra.security.powerauth.client.model.response.GetActivationStatusResponse;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.request.CreateDeviceForActivationsRequest;
 import io.getlime.push.model.request.CreateDeviceRequest;
@@ -64,6 +65,7 @@ public class DeviceRegistrationService {
         final String appId = requestObject.getAppId();
         final String pushToken = requestObject.getToken();
         final MobilePlatform platform = requestObject.getPlatform();
+        final ApnsEnvironment environment = requestObject.getEnvironment();
         final String activationId = requestObject.getActivationId();
 
         final List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
@@ -89,6 +91,7 @@ public class DeviceRegistrationService {
         }
         device.setTimestampLastRegistered(new Date());
         device.setPlatform(convert(platform));
+        device.setEnvironment(environment != null ? environment.getKey() : null);
         updateActivationForDevice(device, activationId);
         pushDeviceRepository.save(device);
     }
@@ -98,6 +101,7 @@ public class DeviceRegistrationService {
         final String appId = request.getAppId();
         final String pushToken = request.getToken();
         final MobilePlatform platform = request.getPlatform();
+        final ApnsEnvironment environment = request.getEnvironment();
         final List<String> activationIds = request.getActivationIds();
 
         // Initialize loop variables.
@@ -130,6 +134,7 @@ public class DeviceRegistrationService {
                 }
                 device.setTimestampLastRegistered(new Date());
                 device.setPlatform(convert(platform));
+                device.setEnvironment(environment != null ? environment.getKey() : null);
                 updateActivationForDevice(device, activationId);
                 PushDeviceRegistrationEntity registeredDevice = pushDeviceRepository.save(device);
                 usedDeviceRegistrationIds.add(registeredDevice.getId());

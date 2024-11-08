@@ -23,3 +23,7 @@ UPDATE push_app_credentials SET apns_bundle = ios_bundle, apns_environment = ios
 -- Changeset powerauth-push-server/1.10.x/20241029-migrate-android-to-fcm.xml::4::Roman Strobl
 -- Migrate existing android_* columns to fcm_* columns
 UPDATE push_app_credentials SET fcm_private_key = android_private_key, fcm_project_id = android_project_id;
+
+-- Changeset powerauth-push-server/1.10.x/20241108-device-registration-environment.xml::1::Roman Strobl
+-- Add columns environment to push_device_registration table
+ALTER TABLE push_device_registration ADD environment VARCHAR(255);

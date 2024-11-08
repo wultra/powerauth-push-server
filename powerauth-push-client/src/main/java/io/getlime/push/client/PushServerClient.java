@@ -112,7 +112,7 @@ public class PushServerClient {
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
     public boolean createDevice(String appId, String token, MobilePlatform platform) throws PushServerClientException {
-        return createDevice(appId, token, platform, null);
+        return createDevice(appId, token, platform, null, null);
     }
 
     /**
@@ -121,15 +121,17 @@ public class PushServerClient {
      * @param appId PowerAuth application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
      * @param platform Mobile platform (APNs, FCM, HMS).
+     * @param environment APNs environment (optional).
      * @param activationId PowerAuth activation ID.
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    public boolean createDevice(String appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
+    public boolean createDevice(String appId, String token, MobilePlatform platform, ApnsEnvironment environment, String activationId) throws PushServerClientException {
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setAppId(appId);
         request.setToken(token);
         request.setPlatform(platform);
+        request.setEnvironment(environment);
         request.setActivationId(activationId);
 
         // Validate request on the client side.
@@ -151,15 +153,17 @@ public class PushServerClient {
      * @param appId PowerAuth application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
      * @param platform Mobile platform (APNs, FCM, HMS).
+     * @param environment APNs environment (optional).
      * @param activationIds PowerAuth activation IDs.
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    public boolean createDeviceForActivations(String appId, String token, MobilePlatform platform, List<String> activationIds) throws PushServerClientException {
+    public boolean createDeviceForActivations(String appId, String token, MobilePlatform platform, ApnsEnvironment environment, List<String> activationIds) throws PushServerClientException {
         CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
         request.setAppId(appId);
         request.setToken(token);
         request.setPlatform(platform);
+        request.setEnvironment(environment);
         request.getActivationIds().addAll(activationIds);
 
         // Validate request on the client side.

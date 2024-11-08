@@ -46,3 +46,7 @@ The unconfigured application list endpoint `POST /admin/app/unconfigured/list` u
 The application detail endpoint `POST /admin/app/detail` uses new platform enumerations in both request and response.
 
 The push message send endpoint `POST /push/message/send` contains new platform enumerations in the response for the count of sent messages. 
+
+### Customization of APNs Environment per Registered Device
+
+TODO

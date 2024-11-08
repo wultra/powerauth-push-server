@@ -82,6 +82,12 @@ public class PushDeviceRegistrationEntity implements Serializable {
     private String pushToken;
 
     /**
+     * Environment for APNs (optional).
+     */
+    @Column(name = "environment")
+    private String environment;
+
+    /**
      * Timestamp last registered.
      */
     @Column(name = "timestamp_last_registered", nullable = false)
