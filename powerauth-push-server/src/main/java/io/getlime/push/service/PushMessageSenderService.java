@@ -207,6 +207,7 @@ public class PushMessageSenderService {
                 final ApnsEnvironment apnsEnvironment = environment != null ? resolveApnsEnvironment(environment.getKey()) : resolveApnsEnvironment(null);
                 if (apnsEnvironment == null) {
                     logger.error("Campaign push message cannot be sent because APNs environment configuration failed. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
+                    return;
                 }
                 final ApnsClient apnsClient = apnsEnvironment == ApnsEnvironment.PRODUCTION ? pushClient.getApnsClientProduction() : pushClient.getApnsClientDevelopment();
                 pushSendingWorker.sendMessageToApns(apnsClient, pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getApnsBundle(), createPushSendingCallback(token, pushMessageObject, pushClient));
