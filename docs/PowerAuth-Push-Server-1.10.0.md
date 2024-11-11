@@ -49,4 +49,12 @@ The push message send endpoint `POST /push/message/send` contains new platform e
 
 ### Customization of APNs Environment per Registered Device
 
-TODO
+It is now possible to specify an APNs environment per device registration. The change is reflected in the REST API endpoints `/push/device/create` and `/push/device/create/multi` by addition of the `environment` parameter.
+
+The allowed values of the `environment` parameter are:
+- `development` - development APNs host is used for sending push messages
+- `production` - production APNs host is used for sending push messages
+
+For existing device registrations the `environment` is not specified, thus the global server setting is used. The environment is controlled by property `powerauth.push.service.apns.useDevelopment`. In case the property is set to `production`, delivery to `development` APNs host is not allowed for devices registered with `development` environment.
+
+This change is reflected in database by addition of parameter `environment` in table `push_device_registration`.
