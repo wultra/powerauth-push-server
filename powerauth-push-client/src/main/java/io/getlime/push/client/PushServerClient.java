@@ -105,33 +105,37 @@ public class PushServerClient {
     /**
      * Register anonymous device to the push server.
      *
+     * @deprecated use {@link #createDevice(CreateDeviceRequest)}
+     *
      * @param appId PowerAuth application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
      * @param platform Mobile platform (APNs, FCM, HMS).
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
+    @Deprecated
     public boolean createDevice(String appId, String token, MobilePlatform platform) throws PushServerClientException {
-        return createDevice(appId, token, platform, null, null);
+        return createDevice(appId, token, platform, null);
     }
 
     /**
      * Register device associated with activation ID to the push server.
      *
+     * @deprecated use {@link #createDevice(CreateDeviceRequest)}
+     *
      * @param appId PowerAuth application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
      * @param platform Mobile platform (APNs, FCM, HMS).
-     * @param environment APNs environment (optional).
      * @param activationId PowerAuth activation ID.
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    public boolean createDevice(String appId, String token, MobilePlatform platform, ApnsEnvironment environment, String activationId) throws PushServerClientException {
+    @Deprecated
+    public boolean createDevice(String appId, String token, MobilePlatform platform, String activationId) throws PushServerClientException {
         CreateDeviceRequest request = new CreateDeviceRequest();
         request.setAppId(appId);
         request.setToken(token);
         request.setPlatform(platform);
-        request.setEnvironment(environment);
         request.setActivationId(activationId);
 
         // Validate request on the client side.
@@ -148,22 +152,43 @@ public class PushServerClient {
     }
 
     /**
+     * Register a device to the push server.
+     *
+     * @param request Create device request.
+     * @return True if device registration was successful, false otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    public boolean createDevice(final CreateDeviceRequest request) throws PushServerClientException {
+        String error = CreateDeviceRequestValidator.validate(request);
+        if (error != null) {
+            throw new PushServerClientException(error);
+        }
+
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", request.getAppId(), maskToken(request.getToken()), request.getPlatform());
+        Response response = postObjectImpl("/push/device/create", new ObjectRequest<>(request));
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", request.getAppId(), maskToken(request.getToken()), request.getPlatform());
+
+        return response.getStatus().equals(Response.Status.OK);
+    }
+
+    /**
      * Register device associated with multiple activation IDs to the push server.
+     *
+     * @deprecated use {@link #createDeviceForActivations(CreateDeviceForActivationsRequest)}
      *
      * @param appId PowerAuth application app ID.
      * @param token Token received from the push service provider (APNs, FCM).
      * @param platform Mobile platform (APNs, FCM, HMS).
-     * @param environment APNs environment (optional).
      * @param activationIds PowerAuth activation IDs.
      * @return True if device registration was successful, false otherwise.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    public boolean createDeviceForActivations(String appId, String token, MobilePlatform platform, ApnsEnvironment environment, List<String> activationIds) throws PushServerClientException {
+    @Deprecated
+    public boolean createDeviceForActivations(String appId, String token, MobilePlatform platform, List<String> activationIds) throws PushServerClientException {
         CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
         request.setAppId(appId);
         request.setToken(token);
         request.setPlatform(platform);
-        request.setEnvironment(environment);
         request.getActivationIds().addAll(activationIds);
 
         // Validate request on the client side.
@@ -175,6 +200,27 @@ public class PushServerClient {
         logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform);
         Response response = postObjectImpl("/push/device/create/multi", new ObjectRequest<>(request));
         logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform);
+
+        return response.getStatus().equals(Response.Status.OK);
+    }
+
+    /**
+     * Register device associated with multiple activation IDs to the push server.
+     *
+     * @param request Create device for activations request.
+     * @return True if device registration was successful, false otherwise.
+     * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
+     */
+    public boolean createDeviceForActivations(final CreateDeviceForActivationsRequest request) throws PushServerClientException {
+        // Validate request on the client side.
+        String error = CreateDeviceRequestValidator.validate(request);
+        if (error != null) {
+            throw new PushServerClientException(error);
+        }
+
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", request.getAppId(), maskToken(request.getToken()), request.getPlatform());
+        Response response = postObjectImpl("/push/device/create/multi", new ObjectRequest<>(request));
+        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", request.getAppId(), maskToken(request.getToken()), request.getPlatform());
 
         return response.getStatus().equals(Response.Status.OK);
     }
