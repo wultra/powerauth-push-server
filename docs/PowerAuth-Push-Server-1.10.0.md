@@ -55,6 +55,8 @@ The allowed values of the `environment` parameter are:
 - `development` - development APNs host is used for sending push messages
 - `production` - production APNs host is used for sending push messages
 
+For platforms other than APNs the parameter is not used, `null` value is allowed.
+
 For existing device registrations the `environment` is not specified, thus the global server setting is used. The environment is controlled by property `powerauth.push.service.apns.useDevelopment`. In case the property is set to `production`, delivery to `development` APNs host is not allowed for devices registered with `development` environment.
 
 This change is reflected in database by addition of parameter `environment` in table `push_device_registration`.
