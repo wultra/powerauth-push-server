@@ -27,6 +27,7 @@ import io.getlime.push.model.enumeration.Priority;
 import io.getlime.push.model.validator.PushMessageValidator;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.dao.PushMessageDAO;
+import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.Platform;
 import io.getlime.push.repository.model.PushDeviceRegistrationEntity;
 import io.getlime.push.repository.model.PushMessageEntity;
@@ -78,7 +79,8 @@ public class PushMessageSenderService {
             validatePushMessage(pushMessage);
 
             // Fetch connected devices
-            final List<PushDeviceRegistrationEntity> devices = getPushDevices(pushClient.getAppCredentials().getId(), pushMessage.getUserId(), pushMessage.getActivationId());
+            final AppCredentialsEntity appCredentials = pushClient.getAppCredentials();
+            final List<PushDeviceRegistrationEntity> devices = getPushDevices(appCredentials.getId(), pushMessage.getUserId(), pushMessage.getActivationId());
 
             // Iterate over all devices for given user
             for (final PushDeviceRegistrationEntity device : devices) {
@@ -96,7 +98,7 @@ public class PushMessageSenderService {
 
                     final Platform platform = device.getPlatform();
                     if (platform == Platform.IOS || platform == Platform.APNS) {
-                        final ApnsEnvironment environment = resolveApnsEnvironment(device.getEnvironment());
+                        final ApnsEnvironment environment = resolveApnsEnvironment(device.getEnvironment(), appCredentials.getApnsEnvironment());
                         if (environment == null) {
                             logger.error("Push message cannot be sent because APNs environment configuration failed. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
                             arriveAndDeregisterPhaserForMode(phaser, mode);
@@ -204,7 +206,8 @@ public class PushMessageSenderService {
 
         switch (platform) {
             case IOS, APNS -> {
-                final ApnsEnvironment apnsEnvironment = environment != null ? resolveApnsEnvironment(environment.getKey()) : resolveApnsEnvironment(null);
+                final String environmentAppConfig = pushClient.getAppCredentials().getApnsEnvironment();
+                final ApnsEnvironment apnsEnvironment = environment != null ? resolveApnsEnvironment(environment.getKey(), environmentAppConfig) : resolveApnsEnvironment(null, environmentAppConfig);
                 if (apnsEnvironment == null) {
                     logger.error("Campaign push message cannot be sent because APNs environment configuration failed. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
                     return;
@@ -288,7 +291,7 @@ public class PushMessageSenderService {
         }
     }
 
-    private ApnsEnvironment resolveApnsEnvironment(final String environmentDevice) {
+    private ApnsEnvironment resolveApnsEnvironment(final String environmentDevice, final String environmentAppConfig) {
         if (environmentDevice != null) {
             final ApnsEnvironment envDevice = ApnsEnvironment.fromString(environmentDevice);
             if (!configuration.isApnsUseDevelopment() && envDevice == ApnsEnvironment.DEVELOPMENT) {
@@ -297,8 +300,9 @@ public class PushMessageSenderService {
             }
             return envDevice;
         }
-        // Fallback in case device was registered without environment
-        if (configuration.isApnsUseDevelopment()) {
+        // Fallback in case device was registered without environment, either use application credentials configuration or global server setting as last fallback
+        if ((environmentAppConfig != null && environmentAppConfig.equals(ApnsEnvironment.DEVELOPMENT.getKey()))
+                || configuration.isApnsUseDevelopment()) {
             return ApnsEnvironment.DEVELOPMENT;
         }
         return ApnsEnvironment.PRODUCTION;

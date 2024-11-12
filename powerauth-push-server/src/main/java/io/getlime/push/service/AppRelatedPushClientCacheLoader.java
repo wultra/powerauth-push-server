@@ -92,7 +92,9 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
         if (credentials.getApnsPrivateKey() != null) {
             final ApnsClient apnsClientProduction = pushSendingWorker.prepareApnsClient(credentials, ApnsEnvironment.PRODUCTION);
             pushClient.setApnsClientProduction(apnsClientProduction);
-            if (configuration.isApnsUseDevelopment()) {
+            final String environmentAppConfig = credentials.getApnsEnvironment();
+            if ((environmentAppConfig != null && environmentAppConfig.equals(ApnsEnvironment.DEVELOPMENT.getKey()))
+                    || configuration.isApnsUseDevelopment()) {
                 final ApnsClient apnsClientDevelopment = pushSendingWorker.prepareApnsClient(credentials, ApnsEnvironment.DEVELOPMENT);
                 pushClient.setApnsClientDevelopment(apnsClientDevelopment);
             }

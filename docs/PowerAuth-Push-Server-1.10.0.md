@@ -57,6 +57,8 @@ The allowed values of the `environment` parameter are:
 
 For platforms other than APNs the parameter is not used, `null` value is allowed.
 
-For existing device registrations the `environment` is not specified, thus the global server setting is used. The environment is controlled by property `powerauth.push.service.apns.useDevelopment`. In case the property is set to `production`, delivery to `development` APNs host is not allowed for devices registered with `development` environment.
+For existing device registrations if the `environment` value is not specified during registration, the `environment` is decided based on application credential settings in table `push_app_credentials`, column `apns_environment`. If the environment is not configured on application level either, a global server setting is used as a fallback value. 
+
+The global setting is controlled by property `powerauth.push.service.apns.useDevelopment`. In case the property is set to `false`, delivery to `development` APNs host is not allowed for devices registered with the `development` environment.
 
 This change is reflected in database by addition of parameter `environment` in table `push_device_registration`.
