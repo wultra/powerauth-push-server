@@ -98,15 +98,17 @@ public class PushMessageSenderService {
 
                     final Platform platform = device.getPlatform();
                     if (platform == Platform.IOS || platform == Platform.APNS) {
+                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getApns();
+                        final PushSendingCallback callback = createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser);
                         final ApnsEnvironment environment = resolveApnsEnvironment(device.getEnvironment(), appCredentials.getApnsEnvironment());
                         if (environment == null) {
                             logger.error("Push message cannot be sent because APNs environment configuration failed. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
+                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                             arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
                         }
                         final ApnsClient apnsClient = environment == ApnsEnvironment.PRODUCTION ? pushClient.getApnsClientProduction() : pushClient.getApnsClientDevelopment();
-                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getApns();
-                        pushSendingWorker.sendMessageToApns(apnsClient, pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getApnsBundle(), createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
+                        pushSendingWorker.sendMessageToApns(apnsClient, pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getApnsBundle(), callback);
                     } else if (platform == Platform.ANDROID || platform == Platform.FCM) {
                         if (pushClient.getFcmClient() == null) {
                             logger.error("Push message cannot be sent to FCM because FCM is not configured in push server.");

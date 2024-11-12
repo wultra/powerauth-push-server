@@ -39,6 +39,7 @@ public class PushServerAppCredentialConfiguration {
         if (appCredentialsRepository.findFirstByAppId(applicationId).isEmpty()) {
             final AppCredentialsEntity testCredentials = new AppCredentialsEntity();
             testCredentials.setAppId(applicationId);
+            testCredentials.setApnsBundle("test-bundle");
             testCredentials.setFcmProjectId("test-project");
             testCredentials.setFcmPrivateKey(new byte[128]);
             appCredentialsRepository.save(testCredentials);
