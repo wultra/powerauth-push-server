@@ -95,9 +95,9 @@ public class PushServerClient {
      */
     public ObjectResponse<ServiceStatusResponse> getServiceStatus() throws PushServerClientException {
 
-        logger.info("Calling push server status service - start");
+        logger.info("call={}, callType={}, action: getServiceStatus, state: initiated", "/push/service/status", "GET");
         final ObjectResponse<ServiceStatusResponse> result = getObjectImpl("/push/service/status", null, ServiceStatusResponse.class);
-        logger.info("Calling push server status service - finish");
+        logger.info("call={}, callType={}, action: getServiceStatus, state: succeeded", "/push/service/status", "GET");
 
         return result;
     }
@@ -144,9 +144,10 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform);
+        logger.info("call={}, callType={}, action: createDevice, state: initiated, appId: {}, token: {}, platform: {}, activationId: {}",
+                "/push/device/create", "POST", appId, maskToken(token), platform, activationId);
         Response response = postObjectImpl("/push/device/create", new ObjectRequest<>(request));
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform);
+        logger.info("call={}, callType={}, action: createDevice, state: succeeded", "/push/device/create", "POST");
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -164,9 +165,10 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", request.getAppId(), maskToken(request.getToken()), request.getPlatform());
+        logger.info("call={}, callType={}, action: createDevice, state: initiated, appId: {}, token: {}, platform: {}, environment: {}",
+                "/push/device/create", "POST", request.getAppId(), maskToken(request.getToken()), request.getPlatform(), request.getEnvironment());
         Response response = postObjectImpl("/push/device/create", new ObjectRequest<>(request));
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", request.getAppId(), maskToken(request.getToken()), request.getPlatform());
+        logger.info("call={}, callType={}, action: createDevice, state: succeeded", "/push/device/create", "POST");
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -197,9 +199,10 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", appId, maskToken(token), platform);
+        logger.info("call={}, callType={}, action: createDeviceForActivations, state: initiated, appId: {}, token: {}, platform: {}, activationIds: {}",
+                "/push/device/create/multi", "POST", request.getAppId(), maskToken(request.getToken()), request.getPlatform(), request.getActivationIds());
         Response response = postObjectImpl("/push/device/create/multi", new ObjectRequest<>(request));
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", appId, maskToken(token), platform);
+        logger.info("call={}, callType={}, action: createDeviceForActivations, state: succeeded", "/push/device/create/multi", "POST");
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -218,9 +221,10 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - start", request.getAppId(), maskToken(request.getToken()), request.getPlatform());
+        logger.info("call={}, callType={}, action: createDeviceForActivations, state: initiated, appId: {}, token: {}, platform: {}, environment: {}, activationIds: {}",
+                "/push/device/create/multi", "POST", request.getAppId(), maskToken(request.getToken()), request.getPlatform(), request.getEnvironment(), request.getActivationIds());
         Response response = postObjectImpl("/push/device/create/multi", new ObjectRequest<>(request));
-        logger.info("Calling create device service, appId: {}, token: {}, platform: {} - finish", request.getAppId(), maskToken(request.getToken()), request.getPlatform());
+        logger.info("call={}, callType={}, action: createDeviceForActivations, state: succeeded", "/push/device/create/multi", "POST");
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -244,9 +248,10 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling push server delete device service, appId: {}, token: {} - start", appId, maskToken(token));
+        logger.info("call={}, callType={}, action: deleteDevice, state: initiated, appId: {}, token: {}",
+                "/push/device/delete", "POST", appId, maskToken(token));
         Response response = postObjectImpl("/push/device/delete", new ObjectRequest<>(request));
-        logger.info("Calling push server delete device service, appId: {}, token: {} - finish", appId, maskToken(token));
+        logger.info("call={}, callType={}, action: deleteDevice, state: succeeded", "/push/device/delete", "POST");
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -268,11 +273,12 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling push server update device status, activation ID: {} - start", activationId);
+        logger.info("call={}, callType={}, action: updateDeviceStatus, state: initiated, activationId: {}",
+                "/push/device/status/update", "POST", activationId);
         // Note that there is just plain 'request' in the request, not 'new ObjectRequest<>(request)'.
         // This is due to the fact that standard PowerAuth Server callback format is used here.
         final Response response = postImpl("/push/device/status/update", request, new ParameterizedTypeReference<>(){});
-        logger.info("Calling push server update device status, activation ID: {} - finish", activationId);
+        logger.info("call={}, callType={}, action: updateDeviceStatus, state: succeeded", "/push/device/status/update", "POST");
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -310,9 +316,10 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling push server to send a push message, app ID: {}, user ID: {} - start", appId, pushMessage.getUserId());
+        logger.info("call={}, callType={}, action: sendPushMessage, state: initiated, appId: {}, userId: {}",
+                "/push/message/send", "POST", appId, pushMessage.getUserId());
         final ObjectResponse<PushMessageSendResult> result = postObjectImpl("/push/message/send", new ObjectRequest<>(request), PushMessageSendResult.class);
-        logger.info("Calling push server to send a push message, app ID: {}, user ID: {} - finish", appId, pushMessage.getUserId());
+        logger.info("call={}, callType={}, action: sendPushMessage, state: succeeded", "/push/message/send", "POST");
 
         return result;
     }
@@ -350,9 +357,10 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling push server to send a push message batch, app ID: {} - start", appId);
+        logger.info("call={}, callType={}, action: sendPushMessageBatch, state: initiated, appId: {}, batchSize: {}",
+                "/push/message/batch/send", "POST", appId, batch.size());
         final ObjectResponse<PushMessageSendResult> result = postObjectImpl("/push/message/batch/send", new ObjectRequest<>(request), PushMessageSendResult.class);
-        logger.info("Calling push server to send a push message batch, app ID: {} - finish", appId);
+        logger.info("call={}, callType={}, action: sendPushMessageBatch, state: succeeded", "/push/message/batch/send", "POST");
 
         return result;
     }
@@ -376,9 +384,11 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling push server to create a push campaign, app ID: {} - start", appId);
+        logger.info("call={}, callType={}, action: createCampaign, state: initiated, appId: {}",
+                "/push/campaign/create", "POST", appId);
         final ObjectResponse<CreateCampaignResponse> result = postObjectImpl("/push/campaign/create", new ObjectRequest<>(request), CreateCampaignResponse.class);
-        logger.info("Calling push server to create a push campaign, app ID: {} - finish", appId);
+        logger.info("call={}, callType={}, action: createCampaign, state: succeeded", "/push/campaign/create", "POST");
+
 
         return result;
     }
@@ -393,9 +403,10 @@ public class PushServerClient {
     public boolean deleteCampaign(Long campaignId) throws PushServerClientException {
         final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
-        logger.info("Calling push server to delete a push campaign, campaign ID: {} - start", campaignId);
+        logger.info("call={}, callType={}, action: deleteCampaign, state: initiated, campaignId: {}",
+                "/push/campaign/{campaignId}/delete", "POST", campaignId);
         final ObjectResponse<DeleteCampaignResponse> response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/delete", null, DeleteCampaignResponse.class);
-        logger.info("Calling push server to delete a push campaign, campaign ID: {} - finish", campaignId);
+        logger.info("call={}, callType={}, action: deleteCampaign, state: succeeded", "/push/campaign/{campaignId}/delete", "POST");
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -411,9 +422,10 @@ public class PushServerClient {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.put("all", Collections.singletonList(Boolean.valueOf(all).toString()));
 
-        logger.info("Calling push server to obtain a push campaign list - start");
+        logger.info("call={}, callType={}, action: getListOfCampaigns, state: initiated",
+                "/push/campaign/list", "GET");
         final ObjectResponse<ListOfCampaignsResponse> result = getObjectImpl("/push/campaign/list", params, ListOfCampaignsResponse.class);
-        logger.info("Calling push server to obtain a push campaign list - finish");
+        logger.info("call={}, callType={}, action: getListOfCampaigns, state: succeeded", "/push/campaign/list", "GET");
 
         return result;
     }
@@ -428,9 +440,9 @@ public class PushServerClient {
     public ObjectResponse<CampaignResponse> getCampaign(Long campaignId) throws PushServerClientException {
         final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
-        logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - start", campaignId);
+        logger.info("call={}, callType={}, action: getCampaign, state: initiated, campaignId: {}", "/push/campaign/{campaignId}/detail", "GET", campaignId);
         final ObjectResponse<CampaignResponse> result = getObjectImpl("/push/campaign/" + campaignIdSanitized + "/detail", null, CampaignResponse.class);
-        logger.info("Calling push server to obtain a push campaign detail, campaign ID: {} - finish", campaignId);
+        logger.info("call={}, callType={}, action: getCampaign, state: succeeded", "/push/campaign/{campaignId}/detail", "GET");
 
         return result;
     }
@@ -447,9 +459,9 @@ public class PushServerClient {
         final ListOfUsers listOfUsers = new ListOfUsers(users);
         final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
-        logger.info("Calling push server to add users to campaign, campaign ID: {} - start", campaignId);
+        logger.info("call={}, callType={}, action: addUsersToCampaign, state: initiated, campaignId: {}, userCount: {}", "/push/campaign/{campaignId}/user/add", "PUT", campaignId, users.size());
         final Response response = putObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/add", new ObjectRequest<>(listOfUsers));
-        logger.info("Calling push server to add users to campaign, campaign ID: {} - finish", campaignId);
+        logger.info("call={}, callType={}, action: addUsersToCampaign, state: succeeded", "/push/campaign/{campaignId}/user/add", "PUT");
 
         if (response == null) {
             throw new PushServerClientException(new Error("PUSH_SERVER_CLIENT_ERROR", "Network communication has failed."));
@@ -472,9 +484,9 @@ public class PushServerClient {
         final MultiValueMap<String, String> params = buildPages(page, size);
 
         final ParameterizedTypeReference<PagedResponse<ListOfUsersFromCampaignResponse>> typeReference = new ParameterizedTypeReference<>() {};
-        logger.info("Calling push server to get users from the campaign, campaign ID: {} - start", campaignId);
+        logger.info("call={}, callType={}, action: getListOfUsersFromCampaign, state: initiated, campaignId: {}, page: {}, size: {}", "/push/campaign/{campaignId}/user/list", "GET", campaignId, page, size);
         final PagedResponse<ListOfUsersFromCampaignResponse> result = getImpl("/push/campaign/" + campaignIdSanitized + "/user/list", params, typeReference);
-        logger.info("Calling push server to get users from the campaign, campaign ID: {} - finish", campaignId);
+        logger.info("call={}, callType={}, action: getListOfUsersFromCampaign, state: succeeded", "/push/campaign/{campaignId}/user/list", "GET");
 
         return result;
     }
@@ -491,9 +503,9 @@ public class PushServerClient {
         final ListOfUsers listOfUsers = new ListOfUsers(users);
         final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
-        logger.info("Calling push server to remove users from the campaign, campaign ID: {} - start", campaignId);
+        logger.info("call={}, callType={}, action: deleteUsersFromCampaign, state: initiated, campaignId: {}, userCount: {}", "/push/campaign/{campaignId}/user/delete", "POST", campaignId, users.size());
         final Response response = postObjectImpl("/push/campaign/" + campaignIdSanitized + "/user/delete", new ObjectRequest<>(listOfUsers));
-        logger.info("Calling push server to remove users from the campaign, campaign ID: {} - finish", campaignId);
+        logger.info("call={}, callType={}, action: deleteUsersFromCampaign, state: succeeded", "/push/campaign/{campaignId}/user/delete", "POST");
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -517,9 +529,9 @@ public class PushServerClient {
             throw new PushServerClientException(error);
         }
 
-        logger.info("Calling push server to send test campaign, campaign ID: {}, user ID: {} - start", campaignId, userId);
+        logger.info("call={}, callType={}, action: sendTestCampaign, state: initiated, campaignId: {}, userId: {}", "/push/campaign/send/test/{campaignId}", "POST", campaignId, userId);
         final Response response = postObjectImpl("/push/campaign/send/test/" + campaignIdSanitized, new ObjectRequest<>(request));
-        logger.info("Calling push server to send test campaign, campaign ID: {}, user ID: {} - finish", campaignId, userId);
+        logger.info("call={}, callType={}, action: sendTestCampaign, state: succeeded", "/push/campaign/send/test/{campaignId}", "POST");
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -534,9 +546,9 @@ public class PushServerClient {
     public boolean sendCampaign(Long campaignId) throws PushServerClientException {
         final String campaignIdSanitized = URLEncoder.encode(String.valueOf(campaignId), StandardCharsets.UTF_8);
 
-        logger.info("Calling push server to send a production campaign, campaign ID: {} - start", campaignId);
+        logger.info("call={}, callType={}, action: sendCampaign, state: initiated, campaignId: {}", "/push/campaign/send/live/{campaignId}", "POST", campaignId);
         final Response response = postObjectImpl("/push/campaign/send/live/" + campaignIdSanitized, null);
-        logger.info("Calling push server to send a production campaign, campaign ID: {} - finish", campaignId);
+        logger.info("call={}, callType={}, action: sendCampaign, state: succeeded", "/push/campaign/send/live/{campaignId}", "POST");
 
         return response.getStatus().equals(Response.Status.OK);
     }
@@ -547,9 +559,9 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<GetApplicationListResponse> getApplicationList() throws PushServerClientException {
-        logger.info("Calling push server to retrieve list of applications - start");
+        logger.info("call={}, callType={}, action: getApplicationList, state: initiated", "/admin/app/list", "GET");
         final ObjectResponse<GetApplicationListResponse> response = getObjectImpl("/admin/app/list", null, GetApplicationListResponse.class);
-        logger.info("Calling push server to retrieve list of applications - finish");
+        logger.info("call={}, callType={}, action: getApplicationList, state: succeeded", "/admin/app/list", "GET");
         return response;
     }
 
@@ -559,9 +571,9 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<GetApplicationListResponse> getUnconfiguredApplicationList() throws PushServerClientException {
-        logger.info("Calling push server to retrieve list of unconfigured applications - start");
+        logger.info("call={}, callType={}, action: getUnconfiguredApplicationList, state: initiated", "/admin/app/unconfigured/list", "GET");
         final ObjectResponse<GetApplicationListResponse> response = getObjectImpl("/admin/app/unconfigured/list", null, GetApplicationListResponse.class);
-        logger.info("Calling push server to retrieve list of unconfigured applications - finish");
+        logger.info("call={}, callType={}, action: getUnconfiguredApplicationList, state: succeeded", "/admin/app/unconfigured/list", "GET");
         return response;
     }
 
@@ -572,9 +584,9 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(final GetApplicationDetailRequest request) throws PushServerClientException {
-        logger.info("Calling push server to retrieve application detail, ID: {} - start", request.getAppId());
+        logger.info("call={}, callType={}, action: getApplicationDetail, state: initiated, appId: {}", "/admin/app/detail", "POST", request.getAppId());
         final ObjectResponse<GetApplicationDetailResponse> response = postObjectImpl("/admin/app/detail", new ObjectRequest<>(request), GetApplicationDetailResponse.class);
-        logger.info("Calling push server to retrieve application detail, ID: {} - finish", request.getAppId());
+        logger.info("call={}, callType={}, action: getApplicationDetail, state: succeeded", "/admin/app/detail", "POST");
         return response;
     }
 
@@ -586,9 +598,9 @@ public class PushServerClient {
      */
     public ObjectResponse<CreateApplicationResponse> createApplication(String appId) throws PushServerClientException {
         final CreateApplicationRequest request = new CreateApplicationRequest(appId);
-        logger.info("Calling push server to create application, app ID: {} - start", appId);
+        logger.info("call={}, callType={}, action: createApplication, state: initiated, appId: {}", "/admin/app/create", "POST", appId);
         final ObjectResponse<CreateApplicationResponse> response = postObjectImpl("/admin/app/create", new ObjectRequest<>(request), CreateApplicationResponse.class);
-        logger.info("Calling push server to create application, app ID: {} - finish", appId);
+        logger.info("call={}, callType={}, action: createApplication, state: succeeded", "/admin/app/create", "POST");
         return response;
     }
 
@@ -610,9 +622,9 @@ public class PushServerClient {
     public Response updateIos(String appId, String bundle, String keyId, String teamId, ApnsEnvironment environment, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
         final UpdateIosRequest request = new UpdateIosRequest(appId, bundle, keyId, teamId, environment, privateKeyBase64);
-        logger.info("Calling push server to update iOS, ID: {} - start", appId);
+        logger.info("call={}, callType={}, action: updateIos, state: initiated, appId: {}", "/admin/app/ios/update", "PUT", appId);
         final Response response = putObjectImpl("/admin/app/ios/update", new ObjectRequest<>(request));
-        logger.info("Calling push server to update iOS, ID: {} - finish", appId);
+        logger.info("call={}, callType={}, action: updateIos, state: succeeded", "/admin/app/ios/update", "PUT");
         return response;
     }
 
@@ -624,9 +636,9 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response updateApns(final UpdateApnsRequest updateRequest) throws PushServerClientException {
-        logger.info("Calling push server to update APNs, ID: {} - start", updateRequest.getAppId());
+        logger.info("call={}, callType={}, action: updateApns, state: initiated, appId: {}", "/admin/app/apns", "PUT", updateRequest.getAppId());
         final Response response = putObjectImpl("/admin/app/apns", new ObjectRequest<>(updateRequest));
-        logger.info("Calling push server to update APNs, ID: {} - finish", updateRequest.getAppId());
+        logger.info("call={}, callType={}, action: updateApns, state: succeeded", "/admin/app/apns", "PUT");
         return response;
     }
 
@@ -642,9 +654,9 @@ public class PushServerClient {
     @Deprecated
     public Response removeIos(String appId) throws PushServerClientException {
         final RemoveIosRequest request = new RemoveIosRequest(appId);
-        logger.info("Calling push server to remove iOS, ID: {} - start", appId);
+        logger.info("call={}, callType={}, action: removeIos, state: initiated, appId: {}", "/admin/app/ios/remove", "POST", appId);
         final Response response = postObjectImpl("/admin/app/ios/remove", new ObjectRequest<>(request));
-        logger.info("Calling push server to remove iOS, ID: {} - finish", appId);
+        logger.info("call={}, callType={}, action: removeIos, state: succeeded", "/admin/app/ios/remove", "POST");
         return response;
     }
 
@@ -656,9 +668,9 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response removeApns(String appId) throws PushServerClientException {
-        logger.info("Calling push server to remove APNs, ID: {} - start", appId);
+        logger.info("call={}, callType={}, action: removeApns, state: initiated, appId: {}", "/admin/app/apns", "DELETE", appId);
         final Response response = deleteImpl("/admin/app/apns?appId=" + appId);
-        logger.info("Calling push server to remove APNs, ID: {} - finish", appId);
+        logger.info("call={}, callType={}, action: removeApns, state: succeeded", "/admin/app/apns", "DELETE");
         return response;
     }
 
@@ -677,9 +689,9 @@ public class PushServerClient {
     public Response updateAndroid(String appId, String projectId, byte[] privateKey) throws PushServerClientException {
         final String privateKeyBase64 = Base64.getEncoder().encodeToString(privateKey);
         final UpdateAndroidRequest request = new UpdateAndroidRequest(appId, projectId, privateKeyBase64);
-        logger.info("Calling push server to update android, ID: {} - start", appId);
+        logger.info("call={}, callType={}, action: updateAndroid, state: initiated, appId: {}", "/admin/app/android/update", "PUT", appId);
         final Response response = putObjectImpl("/admin/app/android/update", new ObjectRequest<>(request));
-        logger.info("Calling push server to update android, ID: {} - finish", appId);
+        logger.info("call={}, callType={}, action: updateAndroid, state: succeeded", "/admin/app/android/update", "PUT");
         return response;
     }
 
@@ -691,9 +703,9 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response updateFcm(final UpdateFcmRequest updateRequest) throws PushServerClientException {
-        logger.info("Calling push server to update FCM, ID: {} - start", updateRequest.getAppId());
+        logger.info("call={}, callType={}, action: updateFcm, state: initiated, appId: {}", "/admin/app/fcm", "PUT", updateRequest.getAppId());
         final Response response = putObjectImpl("/admin/app/fcm", new ObjectRequest<>(updateRequest));
-        logger.info("Calling push server to update FCM, ID: {} - finish", updateRequest.getAppId());
+        logger.info("call={}, callType={}, action: updateFcm, state: succeeded", "/admin/app/fcm", "PUT");
         return response;
     }
 
@@ -709,9 +721,9 @@ public class PushServerClient {
     @Deprecated
     public Response removeAndroid(String appId) throws PushServerClientException {
         final RemoveAndroidRequest request = new RemoveAndroidRequest(appId);
-        logger.info("Calling push server to remove android, ID: {} - start", appId);
+        logger.info("call={}, callType={}, action: removeAndroid, state: initiated, appId: {}", "/admin/app/android/remove", "POST", appId);
         final Response response = postObjectImpl("/admin/app/android/remove", new ObjectRequest<>(request));
-        logger.info("Calling push server to remove android, ID: {} - finish", appId);
+        logger.info("call={}, callType={}, action: removeAndroid, state: succeeded", "/admin/app/android/remove", "POST");
         return response;
     }
 
@@ -723,9 +735,9 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response removeFcm(String appId) throws PushServerClientException {
-        logger.info("Calling push server to remove FCM, ID: {} - start", appId);
+        logger.info("call={}, callType={}, action: removeFcm, state: initiated, appId: {}", "/admin/app/fcm", "DELETE", appId);
         final Response response = deleteImpl("/admin/app/fcm?appId=" + appId);
-        logger.info("Calling push server to remove FCM, ID: {} - finish", appId);
+        logger.info("call={}, callType={}, action: removeFcm, state: succeeded", "/admin/app/fcm", "DELETE");
         return response;
     }
 
@@ -740,9 +752,9 @@ public class PushServerClient {
      */
     @Deprecated
     public Response updateHuawei(final UpdateHuaweiRequest request) throws PushServerClientException {
-        logger.info("Calling push server to update Huawei, ID: {} - start", request.getAppId());
+        logger.info("call={}, callType={}, action: updateHuawei, state: initiated, appId: {}", "/admin/app/huawei/update", "PUT", request.getAppId());
         final Response response = putObjectImpl("/admin/app/huawei/update", new ObjectRequest<>(request));
-        logger.info("Calling push server to update Huawei, ID: {} - finish", request.getAppId());
+        logger.info("call={}, callType={}, action: updateHuawei, state: succeeded", "/admin/app/huawei/update", "PUT");
         return response;
     }
 
@@ -754,15 +766,15 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response updateHms(final UpdateHmsRequest request) throws PushServerClientException {
-        logger.info("Calling push server to update HMS, ID: {} - start", request.getAppId());
+        logger.info("call={}, callType={}, action: updateHms, state: initiated, appId: {}", "/admin/app/hms", "PUT", request.getAppId());
         final Response response = putObjectImpl("/admin/app/hms", new ObjectRequest<>(request));
-        logger.info("Calling push server to update HMS, ID: {} - finish", request.getAppId());
+        logger.info("call={}, callType={}, action: updateHms, state: succeeded", "/admin/app/hms", "PUT");
         return response;
     }
 
     /**
      * Remove Huawei record from an application credentials entity.
-     * 
+     *
      * @deprecated use {@link #removeHms(String)}
      *
      * @param appId Application credentials entity ID.
@@ -772,9 +784,9 @@ public class PushServerClient {
     @Deprecated
     public Response removeHuawei(String appId) throws PushServerClientException {
         final RemoveHuaweiRequest request = new RemoveHuaweiRequest(appId);
-        logger.info("Calling push server to remove Huawei, ID: {} - start", appId);
+        logger.info("call={}, callType={}, action: removeHuawei, state: initiated, appId: {}", "/admin/app/huawei/remove", "POST", appId);
         final Response response = postObjectImpl("/admin/app/huawei/remove", new ObjectRequest<>(request));
-        logger.info("Calling push server to remove Huawei, ID: {} - finish", appId);
+        logger.info("call={}, callType={}, action: removeHuawei, state: succeeded", "/admin/app/huawei/remove", "POST");
         return response;
     }
 
@@ -786,9 +798,9 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public Response removeHms(String appId) throws PushServerClientException {
-        logger.info("Calling push server to remove HMS, ID: {} - start", appId);
+        logger.info("call={}, callType={}, action: removeHms, state: initiated, appId: {}", "/admin/app/hms", "DELETE", appId);
         final Response response = deleteImpl("/admin/app/hms?appId=" + appId);
-        logger.info("Calling push server to remove HMS, ID: {} - finish", appId);
+        logger.info("call={}, callType={}, action: removeHms, state: succeeded", "/admin/app/hms", "DELETE");
         return response;
     }
 
@@ -799,9 +811,9 @@ public class PushServerClient {
      * @throws PushServerClientException Thrown when communication with Push Server fails.
      */
     public ObjectResponse<GetInboxMessageDetailResponse> postMessage(CreateInboxMessageRequest request) throws PushServerClientException {
-        logger.info("Calling push server to send message to inbox of: {}, subject: {} - start", request.getUserId(), request.getSubject());
+        logger.info("call={}, callType={}, action: postMessage, state: initiated, userId: {}, subject: {}", "/inbox/messages", "POST", request.getUserId(), request.getSubject());
         final ObjectResponse<GetInboxMessageDetailResponse> response = postObjectImpl("/inbox/messages", new ObjectRequest<>(request), GetInboxMessageDetailResponse.class);
-        logger.info("Calling push server to send message to inbox of: {}, subject: {} - finish", request.getUserId(), request.getSubject());
+        logger.info("call={}, callType={}, action: postMessage, state: succeeded", "/inbox/messages", "POST");
         return response;
     }
 
@@ -822,9 +834,9 @@ public class PushServerClient {
         params.add("onlyUnread", Boolean.toString(onlyUnread));
 
         final ParameterizedTypeReference<PagedResponse<ListOfInboxMessages>> typeReference = new ParameterizedTypeReference<>() {};
-        logger.info("Calling push server fetch messages for user: {} - start", userId);
+        logger.info("call={}, callType={}, action: fetchMessageListForUser, state: initiated, userId: {}, onlyUnread: {}", "/inbox/messages/list", "GET", userId, onlyUnread);
         final PagedResponse<ListOfInboxMessages> result = getImpl("/inbox/messages/list", params, typeReference);
-        logger.info("Calling push server fetch messages for user: {} - finish", userId);
+        logger.info("call={}, callType={}, action: fetchMessageListForUser, state: succeeded", "/inbox/messages/list", "GET");
 
         return result;
     }
@@ -842,9 +854,9 @@ public class PushServerClient {
         params.add("appId", appId);
 
         final ParameterizedTypeReference<ObjectResponse<GetInboxMessageCountResponse>> typeReference = new ParameterizedTypeReference<>() {};
-        logger.info("Calling push server fetch message count for user: {} - start", userId);
+        logger.info("call={}, callType={}, action: fetchMessageCountForUser, state: initiated, userId: {}, appId: {}", "/inbox/messages/count", "GET", userId, appId);
         final ObjectResponse<GetInboxMessageCountResponse> result = getImpl("/inbox/messages/count", params, typeReference);
-        logger.info("Calling push server fetch message count for user: {} - finish", userId);
+        logger.info("call={}, callType={}, action: fetchMessageCountForUser, state: succeeded", "/inbox/messages/count", "GET");
 
         return result;
     }
@@ -860,9 +872,9 @@ public class PushServerClient {
         final ReadAllInboxMessagesRequest request = new ReadAllInboxMessagesRequest();
         request.setUserId(userId);
         request.setAppId(appId);
-        logger.info("Calling push server to mark all messages read in inbox of user: {} - start", userId);
+        logger.info("call={}, callType={}, action: readAllMessages, state: initiated, userId: {}, appId: {}", "/inbox/messages/read-all", "POST", userId, appId);
         final Response response = postObjectImpl("/inbox/messages/read-all", new ObjectRequest<>(request));
-        logger.info("Calling push server to mark all messages read in inbox of user: {} - finish", userId);
+        logger.info("call={}, callType={}, action: readAllMessages, state: succeeded", "/inbox/messages/read-all", "POST");
         return response;
     }
 
@@ -876,9 +888,9 @@ public class PushServerClient {
         final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("id", inboxId);
 
-        logger.info("Calling push server fetch message ID: {} - start", inboxId);
+        logger.info("call={}, callType={}, action: fetchMessageDetail, state: initiated, inboxId: {}", "/inbox/messages/detail", "GET", inboxId);
         final ObjectResponse<GetInboxMessageDetailResponse> result = getObjectImpl("/inbox/messages/detail", params, GetInboxMessageDetailResponse.class);
-        logger.info("Calling push server fetch message ID: {} - finish", inboxId);
+        logger.info("call={}, callType={}, action: fetchMessageDetail, state: succeeded", "/inbox/messages/detail", "GET");
 
         return result;
     }
@@ -892,9 +904,9 @@ public class PushServerClient {
     public ObjectResponse<GetInboxMessageDetailResponse> readMessage(String inboxId) throws PushServerClientException {
         final ReadInboxMessageRequest request = new ReadInboxMessageRequest();
         request.setInboxId(inboxId);
-        logger.info("Calling push server to read message to inbox of: {} - start", inboxId);
+        logger.info("call={}, callType={}, action: readMessage, state: initiated, inboxId: {}", "/inbox/messages/read", "POST", inboxId);
         final ObjectResponse<GetInboxMessageDetailResponse> response = postObjectImpl("/inbox/messages/read", new ObjectRequest<>(request), GetInboxMessageDetailResponse.class);
-        logger.info("Calling push server to read message to inbox of: {} - finish", inboxId);
+        logger.info("call={}, callType={}, action: readMessage, state: succeeded", "/inbox/messages/read", "POST");
         return response;
     }
 
