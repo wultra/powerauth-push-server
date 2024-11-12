@@ -70,7 +70,7 @@ class PushDeviceServiceTest {
         request.setAppId("my_app");
         request.setActivationId("a1");
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         final Response response = tested.createDevice(request);
         verify(deviceRegistrationService).createOrUpdateDevice(request, credentials);
@@ -111,7 +111,7 @@ class PushDeviceServiceTest {
         request.setAppId("non_existent");
         request.setActivationId("a1");
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         final PushServerException exception = assertThrows(PushServerException.class,
                 () -> tested.createDevice(request));
@@ -128,7 +128,7 @@ class PushDeviceServiceTest {
 
         final CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
         request.setAppId("my_app");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
         request.setToken("t2");
         request.getActivationIds().addAll(List.of("a1", "a2"));
 
@@ -168,7 +168,7 @@ class PushDeviceServiceTest {
 
         final CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
         request.setAppId("non-existent");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
         request.setToken("t2");
         request.getActivationIds().addAll(List.of("a1", "a2"));
 

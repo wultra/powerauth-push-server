@@ -83,7 +83,7 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.setActivationId("a1");
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         tested.createOrUpdateDevice(request, credentials);
 
@@ -107,7 +107,7 @@ class DeviceRegistrationServiceTest {
                 request.setAppId(APP_NAME);
                 request.setActivationId("a1");
                 request.setToken("t1");
-                request.setPlatform(MobilePlatform.IOS);
+                request.setPlatform(MobilePlatform.APNS);
                 tested.createOrUpdateDevice(request, credentials);
                 return null;
             });
@@ -130,7 +130,7 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.setActivationId("a1");
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         final PushServerException ex = assertThrows(PushServerException.class,
                 () -> tested.createOrUpdateDevice(request, credentials));
@@ -149,7 +149,7 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.getActivationIds().addAll(List.of("a1", "a2"));
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         tested.createOrUpdateDevices(request, credentials);
 
@@ -167,7 +167,7 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.getActivationIds().addAll(List.of("a1", "a1"));
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         tested.createOrUpdateDevices(request, credentials);
 
@@ -187,7 +187,7 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.getActivationIds().addAll(List.of("a1", "a2"));
         request.setToken("t1_new");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         tested.createOrUpdateDevices(request, credentials);
 
@@ -206,7 +206,7 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.getActivationIds().add("a1");
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         assertRegistrationExists("a_other", "t1");
         assertRegistrationExists("a_different", "t1");
@@ -224,7 +224,7 @@ class DeviceRegistrationServiceTest {
         device.setActivationId("a1");
         device.setAppCredentials(createAppCredentials(APP_NAME));
         device.setTimestampLastRegistered(new Date());
-        device.setPlatform(Platform.IOS);
+        device.setPlatform(Platform.APNS);
         device.setPushToken("t1");
         device.setActive(false);
         deviceRepository.save(device);
@@ -246,7 +246,7 @@ class DeviceRegistrationServiceTest {
         device.setActivationId("a1");
         device.setAppCredentials(createAppCredentials(APP_NAME));
         device.setTimestampLastRegistered(new Date());
-        device.setPlatform(Platform.IOS);
+        device.setPlatform(Platform.APNS);
         device.setPushToken("t1");
         device.setActive(false);
         deviceRepository.save(device);

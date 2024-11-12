@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Test for configuration and resolution of APNs environment.
+ * Test for configuration of production APNs environment vs development push messages.
  *
  * @author Roman Strobl, roman.strobl@wultra.com
  */
