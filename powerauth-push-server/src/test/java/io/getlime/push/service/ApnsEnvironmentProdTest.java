@@ -45,9 +45,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@TestPropertySource(locations = "classpath:application-test-apns-prod.properties")
 @ActiveProfiles("test")
-@TestPropertySource(properties = "powerauth.push.service.apns.useDevelopment=false")
 public class ApnsEnvironmentProdTest {
 
     private static final String MOCK_PUSH_TOKEN = "1234567890987654321234567890";
