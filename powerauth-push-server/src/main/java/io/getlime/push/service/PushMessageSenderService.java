@@ -302,9 +302,15 @@ public class PushMessageSenderService {
             }
             return envDevice;
         }
-        // Fallback in case device was registered without environment, either use application credentials configuration or global server setting as last fallback
-        if ((environmentAppConfig != null && environmentAppConfig.equals(ApnsEnvironment.DEVELOPMENT.getKey()))
-                || configuration.isApnsUseDevelopment()) {
+        // Fallback in case device was registered without environment, check environment in application configuration
+        if (environmentAppConfig != null) {
+            if (ApnsEnvironment.DEVELOPMENT.getKey().equals(environmentAppConfig)) {
+                return ApnsEnvironment.DEVELOPMENT;
+            }
+            return ApnsEnvironment.PRODUCTION;
+        }
+        // Final fallback to global setting
+        if (configuration.isApnsUseDevelopment()) {
             return ApnsEnvironment.DEVELOPMENT;
         }
         return ApnsEnvironment.PRODUCTION;

@@ -20,6 +20,8 @@ import io.getlime.push.repository.model.AppCredentialsEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Configuration class for push server app credentials.
  *
@@ -36,13 +38,24 @@ public class PushServerAppCredentialConfiguration {
     }
 
     public void configure(String applicationId) {
-        if (appCredentialsRepository.findFirstByAppId(applicationId).isEmpty()) {
-            final AppCredentialsEntity testCredentials = new AppCredentialsEntity();
-            testCredentials.setAppId(applicationId);
-            testCredentials.setApnsBundle("test-bundle");
-            testCredentials.setFcmProjectId("test-project");
-            testCredentials.setFcmPrivateKey(new byte[128]);
-            appCredentialsRepository.save(testCredentials);
+        configure(applicationId, null);
+    }
+
+    public void configure(String applicationId, String environment) {
+        final AppCredentialsEntity testCredentials;
+        if (appCredentialsRepository.findFirstByAppId(applicationId).isPresent()) {
+            testCredentials = appCredentialsRepository.findFirstByAppId(applicationId).get();
+        } else {
+            testCredentials = new AppCredentialsEntity();
         }
+        testCredentials.setAppId(applicationId);
+        testCredentials.setApnsBundle("test-bundle");
+        testCredentials.setApnsPrivateKey("-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg2Xdp5cQvLRDA+kLZ\nmEICtfn0xvPEwHnMWvc+DGXvkbqhRANCAATBeR4PYm+hF8GqH2gxfu0E8yCmHQpd\nn8AB7B/Yhr5N8T+EdOxcfHRA6ayvUG9dFhuyMi7c2v9Yv8i6cVZmXQgz\n-----END PRIVATE KEY-----\n".getBytes(StandardCharsets.UTF_8));
+        testCredentials.setApnsKeyId("test-key");
+        testCredentials.setApnsTeamId("test-team-id");
+        testCredentials.setApnsEnvironment(environment);
+        testCredentials.setFcmProjectId("test-project");
+        testCredentials.setFcmPrivateKey(new byte[128]);
+        appCredentialsRepository.save(testCredentials);
     }
 }

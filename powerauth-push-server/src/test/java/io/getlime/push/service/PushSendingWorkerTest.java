@@ -61,6 +61,7 @@ class PushSendingWorkerTest {
     @Test
     void testSendMessageToFcmError() throws FcmMissingTokenException {
         final RestClientException simulatedException = new RestClientException("Simulated INVALID_ARGUMENT error");
+        when(pushServiceConfiguration.isFcmDataNotificationOnly()).thenReturn(false);
         when(fcmModelConverter.convertExceptionToErrorCode(simulatedException)).thenReturn(MessagingErrorCode.INVALID_ARGUMENT);
         doAnswer(invocation -> {
             final Consumer<Throwable> onError = invocation.getArgument(3);
