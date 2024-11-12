@@ -484,10 +484,10 @@ public class PushSendingWorker {
      * @param attributes Push message attributes.
      * @param priority Push message priority.
      * @param pushToken Push token.
-     * @param iosTopic APNs topic, usually same as bundle ID.
+     * @param apnsTopic APNs topic, usually same as bundle ID.
      * @param callback Callback that is called after the asynchronous executions is completed.
      */
-    void sendMessageToApns(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
+    void sendMessageToApns(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final String apnsTopic, final PushSendingCallback callback) {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
         final boolean isSilent = attributes != null && attributes.getSilent(); // In case there are no attributes, the message is not silent
@@ -495,7 +495,7 @@ public class PushSendingWorker {
         final Instant validUntil = pushMessageBody.getValidUntil();
         final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set
         final DeliveryPriority deliveryPriority = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
-        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, deliveryPriority, pushType, pushMessageBody.getCollapseKey());
+        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, apnsTopic, payload, validUntil, deliveryPriority, pushType, pushMessageBody.getCollapseKey());
         final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
         sendNotificationFuture.whenCompleteAsync((response, cause) -> {
@@ -522,11 +522,11 @@ public class PushSendingWorker {
                         logger.debug("Deleting push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.DEVICE_TOKEN_NOT_FOR_TOPIC.isEqualToText(rejectionReason)) {
-                        logger.warn("Notification was sent to incorrect topic: {}.", iosTopic);
+                        logger.warn("Notification was sent to incorrect topic: {}.", apnsTopic);
                         logger.debug("Deleting push token: {}", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.TOPIC_DISALLOWED.isEqualToText(rejectionReason)) {
-                        logger.warn("Notification was sent to incorrect topic: {}.", iosTopic);
+                        logger.warn("Notification was sent to incorrect topic: {}.", apnsTopic);
                         logger.debug("Deleting push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.EXPIRED_PROVIDER_TOKEN.isEqualToText(rejectionReason)) {
