@@ -101,8 +101,8 @@ public class PushMessageSenderService {
                         final PushMessageSendResult.PlatformResult platformResult = sendResult.getApns();
                         final PushSendingCallback callback = createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser);
                         final String environment = resolveApnsEnvironment(device.getEnvironment(), appCredentials.getApnsEnvironment());
-                        if (environment == null) {
-                            logger.error("Push message cannot be sent because APNs environment configuration failed. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
+                        if (!configuration.isApnsUseDevelopment() && ApnsEnvironment.DEVELOPMENT.getKey().equals(device.getEnvironment())) {
+                            logger.error("Push message cannot be sent because APNs development host is requested, however the server is in production mode. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
                             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                             arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
@@ -210,8 +210,8 @@ public class PushMessageSenderService {
             case IOS, APNS -> {
                 final String environmentAppConfig = pushClient.getAppCredentials().getApnsEnvironment();
                 final String apnsEnvironment = resolveApnsEnvironment(environment, environmentAppConfig);
-                if (apnsEnvironment == null) {
-                    logger.error("Campaign push message cannot be sent because APNs environment configuration failed. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
+                if (!configuration.isApnsUseDevelopment() && ApnsEnvironment.DEVELOPMENT.getKey().equals(environment)) {
+                    logger.error("Push message cannot be sent because APNs development host is requested, however the server is in production mode. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
                     return;
                 }
                 final ApnsClient apnsClient = ApnsEnvironment.PRODUCTION.getKey().equals(apnsEnvironment) ? pushClient.getApnsClientProduction() : pushClient.getApnsClientDevelopment();
