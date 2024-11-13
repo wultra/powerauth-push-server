@@ -183,6 +183,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
     "appId": "mobile-app",
     "token": "1234567890987654321234567890",
     "platform": "apns",
+    "environment": "development",
     "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
   }
 }
@@ -191,6 +192,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
 - `platform` - `apns`, `fcm`, `hms`
+- `environment` - `development` or `production` for APNs, `null` otherwise
 - `activationId` - Activation identifier
 
 #### Response 200
@@ -230,6 +232,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
     "appId": "mobile-app",
     "token": "1234567890987654321234567890",
     "platform": "apns",
+    "environment": "development",
     "activationIds": [
       "49414e31-f3df-4cea-87e6-f214ca3b8412",
       "26c94bf8-f594-4bd8-9c51-93449926b644"
@@ -241,6 +244,7 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
 - `platform` - `apns`, `fcm`, `hms`
+- `environment` - `development` or `production` for APNs, `null` otherwise
 - `activationIds` - Associated activation identifiers
 
 #### Response 200

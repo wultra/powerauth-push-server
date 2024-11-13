@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Add new APNS columns -->
+    <changeSet id="1" logicalFilePath="powerauth-push-server/1.10.x/20241108-device-registration-environment.xml" author="Roman Strobl">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="push_device_registration" columnName="environment"/>
+        </preConditions>
+        <comment>Add columns environment to push_device_registration table</comment>
+        <addColumn tableName="push_device_registration">
+            <column name="environment" type="varchar(255)" />
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

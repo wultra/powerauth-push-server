@@ -15,14 +15,14 @@
  */
 package io.getlime.push.model.request;
 
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.MobilePlatform;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +34,9 @@ import java.util.List;
  */
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateDeviceForActivationsRequest {
 
     /**
@@ -55,6 +58,11 @@ public class CreateDeviceForActivationsRequest {
      */
     @NotNull
     private MobilePlatform platform;
+
+    /**
+     * Environment for APNs (optional).
+     */
+    private ApnsEnvironment environment;
 
     /**
      * Activation IDs.

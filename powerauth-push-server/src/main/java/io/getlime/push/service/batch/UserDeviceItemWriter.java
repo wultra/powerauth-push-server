@@ -18,6 +18,7 @@ package io.getlime.push.service.batch;
 
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageBody;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.repository.PushCampaignRepository;
 import io.getlime.push.repository.model.Platform;
 import io.getlime.push.repository.model.PushCampaignEntity;
@@ -72,6 +73,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
     public void write(Chunk<? extends UserDevice> list) throws Exception {
         for (UserDevice device: list) {
             final Platform platform = device.getPlatform();
+            final String environment = device.getEnvironment();
             final String token = device.getToken();
             final String userId = device.getUserId();
             final Long campaignId = device.getCampaignId();
@@ -87,7 +89,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
             final PushMessageBody messageBody = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
 
             // Send the push message using push sender service
-            pushMessageSenderService.sendCampaignMessage(campaign.getAppCredentials().getAppId(), platform, token, messageBody, userId, deviceId, activationId);
+            pushMessageSenderService.sendCampaignMessage(campaign.getAppCredentials().getAppId(), platform, environment, token, messageBody, userId, deviceId, activationId);
         }
     }
 }

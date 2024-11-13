@@ -50,8 +50,8 @@ public class PushDeviceService {
         if (request == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received createDevice request, app ID: {}, activation ID: {}, token: {}, platform: {}", request.getAppId(),
-                request.getActivationId(), maskPushToken(request.getToken()), request.getPlatform());
+        logger.info("Received createDevice request, app ID: {}, activation ID: {}, token: {}, platform: {}, environment: {}", request.getAppId(),
+                request.getActivationId(), maskPushToken(request.getToken()), request.getPlatform(), request.getEnvironment());
 
         final String errorMessage = CreateDeviceRequestValidator.validate(request);
         if (errorMessage != null) {
@@ -61,7 +61,7 @@ public class PushDeviceService {
         final AppCredentialsEntity appCredentials = findAppCredentials(request.getAppId());
 
         deviceRegistrationService.createOrUpdateDevice(request, appCredentials);
-        logger.info("The createDevice request succeeded, app ID: {}, activation ID: {}, platform: {}", request.getAppId(), request.getActivationId(), request.getPlatform());
+        logger.info("The createDevice request succeeded, app ID: {}, activation ID: {}, platform: {}, environment: {}", request.getAppId(), request.getActivationId(), request.getPlatform(), request.getEnvironment());
         return new Response();
     }
 
@@ -73,8 +73,8 @@ public class PushDeviceService {
         if (request == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received createDeviceMultipleActivations request, app ID: {}, activation IDs: {}, token: {}, platform: {}",
-                request.getAppId(), request.getActivationIds(), maskPushToken(request.getToken()), request.getPlatform());
+        logger.info("Received createDeviceMultipleActivations request, app ID: {}, activation IDs: {}, token: {}, platform: {}, environment: {}",
+                request.getAppId(), request.getActivationIds(), maskPushToken(request.getToken()), request.getPlatform(), request.getEnvironment());
 
         final String errorMessage = CreateDeviceRequestValidator.validate(request);
         if (errorMessage != null) {
@@ -84,7 +84,7 @@ public class PushDeviceService {
         final AppCredentialsEntity appCredentials = findAppCredentials(request.getAppId());
 
         deviceRegistrationService.createOrUpdateDevices(request, appCredentials);
-        logger.info("The createDeviceMultipleActivations request succeeded, app ID: {}, activation IDs: {}, platform: {}", request.getAppId(), request.getActivationIds(), request.getPlatform());
+        logger.info("The createDeviceMultipleActivations request succeeded, app ID: {}, activation IDs: {}, platform: {}, environment: {}", request.getAppId(), request.getActivationIds(), request.getPlatform(), request.getEnvironment());
         return new Response();
     }
 

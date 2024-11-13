@@ -33,4 +33,9 @@ GO
 UPDATE push_app_credentials SET fcm_private_key = android_private_key, fcm_project_id = android_project_id;
 GO
 
+-- Changeset powerauth-push-server/1.10.x/20241108-device-registration-environment.xml::1::Roman Strobl
+-- Add columns environment to push_device_registration table
+ALTER TABLE push_device_registration ADD environment varchar(255);
+GO
+
 

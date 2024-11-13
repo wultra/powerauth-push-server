@@ -15,12 +15,12 @@
  */
 package io.getlime.push.model.request;
 
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.MobilePlatform;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * Request object used for device registration.
@@ -29,6 +29,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateDeviceRequest {
 
     /**
@@ -47,6 +50,11 @@ public class CreateDeviceRequest {
 
     @NotNull
     private MobilePlatform platform;
+
+    /**
+     * Environment for APNs (optional).
+     */
+    private ApnsEnvironment environment;
 
     /**
      * Activation ID.

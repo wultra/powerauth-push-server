@@ -34,6 +34,7 @@ import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageAttributes;
 import io.getlime.push.model.entity.PushMessageBody;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.Priority;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.apns.ApnsRejectionReason;
@@ -418,8 +419,7 @@ public class PushSendingWorker {
      * @implSpec APNS environment {@code development} or {@code production} values can be used to override global settings.
      * If {@code null} or unknown value is passed, the global configuration is used.
      */
-    ApnsClient prepareApnsClient(final AppCredentialsEntity credentials) throws PushServerException {
-        final String environment = credentials.getApnsEnvironment();
+    ApnsClient prepareApnsClient(final AppCredentialsEntity credentials, final ApnsEnvironment environment) throws PushServerException {
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder()
                 .setProxyHandlerFactory(apnsClientProxy())
                 .setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections())
@@ -427,28 +427,10 @@ public class PushSendingWorker {
                 .setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()))
                 .setTrustedServerCertificateChain(caCertUtil.allCerts());
 
-        final String appId = credentials.getAppId();
-        // Determine the APNs environment by looking at per-app config first and if no recognized value is present,
-        // use the default configuration. Note that "equalsIgnoreCase" optimizes for null parameter, so the first two
-        // if-else branches are performed quickly (we do not need to worry about the fact that "null" will likely be
-        // the most common value there).
-        if ("development".equalsIgnoreCase(environment)) {
-            logger.info("Using APNs development host, application ID: {}", appId);
+        if (environment == ApnsEnvironment.DEVELOPMENT) {
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
-        } else if ("production".equalsIgnoreCase(environment)) {
-            logger.info("Using APNs production host, application ID: {}", appId);
-            apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
         } else {
-            if (environment != null) {
-                logger.warn("Invalid APNS host environment specified: \"{}\". Use \"development\" or \"production\", application ID: {}", environment, appId);
-            }
-            if (pushServiceConfiguration.isApnsUseDevelopment()) {
-                logger.info("Using APNs development host by applying the global push server configuration, application ID: {}", appId);
-                apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
-            } else {
-                logger.info("Using APNs production host by applying the global push server configuration, application ID: {}", appId);
-                apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
-            }
+            apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
         }
 
         final String teamId = credentials.getApnsTeamId();
@@ -502,10 +484,10 @@ public class PushSendingWorker {
      * @param attributes Push message attributes.
      * @param priority Push message priority.
      * @param pushToken Push token.
-     * @param iosTopic APNs topic, usually same as bundle ID.
+     * @param apnsTopic APNs topic, usually same as bundle ID.
      * @param callback Callback that is called after the asynchronous executions is completed.
      */
-    void sendMessageToApns(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
+    void sendMessageToApns(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final String apnsTopic, final PushSendingCallback callback) {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
         final boolean isSilent = attributes != null && attributes.getSilent(); // In case there are no attributes, the message is not silent
@@ -513,7 +495,7 @@ public class PushSendingWorker {
         final Instant validUntil = pushMessageBody.getValidUntil();
         final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set
         final DeliveryPriority deliveryPriority = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
-        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, deliveryPriority, pushType, pushMessageBody.getCollapseKey());
+        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, apnsTopic, payload, validUntil, deliveryPriority, pushType, pushMessageBody.getCollapseKey());
         final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
         sendNotificationFuture.whenCompleteAsync((response, cause) -> {
@@ -540,11 +522,11 @@ public class PushSendingWorker {
                         logger.debug("Deleting push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.DEVICE_TOKEN_NOT_FOR_TOPIC.isEqualToText(rejectionReason)) {
-                        logger.warn("Notification was sent to incorrect topic: {}.", iosTopic);
+                        logger.warn("Notification was sent to incorrect topic: {}.", apnsTopic);
                         logger.debug("Deleting push token: {}", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.TOPIC_DISALLOWED.isEqualToText(rejectionReason)) {
-                        logger.warn("Notification was sent to incorrect topic: {}.", iosTopic);
+                        logger.warn("Notification was sent to incorrect topic: {}.", apnsTopic);
                         logger.debug("Deleting push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.EXPIRED_PROVIDER_TOKEN.isEqualToText(rejectionReason)) {
