@@ -73,7 +73,7 @@ public class CreateDeviceRequestValidator {
             return "Platform must not be null.";
         }
         if (request.getPlatform() != MobilePlatform.APNS && request.getEnvironment() != null) {
-            return "Environment specified for platform which does not support environment setting.";
+            return "Environment specified for a platform that does not support environment setting.";
         }
         if (request.getToken() == null || request.getToken().isEmpty()) {
             return "Push token must not be null or empty.";
