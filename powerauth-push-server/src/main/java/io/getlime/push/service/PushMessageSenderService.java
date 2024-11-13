@@ -100,14 +100,14 @@ public class PushMessageSenderService {
                     if (platform == Platform.IOS || platform == Platform.APNS) {
                         final PushMessageSendResult.PlatformResult platformResult = sendResult.getApns();
                         final PushSendingCallback callback = createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser);
-                        final String environment = resolveApnsEnvironment(device.getEnvironment(), appCredentials.getApnsEnvironment());
-                        if (!configuration.isApnsUseDevelopment() && ApnsEnvironment.DEVELOPMENT.getKey().equals(device.getEnvironment())) {
+                        final String apnsEnvironment = resolveApnsEnvironment(device.getEnvironment(), appCredentials.getApnsEnvironment());
+                        if (apnsEnvironment == null) {
                             logger.error("Push message cannot be sent because APNs development host is requested, however the server is in production mode. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
                             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                             arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
                         }
-                        final ApnsClient apnsClient = ApnsEnvironment.PRODUCTION.getKey().equals(environment) ? pushClient.getApnsClientProduction() : pushClient.getApnsClientDevelopment();
+                        final ApnsClient apnsClient = ApnsEnvironment.PRODUCTION.getKey().equals(apnsEnvironment) ? pushClient.getApnsClientProduction() : pushClient.getApnsClientDevelopment();
                         pushSendingWorker.sendMessageToApns(apnsClient, pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getApnsBundle(), callback);
                     } else if (platform == Platform.ANDROID || platform == Platform.FCM) {
                         if (pushClient.getFcmClient() == null) {
@@ -210,7 +210,7 @@ public class PushMessageSenderService {
             case IOS, APNS -> {
                 final String environmentAppConfig = pushClient.getAppCredentials().getApnsEnvironment();
                 final String apnsEnvironment = resolveApnsEnvironment(environment, environmentAppConfig);
-                if (!configuration.isApnsUseDevelopment() && ApnsEnvironment.DEVELOPMENT.getKey().equals(environment)) {
+                if (apnsEnvironment == null) {
                     logger.error("Push message cannot be sent because APNs development host is requested, however the server is in production mode. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
                     return;
                 }
@@ -301,6 +301,9 @@ public class PushMessageSenderService {
         if (environmentDevice != null) {
             if (environmentDevice.equals(ApnsEnvironment.PRODUCTION.getKey()) || environment.equals(ApnsEnvironment.DEVELOPMENT.getKey())) {
                 environment = environmentDevice;
+            } else {
+                // The case when configuration is in production mode and device is in development mode is not allowed
+                environment = null;
             }
         }
         return environment;
