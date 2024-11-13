@@ -15,6 +15,7 @@
  */
 package io.getlime.push.service;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.push.api.PowerAuthTestClient;
 import io.getlime.push.client.PushServerClient;
@@ -57,6 +58,9 @@ public class ApnsEnvironmentProdTest {
     @Autowired
     private PushServerAppCredentialConfiguration appCredentialConfig;
 
+    @Autowired
+    private LoadingCache<String, AppRelatedPushClient> appRelatedPushClientCache;
+
     private PowerAuthTestClient powerAuthTestClient;
     private PushServerClient pushServerClient;
 
@@ -67,11 +71,13 @@ public class ApnsEnvironmentProdTest {
     void setUp() throws Exception {
         pushServerClient = testClientFactory.createPushServerClient("http://localhost:" + port);
         powerAuthTestClient = testClientFactory.createPowerAuthTestClient();
-        appCredentialConfig.configure(powerAuthTestClient.getApplicationId());
+        appRelatedPushClientCache.invalidateAll();
     }
 
     @Test
     public void testApnsProdNoDevelopmentPushMessages() throws PushServerClientException {
+        appCredentialConfig.configure(powerAuthTestClient.getApplicationId(), null);
+
         CreateDeviceRequest request = CreateDeviceRequest.builder()
                 .appId(powerAuthTestClient.getApplicationId())
                 .token(MOCK_PUSH_TOKEN)
@@ -82,6 +88,36 @@ public class ApnsEnvironmentProdTest {
         boolean result = pushServerClient.createDevice(request);
         assertTrue(result);
 
+        final PushMessage pushMessage = preparePushMessage();
+
+        final ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessage(powerAuthTestClient.getApplicationId(), Mode.SYNCHRONOUS, pushMessage);
+        assertEquals("OK", actual.getStatus());
+        assertEquals(0, actual.getResponseObject().getApns().getSent());
+        assertEquals(1, actual.getResponseObject().getApns().getFailed());
+    }
+
+    @Test
+    public void testApnsProdAppConfigNoDevelopmentPushMessages() throws PushServerClientException {
+        appCredentialConfig.configure(powerAuthTestClient.getApplicationId(), ApnsEnvironment.PRODUCTION.getKey());
+        CreateDeviceRequest request = CreateDeviceRequest.builder()
+                .appId(powerAuthTestClient.getApplicationId())
+                .token(MOCK_PUSH_TOKEN)
+                .platform(MobilePlatform.APNS)
+                .environment(ApnsEnvironment.DEVELOPMENT)
+                .activationId(powerAuthTestClient.getActivationId())
+                .build();
+        boolean result = pushServerClient.createDevice(request);
+        assertTrue(result);
+
+        final PushMessage pushMessage = preparePushMessage();
+
+        final ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessage(powerAuthTestClient.getApplicationId(), Mode.SYNCHRONOUS, pushMessage);
+        assertEquals("OK", actual.getStatus());
+        assertEquals(0, actual.getResponseObject().getApns().getSent());
+        assertEquals(1, actual.getResponseObject().getApns().getFailed());
+    }
+
+    private PushMessage preparePushMessage() {
         final PushMessageBody pushMessageBody = new PushMessageBody();
         pushMessageBody.setTitle("Balance update");
         pushMessageBody.setBody("Your balance is now $745.00");
@@ -91,10 +127,6 @@ public class ApnsEnvironmentProdTest {
         pushMessage.setActivationId(powerAuthTestClient.getActivationId());
         pushMessage.setBody(pushMessageBody);
 
-        final ObjectResponse<PushMessageSendResult> actual = pushServerClient.sendPushMessage(powerAuthTestClient.getApplicationId(), Mode.SYNCHRONOUS, pushMessage);
-        assertEquals("OK", actual.getStatus());
-        assertEquals(0, actual.getResponseObject().getApns().getSent());
-        assertEquals(1, actual.getResponseObject().getApns().getFailed());
+        return pushMessage;
     }
-
 }
