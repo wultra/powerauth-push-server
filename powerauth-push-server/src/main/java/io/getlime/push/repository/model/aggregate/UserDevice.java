@@ -67,7 +67,7 @@ public class UserDevice {
     /**
      * APNs environment (optional).
      */
-    private ApnsEnvironment environment;
+    private String environment;
 
     /**
      * Push token.
@@ -85,7 +85,7 @@ public class UserDevice {
      * @param environment APNs environment (optional).
      * @param token Push token.
      */
-    public UserDevice(String userId, Long deviceId, String activationId, Long campaignId, Long appId, Platform platform, ApnsEnvironment environment, String token) {
+    public UserDevice(String userId, Long deviceId, String activationId, Long campaignId, Long appId, Platform platform, String environment, String token) {
         this.userId = userId;
         this.deviceId = deviceId;
         this.activationId = activationId;

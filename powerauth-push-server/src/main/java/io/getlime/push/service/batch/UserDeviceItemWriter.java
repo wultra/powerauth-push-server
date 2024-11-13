@@ -73,7 +73,7 @@ public class UserDeviceItemWriter implements ItemWriter<UserDevice> {
     public void write(Chunk<? extends UserDevice> list) throws Exception {
         for (UserDevice device: list) {
             final Platform platform = device.getPlatform();
-            final ApnsEnvironment environment = device.getEnvironment();
+            final String environment = device.getEnvironment();
             final String token = device.getToken();
             final String userId = device.getUserId();
             final Long campaignId = device.getCampaignId();

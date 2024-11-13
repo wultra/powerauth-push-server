@@ -100,14 +100,14 @@ public class PushMessageSenderService {
                     if (platform == Platform.IOS || platform == Platform.APNS) {
                         final PushMessageSendResult.PlatformResult platformResult = sendResult.getApns();
                         final PushSendingCallback callback = createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser);
-                        final ApnsEnvironment environment = resolveApnsEnvironment(device.getEnvironment(), appCredentials.getApnsEnvironment());
+                        final String environment = resolveApnsEnvironment(device.getEnvironment(), appCredentials.getApnsEnvironment());
                         if (environment == null) {
                             logger.error("Push message cannot be sent because APNs environment configuration failed. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
                             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                             arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
                         }
-                        final ApnsClient apnsClient = environment == ApnsEnvironment.PRODUCTION ? pushClient.getApnsClientProduction() : pushClient.getApnsClientDevelopment();
+                        final ApnsClient apnsClient = ApnsEnvironment.PRODUCTION.getKey().equals(environment) ? pushClient.getApnsClientProduction() : pushClient.getApnsClientDevelopment();
                         pushSendingWorker.sendMessageToApns(apnsClient, pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getApnsBundle(), callback);
                     } else if (platform == Platform.ANDROID || platform == Platform.FCM) {
                         if (pushClient.getFcmClient() == null) {
@@ -180,7 +180,7 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      *                             the error can be found in exception message.
      */
-    public void sendCampaignMessage(String appId, Platform platform, ApnsEnvironment environment, String token, PushMessageBody pushMessageBody, String userId, Long deviceId, String activationId) throws PushServerException {
+    public void sendCampaignMessage(String appId, Platform platform, String environment, String token, PushMessageBody pushMessageBody, String userId, Long deviceId, String activationId) throws PushServerException {
         sendCampaignMessage(appId, platform, environment, token, pushMessageBody, null, Priority.HIGH, userId, deviceId, activationId);
     }
 
@@ -201,7 +201,7 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      * the error can be found in exception message.
      */
-    public void sendCampaignMessage(final String appId, final Platform platform, final ApnsEnvironment environment, final String token, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String userId, final Long deviceId, final String activationId) throws PushServerException {
+    public void sendCampaignMessage(final String appId, final Platform platform, final String environment, final String token, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String userId, final Long deviceId, final String activationId) throws PushServerException {
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
         final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, activationId, deviceId);
@@ -209,12 +209,12 @@ public class PushMessageSenderService {
         switch (platform) {
             case IOS, APNS -> {
                 final String environmentAppConfig = pushClient.getAppCredentials().getApnsEnvironment();
-                final ApnsEnvironment apnsEnvironment = environment != null ? resolveApnsEnvironment(environment.getKey(), environmentAppConfig) : resolveApnsEnvironment(null, environmentAppConfig);
+                final String apnsEnvironment = resolveApnsEnvironment(environment, environmentAppConfig);
                 if (apnsEnvironment == null) {
                     logger.error("Campaign push message cannot be sent because APNs environment configuration failed. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
                     return;
                 }
-                final ApnsClient apnsClient = apnsEnvironment == ApnsEnvironment.PRODUCTION ? pushClient.getApnsClientProduction() : pushClient.getApnsClientDevelopment();
+                final ApnsClient apnsClient = ApnsEnvironment.PRODUCTION.getKey().equals(apnsEnvironment) ? pushClient.getApnsClientProduction() : pushClient.getApnsClientDevelopment();
                 pushSendingWorker.sendMessageToApns(apnsClient, pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getApnsBundle(), createPushSendingCallback(token, pushMessageObject, pushClient));
             }
             case ANDROID, FCM ->
@@ -293,27 +293,17 @@ public class PushMessageSenderService {
         }
     }
 
-    private ApnsEnvironment resolveApnsEnvironment(final String environmentDevice, final String environmentAppConfig) {
+    private String resolveApnsEnvironment(final String environmentDevice, final String environmentAppConfig) {
+        String environment = environmentAppConfig;
+        if (environment == null) {
+            environment = configuration.isApnsUseDevelopment() ? ApnsEnvironment.DEVELOPMENT.getKey() : ApnsEnvironment.PRODUCTION.getKey();
+        }
         if (environmentDevice != null) {
-            final ApnsEnvironment envDevice = ApnsEnvironment.fromString(environmentDevice);
-            if (!configuration.isApnsUseDevelopment() && envDevice == ApnsEnvironment.DEVELOPMENT) {
-                logger.warn("Invalid configuration: server is configured with APNs in production mode, however push device is registered in development mode.");
-                return null;
+            if (environmentDevice.equals(ApnsEnvironment.PRODUCTION.getKey()) || environment.equals(ApnsEnvironment.DEVELOPMENT.getKey())) {
+                environment = environmentDevice;
             }
-            return envDevice;
         }
-        // Fallback in case device was registered without environment, check environment in application configuration
-        if (environmentAppConfig != null) {
-            if (ApnsEnvironment.DEVELOPMENT.getKey().equals(environmentAppConfig)) {
-                return ApnsEnvironment.DEVELOPMENT;
-            }
-            return ApnsEnvironment.PRODUCTION;
-        }
-        // Final fallback to global setting
-        if (configuration.isApnsUseDevelopment()) {
-            return ApnsEnvironment.DEVELOPMENT;
-        }
-        return ApnsEnvironment.PRODUCTION;
+        return environment;
     }
 
     /**
