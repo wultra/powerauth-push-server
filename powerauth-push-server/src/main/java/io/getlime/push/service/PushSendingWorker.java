@@ -45,12 +45,10 @@ import io.getlime.push.service.hms.HmsClient;
 import io.getlime.push.service.hms.HmsSendResponse;
 import io.getlime.push.service.hms.request.AndroidNotification.Importance;
 import io.getlime.push.service.hms.request.ClickAction;
-import io.getlime.push.util.CaCertUtil;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import io.opentelemetry.context.Context;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -72,9 +70,9 @@ import java.util.function.Consumer;
  * @author Petr Dvorak, petr@wulta.com
  */
 @Service
+@AllArgsConstructor
+@Slf4j
 public class PushSendingWorker {
-
-    private static final Logger logger = LoggerFactory.getLogger(PushSendingWorker.class);
 
     // FCM data only notification keys
     private static final String FCM_NOTIFICATION_KEY            = "_notification";
@@ -88,20 +86,7 @@ public class PushSendingWorker {
 
     private final PushServiceConfiguration pushServiceConfiguration;
     private final FcmModelConverter fcmConverter;
-    private final CaCertUtil caCertUtil;
-
-    /**
-     * Constructor with push service configuration, model converter and CA certificate utility class.
-     * @param pushServiceConfiguration Push service configuration.
-     * @param fcmConverter FCM converter class.
-     * @param caCertUtil CA certificate utility class.
-     */
-    @Autowired
-    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter, CaCertUtil caCertUtil) {
-        this.pushServiceConfiguration = pushServiceConfiguration;
-        this.fcmConverter = fcmConverter;
-        this.caCertUtil = caCertUtil;
-    }
+    private final CaCertificateService caCertificateService;
 
     // Android related methods
 
@@ -426,7 +411,7 @@ public class PushSendingWorker {
                 .setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections())
                 .setConnectionTimeout(Duration.ofMillis(pushServiceConfiguration.getApnsConnectTimeout()))
                 .setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()))
-                .setTrustedServerCertificateChain(caCertUtil.allCerts());
+                .setTrustedServerCertificateChain(caCertificateService.allCerts());
 
         if (environment == ApnsEnvironment.DEVELOPMENT) {
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);

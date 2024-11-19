@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package io.getlime.push.util;
+package io.getlime.push.service;
 
 import io.getlime.push.configuration.PushServiceConfiguration;
-import lombok.AllArgsConstructor;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -30,19 +31,17 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 /**
- * Utility service class for working with CA Certificates.
+ * Service for working with CA Certificates.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
-public class CaCertUtil {
+public class CaCertificateService {
 
     // Include those constants to remove dependency on X509Factory.BEGIN_CERT and X509Factory.END_CERT.
     private static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
@@ -59,12 +58,21 @@ public class CaCertUtil {
 
     private final ResourceLoader resourceLoader;
 
+    private List<X509Certificate> allCertificates;
+
     /**
      * Obtain all registered CA certificates.
      * @return All registered CA certificates.
      */
     public X509Certificate[] allCerts() {
-        // Prepare result list
+        return allCertificates.toArray(X509Certificate[]::new);
+    }
+
+    /**
+     * Load the locally stored CA certificates required by Apple for APNs.
+     */
+    @PostConstruct
+    protected void loadAllCertificates() throws IOException, KeyStoreException, InvalidAlgorithmParameterException, CertificateException, NoSuchAlgorithmException {
         final List<X509Certificate> result = new ArrayList<>();
 
         final String filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar);
@@ -83,29 +91,34 @@ public class CaCertUtil {
                 result.add(cert);
             }
 
-        } catch (CertificateException | KeyStoreException | NoSuchAlgorithmException | InvalidAlgorithmParameterException | IOException e) {
-            logger.error("Certificate error: {}", e.getMessage(), e);
         }
 
-        // Add the locally stored CA certificates required by Apple for APNs
-        for (String certPath : EMBEDDED_CERTIFICATES) {
-            try {
-                logger.info("Importing embedded certificate: {}", certPath);
-                final Resource resource = resourceLoader.getResource(certPath);
-                try (final InputStream inputStream = resource.getInputStream()) {
-                    final String certString = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                    final X509Certificate cert = certificateFromPem(certString);
-                    result.add(cert);
-                }
-            } catch (CertificateException | IOException e) {
-                logger.error("Certificate error: {}", e.getMessage(), e);
-            }
-        }
+        result.addAll(loadEmbeddedCertificate());
 
-        return result.toArray(new X509Certificate[0]);
+        allCertificates = result;
     }
 
-    private X509Certificate certificateFromPem(String pem) throws CertificateException {
+    /**
+     * Load the locally stored CA certificates required by Apple for APNs.
+     *
+     * @throws CertificateException If unable to create the certificate.
+     * @throws IOException If unable to load file.
+     */
+    private List<X509Certificate> loadEmbeddedCertificate() throws CertificateException, IOException {
+        final List<X509Certificate> result = new ArrayList<>();
+        for (final String certPath : EMBEDDED_CERTIFICATES) {
+            logger.info("Importing embedded certificate: {}", certPath);
+            final Resource resource = resourceLoader.getResource(certPath);
+            try (final InputStream inputStream = resource.getInputStream()) {
+                final String certString = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                final X509Certificate cert = certificateFromPem(certString);
+                result.add(cert);
+            }
+        }
+        return result;
+    }
+
+    private static X509Certificate certificateFromPem(String pem) throws CertificateException {
         final byte[] decoded = Base64.getDecoder().decode(pem
                 .replace(BEGIN_CERT, "")
                 .replace(END_CERT, "")
