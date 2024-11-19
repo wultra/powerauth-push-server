@@ -46,6 +46,7 @@ import io.getlime.push.service.hms.HmsSendResponse;
 import io.getlime.push.service.hms.request.AndroidNotification.Importance;
 import io.getlime.push.service.hms.request.ClickAction;
 import io.getlime.push.util.CaCertUtil;
+import io.opentelemetry.context.Context;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,7 +167,7 @@ public class PushSendingWorker {
         final Message message = buildAndroidMessage(pushMessageBody, attributes, priority, pushToken);
 
         // Extraction of FCM success response
-        final Consumer<ResponseEntity<FcmSuccessResponse>> onSuccess = responseEntity -> {
+        final Consumer<ResponseEntity<FcmSuccessResponse>> onSuccess = Context.current().wrapConsumer(responseEntity -> {
             final FcmSuccessResponse response = responseEntity.getBody();
             if (response != null && response.getName() != null) {
                 if (response.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
@@ -181,10 +182,10 @@ public class PushSendingWorker {
                 logger.error("Invalid response received from FCM, notification sending failed - empty or invalid response.");
                 callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
             }
-        };
+        });
 
         // Callback when FCM request fails
-        final Consumer<Throwable> onError = t -> {
+        final Consumer<Throwable> onError = Context.current().wrapConsumer(t -> {
             if (t instanceof final RestClientException restClientException) {
                 final MessagingErrorCode errorCode = fcmConverter.convertExceptionToErrorCode(restClientException);
                 logger.warn("FCM server returned error response: {}.", (restClientException).getResponse());
@@ -218,7 +219,7 @@ public class PushSendingWorker {
             logger.error("Unexpected error occurred while sending push message: {}.", t.getMessage());
             logger.debug("Exception details:", t);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
-        };
+        });
 
         // Perform request to FCM asynchronously, either of the consumers is called in case of success or error
         try {
@@ -244,7 +245,7 @@ public class PushSendingWorker {
     void sendMessageToHms(final HmsClient hmsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) throws PushServerException {
         final io.getlime.push.service.hms.request.Message message = buildHmsMessage(pushMessageBody, attributes, priority, pushToken);
 
-        final Consumer<HmsSendResponse> successConsumer = response -> {
+        final Consumer<HmsSendResponse> successConsumer = Context.current().wrapConsumer(response -> {
             final String requestId = response.requestId();
             if (HmsClient.SUCCESS_CODE.equals(response.code())) {
                 logger.info("Notification sent successfully, request ID: {}", requestId);
@@ -253,12 +254,12 @@ public class PushSendingWorker {
                 logger.error("Notification sending failed, request ID: {}, code: {}, message: {}", requestId, response.code(), response.msg());
                 callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
             }
-        };
+        });
 
-        final Consumer<Throwable> throwableConsumer = throwable -> {
+        final Consumer<Throwable> throwableConsumer = Context.current().wrapConsumer(throwable -> {
             logger.error("Invalid response received from HSM, notification sending failed.", throwable);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
-        };
+        });
 
         hmsClient.sendMessage(message, false)
                 .subscribe(successConsumer, throwableConsumer);
@@ -498,7 +499,7 @@ public class PushSendingWorker {
         final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, apnsTopic, payload, validUntil, deliveryPriority, pushType, pushMessageBody.getCollapseKey());
         final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
-        sendNotificationFuture.whenCompleteAsync((response, cause) -> {
+        sendNotificationFuture.whenCompleteAsync(Context.current().wrapConsumer((response, cause) -> {
             if (response != null) {
                 final UUID apnsId = response.getApnsId();
                 if (response.isAccepted()) {
@@ -551,7 +552,7 @@ public class PushSendingWorker {
                 logger.debug("Exception detail:", cause);
                 callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
             }
-        });
+        }));
     }
 
 }
