@@ -28,11 +28,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test {@link ApnsPayloadBuilder}.
+ * Test {@link ApnsPayloadGenerator}.
  *
  * @author Lubos Racansky, lubos.racansky@wultra.com
  */
-class ApnsPayloadBuilderTest {
+class ApnsPayloadGeneratorTest {
 
     @Test
     void testBuildApnsPayload() {
@@ -55,7 +55,7 @@ class ApnsPayloadBuilderTest {
         pushMessageBody.setValidUntil(Instant.parse("2017-12-11T21:22:29.923Z"));
         pushMessageBody.setExtras(extras);
 
-        final String result = ApnsPayloadBuilder.buildPayloadForApns(pushMessageBody, false);
+        final String result = ApnsPayloadGenerator.payloadForApns(pushMessageBody, false);
 
         assertFalse(result.contains("_foo"));
         assertEquals("""
@@ -64,7 +64,7 @@ class ApnsPayloadBuilderTest {
     }
 
     @Test
-    void testBuildPayloadForFcm() throws Exception {
+    void testPayloadForFcm() throws Exception {
         final Map<String, Object> extras = new HashMap<>();
         extras.put("_comment", "Any custom data.");
         extras.put("_foo", null);
@@ -84,7 +84,7 @@ class ApnsPayloadBuilderTest {
         pushMessageBody.setValidUntil(Instant.parse("2017-12-11T21:22:29.923Z"));
         pushMessageBody.setExtras(extras);
 
-        final ApnsConfig result = ApnsPayloadBuilder.buildPayloadForFcm(pushMessageBody, false, DeliveryPriority.IMMEDIATE);
+        final ApnsConfig result = ApnsPayloadGenerator.payloadForFcm(pushMessageBody, false, DeliveryPriority.IMMEDIATE);
 
         Field headersField = ApnsConfig.class.getDeclaredField("headers");
         headersField.setAccessible(true);

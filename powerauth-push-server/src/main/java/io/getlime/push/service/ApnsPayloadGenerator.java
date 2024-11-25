@@ -33,9 +33,9 @@ import java.util.Map;
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 @Slf4j
-final class ApnsPayloadBuilder {
+final class ApnsPayloadGenerator {
 
-    private ApnsPayloadBuilder() {
+    private ApnsPayloadGenerator() {
         throw new IllegalStateException("Should not be instantiated.");
     }
 
@@ -46,7 +46,7 @@ final class ApnsPayloadBuilder {
      * @param isSilent Indicates if the message is silent or not.
      * @return String with APNs JSON payload.
      */
-    static String buildPayloadForApns(final PushMessageBody push, final boolean isSilent) {
+    static String payloadForApns(final PushMessageBody push, final boolean isSilent) {
         final com.eatthepath.pushy.apns.util.ApnsPayloadBuilder payloadBuilder = new SimpleApnsPayloadBuilder();
         if (!isSilent) { // include alert, body, sound and category only in case push message is not silent.
             payloadBuilder
@@ -78,7 +78,7 @@ final class ApnsPayloadBuilder {
         return payloadBuilder.build();
     }
 
-    static ApnsConfig buildPayloadForFcm(final PushMessageBody push, final boolean isSilent, final DeliveryPriority priority) {
+    static ApnsConfig payloadForFcm(final PushMessageBody push, final boolean isSilent, final DeliveryPriority priority) {
         Aps.Builder apsBuilder = Aps.builder();
 
         if (!isSilent) {

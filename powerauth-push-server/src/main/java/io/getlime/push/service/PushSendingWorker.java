@@ -299,7 +299,7 @@ public class PushSendingWorker {
         }
 
         final DeliveryPriority deliveryPriorityApns = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
-        final ApnsConfig apnsConfig = ApnsPayloadBuilder.buildPayloadForFcm(pushMessageBody, isMessageSilent(attributes), deliveryPriorityApns);
+        final ApnsConfig apnsConfig = ApnsPayloadGenerator.payloadForFcm(pushMessageBody, isMessageSilent(attributes), deliveryPriorityApns);
 
         return Message.builder()
                 .setToken(pushToken)
@@ -477,7 +477,7 @@ public class PushSendingWorker {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
         final boolean isSilent = attributes != null && attributes.getSilent(); // In case there are no attributes, the message is not silent
-        final String payload = ApnsPayloadBuilder.buildPayloadForApns(pushMessageBody, isSilent);
+        final String payload = ApnsPayloadGenerator.payloadForApns(pushMessageBody, isSilent);
         final Instant validUntil = pushMessageBody.getValidUntil();
         final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set
         final DeliveryPriority deliveryPriority = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
