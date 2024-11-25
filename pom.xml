@@ -82,7 +82,7 @@
 
         <!-- Documentation Dependencies -->
         <springdoc-openapi-starter-webmvc-ui.version>2.6.0</springdoc-openapi-starter-webmvc-ui.version>
-        <swagger-annotations-jakarta.version>2.2.25</swagger-annotations-jakarta.version>
+        <swagger-annotations-jakarta.version>2.2.26</swagger-annotations-jakarta.version>
     </properties>
 
     <dependencyManagement>
