@@ -15,11 +15,16 @@
  */
 package io.getlime.push.service;
 
+import com.eatthepath.pushy.apns.DeliveryPriority;
 import com.eatthepath.pushy.apns.util.ApnsPayloadBuilder;
 import com.eatthepath.pushy.apns.util.SimpleApnsPayloadBuilder;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
+import com.google.firebase.messaging.ApsAlert;
 import io.getlime.push.model.entity.PushMessageBody;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,7 +46,7 @@ final class PayloadBuilder {
      * @param isSilent Indicates if the message is silent or not.
      * @return String with APNs JSON payload.
      */
-    static String buildApnsPayload(final PushMessageBody push, final boolean isSilent) {
+    static String buildPayloadForApns(final PushMessageBody push, final boolean isSilent) {
         final ApnsPayloadBuilder payloadBuilder = new SimpleApnsPayloadBuilder();
         if (!isSilent) { // include alert, body, sound and category only in case push message is not silent.
             payloadBuilder
@@ -71,5 +76,56 @@ final class PayloadBuilder {
         }
 
         return payloadBuilder.build();
+    }
+
+    static ApnsConfig buildApnsPayloadForFcm(final PushMessageBody push, final boolean isSilent, final DeliveryPriority priority) {
+        Aps.Builder apsBuilder = Aps.builder();
+
+        if (!isSilent) {
+            ApsAlert.Builder alertBuilder = ApsAlert.builder()
+                    .setTitle(push.getTitle())
+                    .setTitleLocalizationKey(push.getTitleLocKey())
+                    .setBody(push.getBody())
+                    .setLocalizationKey(push.getBodyLocKey());
+            if (push.getTitleLocArgs() != null) {
+                alertBuilder.addAllTitleLocArgs(List.of(push.getTitleLocArgs()));
+            }
+            if (push.getBodyLocArgs() != null) {
+                alertBuilder.addAllLocalizationArgs(List.of(push.getBodyLocArgs()));
+            }
+            apsBuilder.setAlert(alertBuilder.build())
+                    .setSound(push.getSound())
+                    .setCategory(push.getCategory());
+        }
+
+        if (push.getBadge() != null) {
+            apsBuilder.setBadge(push.getBadge());
+        }
+
+        apsBuilder.setContentAvailable(isSilent);
+
+        if (push.getCollapseKey() != null) {
+            apsBuilder.setThreadId(push.getCollapseKey());
+        }
+
+        // Build custom data properties (extras)
+        Map<String, Object> extras = push.getExtras();
+        if (extras != null) {
+            extras.forEach((key, value) -> {
+                if (value != null) {
+                    apsBuilder.putCustomData(key, value.toString());
+                } else {
+                    // Workaround for a known Apple issue, the JSON is valid but APNS would not send the push message.
+                    logger.debug("Skipping extras key: {} because of null value.", key);
+                }
+            });
+        }
+
+        // Construct the ApnsConfig
+        return ApnsConfig.builder()
+                .putHeader("apns-priority", String.valueOf(priority.getCode()))
+                .putHeader("apns-push-type", isSilent ? "background" : "alert")
+                .setAps(apsBuilder.build())
+                .build();
     }
 }

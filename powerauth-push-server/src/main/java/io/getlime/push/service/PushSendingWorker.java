@@ -24,10 +24,7 @@ import com.eatthepath.pushy.apns.util.TokenUtil;
 import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.firebase.messaging.AndroidConfig;
-import com.google.firebase.messaging.AndroidNotification;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.MessagingErrorCode;
+import com.google.firebase.messaging.*;
 import com.wultra.core.rest.client.base.RestClientException;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
@@ -149,7 +146,7 @@ public class PushSendingWorker {
     void sendMessageToFcm(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) {
 
         // Build Android message
-        final Message message = buildAndroidMessage(pushMessageBody, attributes, priority, pushToken);
+        final Message message = buildFcmMessage(pushMessageBody, attributes, priority, pushToken);
 
         // Extraction of FCM success response
         final Consumer<ResponseEntity<FcmSuccessResponse>> onSuccess = Context.current().wrapConsumer(responseEntity -> {
@@ -251,14 +248,14 @@ public class PushSendingWorker {
     }
 
     /**
-     * Build Android Message object from Push message body.
+     * Build FCM Message object from Push message body.
      * @param pushMessageBody Push message body.
      * @param attributes Push message attributes.
      * @param priority Push message priority.
      * @param pushToken Push token.
      * @return Android Message object.
      */
-    private Message buildAndroidMessage(final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken) {
+    private Message buildFcmMessage(final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken) {
         // convert data from Map<String, Object> to Map<String, String>
         final Map<String, Object> extras = pushMessageBody.getExtras();
         final Map<String, String> data = new LinkedHashMap<>();
@@ -298,14 +295,18 @@ public class PushSendingWorker {
 
         if (pushServiceConfiguration.isFcmDataNotificationOnly()) { // notification only through data map
             data.put(FCM_NOTIFICATION_KEY, fcmConverter.convertNotificationToString(notification));
-        } else if (isMessageNotSilent(attributes)) {
+        } else if (!isMessageSilent(attributes)) {
             androidConfigBuilder.setNotification(notification);
         }
+
+        final DeliveryPriority deliveryPriorityApns = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
+        final ApnsConfig apnsConfig = PayloadBuilder.buildApnsPayloadForFcm(pushMessageBody, isMessageSilent(attributes), deliveryPriorityApns);
 
         return Message.builder()
                 .setToken(pushToken)
                 .putAllData(data)
                 .setAndroidConfig(androidConfigBuilder.build())
+                .setApnsConfig(apnsConfig)
                 .build();
     }
 
@@ -349,7 +350,7 @@ public class PushSendingWorker {
             notificationBuilder.bodyLocArgs(List.of(pushMessageBody.getBodyLocArgs()));
         }
 
-        if (isMessageNotSilent(attributes)) {
+        if (!isMessageSilent(attributes)) {
             androidConfigBuilder.notification(notificationBuilder.build());
         }
 
@@ -372,9 +373,9 @@ public class PushSendingWorker {
                 .build();
     }
 
-    private static boolean isMessageNotSilent(final PushMessageAttributes attributes) {
+    private static boolean isMessageSilent(final PushMessageAttributes attributes) {
         // if there are no attributes, assume the message is not silent
-        return attributes == null || !attributes.getSilent();
+        return attributes != null && attributes.getSilent();
     }
 
     /**
@@ -477,7 +478,7 @@ public class PushSendingWorker {
 
         final String token = TokenUtil.sanitizeTokenString(pushToken);
         final boolean isSilent = attributes != null && attributes.getSilent(); // In case there are no attributes, the message is not silent
-        final String payload = PayloadBuilder.buildApnsPayload(pushMessageBody, isSilent);
+        final String payload = PayloadBuilder.buildPayloadForApns(pushMessageBody, isSilent);
         final Instant validUntil = pushMessageBody.getValidUntil();
         final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set
         final DeliveryPriority deliveryPriority = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
