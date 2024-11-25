@@ -28,11 +28,11 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test {@link PayloadBuilder}.
+ * Test {@link ApnsPayloadBuilder}.
  *
  * @author Lubos Racansky, lubos.racansky@wultra.com
  */
-class PayloadBuilderTest {
+class ApnsPayloadBuilderTest {
 
     @Test
     void testBuildApnsPayload() {
@@ -55,7 +55,7 @@ class PayloadBuilderTest {
         pushMessageBody.setValidUntil(Instant.parse("2017-12-11T21:22:29.923Z"));
         pushMessageBody.setExtras(extras);
 
-        final String result = PayloadBuilder.buildPayloadForApns(pushMessageBody, false);
+        final String result = ApnsPayloadBuilder.buildPayloadForApns(pushMessageBody, false);
 
         assertFalse(result.contains("_foo"));
         assertEquals("""
@@ -84,7 +84,7 @@ class PayloadBuilderTest {
         pushMessageBody.setValidUntil(Instant.parse("2017-12-11T21:22:29.923Z"));
         pushMessageBody.setExtras(extras);
 
-        final ApnsConfig result = PayloadBuilder.buildApnsPayloadForFcm(pushMessageBody, false, DeliveryPriority.IMMEDIATE);
+        final ApnsConfig result = ApnsPayloadBuilder.buildApnsPayloadForFcm(pushMessageBody, false, DeliveryPriority.IMMEDIATE);
 
         Field headersField = ApnsConfig.class.getDeclaredField("headers");
         headersField.setAccessible(true);

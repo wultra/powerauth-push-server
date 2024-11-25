@@ -16,7 +16,6 @@
 package io.getlime.push.service;
 
 import com.eatthepath.pushy.apns.DeliveryPriority;
-import com.eatthepath.pushy.apns.util.ApnsPayloadBuilder;
 import com.eatthepath.pushy.apns.util.SimpleApnsPayloadBuilder;
 import com.google.firebase.messaging.ApnsConfig;
 import com.google.firebase.messaging.Aps;
@@ -28,14 +27,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Convert {@link PushMessageBody} to platform dependant payload.
+ * Convert {@link PushMessageBody} to APNs platform-dependent payload.
  *
  * @author Lubos Racansky, lubos.racansky@wultra.com
+ * @author Roman Strobl, roman.strobl@wultra.com
  */
 @Slf4j
-final class PayloadBuilder {
+final class ApnsPayloadBuilder {
 
-    private PayloadBuilder() {
+    private ApnsPayloadBuilder() {
         throw new IllegalStateException("Should not be instantiated.");
     }
 
@@ -47,7 +47,7 @@ final class PayloadBuilder {
      * @return String with APNs JSON payload.
      */
     static String buildPayloadForApns(final PushMessageBody push, final boolean isSilent) {
-        final ApnsPayloadBuilder payloadBuilder = new SimpleApnsPayloadBuilder();
+        final com.eatthepath.pushy.apns.util.ApnsPayloadBuilder payloadBuilder = new SimpleApnsPayloadBuilder();
         if (!isSilent) { // include alert, body, sound and category only in case push message is not silent.
             payloadBuilder
                     .setAlertTitle(push.getTitle())
