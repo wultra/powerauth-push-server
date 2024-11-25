@@ -64,7 +64,7 @@ class ApnsPayloadBuilderTest {
     }
 
     @Test
-    void testBuildApnsPayloadForFcm() throws Exception {
+    void testBuildPayloadForFcm() throws Exception {
         final Map<String, Object> extras = new HashMap<>();
         extras.put("_comment", "Any custom data.");
         extras.put("_foo", null);
@@ -84,7 +84,7 @@ class ApnsPayloadBuilderTest {
         pushMessageBody.setValidUntil(Instant.parse("2017-12-11T21:22:29.923Z"));
         pushMessageBody.setExtras(extras);
 
-        final ApnsConfig result = ApnsPayloadBuilder.buildApnsPayloadForFcm(pushMessageBody, false, DeliveryPriority.IMMEDIATE);
+        final ApnsConfig result = ApnsPayloadBuilder.buildPayloadForFcm(pushMessageBody, false, DeliveryPriority.IMMEDIATE);
 
         Field headersField = ApnsConfig.class.getDeclaredField("headers");
         headersField.setAccessible(true);

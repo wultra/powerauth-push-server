@@ -78,7 +78,7 @@ final class ApnsPayloadBuilder {
         return payloadBuilder.build();
     }
 
-    static ApnsConfig buildApnsPayloadForFcm(final PushMessageBody push, final boolean isSilent, final DeliveryPriority priority) {
+    static ApnsConfig buildPayloadForFcm(final PushMessageBody push, final boolean isSilent, final DeliveryPriority priority) {
         Aps.Builder apsBuilder = Aps.builder();
 
         if (!isSilent) {

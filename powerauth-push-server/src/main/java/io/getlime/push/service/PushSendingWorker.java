@@ -299,7 +299,7 @@ public class PushSendingWorker {
         }
 
         final DeliveryPriority deliveryPriorityApns = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
-        final ApnsConfig apnsConfig = ApnsPayloadBuilder.buildApnsPayloadForFcm(pushMessageBody, isMessageSilent(attributes), deliveryPriorityApns);
+        final ApnsConfig apnsConfig = ApnsPayloadBuilder.buildPayloadForFcm(pushMessageBody, isMessageSilent(attributes), deliveryPriorityApns);
 
         return Message.builder()
                 .setToken(pushToken)
