@@ -145,7 +145,6 @@ public class PushSendingWorker {
      */
     void sendMessageToFcm(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) {
 
-        // Build Android message
         final Message message = buildFcmMessage(pushMessageBody, attributes, priority, pushToken);
 
         // Extraction of FCM success response
