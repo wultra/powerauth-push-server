@@ -6,7 +6,9 @@
     <!-- Add new APNS columns -->
     <changeSet id="1" logicalFilePath="powerauth-push-server/1.10.x/20241108-device-registration-environment.xml" author="Roman Strobl">
         <preConditions onFail="MARK_RAN">
-            <columnExists tableName="push_device_registration" columnName="environment"/>
+            <not>
+                <columnExists tableName="push_device_registration" columnName="environment"/>
+            </not>
         </preConditions>
         <comment>Add columns environment to push_device_registration table</comment>
         <addColumn tableName="push_device_registration">

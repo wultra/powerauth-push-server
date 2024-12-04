@@ -40,7 +40,7 @@
     </changeSet>
 
     <!-- Migrate app credentials: iOS to APNs -->
-    <changeSet id="3" logicalFilePath="powerauth-push-server/1.10.x/20241029-migrate-ios-to-apns.xml" author="Roman Strobl">
+    <changeSet id="3" logicalFilePath="powerauth-push-server/1.10.x/20241029-add-new-platforms.xml" author="Roman Strobl">
         <preConditions onFail="MARK_RAN">
             <!-- Ensure this runs only if the apns_* columns were created in this script -->
             <and>
@@ -63,7 +63,7 @@
     </changeSet>
 
     <!-- Migrate Android to FCM -->
-    <changeSet id="4" logicalFilePath="powerauth-push-server/1.10.x/20241029-migrate-android-to-fcm.xml" author="Roman Strobl">
+    <changeSet id="4" logicalFilePath="powerauth-push-server/1.10.x/20241029-add-new-platforms.xml" author="Roman Strobl">
         <preConditions onFail="MARK_RAN">
             <!-- Ensure this runs only if the fcm_* columns were created in this script -->
             <and>
