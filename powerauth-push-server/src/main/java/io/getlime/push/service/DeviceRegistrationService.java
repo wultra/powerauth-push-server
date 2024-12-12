@@ -94,7 +94,7 @@ public class DeviceRegistrationService {
                 logger.info("Creating new device registration for a new activation: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
                 // Create a new registration record for a new activation ID
                 device = initDeviceRegistrationEntity(appCredentials, pushToken);
-                // Make sure that status of existing device registrations is updated in case of a deleted activation
+                // Make sure that status of existing device registrations are updated in case of a deleted activation
                 for (PushDeviceRegistrationEntity deviceRegistration: devices) {
                     updateStatus(deviceRegistration.getActivationId(), null);
                 }
