@@ -20,8 +20,7 @@ package io.getlime.push.model.request;
 import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * Class representing request object responsible for updating activation status.
@@ -30,6 +29,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
 public class UpdateDeviceStatusRequest {
 
     /**

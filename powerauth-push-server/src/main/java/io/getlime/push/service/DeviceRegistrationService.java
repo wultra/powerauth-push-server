@@ -75,7 +75,7 @@ public class DeviceRegistrationService {
             logger.info("Creating new device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
             device = initDeviceRegistrationEntity(appCredentials, pushToken);
         } else {
-            // An existing row was found by one of the lookup methods, update this row. This means that either:
+            // An existing row was found by one of the lookup methods. This means that either:
             // 1. A row with same activation ID and push token is updated, in this case only the last registration timestamp changes.
             // 2. A row with same activation ID but different push token is updated. A new push token has been issued by Google or Apple for an activation.
             // 3. A row with different activation ID but same push token is created. The user removed an activation and created a new one, the push token remains the same,
@@ -89,6 +89,10 @@ public class DeviceRegistrationService {
                 logger.info("Creating new device registration for a new activation: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
                 // Create a new registration record for a new activation ID
                 device = initDeviceRegistrationEntity(appCredentials, pushToken);
+                // Make sure that status of existing device registrations is updated in case of a deleted activation
+                for (PushDeviceRegistrationEntity deviceRegistration: devices) {
+                    updateStatus(deviceRegistration.getActivationId(), null);
+                }
             }
         }
         device.setTimestampLastRegistered(new Date());
@@ -152,12 +156,10 @@ public class DeviceRegistrationService {
     }
 
     @Transactional
-    public void updateStatus(final UpdateDeviceStatusRequest request) throws PushServerException {
-        final String activationId = request.getActivationId();
-
+    public void updateStatus(final String activationId, final ActivationStatus status) throws PushServerException {
         final List<PushDeviceRegistrationEntity> device = pushDeviceRepository.findByActivationId(activationId);
 
-        final ActivationStatus activationStatus = request.getActivationStatus() == null ? fetchActivationStatus(activationId) : request.getActivationStatus();
+        final ActivationStatus activationStatus = status == null ? fetchActivationStatus(activationId) : status;
 
         for (PushDeviceRegistrationEntity registration : device) {
             registration.setActive(activationStatus == ActivationStatus.ACTIVE);

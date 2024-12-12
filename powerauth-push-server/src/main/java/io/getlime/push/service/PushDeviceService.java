@@ -99,7 +99,7 @@ public class PushDeviceService {
             throw new PushServerException(errorMessage);
         }
 
-        deviceRegistrationService.updateStatus(request);
+        deviceRegistrationService.updateStatus(request.getActivationId(), request.getActivationStatus());
         logger.info("The updateDeviceStatus request succeeded, activation ID: {}", request.getActivationId());
         return new Response();
     }

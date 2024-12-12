@@ -215,7 +215,7 @@ class DeviceRegistrationServiceTest {
         request.setActivationId("a1");
         request.setActivationStatus(ActivationStatus.ACTIVE);
 
-        tested.updateStatus(request);
+        tested.updateStatus(request.getActivationId(), request.getActivationStatus());
 
         final List<PushDeviceRegistrationEntity> entities2 = deviceRepository.findByActivationId("a1");
         assertEquals(1, entities2.size());
@@ -243,7 +243,7 @@ class DeviceRegistrationServiceTest {
         final UpdateDeviceStatusRequest request = new UpdateDeviceStatusRequest();
         request.setActivationId("a1");
 
-        tested.updateStatus(request);
+        tested.updateStatus(request.getActivationId(), request.getActivationStatus());
         verify(powerAuthClient).getActivationStatus("a1");
 
         final List<PushDeviceRegistrationEntity> entities2 = deviceRepository.findByActivationId("a1");
