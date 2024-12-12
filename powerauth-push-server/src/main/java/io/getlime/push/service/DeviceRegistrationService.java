@@ -25,7 +25,6 @@ import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.request.CreateDeviceForActivationsRequest;
 import io.getlime.push.model.request.CreateDeviceRequest;
-import io.getlime.push.model.request.UpdateDeviceStatusRequest;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.repository.model.Platform;
