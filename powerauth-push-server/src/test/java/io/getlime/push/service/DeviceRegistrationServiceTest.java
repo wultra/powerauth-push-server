@@ -120,24 +120,6 @@ class DeviceRegistrationServiceTest {
     }
 
     @Test
-    @Sql
-    void testCreateOrUpdateDevice_multipleRecords() throws Exception {
-        final AppCredentialsEntity credentials = appCredentialsRepository.findById(1L).get();
-        when(powerAuthClient.getActivationStatus("a1"))
-                .thenReturn(createActivationStatusResponse("a1"));
-
-        final CreateDeviceRequest request = new CreateDeviceRequest();
-        request.setAppId(APP_NAME);
-        request.setActivationId("a1");
-        request.setToken("t1");
-        request.setPlatform(MobilePlatform.FCM);
-
-        final PushServerException ex = assertThrows(PushServerException.class,
-                () -> tested.createOrUpdateDevice(request, credentials));
-        assertEquals("Multiple device registrations found for push token. Use the /push/device/create/multi endpoint for this scenario.", ex.getMessage());
-    }
-
-    @Test
     void testCreateOrUpdateDevices_createNew() throws Exception {
         final AppCredentialsEntity credentials = createAppCredentials(APP_NAME);
         when(powerAuthClient.getActivationStatus("a1"))

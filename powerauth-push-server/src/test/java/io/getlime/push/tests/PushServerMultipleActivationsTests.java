@@ -251,33 +251,4 @@ class PushServerMultipleActivationsTests {
         pushDeviceRepository.deleteAll(pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN));
     }
 
-    @Test
-    public void createDeviceMixedRegistrationEndpointsTest() {
-        assertThrows(PushServerClientException.class, () -> {
-            List<String> activationIds = new ArrayList<>();
-            activationIds.add(powerAuthTestClient.getActivationId());
-            activationIds.add(powerAuthTestClient.getActivationId2());
-            // This test tests refresh of a device registration
-            CreateDeviceForActivationsRequest request = CreateDeviceForActivationsRequest.builder()
-                    .appId(powerAuthTestClient.getApplicationId())
-                    .token(MOCK_PUSH_TOKEN)
-                    .platform(MobilePlatform.APNS)
-                    .environment(ApnsEnvironment.DEVELOPMENT)
-                    .build();
-            request.getActivationIds().addAll(activationIds);
-            boolean actual = pushServerClient.createDeviceForActivations(request);
-            assertTrue(actual);
-            List<PushDeviceRegistrationEntity> devices = pushDeviceRepository.findByAppCredentialsAppIdAndPushToken(powerAuthTestClient.getApplicationId(), MOCK_PUSH_TOKEN);
-            assertEquals(2, devices.size());
-            CreateDeviceRequest request2 = CreateDeviceRequest.builder()
-                    .appId(powerAuthTestClient.getApplicationId())
-                    .token(MOCK_PUSH_TOKEN)
-                    .platform(MobilePlatform.APNS)
-                    .environment(ApnsEnvironment.DEVELOPMENT)
-                    .activationId(powerAuthTestClient.getActivationId3())
-                    .build();
-            pushServerClient.createDevice(request2);
-        });
-    }
-
 }

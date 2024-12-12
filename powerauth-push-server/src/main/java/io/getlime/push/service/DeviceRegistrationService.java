@@ -74,7 +74,7 @@ public class DeviceRegistrationService {
             // The device registration is new, create a new entity.
             logger.info("Creating new device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
             device = initDeviceRegistrationEntity(appCredentials, pushToken);
-        } else if (devices.size() == 1) {
+        } else {
             // An existing row was found by one of the lookup methods, update this row. This means that either:
             // 1. A row with same activation ID and push token is updated, in this case only the last registration timestamp changes.
             // 2. A row with same activation ID but different push token is updated. A new push token has been issued by Google or Apple for an activation.
@@ -90,12 +90,6 @@ public class DeviceRegistrationService {
                 // Create a new registration record for a new activation ID
                 device = initDeviceRegistrationEntity(appCredentials, pushToken);
             }
-        } else {
-            // Multiple existing rows have been found. This can only occur during lookup by push token.
-            // Push token can be associated with multiple activations only when associated activations are enabled.
-            // Push device registration must be done using /push/device/create/multi endpoint in this case.
-            logger.info("Multiple device registrations found: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
-            throw new PushServerException("Multiple device registrations found for push token. Use the /push/device/create/multi endpoint for this scenario.");
         }
         device.setTimestampLastRegistered(new Date());
         device.setPlatform(convert(platform));
