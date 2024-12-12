@@ -78,10 +78,18 @@ public class DeviceRegistrationService {
             // An existing row was found by one of the lookup methods, update this row. This means that either:
             // 1. A row with same activation ID and push token is updated, in this case only the last registration timestamp changes.
             // 2. A row with same activation ID but different push token is updated. A new push token has been issued by Google or Apple for an activation.
-            // 3. A row with same push token but different activation ID is updated. The user removed an activation and created a new one, the push token remains the same.
-            logger.info("Updating existing device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
-            device = devices.get(0);
-            updateDeviceRegistrationEntity(device, appCredentials, pushToken);
+            // 3. A row with different activation ID but same push token is created. The user removed an activation and created a new one, the push token remains the same,
+            //    or the user registers more activations with the same push token.
+            if (devices.get(0).getActivationId().equals(activationId)) {
+                logger.info("Updating existing device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
+                // Update an existing registration record
+                device = devices.get(0);
+                updateDeviceRegistrationEntity(device, appCredentials, pushToken);
+            } else {
+                logger.info("Creating new device registration for a new activation: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
+                // Create a new registration record for a new activation ID
+                device = initDeviceRegistrationEntity(appCredentials, pushToken);
+            }
         } else {
             // Multiple existing rows have been found. This can only occur during lookup by push token.
             // Push token can be associated with multiple activations only when associated activations are enabled.
