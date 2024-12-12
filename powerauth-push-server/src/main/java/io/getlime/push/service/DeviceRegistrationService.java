@@ -69,21 +69,25 @@ public class DeviceRegistrationService {
         final String activationId = requestObject.getActivationId();
 
         final List<PushDeviceRegistrationEntity> devices = lookupDeviceRegistrations(appId, activationId, pushToken);
-        final PushDeviceRegistrationEntity device;
+        PushDeviceRegistrationEntity device = null;
         if (devices.isEmpty()) {
             // The device registration is new, create a new entity.
             logger.info("Creating new device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
             device = initDeviceRegistrationEntity(appCredentials, pushToken);
         } else {
-            // An existing row was found by one of the lookup methods. This means that either:
+            // An existing row(s) were found by one of the lookup methods. This means that either:
             // 1. A row with same activation ID and push token is updated, in this case only the last registration timestamp changes.
             // 2. A row with same activation ID but different push token is updated. A new push token has been issued by Google or Apple for an activation.
             // 3. A row with different activation ID but same push token is created. The user removed an activation and created a new one, the push token remains the same,
-            //    or the user registers more activations with the same push token.
-            if (devices.get(0).getActivationId().equals(activationId)) {
+            //    or the user registered multiple activations with the same push token.
+            for (PushDeviceRegistrationEntity existingDevice: devices) {
+                if (existingDevice.getActivationId().equals(activationId)) {
+                    device = existingDevice;
+                }
+            }
+            if (device != null) {
                 logger.info("Updating existing device registration: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
                 // Update an existing registration record
-                device = devices.get(0);
                 updateDeviceRegistrationEntity(device, appCredentials, pushToken);
             } else {
                 logger.info("Creating new device registration for a new activation: app ID: {}, activation ID: {}, platform: {}", requestObject.getAppId(), requestObject.getActivationId(), platform);
