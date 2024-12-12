@@ -84,6 +84,7 @@ public class DeviceRegistrationService {
                 if (existingDevice.getActivationId().equals(activationId)) {
                     device = existingDevice;
                     logger.debug("Found existing device registration ID: {} for activation ID: {}", existingDevice.getId(), activationId);
+                    break;
                 }
             }
             if (device != null) {
