@@ -52,7 +52,7 @@ public class CaCertificateService {
             "classpath:/cacert/AAACertificateServices.pem",
             "classpath:/cacert/COMODORSAAAACA.pem",
             "classpath:/cacert/USERTrustRSAAAACA.pem",
-            "classpath:/cacert/USERTrustRSAAAACA_2025.pem"
+            "classpath:/cacert/USERTrustRSA_CA.pem"
     );
 
     private final PushServiceConfiguration pushServiceConfiguration;
