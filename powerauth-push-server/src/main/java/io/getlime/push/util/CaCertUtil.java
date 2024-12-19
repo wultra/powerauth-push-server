@@ -52,7 +52,8 @@ public class CaCertUtil {
             "classpath:/cacert/GeoTrust_Global_CA.pem",
             "classpath:/cacert/AAACertificateServices.pem",
             "classpath:/cacert/COMODORSAAAACA.pem",
-            "classpath:/cacert/USERTrustRSAAAACA.pem"
+            "classpath:/cacert/USERTrustRSAAAACA.pem",
+            "classpath:/cacert/USERTrustRSA_CA.pem"
     );
 
     private final PushServiceConfiguration pushServiceConfiguration;
