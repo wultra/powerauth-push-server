@@ -17,7 +17,7 @@ In order to be able to implement integration easily, add Push Server client Mave
 
 ```xml
 <dependency>
-    <groupId>io.getlime.security</groupId>
+    <groupId>com.wultra.security</groupId>
     <artifactId>powerauth-push-client</artifactId>
     <version>${powerauth.push-server.version}</version>
 </dependency>
@@ -29,7 +29,7 @@ In order to connect to the PowerAuth Push Server, you need to add following conf
 
 ```java
 @Configuration
-@ComponentScan(basePackages = {"io.getlime.push"})
+@ComponentScan(basePackages = {"com.wultra.push"})
 public class PowerAuthPushConfiguration {
 
   @Bean
