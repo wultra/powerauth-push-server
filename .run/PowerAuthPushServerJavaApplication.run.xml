@@ -2,7 +2,7 @@
   <configuration default="false" name="PowerAuthPushServerJavaApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="ACTIVE_PROFILES" value="dev" />
     <module name="powerauth-push-server" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="io.getlime.push.PowerAuthPushServerJavaApplication" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.wultra.push.PowerAuthPushServerJavaApplication" />
     <option name="VM_PARAMETERS" value="-Dserver.servlet.context-path=/powerauth-push-server -Dserver.port=8089" />
     <method v="2">
       <option name="Make" enabled="true" />

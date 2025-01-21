@@ -10,18 +10,18 @@
 
     <parent>
         <artifactId>powerauth-push-server-parent</artifactId>
-        <groupId>io.getlime.security</groupId>
-        <version>1.10.0-SNAPSHOT</version>
+        <groupId>com.wultra.security</groupId>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
-            <groupId>io.getlime.core</groupId>
+            <groupId>com.wultra.core</groupId>
             <artifactId>rest-model-base</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>io.getlime.security</groupId>
+            <groupId>com.wultra.security</groupId>
             <artifactId>powerauth-client-model</artifactId>
         </dependency>
 
