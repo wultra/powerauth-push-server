@@ -16,25 +16,26 @@
 package com.wultra.push.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.v3.PowerAuthClient;
 import com.wultra.security.powerauth.client.model.entity.Application;
 import com.wultra.security.powerauth.client.model.entity.ApplicationVersion;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import com.wultra.security.powerauth.client.model.request.InitActivationRequest;
-import com.wultra.security.powerauth.client.model.request.PrepareActivationRequest;
+import com.wultra.security.powerauth.client.model.request.v3.PrepareActivationRequest;
 import com.wultra.security.powerauth.client.model.response.CommitActivationResponse;
 import com.wultra.security.powerauth.client.model.response.CreateApplicationVersionResponse;
 import com.wultra.security.powerauth.client.model.response.InitActivationResponse;
-import com.wultra.security.powerauth.client.model.response.PrepareActivationResponse;
-import com.wultra.security.powerauth.rest.client.PowerAuthRestClient;
+import com.wultra.security.powerauth.client.model.response.v3.PrepareActivationResponse;
+import com.wultra.security.powerauth.crypto.lib.encryptor.model.v3.EciesEncryptedRequest;
+import com.wultra.security.powerauth.crypto.lib.encryptor.model.v3.EciesEncryptedResponse;
+import com.wultra.security.powerauth.rest.client.v3.PowerAuthRestClient;
 import com.wultra.push.api.PowerAuthTestClient;
 import com.wultra.security.powerauth.crypto.client.activation.PowerAuthClientActivation;
 import com.wultra.security.powerauth.crypto.lib.encryptor.ClientEncryptor;
 import com.wultra.security.powerauth.crypto.lib.encryptor.EncryptorFactory;
-import com.wultra.security.powerauth.crypto.lib.encryptor.model.EncryptedRequest;
 import com.wultra.security.powerauth.crypto.lib.encryptor.model.EncryptorId;
 import com.wultra.security.powerauth.crypto.lib.encryptor.model.EncryptorParameters;
-import com.wultra.security.powerauth.crypto.lib.encryptor.model.v3.ClientEncryptorSecrets;
+import com.wultra.security.powerauth.crypto.lib.encryptor.model.v3.ClientEciesSecrets;
 import com.wultra.security.powerauth.crypto.lib.util.KeyConvertor;
 import com.wultra.security.powerauth.rest.api.model.request.ActivationLayer2Request;
 
@@ -138,11 +139,11 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
 
         final String protocolVersion = "3.1";
         final EncryptorParameters encryptorParameters = new EncryptorParameters(protocolVersion, applicationKey, null, null);
-        final ClientEncryptorSecrets encryptorSecrets = new ClientEncryptorSecrets(masterPK, applicationSecretBytes);
-        final ClientEncryptor clientEncryptor = encryptorFactory.getClientEncryptor(EncryptorId.ACTIVATION_LAYER_2, encryptorParameters, encryptorSecrets);
+        final ClientEciesSecrets encryptorSecrets = new ClientEciesSecrets(masterPK, applicationSecretBytes);
+        final ClientEncryptor<EciesEncryptedRequest, EciesEncryptedResponse> clientEncryptor = encryptorFactory.getClientEncryptor(EncryptorId.ACTIVATION_LAYER_2, encryptorParameters, encryptorSecrets);
         final ByteArrayOutputStream baosL2 = new ByteArrayOutputStream();
         objectMapper.writeValue(baosL2, requestL2);
-        final EncryptedRequest encryptedRequest = clientEncryptor.encryptRequest(baosL2.toByteArray());
+        final EciesEncryptedRequest encryptedRequest = clientEncryptor.encryptRequest(baosL2.toByteArray());
 
         final PrepareActivationRequest prepareRequest = new PrepareActivationRequest();
         prepareRequest.setActivationCode(initResponse.getActivationCode());

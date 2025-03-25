@@ -17,7 +17,7 @@
 
 package com.wultra.push.controller.rest;
 
-import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.v3.PowerAuthClient;
 import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
 import com.wultra.security.powerauth.client.model.response.GetActivationStatusResponse;
 import com.wultra.core.rest.model.base.request.ObjectRequest;
@@ -34,8 +34,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ class PushDeviceControllerTest {
     @Autowired
     private AppCredentialsRepository appCredentialsRepository;
 
-    @MockBean
+    @MockitoBean
     private PowerAuthClient powerAuthClient;
 
     @Test
