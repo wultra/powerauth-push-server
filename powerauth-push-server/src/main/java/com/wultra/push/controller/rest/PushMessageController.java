@@ -126,7 +126,7 @@ public class PushMessageController {
         final Mode mode = requestObject.getMode();
         final List<PushMessage> batch = requestObject.getBatch();
         final BasePushMessageSendResult result = pushMessageSenderService.sendPushMessage(appId, mode, batch);
-        logger.info("The sendPushMessageBatch request succeeded, application ID: {}", requestObject.getAppId());
+        logger.info("The sendPushMessageBatch request succeeded, application ID: {}, {}", requestObject.getAppId(), result);
         return new ObjectResponse<>(result);
     }
 }
