@@ -17,12 +17,14 @@
 package com.wultra.push.model.entity;
 
 import com.wultra.push.model.enumeration.Mode;
+import lombok.ToString;
 
 /**
  * Base push message sending result.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@ToString
 public class BasePushMessageSendResult {
 
     private final Mode mode;

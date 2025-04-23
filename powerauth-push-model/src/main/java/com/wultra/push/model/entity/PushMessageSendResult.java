@@ -19,6 +19,7 @@ package com.wultra.push.model.entity;
 import com.wultra.push.model.enumeration.Mode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Class that contains push message sending result data.
@@ -27,6 +28,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class PushMessageSendResult extends BasePushMessageSendResult {
 
     /**
