@@ -117,16 +117,18 @@ public class PushMessageController {
         if (requestObject.getBatch() == null) {
             throw new PushServerException("Batch must not be empty");
         }
-        logger.info("Received sendPushMessageBatch request, application ID: {}", requestObject.getAppId());
+
+        final String appId = requestObject.getAppId();
+        logger.info("action: sendPushMessageBatch, state: initiated, applicationId: {}", appId);
         String errorMessage = SendPushMessageBatchRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
-        final String appId = requestObject.getAppId();
+
         final Mode mode = requestObject.getMode();
         final List<PushMessage> batch = requestObject.getBatch();
         final BasePushMessageSendResult result = pushMessageSenderService.sendPushMessage(appId, mode, batch);
-        logger.info("The sendPushMessageBatch request succeeded, application ID: {}, {}", requestObject.getAppId(), result);
+        logger.info("action: sendPushMessageBatch, state: succeeded, result: {}, applicationId: {}", result, appId);
         return new ObjectResponse<>(result);
     }
 }
