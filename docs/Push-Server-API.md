@@ -196,8 +196,8 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
 - `platform` - `apns`, `fcm`, `hms`.
 - `environment` - `development` or `production` for APNs, `null` otherwise.
 - `activationId` - Activation identifier.
-- `activationStatus` - Status of the associated activation.
-- `userId` - User ID associated with the activation.
+- `activationStatus` - Status of the associated activation, optional.
+- `userId` - User ID associated with the activation, optional.
 
 #### Response 200
 
