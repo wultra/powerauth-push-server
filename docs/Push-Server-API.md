@@ -184,16 +184,20 @@ _Note: Since this endpoint is usually called by the back-end service, it is not 
     "token": "1234567890987654321234567890",
     "platform": "apns",
     "environment": "development",
-    "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412"
+    "activationId": "49414e31-f3df-4cea-87e6-f214ca3b8412",
+    "activationStatus": "ACTIVE",
+    "userId": "userId"
   }
 }
 ```
 
 - `appId` - Application that device is using.
 - `token` - Identifier for device.
-- `platform` - `apns`, `fcm`, `hms`
-- `environment` - `development` or `production` for APNs, `null` otherwise
-- `activationId` - Activation identifier
+- `platform` - `apns`, `fcm`, `hms`.
+- `environment` - `development` or `production` for APNs, `null` otherwise.
+- `activationId` - Activation identifier.
+- `activationStatus` - Status of the associated activation.
+- `userId` - User ID associated with the activation.
 
 #### Response 200
 
