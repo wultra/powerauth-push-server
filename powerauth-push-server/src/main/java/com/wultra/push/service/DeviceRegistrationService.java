@@ -246,12 +246,11 @@ public class DeviceRegistrationService {
 
     /**
      * Fetch and update activation details associated with the given device.
-     * {@link PowerAuthClientException} is thrown in case the activation does not exist
-     * in PowerAuth server or is in REMOVED state.
      *
      * @param device Push device registration entity.
      * @param activationId Activation ID.
-     * @throws PushServerException Thrown in case communication with PowerAuth server fails, or there is no such activation.
+     * @throws PushServerException Thrown in case communication with PowerAuth server fails,
+     * or there is no such activation, or the matching activation is in REMOVED state.
      */
     private void fetchAndUpdateActivationForDevice(PushDeviceRegistrationEntity device, String activationId) throws PushServerException {
         try {
