@@ -50,8 +50,8 @@ public class PushDeviceService {
         if (request == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received createDevice request, app ID: {}, activation ID: {}, token: {}, platform: {}, environment: {}", request.getAppId(),
-                request.getActivationId(), maskPushToken(request.getToken()), request.getPlatform(), request.getEnvironment());
+        logger.info("Received createDevice request, appId: {}, activationId: {}, token: {}, platform: {}, environment: {}, activationStatus: {}, userId: {}", request.getAppId(),
+                request.getActivationId(), maskPushToken(request.getToken()), request.getPlatform(), request.getEnvironment(), request.getActivationStatus(), request.getUserId());
 
         final String errorMessage = CreateDeviceRequestValidator.validate(request);
         if (errorMessage != null) {
@@ -61,7 +61,7 @@ public class PushDeviceService {
         final AppCredentialsEntity appCredentials = findAppCredentials(request.getAppId());
 
         deviceRegistrationService.createOrUpdateDevice(request, appCredentials);
-        logger.info("The createDevice request succeeded, app ID: {}, activation ID: {}, platform: {}, environment: {}", request.getAppId(), request.getActivationId(), request.getPlatform(), request.getEnvironment());
+        logger.info("The createDevice request succeeded, appId: {}, activationId: {}, platform: {}, environment: {}", request.getAppId(), request.getActivationId(), request.getPlatform(), request.getEnvironment());
         return new Response();
     }
 
