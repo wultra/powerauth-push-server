@@ -1,6 +1,6 @@
-# Migration from 1.9.x to 2.0.x
+# Migration from 1.9.x to 1.10.x
 
-This guide contains instructions for migration from PowerAuth Push Server version `1.9.x` to version `2.0.x`.
+This guide contains instructions for migration from PowerAuth Push Server version `1.9.x` to version `1.10.x`.
 
 ## Database Changes
 
