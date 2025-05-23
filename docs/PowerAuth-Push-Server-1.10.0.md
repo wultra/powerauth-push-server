@@ -71,3 +71,12 @@ When creating a new device registration using the REST API endpoint `POST /push/
 to pass `activationStatus` and `userId` of the associated activation. Doing so allows the registration procedure to skip
 the remote call to PowerAuth Server when activation details are already known at the time of request construction.
 To enable this optimization, both the added request parameters have to be present.
+
+## Other Changes
+
+### Structured Logging for Device Registration Endpoints
+
+Logging structure for the `/push/device/create`, `/push/device/create/multi`, `/push/device/status/update`
+and `/push/device/delete` endpoints has been updated to parsable key-value format to enable better automated log
+processing, and align with the logging approach used in the PowerAuth Server.
+This change is only relevant for the first and last info-level logs during request processing.
