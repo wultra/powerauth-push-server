@@ -47,6 +47,8 @@ The application detail endpoint `POST /admin/app/detail` uses new platform enume
 
 The push message send endpoint `POST /push/message/send` contains new platform enumerations in the response for the count of sent messages. 
 
+## REST API Changes
+
 ### Customization of APNs Environment per Registered Device
 
 It is now possible to specify an APNs environment per device registration. The change is reflected in the REST API endpoints `/push/device/create` and `/push/device/create/multi` by addition of the `environment` parameter.
@@ -62,3 +64,19 @@ For existing device registrations if the `environment` value is not specified du
 The global setting is controlled by property `powerauth.push.service.apns.useDevelopment`. In case the property is set to `false`, delivery to `development` APNs host is not allowed for devices registered with the `development` environment.
 
 This change is reflected in database by addition of parameter `environment` in table `push_device_registration`.
+
+### Avoiding Redundant Activation Status Lookups
+
+When creating a new device registration using the REST API endpoint `POST /push/device/create`, it is now possible
+to pass `activationStatus` and `userId` of the associated activation. Doing so allows the registration procedure to skip
+the remote call to PowerAuth Server when activation details are already known at the time of request construction.
+To enable this optimization, both the added request parameters have to be present.
+
+## Other Changes
+
+### Structured Logging for Device Registration Endpoints
+
+Logging structure for the `/push/device/create`, `/push/device/create/multi`, `/push/device/status/update`
+and `/push/device/delete` endpoints has been updated to parsable key-value format to enable better automated log
+processing, and align with the logging approach used in the PowerAuth Server.
+This change is only relevant for the first and last info-level logs during request processing.
