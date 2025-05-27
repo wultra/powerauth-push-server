@@ -31,6 +31,7 @@ import com.wultra.push.repository.model.AppCredentialsEntity;
 import com.wultra.push.repository.model.Platform;
 import com.wultra.push.repository.model.PushDeviceRegistrationEntity;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.annotation.Backoff;
@@ -92,7 +93,20 @@ public class DeviceRegistrationService {
         device.setTimestampLastRegistered(new Date());
         device.setPlatform(convert(platform));
         device.setEnvironment(environment != null ? environment.getKey() : null);
-        updateActivationForDevice(device, activationId);
+
+        if (requestObject.getActivationStatus() == null || requestObject.getUserId() == null) {
+            logger.debug("Request does not contain details about activation");
+            fetchAndUpdateActivationForDevice(device, activationId);
+        } else {
+            logger.debug("Request contains details about activation");
+            final ActivationDetail activationDetail = ActivationDetail.builder()
+                    .activationId(activationId)
+                    .activationStatus(requestObject.getActivationStatus())
+                    .userId(requestObject.getUserId())
+                    .build();
+            assignActivationDetails(device, activationDetail);
+        }
+
         pushDeviceRepository.save(device);
     }
 
@@ -135,7 +149,7 @@ public class DeviceRegistrationService {
                 device.setTimestampLastRegistered(new Date());
                 device.setPlatform(convert(platform));
                 device.setEnvironment(environment != null ? environment.getKey() : null);
-                updateActivationForDevice(device, activationId);
+                fetchAndUpdateActivationForDevice(device, activationId);
                 PushDeviceRegistrationEntity registeredDevice = pushDeviceRepository.save(device);
                 usedDeviceRegistrationIds.add(registeredDevice.getId());
             } catch (PushServerException ex) {
@@ -231,26 +245,48 @@ public class DeviceRegistrationService {
     }
 
     /**
-     * Update activation for given device in case activation exists in PowerAuth server and it is not in REMOVED state.
-     * Otherwise fail the device registration because registration could not be associated with an activation.
+     * Fetch and update activation details associated with the given device.
+     *
      * @param device Push device registration entity.
      * @param activationId Activation ID.
-     * @throws PushServerException Throw in case communication with PowerAuth server fails.
+     * @throws PushServerException Thrown in case communication with PowerAuth server fails,
+     * or there is no such activation, or the matching activation is in REMOVED state.
      */
-    private void updateActivationForDevice(PushDeviceRegistrationEntity device, String activationId) throws PushServerException {
+    private void fetchAndUpdateActivationForDevice(PushDeviceRegistrationEntity device, String activationId) throws PushServerException {
         try {
             final GetActivationStatusResponse activation = powerAuthClient.getActivationStatus(activationId);
-            if (activation != null && !ActivationStatus.REMOVED.equals(activation.getActivationStatus())) {
-                device.setActivationId(activationId);
-                device.setActive(activation.getActivationStatus().equals(ActivationStatus.ACTIVE));
-                device.setUserId(activation.getUserId());
-                return;
+            if (activation == null) {
+                throw new PushServerException("Device registration failed because associated activation was not found");
             }
-            throw new PushServerException("Device registration failed because associated activation is not ACTIVE");
+
+            final ActivationDetail activationDetail = ActivationDetail.builder()
+                    .activationId(activation.getActivationId())
+                    .activationStatus(activation.getActivationStatus())
+                    .userId(activation.getUserId())
+                    .build();
+            assignActivationDetails(device, activationDetail);
         } catch (PowerAuthClientException ex) {
             logger.warn(ex.getMessage(), ex);
             throw new PushServerException("Device registration failed because activation status is unknown");
         }
+    }
+
+    /**
+     * Assign activation details associated with the given device.
+     * {@link PowerAuthClientException} is thrown in case the activation is in REMOVED state.
+     *
+     * @param device Push device registration entity.
+     * @param activationDetail Details about the activation.
+     * @throws PushServerException In case the activation is in REMOVED state.
+     */
+    private static void assignActivationDetails(PushDeviceRegistrationEntity device, ActivationDetail activationDetail) throws PushServerException {
+        if (activationDetail.activationStatus() == ActivationStatus.REMOVED) {
+            throw new PushServerException("Device registration failed because associated activation is REMOVED");
+        }
+
+        device.setActivationId(activationDetail.activationId());
+        device.setActive(activationDetail.activationStatus() == ActivationStatus.ACTIVE);
+        device.setUserId(activationDetail.userId());
     }
 
     private ActivationStatus fetchActivationStatus(final String activationId) throws PushServerException {
@@ -272,5 +308,8 @@ public class DeviceRegistrationService {
             case HMS -> Platform.HMS;
         };
     }
+
+    @Builder
+    record ActivationDetail(String activationId, String userId, ActivationStatus activationStatus) {}
 
 }

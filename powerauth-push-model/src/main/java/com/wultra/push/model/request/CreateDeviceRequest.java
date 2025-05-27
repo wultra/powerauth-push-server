@@ -17,6 +17,7 @@ package com.wultra.push.model.request;
 
 import com.wultra.push.model.enumeration.ApnsEnvironment;
 import com.wultra.push.model.enumeration.MobilePlatform;
+import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -62,5 +63,17 @@ public class CreateDeviceRequest {
     @NotBlank
     @Schema(description = "Activation ID.", format = "UUID (level 4)", maxLength = 37, example = "099e5e30-47b1-41c7-b49b-3bf28e811fca")
     private String activationId;
+
+    /**
+     * Activation status.
+     */
+    @Schema(description = "Activation status.")
+    private ActivationStatus activationStatus;
+
+    /**
+     * User ID.
+     */
+    @Schema(description = "User ID.")
+    private String userId;
 
 }
