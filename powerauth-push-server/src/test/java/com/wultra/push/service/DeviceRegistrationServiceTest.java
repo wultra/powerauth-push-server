@@ -16,9 +16,6 @@
 
 package com.wultra.push.service;
 
-import com.wultra.security.powerauth.client.PowerAuthClient;
-import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
-import com.wultra.security.powerauth.client.model.response.GetActivationStatusResponse;
 import com.wultra.push.errorhandling.exceptions.PushServerException;
 import com.wultra.push.model.enumeration.MobilePlatform;
 import com.wultra.push.model.request.CreateDeviceForActivationsRequest;
@@ -29,13 +26,16 @@ import com.wultra.push.repository.PushDeviceRepository;
 import com.wultra.push.repository.model.AppCredentialsEntity;
 import com.wultra.push.repository.model.Platform;
 import com.wultra.push.repository.model.PushDeviceRegistrationEntity;
+import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
+import com.wultra.security.powerauth.client.model.response.GetActivationStatusResponse;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ class DeviceRegistrationServiceTest {
     @Autowired
     private AppCredentialsRepository appCredentialsRepository;
 
-    @MockBean
+    @MockitoBean
     private PowerAuthClient powerAuthClient;
 
     @Test
