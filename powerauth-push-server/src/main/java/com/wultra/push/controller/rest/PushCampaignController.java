@@ -92,6 +92,7 @@ public class PushCampaignController {
             throw new PushServerException("Request object must not be empty");
         }
         final String appId = requestObject.getAppId();
+        logger.info("action: createCampaign, state: initiated, applicationId: {}", appId);
         final String errorMessage = CreateCampaignRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             logger.error("action: createCampaign, state: failed, applicationId: {}, error: {}", appId, errorMessage);
@@ -110,7 +111,7 @@ public class PushCampaignController {
         campaign = pushCampaignRepository.save(campaign);
         final CreateCampaignResponse response = new CreateCampaignResponse();
         response.setId(campaign.getId());
-        logger.info("action: createCampaign, state: succeeded, applicationId: {}, campaignId: {}", appId, campaign.getId());
+        logger.info("action: createCampaign, state: succeeded, campaignId: {}", campaign.getId());
         return new ObjectResponse<>(response);
     }
 
@@ -149,6 +150,7 @@ public class PushCampaignController {
     @Operation(summary = "Return details about campaign",
                   description = "Campaign specified by id. Details contain campaign id, application id, status if campaign was sent and message.")
     public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
+        logger.info("action: getCampaign, state: initiated, campaignId: {}", campaignId);
         final PushCampaignEntity campaign = findPushCampaignById(campaignId);
         final CampaignResponse campaignResponse = new CampaignResponse();
         campaignResponse.setId(campaign.getId());
@@ -156,7 +158,7 @@ public class PushCampaignController {
         campaignResponse.setAppId(campaign.getAppCredentials().getAppId());
         final PushMessageBody message = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
         campaignResponse.setMessage(message);
-        logger.info("action: getCampaign, state: succeeded, campaignId: {}", campaignId);
+        logger.info("action: getCampaign, state: succeeded");
         return new ObjectResponse<>(campaignResponse);
     }
 
@@ -211,6 +213,7 @@ public class PushCampaignController {
     public Response addUsersToCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
         checkRequestNullity(request);
         final ListOfUsers listOfUsers = request.getRequestObject();
+        logger.info("action: addUsersToCampaign, state: initiated, campaignId: {}, size: {}", id, listOfUsers.size());
         assureExistsPushCampaignById(id);
         for (String user : listOfUsers) {
             if (pushCampaignUserRepository.findFirstByUserIdAndCampaignId(user, id) == null) {
@@ -223,7 +226,7 @@ public class PushCampaignController {
                 logger.warn("Duplicate user entry for push campaign: {}", user);
             }
         }
-        logger.info("action: addUsersToCampaign, state: succeeded, campaignId: {}, size: {}", id, listOfUsers.size());
+        logger.info("action: addUsersToCampaign, state: succeeded");
         return new Response();
     }
 
@@ -269,10 +272,11 @@ public class PushCampaignController {
                           "Users are described as list of their ids in Request body")
     public Response deleteUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
         ListOfUsers listOfUsers = request.getRequestObject();
+        logger.info("action: deleteUsersFromCampaign, state: initiated, campaignId: {}, size: {}", id, listOfUsers.size());
         for (String user : listOfUsers) {
             pushCampaignUserRepository.deleteByCampaignIdAndUserId(id, user);
         }
-        logger.info("action: deleteUsersFromCampaign, state: succeeded, campaignId: {}, size: {}", id, listOfUsers.size());
+        logger.info("action: deleteUsersFromCampaign, state: succeeded");
         return new Response();
     }
 

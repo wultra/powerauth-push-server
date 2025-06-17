@@ -77,9 +77,10 @@ public class InboxController {
     public ObjectResponse<GetInboxMessageDetailResponse> postMessage(
             @Valid @RequestBody ObjectRequest<CreateInboxMessageRequest> request) throws AppNotFoundException {
         final CreateInboxMessageRequest requestObject = request.getRequestObject();
+        logger.info("action: postMessage, state: initiated, applicationId: {}", 
+                requestObject.getAppId());
         final GetInboxMessageDetailResponse response = inboxService.postMessage(requestObject);
-        logger.info("action: postMessage, state: succeeded, applicationId: {}, messageId: {}", 
-                requestObject.getAppId(), response.getId());
+        logger.info("action: postMessage, state: succeeded, messageId: {}", response.getId());
         return new ObjectResponse<>(response);
     }
 
@@ -100,8 +101,9 @@ public class InboxController {
             @NotNull @Size(min = 1, max = 255) @RequestParam("applications") @Schema(type = "string", example = "app-id-01,app-id-02") String applications,
             @RequestParam(value = "onlyUnread", required = false, defaultValue = "false") boolean onlyUnread,
             @ParameterObject Pageable pageable) throws AppNotFoundException {
+        logger.info("action: fetchMessageListForUser, state: initiated, userId: {}", userId);
         final PagedResponse<ListOfInboxMessages> response = new PagedResponse<>(inboxService.fetchMessageListForUser(userId, Arrays.asList(applications.split(",")), onlyUnread, pageable), pageable.getPageNumber(), pageable.getPageSize());
-        logger.info("action: fetchMessageListForUser, state: succeeded, userId: {}, size: {}", userId, response.getResponseObject().size());
+        logger.info("action: fetchMessageListForUser, state: succeeded, size: {}", response.getResponseObject().size());
         return response;
     }
 
@@ -117,8 +119,9 @@ public class InboxController {
     public ObjectResponse<GetInboxMessageCountResponse> fetchMessageCountForUser(
             @NotNull @Size(min = 1, max = 255) @RequestParam("userId") String userId,
             @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId) throws AppNotFoundException {
+        logger.info("action: fetchMessageCountForUser, state: initiated, userId: {}", userId);
         final GetInboxMessageCountResponse response = inboxService.fetchMessageCountForUser(userId, appId);
-        logger.info("action: fetchMessageCountForUser, state: succeeded, userId: {}, count: {}", userId, response.getCountAll());
+        logger.info("action: fetchMessageCountForUser, state: succeeded, count: {}", response.getCountAll());
         return new ObjectResponse<>(response);
     }
 
@@ -134,9 +137,10 @@ public class InboxController {
     public Response readAllMessages(
             @Valid @RequestBody ObjectRequest<ReadAllInboxMessagesRequest> request) throws AppNotFoundException {
         final ReadAllInboxMessagesRequest requestObject = request.getRequestObject();
-        inboxService.readAllMessages(requestObject.getUserId(), requestObject.getAppId());
-        logger.info("action: readAllMessages, state: succeeded, userId: {}, applicationId: {}", 
+        logger.info("action: readAllMessages, state: initiated, userId: {}, applicationId: {}", 
                 requestObject.getUserId(), requestObject.getAppId());
+        inboxService.readAllMessages(requestObject.getUserId(), requestObject.getAppId());
+        logger.info("action: readAllMessages, state: succeeded");
         return new Response();
     }
 
@@ -151,8 +155,9 @@ public class InboxController {
     @Operation(summary = "Get a message detail", description = "Fetch given inbox message detail")
     public ObjectResponse<GetInboxMessageDetailResponse> fetchMessageDetail(
             @NotNull @RequestParam("id") String inboxId) throws InboxMessageNotFoundException {
+        logger.info("action: fetchMessageDetail, state: initiated, messageId: {}", inboxId);
         final GetInboxMessageDetailResponse response = inboxService.fetchMessageDetail(inboxId);
-        logger.info("action: fetchMessageDetail, state: succeeded, messageId: {}", inboxId);
+        logger.info("action: fetchMessageDetail, state: succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -167,8 +172,9 @@ public class InboxController {
     public ObjectResponse<GetInboxMessageDetailResponse> readMessage(
             @Valid @RequestBody ObjectRequest<ReadInboxMessageRequest> request) throws InboxMessageNotFoundException {
         final ReadInboxMessageRequest requestObject = request.getRequestObject();
+        logger.info("action: readMessage, state: initiated, messageId: {}", requestObject.getInboxId());
         final GetInboxMessageDetailResponse response = inboxService.readMessage(requestObject.getInboxId());
-        logger.info("action: readMessage, state: succeeded, messageId: {}", requestObject.getInboxId());
+        logger.info("action: readMessage, state: succeeded");
         return new ObjectResponse<>(response);
     }
 

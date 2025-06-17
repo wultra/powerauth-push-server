@@ -140,6 +140,7 @@ public class SendCampaignController {
         if (requestedObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
+        logger.info("action: sendTestCampaign, state: initiated, campaignId: {}, userId: {}", id, requestedObject.getUserId());
         final PushCampaignEntity campaign = pushCampaignRepository.findById(id).orElseThrow(() ->
                 new PushServerException("Campaign with entered ID does not exist"));
         String errorMessage = TestCampaignRequestValidator.validate(requestedObject);
@@ -153,7 +154,7 @@ public class SendCampaignController {
         List<PushMessage> message = new ArrayList<>();
         message.add(pushMessage);
         pushMessageSenderService.sendPushMessage(campaign.getAppCredentials().getAppId(), Mode.SYNCHRONOUS, message);
-        logger.info("action: sendTestCampaign, state: succeeded, campaignId: {}, userId: {}", id, requestedObject.getUserId());
+        logger.info("action: sendTestCampaign, state: succeeded");
         return new Response();
     }
 }

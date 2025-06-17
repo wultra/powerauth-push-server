@@ -81,6 +81,8 @@ public class PushMessageController {
         if (requestObject.getMessage() == null) {
             throw new PushServerException("Message must not be empty");
         }
+        logger.info("action: sendPushMessage, state: initiated, applicationId: {}, activationId: {}, userId: {}", 
+                requestObject.getAppId(), requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
         String errorMessage = SendPushMessageRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             logger.error("action: sendPushMessage, state: failed, applicationId: {}, error: {}", requestObject.getAppId(), errorMessage);
@@ -91,8 +93,7 @@ public class PushMessageController {
         final List<PushMessage> pushMessageList = new ArrayList<>();
         pushMessageList.add(requestObject.getMessage());
         final BasePushMessageSendResult result = pushMessageSenderService.sendPushMessage(appId, mode, pushMessageList);
-        logger.info("action: sendPushMessage, state: succeeded, applicationId: {}, activationId: {}, userId: {}", 
-                requestObject.getAppId(), requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
+        logger.info("action: sendPushMessage, state: succeeded");
         return new ObjectResponse<>(result);
     }
 
@@ -117,6 +118,8 @@ public class PushMessageController {
         }
 
         final String appId = requestObject.getAppId();
+        final List<PushMessage> batch = requestObject.getBatch();
+        logger.info("action: sendPushMessageBatch, state: initiated, applicationId: {}, size: {}", appId, batch.size());
         String errorMessage = SendPushMessageBatchRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             logger.error("action: sendPushMessageBatch, state: failed, applicationId: {}, error: {}", appId, errorMessage);
@@ -124,9 +127,8 @@ public class PushMessageController {
         }
 
         final Mode mode = requestObject.getMode();
-        final List<PushMessage> batch = requestObject.getBatch();
         final BasePushMessageSendResult result = pushMessageSenderService.sendPushMessage(appId, mode, batch);
-        logger.info("action: sendPushMessageBatch, state: succeeded, applicationId: {}, size: {}", appId, batch.size());
+        logger.info("action: sendPushMessageBatch, state: succeeded");
         return new ObjectResponse<>(result);
     }
 }

@@ -68,6 +68,7 @@ public class ServiceController {
     @Operation(summary = "Service status",
                   description = "Send a system status response, with basic information about the running application.")
     public ObjectResponse<ServiceStatusResponse> getServiceStatus() {
+        logger.info("action: getServiceStatus, state: initiated");
         ServiceStatusResponse response = new ServiceStatusResponse();
         response.setApplicationName(pushServiceConfiguration.getPushServerName());
         response.setApplicationDisplayName(pushServiceConfiguration.getPushServerDisplayName());
