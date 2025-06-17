@@ -68,7 +68,7 @@ public class ServiceController {
     @Operation(summary = "Service status",
                   description = "Send a system status response, with basic information about the running application.")
     public ObjectResponse<ServiceStatusResponse> getServiceStatus() {
-        logger.debug("action: getServiceStatus, state: initiated");
+        logger.info("action: getServiceStatus, state: initiated");
         ServiceStatusResponse response = new ServiceStatusResponse();
         response.setApplicationName(pushServiceConfiguration.getPushServerName());
         response.setApplicationDisplayName(pushServiceConfiguration.getPushServerDisplayName());
@@ -78,7 +78,7 @@ public class ServiceController {
             response.setVersion(buildProperties.getVersion());
             response.setBuildTime(Date.from(buildProperties.getTime()));
         }
-        logger.debug("action: getServiceStatus, state: succeeded");
+        logger.info("action: getServiceStatus, state: succeeded");
         return new ObjectResponse<>(response);
     }
 }

@@ -150,7 +150,7 @@ public class PushCampaignController {
     @Operation(summary = "Return details about campaign",
                   description = "Campaign specified by id. Details contain campaign id, application id, status if campaign was sent and message.")
     public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
-        logger.debug("action: getCampaign, state: initiated, campaignId: {}", campaignId);
+        logger.info("action: getCampaign, state: initiated, campaignId: {}", campaignId);
         final PushCampaignEntity campaign = findPushCampaignById(campaignId);
         final CampaignResponse campaignResponse = new CampaignResponse();
         campaignResponse.setId(campaign.getId());
@@ -158,7 +158,7 @@ public class PushCampaignController {
         campaignResponse.setAppId(campaign.getAppCredentials().getAppId());
         final PushMessageBody message = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
         campaignResponse.setMessage(message);
-        logger.debug("action: getCampaign, state: succeeded, campaignId: {}", campaignId);
+        logger.info("action: getCampaign, state: succeeded, campaignId: {}", campaignId);
         return new ObjectResponse<>(campaignResponse);
     }
 
@@ -175,7 +175,7 @@ public class PushCampaignController {
                   description = "Restricted with all param. This parameter decides if return campaigns that are 'only sent'(statement false)" +
                           " or return all registered campaigns (statement true). Details are same as in getCampaign method")
     public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(@RequestParam(value = "all", required = false) boolean all) throws PushServerException {
-        logger.debug("action: getListOfCampaigns, state: initiated, all: {}", all);
+        logger.info("action: getListOfCampaigns, state: initiated, all: {}", all);
         // Fetch campaigns from the repository
         final Iterable<PushCampaignEntity> campaignList;
         if (all) {
@@ -194,7 +194,7 @@ public class PushCampaignController {
             campaignResponse.setMessage(pushMessageBody);
             listOfCampaignsResponse.add(campaignResponse);
         }
-        logger.debug("action: getListOfCampaigns, state: succeeded, size: {}", listOfCampaignsResponse.size());
+        logger.info("action: getListOfCampaigns, state: succeeded, size: {}", listOfCampaignsResponse.size());
         return new ObjectResponse<>(listOfCampaignsResponse);
     }
 
@@ -243,7 +243,7 @@ public class PushCampaignController {
                           "Users are shown in paginated format based on parameters assigned in URI. " +
                           "Page param defines which page to show (start from 0) and size param which defines how many user ids to show per page")
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(@PathVariable(value = "id") Long id, Pageable pageable) {
-        logger.debug("action: getListOfUsersFromCampaign, state: initiated, campaignId: {}", id);
+        logger.info("action: getListOfUsersFromCampaign, state: initiated, campaignId: {}", id);
         ListOfUsersFromCampaignResponse listOfUsersFromCampaignResponse = new ListOfUsersFromCampaignResponse();
         List<PushCampaignUserEntity> users = pushCampaignUserRepository.findAllByCampaignId(id, pageable);
         ListOfUsers listOfUsers = new ListOfUsers();
@@ -255,7 +255,7 @@ public class PushCampaignController {
         PagedResponse<ListOfUsersFromCampaignResponse> listOfUsersPagedResponse = new PagedResponse<>(listOfUsersFromCampaignResponse);
         listOfUsersPagedResponse.setPage(pageable.getPageNumber());
         listOfUsersPagedResponse.setSize(pageable.getPageSize());
-        logger.debug("action: getListOfUsersFromCampaign, state: succeeded, campaignId: {}, size: {}", id, listOfUsers.size());
+        logger.info("action: getListOfUsersFromCampaign, state: succeeded, campaignId: {}, size: {}", id, listOfUsers.size());
         return listOfUsersPagedResponse;
     }
 

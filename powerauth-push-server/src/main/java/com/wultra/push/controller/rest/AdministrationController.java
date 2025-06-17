@@ -57,11 +57,11 @@ public class AdministrationController {
     @GetMapping(value = "list")
     @Operation(summary = "List all applications", description = "List all application registered in Push Server")
     public ObjectResponse<GetApplicationListResponse> listApplications() {
-        logger.debug("action: listApplications, state: initiated");
+        logger.info("action: listApplications, state: initiated");
         final List<PushServerApplication> applications = administrationService.findAllApplications();
         final GetApplicationListResponse response = new GetApplicationListResponse();
         response.setApplicationList(applications);
-        logger.debug("action: listApplications, state: succeeded, size: {}", applications.size());
+        logger.info("action: listApplications, state: succeeded, size: {}", applications.size());
         return new ObjectResponse<>(response);
     }
 
@@ -74,11 +74,11 @@ public class AdministrationController {
     @Operation(summary = "List unconfigured applications", description = "List unconfigured application in Push Server")
     public ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() throws PushServerException {
         try {
-            logger.debug("action: listUnconfiguredApplications, state: initiated");
+            logger.info("action: listUnconfiguredApplications, state: initiated");
             final List<PushServerApplication> applications = administrationService.findUnconfiguredApplications();
             final GetApplicationListResponse response = new GetApplicationListResponse();
             response.setApplicationList(applications);
-            logger.debug("action: listUnconfiguredApplications, state: succeeded, size: {}", applications.size());
+            logger.info("action: listUnconfiguredApplications, state: succeeded, size: {}", applications.size());
             return new ObjectResponse<>(response);
         } catch (PowerAuthClientException ex) {
             logger.error("action: listUnconfiguredApplications, state: failed, error: PowerAuth client error");
@@ -97,7 +97,7 @@ public class AdministrationController {
     @Operation(summary = "Get application detail", description = "Obtain registered application detail")
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(@RequestBody ObjectRequest<GetApplicationDetailRequest> request) throws PushServerException {
         final GetApplicationDetailRequest requestObject = request.getRequestObject();
-        logger.debug("action: getApplicationDetail, state: initiated, applicationId: {}", requestObject != null ? requestObject.getAppId() : null);
+        logger.info("action: getApplicationDetail, state: initiated, applicationId: {}", requestObject != null ? requestObject.getAppId() : null);
         final String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -122,7 +122,7 @@ public class AdministrationController {
         if (requestObject.isIncludeHms()) {
             response.setHmsProjectId(appCredentialsEntity.getHmsProjectId());
         }
-        logger.debug("action: getApplicationDetail, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: getApplicationDetail, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new ObjectResponse<>(response);
     }
 
