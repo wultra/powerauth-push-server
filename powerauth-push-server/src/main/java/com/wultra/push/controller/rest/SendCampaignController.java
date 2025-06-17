@@ -28,8 +28,7 @@ import com.wultra.push.repository.model.PushCampaignEntity;
 import com.wultra.push.repository.serialization.JsonSerialization;
 import com.wultra.push.service.PushMessageSenderService;
 import io.swagger.v3.oas.annotations.Operation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -51,11 +50,10 @@ import java.util.Optional;
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
+@Slf4j
 @RestController
 @RequestMapping(value = "push/campaign/send")
 public class SendCampaignController {
-
-    private static final Logger logger = LoggerFactory.getLogger(SendCampaignController.class);
 
     private final JobLauncher jobLauncher;
     private final Job job;
@@ -97,7 +95,7 @@ public class SendCampaignController {
 
                           If sending was successful then sent parameter is set on true and timestampSent is set on current time.""")
     public Response sendCampaign(@PathVariable(value = "id") Long id) throws PushServerException {
-        logger.info("Received sendCampaign request, campaign ID: {}", id);
+        logger.info("action: sendCampaign, state: initiated, campaignId: {}", id);
         try {
             final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(id);
             if (campaignEntityOptional.isEmpty()) {
@@ -108,7 +106,7 @@ public class SendCampaignController {
                     .addDate("timestamp", new Date())
                     .toJobParameters();
             jobLauncher.run(job, jobParameters);
-            logger.info("The sendCampaign request succeeded, campaign ID: {}", id);
+            logger.info("action: sendCampaign, state: succeeded, campaignId: {}", id);
             return new Response();
         } catch (JobExecutionAlreadyRunningException e) {
             throw new PushServerException("Job execution already running", e);
@@ -133,21 +131,21 @@ public class SendCampaignController {
     @Operation(summary = "Send a test campaign",
                   description = "Send message from a specific campaign on test user identified in request body, userId param, to check rightness of that campaign.")
     public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
-        logger.info("Received sendTestCampaign request, campaign ID: {}", id);
+        final TestCampaignRequest requestedObject = request.getRequestObject();
+        logger.info("action: sendTestCampaign, state: initiated, campaignId: {}, userId: {}", id, requestedObject.getUserId());
         final PushCampaignEntity campaign = pushCampaignRepository.findById(id).orElseThrow(() ->
                 new PushServerException("Campaign with entered ID does not exist"));
-        TestCampaignRequest requestedObject = request.getRequestObject();
         String errorMessage = TestCampaignRequestValidator.validate(requestedObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
         }
         PushMessage pushMessage = new PushMessage();
-        pushMessage.setUserId(request.getRequestObject().getUserId());
+        pushMessage.setUserId(requestedObject.getUserId());
         pushMessage.setBody(jsonSerialization.deserializePushMessageBody(campaign.getMessage()));
         List<PushMessage> message = new ArrayList<>();
         message.add(pushMessage);
         pushMessageSenderService.sendPushMessage(campaign.getAppCredentials().getAppId(), Mode.SYNCHRONOUS, message);
-        logger.info("The sendTestCampaign request succeeded, campaign ID: {}", id);
+        logger.info("action: sendTestCampaign, state: succeeded, campaignId: {}, userId: {}", id, requestedObject.getUserId());
         return new Response();
     }
 }

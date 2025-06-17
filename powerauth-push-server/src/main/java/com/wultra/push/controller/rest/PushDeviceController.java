@@ -25,6 +25,7 @@ import com.wultra.push.model.request.UpdateDeviceStatusRequest;
 import com.wultra.push.service.PushDeviceService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Slf4j
 @RestController
 @RequestMapping(value = "push/device")
 @AllArgsConstructor
@@ -52,7 +54,16 @@ public class PushDeviceController {
 
                           ---Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID, so that there are no incorrect bindings.""")
     public Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
-        return pushDeviceService.createDevice(request.getRequestObject());
+        final CreateDeviceRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
+        }
+        logger.info("action: createDevice, state: initiated, applicationId: {}, activationId: {}", 
+                requestObject.getAppId(), requestObject.getActivationId());
+        final Response response = pushDeviceService.createDevice(requestObject);
+        logger.info("action: createDevice, state: succeeded, applicationId: {}, activationId: {}", 
+                requestObject.getAppId(), requestObject.getActivationId());
+        return response;
     }
 
     /**
@@ -68,7 +79,16 @@ public class PushDeviceController {
 
                     ---Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs, so that there are no incorrect bindings.""")
     public Response createDeviceMultipleActivations(@RequestBody ObjectRequest<CreateDeviceForActivationsRequest> request) throws PushServerException {
-        return pushDeviceService.createDeviceMultipleActivations(request.getRequestObject());
+        final CreateDeviceForActivationsRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
+        }
+        logger.info("action: createDeviceMultipleActivations, state: initiated, applicationId: {}, activationIds: {}", 
+                requestObject.getAppId(), requestObject.getActivationIds());
+        final Response response = pushDeviceService.createDeviceMultipleActivations(requestObject);
+        logger.info("action: createDeviceMultipleActivations, state: succeeded, applicationId: {}, size: {}", 
+                requestObject.getAppId(), requestObject.getActivationIds() != null ? requestObject.getActivationIds().size() : 0);
+        return response;
     }
 
     /**
@@ -82,7 +102,13 @@ public class PushDeviceController {
                   description = "Update the status of given device registration based on the associated activation ID. " +
                           "This can help assure that registration is in non-active state and cannot receive personal messages.")
     public Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
-        return pushDeviceService.updateDeviceStatus(request);
+        if (request == null) {
+            throw new PushServerException("Request object must not be empty");
+        }
+        logger.info("action: updateDeviceStatus, state: initiated, activationId: {}", request.getActivationId());
+        final Response response = pushDeviceService.updateDeviceStatus(request);
+        logger.info("action: updateDeviceStatus, state: succeeded, activationId: {}", request.getActivationId());
+        return response;
     }
 
     /**
@@ -96,7 +122,14 @@ public class PushDeviceController {
                   description = "Remove device identified by application ID and device token. " +
                           "If device identifiers don't match, nothing happens")
     public Response deleteDevice(@RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
-        return pushDeviceService.deleteDevice(request.getRequestObject());
+        final DeleteDeviceRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            throw new PushServerException("Request object must not be empty");
+        }
+        logger.info("action: deleteDevice, state: initiated, applicationId: {}", requestObject.getAppId());
+        final Response response = pushDeviceService.deleteDevice(requestObject);
+        logger.info("action: deleteDevice, state: succeeded, applicationId: {}", requestObject.getAppId());
+        return response;
     }
 
 }

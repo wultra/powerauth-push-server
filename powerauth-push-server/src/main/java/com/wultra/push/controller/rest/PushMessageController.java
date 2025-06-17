@@ -27,8 +27,7 @@ import com.wultra.push.model.validator.SendPushMessageBatchRequestValidator;
 import com.wultra.push.model.validator.SendPushMessageRequestValidator;
 import com.wultra.push.service.PushMessageSenderService;
 import io.swagger.v3.oas.annotations.Operation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,10 +42,10 @@ import java.util.List;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Slf4j
 @RestController
 @RequestMapping(value = "push/message")
 public class PushMessageController {
-    private static final Logger logger = LoggerFactory.getLogger(PushMessageController.class);
 
     private final PushMessageSenderService pushMessageSenderService;
 
@@ -82,8 +81,8 @@ public class PushMessageController {
         if (requestObject.getMessage() == null) {
             throw new PushServerException("Message must not be empty");
         }
-        logger.info("Received sendPushMessage request, application ID: {}, activation ID: {}, user ID: {}", requestObject.getAppId(),
-                requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
+        logger.info("action: sendPushMessage, state: initiated, applicationId: {}, activationId: {}, userId: {}", 
+                requestObject.getAppId(), requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
         String errorMessage = SendPushMessageRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -93,8 +92,8 @@ public class PushMessageController {
         final List<PushMessage> pushMessageList = new ArrayList<>();
         pushMessageList.add(requestObject.getMessage());
         final BasePushMessageSendResult result = pushMessageSenderService.sendPushMessage(appId, mode, pushMessageList);
-        logger.info("The sendPushMessage request succeeded, application ID: {}, activation ID: {}, user ID: {}", requestObject.getAppId(),
-                requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
+        logger.info("action: sendPushMessage, state: succeeded, applicationId: {}, activationId: {}, userId: {}", 
+                requestObject.getAppId(), requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
         return new ObjectResponse<>(result);
     }
 
@@ -119,7 +118,7 @@ public class PushMessageController {
         }
 
         final String appId = requestObject.getAppId();
-        logger.info("action: sendPushMessageBatch, state: initiated, applicationId: {}", appId);
+        logger.info("action: sendPushMessageBatch, state: initiated, applicationId: {}, size: {}", appId, requestObject.getBatch().size());
         String errorMessage = SendPushMessageBatchRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -128,7 +127,7 @@ public class PushMessageController {
         final Mode mode = requestObject.getMode();
         final List<PushMessage> batch = requestObject.getBatch();
         final BasePushMessageSendResult result = pushMessageSenderService.sendPushMessage(appId, mode, batch);
-        logger.info("action: sendPushMessageBatch, state: succeeded, result: {}, applicationId: {}", result, appId);
+        logger.info("action: sendPushMessageBatch, state: succeeded, applicationId: {}, size: {}", appId, batch.size());
         return new ObjectResponse<>(result);
     }
 }

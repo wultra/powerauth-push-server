@@ -61,7 +61,7 @@ public class AdministrationController {
         final List<PushServerApplication> applications = administrationService.findAllApplications();
         final GetApplicationListResponse response = new GetApplicationListResponse();
         response.setApplicationList(applications);
-        logger.debug("action: listApplications, state: succeeded");
+        logger.debug("action: listApplications, state: succeeded, size: {}", applications.size());
         return new ObjectResponse<>(response);
     }
 
@@ -78,7 +78,7 @@ public class AdministrationController {
             final List<PushServerApplication> applications = administrationService.findUnconfiguredApplications();
             final GetApplicationListResponse response = new GetApplicationListResponse();
             response.setApplicationList(applications);
-            logger.debug("action: listUnconfiguredApplications, state: succeeded");
+            logger.debug("action: listUnconfiguredApplications, state: succeeded, size: {}", applications.size());
             return new ObjectResponse<>(response);
         } catch (PowerAuthClientException ex) {
             logger.warn(ex.getMessage(), ex);
@@ -95,8 +95,8 @@ public class AdministrationController {
     @PostMapping(value = "detail")
     @Operation(summary = "Get application detail", description = "Obtain registered application detail")
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(@RequestBody ObjectRequest<GetApplicationDetailRequest> request) throws PushServerException {
-        logger.debug("action: getApplicationDetail, state: initiated");
         final GetApplicationDetailRequest requestObject = request.getRequestObject();
+        logger.debug("action: getApplicationDetail, state: initiated, applicationId: {}", requestObject != null ? requestObject.getAppId() : null);
         final String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
         if (errorMessage != null) {
             throw new PushServerException(errorMessage);
@@ -121,7 +121,7 @@ public class AdministrationController {
         if (requestObject.isIncludeHms()) {
             response.setHmsProjectId(appCredentialsEntity.getHmsProjectId());
         }
-        logger.debug("action: getApplicationDetail, state: succeeded");
+        logger.debug("action: getApplicationDetail, state: succeeded, applicationId: {}", requestObject.getAppId());
         return new ObjectResponse<>(response);
     }
 
