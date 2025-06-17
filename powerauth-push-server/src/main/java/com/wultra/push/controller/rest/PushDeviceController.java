@@ -56,10 +56,11 @@ public class PushDeviceController {
     public Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
         final CreateDeviceRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
+            logger.error("action: createDevice, state: failed, error: Request object must not be empty");
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("action: createDevice, state: initiated, applicationId: {}, activationId: {}", 
-                requestObject.getAppId(), requestObject.getActivationId());
+        logger.info("action: createDevice, state: initiated, applicationId: {}, activationId: {}, userId: {}", 
+                requestObject.getAppId(), requestObject.getActivationId(), requestObject.getUserId());
         final Response response = pushDeviceService.createDevice(requestObject);
         logger.info("action: createDevice, state: succeeded");
         return response;
@@ -80,6 +81,7 @@ public class PushDeviceController {
     public Response createDeviceMultipleActivations(@RequestBody ObjectRequest<CreateDeviceForActivationsRequest> request) throws PushServerException {
         final CreateDeviceForActivationsRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
+            logger.error("action: createDeviceMultipleActivations, state: failed, error: Request object must not be empty");
             throw new PushServerException("Request object must not be empty");
         }
         logger.info("action: createDeviceMultipleActivations, state: initiated, applicationId: {}, size: {}", 
@@ -101,6 +103,7 @@ public class PushDeviceController {
                           "This can help assure that registration is in non-active state and cannot receive personal messages.")
     public Response updateDeviceStatus(@RequestBody UpdateDeviceStatusRequest request) throws PushServerException {
         if (request == null) {
+            logger.error("action: updateDeviceStatus, state: failed, error: Request object must not be empty");
             throw new PushServerException("Request object must not be empty");
         }
         logger.info("action: updateDeviceStatus, state: initiated, activationId: {}", request.getActivationId());
@@ -122,6 +125,7 @@ public class PushDeviceController {
     public Response deleteDevice(@RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
         final DeleteDeviceRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
+            logger.error("action: deleteDevice, state: failed, error: Request object must not be empty");
             throw new PushServerException("Request object must not be empty");
         }
         logger.info("action: deleteDevice, state: initiated, applicationId: {}", requestObject.getAppId());

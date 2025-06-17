@@ -76,9 +76,11 @@ public class PushMessageController {
     public ObjectResponse<BasePushMessageSendResult> sendPushMessage(@RequestBody ObjectRequest<SendPushMessageRequest> request) throws PushServerException {
         SendPushMessageRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
+            logger.error("action: sendPushMessage, state: failed, error: Request object must not be empty");
             throw new PushServerException("Request object must not be empty");
         }
         if (requestObject.getMessage() == null) {
+            logger.error("action: sendPushMessage, state: failed, error: Message must not be empty");
             throw new PushServerException("Message must not be empty");
         }
         logger.info("action: sendPushMessage, state: initiated, applicationId: {}, activationId: {}, userId: {}", 
@@ -111,9 +113,11 @@ public class PushMessageController {
     public ObjectResponse<BasePushMessageSendResult> sendPushMessageBatch(@RequestBody ObjectRequest<SendPushMessageBatchRequest> request) throws PushServerException {
         SendPushMessageBatchRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
+            logger.error("action: sendPushMessageBatch, state: failed, error: Request object must not be empty");
             throw new PushServerException("Request object must not be empty");
         }
         if (requestObject.getBatch() == null) {
+            logger.error("action: sendPushMessageBatch, state: failed, error: Batch must not be empty");
             throw new PushServerException("Batch must not be empty");
         }
 

@@ -89,6 +89,7 @@ public class PushCampaignController {
     public ObjectResponse<CreateCampaignResponse> createCampaign(@RequestBody ObjectRequest<CreateCampaignRequest> request) throws PushServerException {
         final CreateCampaignRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
+            logger.error("action: createCampaign, state: failed, error: Request object must not be empty");
             throw new PushServerException("Request object must not be empty");
         }
         final String appId = requestObject.getAppId();
@@ -300,6 +301,7 @@ public class PushCampaignController {
      */
     private void checkRequestNullity(ObjectRequest<?> request) throws PushServerException {
         if (request.getRequestObject() == null) {
+            logger.error("action: checkRequestNullity, state: failed, error: Empty requestObject data");
             throw new PushServerException("Empty requestObject data");
         }
     }
@@ -323,6 +325,7 @@ public class PushCampaignController {
     private void assureExistsPushCampaignById(Long campaignId) throws PushServerException {
         final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
         if (campaignEntityOptional.isEmpty()) {
+            logger.error("action: assureExistsPushCampaignById, state: failed, campaignId: {}, error: Campaign with entered ID does not exist", campaignId);
             throw new PushServerException("Campaign with entered ID does not exist");
         }
     }

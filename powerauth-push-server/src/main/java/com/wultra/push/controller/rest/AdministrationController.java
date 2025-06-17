@@ -99,6 +99,7 @@ public class AdministrationController {
         logger.info("action: getApplicationDetail, state: initiated, applicationId: {}", requestObject != null ? requestObject.getAppId() : null);
         final String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
         if (errorMessage != null) {
+            logger.error("action: getApplicationDetail, state: failed, applicationId: {}, error: {}", requestObject != null ? requestObject.getAppId() : null, errorMessage);
             throw new PushServerException(errorMessage);
         }
         final GetApplicationDetailResponse response = new GetApplicationDetailResponse();

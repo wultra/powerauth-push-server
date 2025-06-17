@@ -77,8 +77,8 @@ public class InboxController {
     public ObjectResponse<GetInboxMessageDetailResponse> postMessage(
             @Valid @RequestBody ObjectRequest<CreateInboxMessageRequest> request) throws AppNotFoundException {
         final CreateInboxMessageRequest requestObject = request.getRequestObject();
-        logger.info("action: postMessage, state: initiated, applicationId: {}", 
-                requestObject.getAppId());
+        logger.info("action: postMessage, state: initiated, userId: {}, applications: {}", 
+                requestObject.getUserId(), requestObject.getApplications());
         final GetInboxMessageDetailResponse response = inboxService.postMessage(requestObject);
         logger.info("action: postMessage, state: succeeded, messageId: {}", response.getId());
         return new ObjectResponse<>(response);
@@ -101,7 +101,7 @@ public class InboxController {
             @NotNull @Size(min = 1, max = 255) @RequestParam("applications") @Schema(type = "string", example = "app-id-01,app-id-02") String applications,
             @RequestParam(value = "onlyUnread", required = false, defaultValue = "false") boolean onlyUnread,
             @ParameterObject Pageable pageable) throws AppNotFoundException {
-        logger.info("action: fetchMessageListForUser, state: initiated, userId: {}", userId);
+        logger.info("action: fetchMessageListForUser, state: initiated, userId: {}, applications: {}", userId, applications);
         final PagedResponse<ListOfInboxMessages> response = new PagedResponse<>(inboxService.fetchMessageListForUser(userId, Arrays.asList(applications.split(",")), onlyUnread, pageable), pageable.getPageNumber(), pageable.getPageSize());
         logger.info("action: fetchMessageListForUser, state: succeeded, size: {}", response.getResponseObject().size());
         return response;
@@ -119,7 +119,7 @@ public class InboxController {
     public ObjectResponse<GetInboxMessageCountResponse> fetchMessageCountForUser(
             @NotNull @Size(min = 1, max = 255) @RequestParam("userId") String userId,
             @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId) throws AppNotFoundException {
-        logger.info("action: fetchMessageCountForUser, state: initiated, userId: {}", userId);
+        logger.info("action: fetchMessageCountForUser, state: initiated, userId: {}, applicationId: {}", userId, appId);
         final GetInboxMessageCountResponse response = inboxService.fetchMessageCountForUser(userId, appId);
         logger.info("action: fetchMessageCountForUser, state: succeeded, count: {}", response.getCountAll());
         return new ObjectResponse<>(response);
