@@ -81,6 +81,7 @@ public class AdministrationController {
             logger.debug("action: listUnconfiguredApplications, state: succeeded, size: {}", applications.size());
             return new ObjectResponse<>(response);
         } catch (PowerAuthClientException ex) {
+            logger.error("action: listUnconfiguredApplications, state: failed, error: PowerAuth client error");
             logger.warn(ex.getMessage(), ex);
             throw new PushServerException("Unconfigured application list failed because application name could not be retrieved");
         }

@@ -99,6 +99,7 @@ public class SendCampaignController {
         try {
             final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(id);
             if (campaignEntityOptional.isEmpty()) {
+                logger.warn("action: sendCampaign, state: failed, campaignId: {}, error: Campaign not found", id);
                 throw new PushServerException("Campaign with entered ID does not exist");
             }
             JobParameters jobParameters = new JobParametersBuilder()
@@ -109,12 +110,16 @@ public class SendCampaignController {
             logger.info("action: sendCampaign, state: succeeded, campaignId: {}", id);
             return new Response();
         } catch (JobExecutionAlreadyRunningException e) {
+            logger.error("action: sendCampaign, state: failed, campaignId: {}, error: Job execution already running", id);
             throw new PushServerException("Job execution already running", e);
         } catch (JobRestartException e) {
+            logger.error("action: sendCampaign, state: failed, campaignId: {}, error: Job is restarted", id);
             throw new PushServerException("Job is restarted", e);
         } catch (JobInstanceAlreadyCompleteException e) {
+            logger.error("action: sendCampaign, state: failed, campaignId: {}, error: Job instance already completed", id);
             throw new PushServerException("Job instance already completed", e);
         } catch (JobParametersInvalidException e) {
+            logger.error("action: sendCampaign, state: failed, campaignId: {}, error: Job parameters are invalid", id);
             throw new PushServerException("Job parameters are invalid", e);
         }
     }
@@ -137,6 +142,7 @@ public class SendCampaignController {
                 new PushServerException("Campaign with entered ID does not exist"));
         String errorMessage = TestCampaignRequestValidator.validate(requestedObject);
         if (errorMessage != null) {
+            logger.error("action: sendTestCampaign, state: failed, campaignId: {}, error: Validation failed", id);
             throw new PushServerException(errorMessage);
         }
         PushMessage pushMessage = new PushMessage();

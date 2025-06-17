@@ -85,6 +85,7 @@ public class PushMessageController {
                 requestObject.getAppId(), requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
         String errorMessage = SendPushMessageRequestValidator.validate(requestObject);
         if (errorMessage != null) {
+            logger.error("action: sendPushMessage, state: failed, applicationId: {}, error: Validation failed", requestObject.getAppId());
             throw new PushServerException(errorMessage);
         }
         final String appId = requestObject.getAppId();
@@ -121,6 +122,7 @@ public class PushMessageController {
         logger.info("action: sendPushMessageBatch, state: initiated, applicationId: {}, size: {}", appId, requestObject.getBatch().size());
         String errorMessage = SendPushMessageBatchRequestValidator.validate(requestObject);
         if (errorMessage != null) {
+            logger.error("action: sendPushMessageBatch, state: failed, applicationId: {}, error: Validation failed", appId);
             throw new PushServerException(errorMessage);
         }
 
