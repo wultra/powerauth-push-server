@@ -3,6 +3,9 @@
 **/src/main/java/generated/
 **/.springBeans
 
+# Javac temporary files
+javac.*.args
+
 ### NetBeans template
 **/nbproject/private/
 **/nbproject/

@@ -1,3 +1,0 @@
--cp
-/dev/null
-powerauth-push-server/src/main/java/com/wultra/push/service/hms/HmsSendResponse.java
