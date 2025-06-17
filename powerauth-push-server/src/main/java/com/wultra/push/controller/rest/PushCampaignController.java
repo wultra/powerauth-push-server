@@ -92,10 +92,9 @@ public class PushCampaignController {
             throw new PushServerException("Request object must not be empty");
         }
         final String appId = requestObject.getAppId();
-        logger.info("action: createCampaign, state: initiated, applicationId: {}", appId);
         final String errorMessage = CreateCampaignRequestValidator.validate(requestObject);
         if (errorMessage != null) {
-            logger.error("action: createCampaign, state: failed, applicationId: {}, error: Validation failed", appId);
+            logger.error("action: createCampaign, state: failed, applicationId: {}, error: {}", appId, errorMessage);
             throw new PushServerException(errorMessage);
         }
 
@@ -150,7 +149,6 @@ public class PushCampaignController {
     @Operation(summary = "Return details about campaign",
                   description = "Campaign specified by id. Details contain campaign id, application id, status if campaign was sent and message.")
     public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
-        logger.info("action: getCampaign, state: initiated, campaignId: {}", campaignId);
         final PushCampaignEntity campaign = findPushCampaignById(campaignId);
         final CampaignResponse campaignResponse = new CampaignResponse();
         campaignResponse.setId(campaign.getId());
@@ -213,7 +211,6 @@ public class PushCampaignController {
     public Response addUsersToCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
         checkRequestNullity(request);
         final ListOfUsers listOfUsers = request.getRequestObject();
-        logger.info("action: addUsersToCampaign, state: initiated, campaignId: {}, size: {}", id, listOfUsers.size());
         assureExistsPushCampaignById(id);
         for (String user : listOfUsers) {
             if (pushCampaignUserRepository.findFirstByUserIdAndCampaignId(user, id) == null) {
@@ -272,7 +269,6 @@ public class PushCampaignController {
                           "Users are described as list of their ids in Request body")
     public Response deleteUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
         ListOfUsers listOfUsers = request.getRequestObject();
-        logger.info("action: deleteUsersFromCampaign, state: initiated, campaignId: {}, size: {}", id, listOfUsers.size());
         for (String user : listOfUsers) {
             pushCampaignUserRepository.deleteByCampaignIdAndUserId(id, user);
         }

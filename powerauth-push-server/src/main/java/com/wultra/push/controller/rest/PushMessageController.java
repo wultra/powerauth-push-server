@@ -81,11 +81,9 @@ public class PushMessageController {
         if (requestObject.getMessage() == null) {
             throw new PushServerException("Message must not be empty");
         }
-        logger.info("action: sendPushMessage, state: initiated, applicationId: {}, activationId: {}, userId: {}", 
-                requestObject.getAppId(), requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
         String errorMessage = SendPushMessageRequestValidator.validate(requestObject);
         if (errorMessage != null) {
-            logger.error("action: sendPushMessage, state: failed, applicationId: {}, error: Validation failed", requestObject.getAppId());
+            logger.error("action: sendPushMessage, state: failed, applicationId: {}, error: {}", requestObject.getAppId(), errorMessage);
             throw new PushServerException(errorMessage);
         }
         final String appId = requestObject.getAppId();
@@ -119,10 +117,9 @@ public class PushMessageController {
         }
 
         final String appId = requestObject.getAppId();
-        logger.info("action: sendPushMessageBatch, state: initiated, applicationId: {}, size: {}", appId, requestObject.getBatch().size());
         String errorMessage = SendPushMessageBatchRequestValidator.validate(requestObject);
         if (errorMessage != null) {
-            logger.error("action: sendPushMessageBatch, state: failed, applicationId: {}, error: Validation failed", appId);
+            logger.error("action: sendPushMessageBatch, state: failed, applicationId: {}, error: {}", appId, errorMessage);
             throw new PushServerException(errorMessage);
         }
 

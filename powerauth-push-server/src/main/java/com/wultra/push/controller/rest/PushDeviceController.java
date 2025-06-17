@@ -58,8 +58,6 @@ public class PushDeviceController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("action: createDevice, state: initiated, applicationId: {}, activationId: {}", 
-                requestObject.getAppId(), requestObject.getActivationId());
         final Response response = pushDeviceService.createDevice(requestObject);
         logger.info("action: createDevice, state: succeeded, applicationId: {}, activationId: {}", 
                 requestObject.getAppId(), requestObject.getActivationId());
@@ -83,8 +81,6 @@ public class PushDeviceController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("action: createDeviceMultipleActivations, state: initiated, applicationId: {}, activationIds: {}", 
-                requestObject.getAppId(), requestObject.getActivationIds());
         final Response response = pushDeviceService.createDeviceMultipleActivations(requestObject);
         logger.info("action: createDeviceMultipleActivations, state: succeeded, applicationId: {}, size: {}", 
                 requestObject.getAppId(), requestObject.getActivationIds() != null ? requestObject.getActivationIds().size() : 0);
@@ -105,7 +101,6 @@ public class PushDeviceController {
         if (request == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("action: updateDeviceStatus, state: initiated, activationId: {}", request.getActivationId());
         final Response response = pushDeviceService.updateDeviceStatus(request);
         logger.info("action: updateDeviceStatus, state: succeeded, activationId: {}", request.getActivationId());
         return response;
@@ -126,7 +121,6 @@ public class PushDeviceController {
         if (requestObject == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("action: deleteDevice, state: initiated, applicationId: {}", requestObject.getAppId());
         final Response response = pushDeviceService.deleteDevice(requestObject);
         logger.info("action: deleteDevice, state: succeeded, applicationId: {}", requestObject.getAppId());
         return response;

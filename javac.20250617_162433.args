@@ -1,0 +1,3 @@
+-cp
+/dev/null
+powerauth-push-server/src/main/java/com/wultra/push/service/hms/request/Message.java
