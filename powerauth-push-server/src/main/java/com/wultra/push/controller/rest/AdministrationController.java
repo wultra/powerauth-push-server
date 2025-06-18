@@ -122,7 +122,7 @@ public class AdministrationController {
         if (requestObject.isIncludeHms()) {
             response.setHmsProjectId(appCredentialsEntity.getHmsProjectId());
         }
-        logger.info("action: getApplicationDetail, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: getApplicationDetail, state: succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -146,7 +146,7 @@ public class AdministrationController {
         logger.info("action: createApplication, state: initiated, applicationId: {}", requestObject.getAppId());
         final AppCredentialsEntity appCredentials = administrationService.createAppCredentials(requestObject);
         final CreateApplicationResponse response = new CreateApplicationResponse(appCredentials.getAppId());
-        logger.info("action: createApplication, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: createApplication, state: succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -169,7 +169,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         administrationService.updateIosAppCredentials(requestObject);
-        logger.info("action: updateIos, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateIos, state: succeeded");
         return new Response();
     }
 
@@ -188,7 +188,7 @@ public class AdministrationController {
         }
         logger.info("action: updateApns, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.updateApnsAppCredentials(requestObject);
-        logger.info("action: updateApns, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateApns, state: succeeded");
         return new Response();
     }
 
@@ -211,7 +211,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         administrationService.removeIosAppCredentials(requestObject.getAppId());
-        logger.info("action: removeIos, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: removeIos, state: succeeded");
         return new Response();
     }
 
@@ -229,7 +229,7 @@ public class AdministrationController {
         }
         logger.info("action: removeApns, state: initiated, applicationId: {}", appId);
         administrationService.removeApnsAppCredentials(appId);
-        logger.info("action: removeApns, state: succeeded, applicationId: {}", appId);
+        logger.info("action: removeApns, state: succeeded");
         return new Response();
     }
 
@@ -252,7 +252,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         administrationService.updateAndroidAppCredentials(requestObject);
-        logger.info("action: updateAndroid, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateAndroid, state: succeeded");
         return new Response();
     }
 
@@ -271,7 +271,7 @@ public class AdministrationController {
         }
         logger.info("action: updateFcm, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.updateFcmAppCredentials(requestObject);
-        logger.info("action: updateFcm, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateFcm, state: succeeded");
         return new Response();
     }
 
@@ -294,7 +294,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         administrationService.removeAndroidAppCredentials(requestObject.getAppId());
-        logger.info("action: removeAndroid, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: removeAndroid, state: succeeded");
         return new Response();
     }
 
@@ -312,7 +312,7 @@ public class AdministrationController {
         }
         logger.info("action: removeFcm, state: initiated, applicationId: {}", appId);
         administrationService.removeFcmAppCredentials(appId);
-        logger.info("action: removeFcm, state: succeeded, applicationId: {}", appId);
+        logger.info("action: removeFcm, state: succeeded");
         return new Response();
     }
 
@@ -329,7 +329,7 @@ public class AdministrationController {
         final UpdateHuaweiRequest requestObject = request.getRequestObject();
         logger.info("action: updateHuawei, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.updateHuaweiAppCredentials(requestObject);
-        logger.info("action: updateHuawei, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateHuawei, state: succeeded");
         return new Response();
     }
 
@@ -346,7 +346,7 @@ public class AdministrationController {
         final UpdateHmsRequest requestObject = request.getRequestObject();
         logger.info("action: updateHms, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.updateHmsAppCredentials(requestObject);
-        logger.info("action: updateHms, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateHms, state: succeeded");
         return new Response();
     }
 
@@ -363,7 +363,7 @@ public class AdministrationController {
         final RemoveHuaweiRequest requestObject = request.getRequestObject();
         logger.info("action: removeHuawei, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.removeHuaweiAppCredentials(requestObject.getAppId());
-        logger.info("action: removeHuawei, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: removeHuawei, state: succeeded");
         return new Response();
     }
 
@@ -382,7 +382,7 @@ public class AdministrationController {
         }
         logger.info("action: removeHms, state: initiated, applicationId: {}", appId);
         administrationService.removeHmsAppCredentials(appId);
-        logger.info("action: removeHms, state: succeeded, applicationId: {}", appId);
+        logger.info("action: removeHms, state: succeeded");
         return new Response();
     }
 

@@ -107,7 +107,7 @@ public class SendCampaignController {
                     .addDate("timestamp", new Date())
                     .toJobParameters();
             jobLauncher.run(job, jobParameters);
-            logger.info("action: sendCampaign, state: succeeded, campaignId: {}", id);
+            logger.info("action: sendCampaign, state: succeeded");
             return new Response();
         } catch (JobExecutionAlreadyRunningException e) {
             logger.error("action: sendCampaign, state: failed, campaignId: {}, error: {}", id, e.getMessage());

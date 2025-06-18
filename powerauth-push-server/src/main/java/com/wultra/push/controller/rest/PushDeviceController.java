@@ -57,8 +57,8 @@ public class PushDeviceController {
                           ---Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID, so that there are no incorrect bindings.""")
     public Response createDevice(@Valid @RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
         final CreateDeviceRequest requestObject = request.getRequestObject();
-        logger.info("action: createDevice, state: initiated, applicationId: {}, activationId: {}, userId: {}", 
-                requestObject.getAppId(), requestObject.getActivationId(), requestObject.getUserId());
+        logger.info("action: createDevice, state: initiated, activationId: {}, userId: {}, applicationId: {}", 
+                requestObject.getActivationId(), requestObject.getUserId(), requestObject.getAppId());
         final Response response = pushDeviceService.createDevice(requestObject);
         logger.info("action: createDevice, state: succeeded");
         return response;

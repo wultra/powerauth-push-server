@@ -136,7 +136,7 @@ public class PushCampaignController {
             deleteCampaignResponse.setDeleted(true);
         }
         pushCampaignUserRepository.deleteByCampaignId(campaignId);
-        logger.info("action: deleteCampaign, state: succeeded, campaignId: {}, deleted: {}", campaignId, deleteCampaignResponse.isDeleted());
+        logger.info("action: deleteCampaign, state: succeeded, deleted: {}", deleteCampaignResponse.isDeleted());
         return new ObjectResponse<>(deleteCampaignResponse);
     }
 
@@ -256,7 +256,7 @@ public class PushCampaignController {
         PagedResponse<ListOfUsersFromCampaignResponse> listOfUsersPagedResponse = new PagedResponse<>(listOfUsersFromCampaignResponse);
         listOfUsersPagedResponse.setPage(pageable.getPageNumber());
         listOfUsersPagedResponse.setSize(pageable.getPageSize());
-        logger.info("action: getListOfUsersFromCampaign, state: succeeded, campaignId: {}, size: {}", id, listOfUsers.size());
+        logger.info("action: getListOfUsersFromCampaign, state: succeeded, size: {}", listOfUsers.size());
         return listOfUsersPagedResponse;
     }
 
@@ -325,7 +325,7 @@ public class PushCampaignController {
     private void assureExistsPushCampaignById(Long campaignId) throws PushServerException {
         final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
         if (campaignEntityOptional.isEmpty()) {
-            logger.error("action: assureExistsPushCampaignById, state: failed, campaignId: {}, error: Campaign with entered ID does not exist", campaignId);
+            logger.error("action: assureExistsPushCampaignById, state: failed, error: Campaign with entered ID does not exist");
             throw new PushServerException("Campaign with entered ID does not exist");
         }
     }
