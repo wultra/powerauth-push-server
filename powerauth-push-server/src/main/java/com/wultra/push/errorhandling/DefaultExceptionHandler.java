@@ -147,14 +147,8 @@ public class DefaultExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public @ResponseBody ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        logger.warn("Error occurred when calling an API: {}", e.getMessage());
-        logger.debug("Exception detail: ", e);
-        final ExtendedError error = new ExtendedError("ERROR_REQUEST", "Invalid method parameter value");
-        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
-            error.getViolations().add(
-                    new Violation(fieldError.getField(), fieldError.getRejectedValue(), fieldError.getDefaultMessage())
-            );
-        }
-        return new ErrorResponse(error);
+        logger.error(e.getMessage(), e);
+        // Return the same error format as PushServerException for API compatibility
+        return new ErrorResponse(Error.Code.ERROR_GENERIC, e);
     }
 }
