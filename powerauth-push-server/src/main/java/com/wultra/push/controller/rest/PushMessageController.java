@@ -87,7 +87,7 @@ public class PushMessageController {
                 requestObject.getAppId(), requestObject.getMessage().getActivationId(), requestObject.getMessage().getUserId());
         String errorMessage = SendPushMessageRequestValidator.validate(requestObject);
         if (errorMessage != null) {
-            logger.error("action: sendPushMessage, state: failed, applicationId: {}, error: {}", requestObject.getAppId(), errorMessage);
+            logger.error("action: sendPushMessage, state: failed, error: {}", errorMessage);
             throw new PushServerException(errorMessage);
         }
         final String appId = requestObject.getAppId();
@@ -126,7 +126,7 @@ public class PushMessageController {
         logger.info("action: sendPushMessageBatch, state: initiated, applicationId: {}, size: {}", appId, batch.size());
         String errorMessage = SendPushMessageBatchRequestValidator.validate(requestObject);
         if (errorMessage != null) {
-            logger.error("action: sendPushMessageBatch, state: failed, applicationId: {}, error: {}", appId, errorMessage);
+            logger.error("action: sendPushMessageBatch, state: failed, error: {}", errorMessage);
             throw new PushServerException(errorMessage);
         }
 

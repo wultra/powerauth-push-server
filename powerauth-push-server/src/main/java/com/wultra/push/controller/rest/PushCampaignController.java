@@ -96,7 +96,7 @@ public class PushCampaignController {
         logger.info("action: createCampaign, state: initiated, applicationId: {}", appId);
         final String errorMessage = CreateCampaignRequestValidator.validate(requestObject);
         if (errorMessage != null) {
-            logger.error("action: createCampaign, state: failed, applicationId: {}, error: {}", appId, errorMessage);
+            logger.error("action: createCampaign, state: failed, error: {}", errorMessage);
             throw new PushServerException(errorMessage);
         }
 

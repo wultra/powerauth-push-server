@@ -99,7 +99,7 @@ public class SendCampaignController {
         try {
             final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(id);
             if (campaignEntityOptional.isEmpty()) {
-                logger.warn("action: sendCampaign, state: failed, campaignId: {}, error: Campaign not found", id);
+                logger.warn("action: sendCampaign, state: failed, error: Campaign not found");
                 throw new PushServerException("Campaign with entered ID does not exist");
             }
             JobParameters jobParameters = new JobParametersBuilder()
@@ -110,16 +110,16 @@ public class SendCampaignController {
             logger.info("action: sendCampaign, state: succeeded");
             return new Response();
         } catch (JobExecutionAlreadyRunningException e) {
-            logger.error("action: sendCampaign, state: failed, campaignId: {}, error: {}", id, e.getMessage());
+            logger.error("action: sendCampaign, state: failed, error: {}", e.getMessage());
             throw new PushServerException("Job execution already running", e);
         } catch (JobRestartException e) {
-            logger.error("action: sendCampaign, state: failed, campaignId: {}, error: {}", id, e.getMessage());
+            logger.error("action: sendCampaign, state: failed, error: {}", e.getMessage());
             throw new PushServerException("Job is restarted", e);
         } catch (JobInstanceAlreadyCompleteException e) {
-            logger.error("action: sendCampaign, state: failed, campaignId: {}, error: {}", id, e.getMessage());
+            logger.error("action: sendCampaign, state: failed, error: {}", e.getMessage());
             throw new PushServerException("Job instance already completed", e);
         } catch (JobParametersInvalidException e) {
-            logger.error("action: sendCampaign, state: failed, campaignId: {}, error: {}", id, e.getMessage());
+            logger.error("action: sendCampaign, state: failed, error: {}", e.getMessage());
             throw new PushServerException("Job parameters are invalid", e);
         }
     }
@@ -138,17 +138,17 @@ public class SendCampaignController {
     public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
         final TestCampaignRequest requestedObject = request.getRequestObject();
         if (requestedObject == null) {
-            logger.error("action: sendTestCampaign, state: failed, campaignId: {}, error: Request object must not be empty", id);
+            logger.error("action: sendTestCampaign, state: failed, error: Request object must not be empty");
             throw new PushServerException("Request object must not be empty");
         }
         logger.info("action: sendTestCampaign, state: initiated, campaignId: {}, userId: {}", id, requestedObject.getUserId());
         final PushCampaignEntity campaign = pushCampaignRepository.findById(id).orElseThrow(() -> {
-            logger.error("action: sendTestCampaign, state: failed, campaignId: {}, error: Campaign with entered ID does not exist", id);
+            logger.error("action: sendTestCampaign, state: failed, error: Campaign with entered ID does not exist");
             return new PushServerException("Campaign with entered ID does not exist");
         });
         String errorMessage = TestCampaignRequestValidator.validate(requestedObject);
         if (errorMessage != null) {
-            logger.error("action: sendTestCampaign, state: failed, campaignId: {}, error: {}", id, errorMessage);
+            logger.error("action: sendTestCampaign, state: failed, error: {}", errorMessage);
             throw new PushServerException(errorMessage);
         }
         PushMessage pushMessage = new PushMessage();
