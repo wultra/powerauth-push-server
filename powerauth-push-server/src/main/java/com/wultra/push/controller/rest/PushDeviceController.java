@@ -28,8 +28,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
-
 /**
  * Controller responsible for device registration related business processes.
  *
@@ -55,8 +53,12 @@ public class PushDeviceController {
                           Create a new device push token (platform specific). The call must include an activation ID, so that the token is associated with given user.Request body should contain application ID, device token, device's platform and an activation ID. If such device already exist, date on last registration is updated and also platform might be changed
 
                           ---Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation ID, so that there are no incorrect bindings.""")
-    public Response createDevice(@Valid @RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
+    public Response createDevice(@RequestBody ObjectRequest<CreateDeviceRequest> request) throws PushServerException {
         final CreateDeviceRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            logger.error("action: createDevice, state: failed, error: Request object must not be empty");
+            throw new PushServerException("Request object must not be empty");
+        }
         logger.info("action: createDevice, state: initiated, applicationId: {}, activationId: {}, userId: {}", 
                 requestObject.getAppId(), requestObject.getActivationId(), requestObject.getUserId());
         final Response response = pushDeviceService.createDevice(requestObject);
@@ -76,8 +78,12 @@ public class PushDeviceController {
                     Create a new device push token (platform specific). The call must include one or more activation IDs.Request body should contain application ID, device token, device's platform and list of activation IDs. If such device already exist, date on last registration is updated and also platform might be changed
 
                     ---Note: Since this endpoint is usually called by the back-end service, it is not secured in any way. It's the service that calls this endpoint responsibility to assure that the device is somehow authenticated before the push token is assigned with given activation IDs, so that there are no incorrect bindings.""")
-    public Response createDeviceMultipleActivations(@Valid @RequestBody ObjectRequest<CreateDeviceForActivationsRequest> request) throws PushServerException {
+    public Response createDeviceMultipleActivations(@RequestBody ObjectRequest<CreateDeviceForActivationsRequest> request) throws PushServerException {
         final CreateDeviceForActivationsRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            logger.error("action: createDeviceMultipleActivations, state: failed, error: Request object must not be empty");
+            throw new PushServerException("Request object must not be empty");
+        }
         logger.info("action: createDeviceMultipleActivations, state: initiated, applicationId: {}, size: {}", 
                 requestObject.getAppId(), requestObject.getActivationIds() != null ? requestObject.getActivationIds().size() : 0);
         final Response response = pushDeviceService.createDeviceMultipleActivations(requestObject);
@@ -116,8 +122,12 @@ public class PushDeviceController {
     @Operation(summary = "Delete a device",
                   description = "Remove device identified by application ID and device token. " +
                           "If device identifiers don't match, nothing happens")
-    public Response deleteDevice(@Valid @RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
+    public Response deleteDevice(@RequestBody ObjectRequest<DeleteDeviceRequest> request) throws PushServerException {
         final DeleteDeviceRequest requestObject = request.getRequestObject();
+        if (requestObject == null) {
+            logger.error("action: deleteDevice, state: failed, error: Request object must not be empty");
+            throw new PushServerException("Request object must not be empty");
+        }
         logger.info("action: deleteDevice, state: initiated, applicationId: {}", requestObject.getAppId());
         final Response response = pushDeviceService.deleteDevice(requestObject);
         logger.info("action: deleteDevice, state: succeeded");
