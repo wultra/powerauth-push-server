@@ -82,7 +82,7 @@ public class AdministrationController {
             return new ObjectResponse<>(response);
         } catch (PowerAuthClientException ex) {
             logger.error("action: listUnconfiguredApplications, state: failed, error: {}", ex.getMessage());
-            throw new PushServerException("Unconfigured application list failed because application name could not be retrieved");
+            throw new PushServerException("Unconfigured application list failed because application name could not be retrieved", ex);
         }
     }
 
