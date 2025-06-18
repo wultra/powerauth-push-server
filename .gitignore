@@ -25,3 +25,6 @@ dist/
 
 rebel.xml
 **/rebel.xml
+
+# Compiled class files
+**/*.class
