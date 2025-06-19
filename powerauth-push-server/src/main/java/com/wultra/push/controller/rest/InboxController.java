@@ -121,7 +121,7 @@ public class InboxController {
             @NotNull @Size(min = 1, max = 255) @RequestParam("appId") String appId) throws AppNotFoundException {
         logger.info("action: fetchMessageCountForUser, state: initiated, userId: {}, applicationId: {}", userId, appId);
         final GetInboxMessageCountResponse response = inboxService.fetchMessageCountForUser(userId, appId);
-        logger.info("action: fetchMessageCountForUser, state: succeeded, count: {}", response.getCountAll());
+        logger.info("action: fetchMessageCountForUser, state: succeeded, count: {}", response.getCountUnread());
         return new ObjectResponse<>(response);
     }
 
