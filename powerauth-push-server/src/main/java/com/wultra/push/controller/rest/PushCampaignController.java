@@ -325,7 +325,7 @@ public class PushCampaignController {
     private void assureExistsPushCampaignById(Long campaignId) throws PushServerException {
         final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
         if (campaignEntityOptional.isEmpty()) {
-            logger.error("action: assureExistsPushCampaignById, state: failed, error: Campaign with entered ID does not exist");
+            logger.error("action: assureExistsPushCampaignById, state: failed, campaignId: {}, error: Campaign with entered ID does not exist", campaignId);
             throw new PushServerException("Campaign with entered ID does not exist");
         }
     }

@@ -40,6 +40,7 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -135,12 +136,8 @@ public class SendCampaignController {
     @PostMapping(value = "test/{id}")
     @Operation(summary = "Send a test campaign",
                   description = "Send message from a specific campaign on test user identified in request body, userId param, to check rightness of that campaign.")
-    public Response sendTestCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
+    public Response sendTestCampaign(@PathVariable(value = "id") Long id, @Valid @RequestBody ObjectRequest<TestCampaignRequest> request) throws PushServerException {
         final TestCampaignRequest requestedObject = request.getRequestObject();
-        if (requestedObject == null) {
-            logger.error("action: sendTestCampaign, state: failed, error: Request object must not be empty");
-            throw new PushServerException("Request object must not be empty");
-        }
         logger.info("action: sendTestCampaign, state: initiated, campaignId: {}, userId: {}", id, requestedObject.getUserId());
         final PushCampaignEntity campaign = pushCampaignRepository.findById(id).orElseThrow(() -> {
             logger.error("action: sendTestCampaign, state: failed, error: Campaign with entered ID does not exist");
