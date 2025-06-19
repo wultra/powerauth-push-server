@@ -57,11 +57,11 @@ public class AdministrationController {
     @GetMapping(value = "list")
     @Operation(summary = "List all applications", description = "List all application registered in Push Server")
     public ObjectResponse<GetApplicationListResponse> listApplications() {
-        logger.debug("action: listApplications, state: initiated");
+        logger.info("action: listApplications, state: initiated");
         final List<PushServerApplication> applications = administrationService.findAllApplications();
         final GetApplicationListResponse response = new GetApplicationListResponse();
         response.setApplicationList(applications);
-        logger.debug("action: listApplications, state: succeeded");
+        logger.info("action: listApplications, state: succeeded, size: {}", applications.size());
         return new ObjectResponse<>(response);
     }
 
@@ -74,15 +74,15 @@ public class AdministrationController {
     @Operation(summary = "List unconfigured applications", description = "List unconfigured application in Push Server")
     public ObjectResponse<GetApplicationListResponse> listUnconfiguredApplications() throws PushServerException {
         try {
-            logger.debug("action: listUnconfiguredApplications, state: initiated");
+            logger.info("action: listUnconfiguredApplications, state: initiated");
             final List<PushServerApplication> applications = administrationService.findUnconfiguredApplications();
             final GetApplicationListResponse response = new GetApplicationListResponse();
             response.setApplicationList(applications);
-            logger.debug("action: listUnconfiguredApplications, state: succeeded");
+            logger.info("action: listUnconfiguredApplications, state: succeeded, size: {}", applications.size());
             return new ObjectResponse<>(response);
         } catch (PowerAuthClientException ex) {
-            logger.warn(ex.getMessage(), ex);
-            throw new PushServerException("Unconfigured application list failed because application name could not be retrieved");
+            logger.error("action: listUnconfiguredApplications, state: failed, error: {}", ex.getMessage());
+            throw new PushServerException("Unconfigured application list failed because application name could not be retrieved", ex);
         }
     }
 
@@ -95,10 +95,11 @@ public class AdministrationController {
     @PostMapping(value = "detail")
     @Operation(summary = "Get application detail", description = "Obtain registered application detail")
     public ObjectResponse<GetApplicationDetailResponse> getApplicationDetail(@RequestBody ObjectRequest<GetApplicationDetailRequest> request) throws PushServerException {
-        logger.debug("action: getApplicationDetail, state: initiated");
         final GetApplicationDetailRequest requestObject = request.getRequestObject();
+        logger.info("action: getApplicationDetail, state: initiated, applicationId: {}", requestObject != null ? requestObject.getAppId() : null);
         final String errorMessage = GetApplicationDetailRequestValidator.validate(requestObject);
         if (errorMessage != null) {
+            logger.error("action: getApplicationDetail, state: failed, error: {}", errorMessage);
             throw new PushServerException(errorMessage);
         }
         final GetApplicationDetailResponse response = new GetApplicationDetailResponse();
@@ -121,7 +122,7 @@ public class AdministrationController {
         if (requestObject.isIncludeHms()) {
             response.setHmsProjectId(appCredentialsEntity.getHmsProjectId());
         }
-        logger.debug("action: getApplicationDetail, state: succeeded");
+        logger.info("action: getApplicationDetail, state: succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -145,7 +146,7 @@ public class AdministrationController {
         logger.info("action: createApplication, state: initiated, applicationId: {}", requestObject.getAppId());
         final AppCredentialsEntity appCredentials = administrationService.createAppCredentials(requestObject);
         final CreateApplicationResponse response = new CreateApplicationResponse(appCredentials.getAppId());
-        logger.info("action: createApplication, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: createApplication, state: succeeded");
         return new ObjectResponse<>(response);
     }
 
@@ -168,7 +169,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         administrationService.updateIosAppCredentials(requestObject);
-        logger.info("action: updateIos, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateIos, state: succeeded");
         return new Response();
     }
 
@@ -187,7 +188,7 @@ public class AdministrationController {
         }
         logger.info("action: updateApns, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.updateApnsAppCredentials(requestObject);
-        logger.info("action: updateApns, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateApns, state: succeeded");
         return new Response();
     }
 
@@ -210,7 +211,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         administrationService.removeIosAppCredentials(requestObject.getAppId());
-        logger.info("action: removeIos, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: removeIos, state: succeeded");
         return new Response();
     }
 
@@ -228,7 +229,7 @@ public class AdministrationController {
         }
         logger.info("action: removeApns, state: initiated, applicationId: {}", appId);
         administrationService.removeApnsAppCredentials(appId);
-        logger.info("action: removeApns, state: succeeded, applicationId: {}", appId);
+        logger.info("action: removeApns, state: succeeded");
         return new Response();
     }
 
@@ -251,7 +252,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         administrationService.updateAndroidAppCredentials(requestObject);
-        logger.info("action: updateAndroid, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateAndroid, state: succeeded");
         return new Response();
     }
 
@@ -270,7 +271,7 @@ public class AdministrationController {
         }
         logger.info("action: updateFcm, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.updateFcmAppCredentials(requestObject);
-        logger.info("action: updateFcm, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateFcm, state: succeeded");
         return new Response();
     }
 
@@ -293,7 +294,7 @@ public class AdministrationController {
             throw new PushServerException(errorMessage);
         }
         administrationService.removeAndroidAppCredentials(requestObject.getAppId());
-        logger.info("action: removeAndroid, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: removeAndroid, state: succeeded");
         return new Response();
     }
 
@@ -311,7 +312,7 @@ public class AdministrationController {
         }
         logger.info("action: removeFcm, state: initiated, applicationId: {}", appId);
         administrationService.removeFcmAppCredentials(appId);
-        logger.info("action: removeFcm, state: succeeded, applicationId: {}", appId);
+        logger.info("action: removeFcm, state: succeeded");
         return new Response();
     }
 
@@ -328,7 +329,7 @@ public class AdministrationController {
         final UpdateHuaweiRequest requestObject = request.getRequestObject();
         logger.info("action: updateHuawei, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.updateHuaweiAppCredentials(requestObject);
-        logger.info("action: updateHuawei, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateHuawei, state: succeeded");
         return new Response();
     }
 
@@ -345,7 +346,7 @@ public class AdministrationController {
         final UpdateHmsRequest requestObject = request.getRequestObject();
         logger.info("action: updateHms, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.updateHmsAppCredentials(requestObject);
-        logger.info("action: updateHms, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: updateHms, state: succeeded");
         return new Response();
     }
 
@@ -362,7 +363,7 @@ public class AdministrationController {
         final RemoveHuaweiRequest requestObject = request.getRequestObject();
         logger.info("action: removeHuawei, state: initiated, applicationId: {}", requestObject.getAppId());
         administrationService.removeHuaweiAppCredentials(requestObject.getAppId());
-        logger.info("action: removeHuawei, state: succeeded, applicationId: {}", requestObject.getAppId());
+        logger.info("action: removeHuawei, state: succeeded");
         return new Response();
     }
 
@@ -381,7 +382,7 @@ public class AdministrationController {
         }
         logger.info("action: removeHms, state: initiated, applicationId: {}", appId);
         administrationService.removeHmsAppCredentials(appId);
-        logger.info("action: removeHms, state: succeeded, applicationId: {}", appId);
+        logger.info("action: removeHms, state: succeeded");
         return new Response();
     }
 
