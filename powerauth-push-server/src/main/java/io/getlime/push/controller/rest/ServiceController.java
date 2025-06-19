@@ -20,6 +20,7 @@ import io.getlime.core.rest.model.base.response.ObjectResponse;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.model.response.ServiceStatusResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,7 @@ import java.util.Date;
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@Slf4j
 @RestController
 @RequestMapping(value = "push/service")
 public class ServiceController {
@@ -66,6 +68,7 @@ public class ServiceController {
     @Operation(summary = "Service status",
                   description = "Send a system status response, with basic information about the running application.")
     public ObjectResponse<ServiceStatusResponse> getServiceStatus() {
+        logger.info("action: getServiceStatus, state: initiated");
         ServiceStatusResponse response = new ServiceStatusResponse();
         response.setApplicationName(pushServiceConfiguration.getPushServerName());
         response.setApplicationDisplayName(pushServiceConfiguration.getPushServerDisplayName());
@@ -75,6 +78,7 @@ public class ServiceController {
             response.setVersion(buildProperties.getVersion());
             response.setBuildTime(Date.from(buildProperties.getTime()));
         }
+        logger.info("action: getServiceStatus, state: succeeded");
         return new ObjectResponse<>(response);
     }
 }
