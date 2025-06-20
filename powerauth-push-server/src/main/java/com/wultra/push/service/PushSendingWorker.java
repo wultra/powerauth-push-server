@@ -161,7 +161,7 @@ public class PushSendingWorker {
                 }
             } else {
                 // This state should not happen, only in case when response from server is invalid
-                logger.warn("action: sendMessageToFcm, state: failed, error: {}, response: {} ", " empty or invalid response", response);
+                logger.warn("action: sendMessageToFcm, state: failed, error: {}, response: {} ", "empty or invalid response", response);
                 callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
             }
         });
