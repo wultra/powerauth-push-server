@@ -28,7 +28,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+
 
 /**
  * Controller responsible for device registration related business processes.
