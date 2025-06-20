@@ -226,7 +226,7 @@ public class PushSendingWorker {
         });
 
         final Consumer<Throwable> throwableConsumer = Context.current().wrapConsumer(throwable -> {
-            logger.warn("action: sendMessageToHms, state: failed, error: {}, code: {}, message: {}", throwable.getMessage());
+            logger.warn("action: sendMessageToHms, state: failed, error: {}", throwable.getMessage());
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         });
 
