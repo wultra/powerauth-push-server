@@ -176,9 +176,13 @@ public class PushSendingWorker {
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                         return;
                     }
-                    default -> {
+                    case UNAVAILABLE, INTERNAL, QUOTA_EXCEEDED -> {
                         // TODO - implement throttling of messages, see:
                         // https://firebase.google.com/docs/cloud-messaging/admin/errors
+                        callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
+                        return;
+                    }
+                    default -> {
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         return;
                     }
