@@ -170,7 +170,7 @@ public class PushSendingWorker {
         final Consumer<Throwable> onError = Context.current().wrapConsumer(t -> {
             if (t instanceof final RestClientException restClientException) {
                 final MessagingErrorCode errorCode = fcmConverter.convertExceptionToErrorCode(restClientException);
-                logger.warn("action: sendMessageToFcm, state: failed, response: {}, error: {}, message: {}", (restClientException).getResponse(), errorCode, t.getMessage());
+                logger.warn("action: sendMessageToFcm, state: failed, response: {}, error: {}, message: {}", restClientException.getResponse(), errorCode, t.getMessage());
                 switch (errorCode) {
                     case UNREGISTERED, INVALID_ARGUMENT -> {
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
