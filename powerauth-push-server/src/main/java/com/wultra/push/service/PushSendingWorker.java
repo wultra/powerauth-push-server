@@ -230,7 +230,7 @@ public class PushSendingWorker {
         });
 
         final Consumer<Throwable> throwableConsumer = Context.current().wrapConsumer(throwable -> {
-            logger.warn("action: sendMessageToHms, state: failed, error: {}", throwable.getMessage());
+            logger.warn("action: sendMessageToHms, state: failed, error: {}", throwable.getMessage(),throwable);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         });
 
@@ -518,7 +518,7 @@ public class PushSendingWorker {
             } else {
                 // In this case, the delivery failed because the future failed, not because APNs rejected the
                 // notification payload. This means that we should be able to attempt resending the message.
-                logger.error("action: sendMessageToApns, state: failed, error: {}", cause.getMessage());
+                logger.error("action: sendMessageToApns, state: failed, error: {}", cause.getMessage(),cause);
                 logger.debug("Exception detail:", cause);
                 callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
             }
