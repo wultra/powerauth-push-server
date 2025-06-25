@@ -174,7 +174,7 @@ public class PushMessageBody {
     }
 
     /**
-     * Get the notification category, used to distinguish actions assinged with the notification.
+     * Get the notification category, used to distinguish actions assigned with the notification.
      * @return Notification category.
      */
     public String getCategory() {
@@ -182,7 +182,7 @@ public class PushMessageBody {
     }
 
     /**
-     * Set the notification category, used to distinguish actions assinged with the notification.
+     * Set the notification category, used to distinguish actions assigned with the notification.
      * @param category Notification category.
      */
     public void setCategory(String category) {

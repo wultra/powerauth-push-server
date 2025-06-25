@@ -36,7 +36,7 @@ public class AppError extends Error {
         public static final String ERROR_MESSAGE_NOT_FOUND = "ERROR_APP_NOT_FOUND";
 
         /**
-         * Default constructor.
+         * No-arg constructor.
          */
         public Code() {
         }

@@ -87,8 +87,8 @@ public class FcmClient {
 
     /**
      * Constructor with FCM specific attributes.
-     * @param projectId Android Project ID.
-     * @param privateKey Android Private Key.
+     * @param projectId FCM Project ID.
+     * @param privateKey FCM Private Key.
      * @param pushServiceConfiguration Push service configuration.
      * @param fcmConverter FCM model converter helper.
      */

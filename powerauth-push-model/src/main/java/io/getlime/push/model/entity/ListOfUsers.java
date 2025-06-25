@@ -27,7 +27,7 @@ import java.util.List;
 public class ListOfUsers extends ArrayList<String> {
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public ListOfUsers() {
     }

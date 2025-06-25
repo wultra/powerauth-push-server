@@ -19,6 +19,7 @@ package io.getlime.push.model.entity;
 import io.getlime.push.model.enumeration.Mode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Class that contains push message sending result data.
@@ -27,30 +28,31 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class PushMessageSendResult extends BasePushMessageSendResult {
 
     /**
-     * Data associated with push messages sent to iOS devices.
+     * Data associated with push messages sent to APNs.
      */
-    private final PlatformResult ios;
+    private final PlatformResult apns;
 
     /**
-     * Data associated with push messages sent to Android devices.
+     * Data associated with push messages sent to FCM.
      */
-    private final PlatformResult android;
+    private final PlatformResult fcm;
 
     /**
-     * Data associated with push messages sent to Huawei devices.
+     * Data associated with push messages sent to HMS.
      */
-    private final PlatformResult huawei;
+    private final PlatformResult hms;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public PushMessageSendResult() {
-        this.ios = new PlatformResult();
-        this.android = new PlatformResult();
-        this.huawei =  new PlatformResult();
+        this.apns = new PlatformResult();
+        this.fcm = new PlatformResult();
+        this.hms =  new PlatformResult();
     }
 
     /**
@@ -60,9 +62,9 @@ public class PushMessageSendResult extends BasePushMessageSendResult {
      */
     public PushMessageSendResult(Mode mode) {
         super(mode);
-        this.ios = new PlatformResult();
-        this.android = new PlatformResult();
-        this.huawei =  new PlatformResult();
+        this.apns = new PlatformResult();
+        this.fcm = new PlatformResult();
+        this.hms =  new PlatformResult();
     }
 
     /**

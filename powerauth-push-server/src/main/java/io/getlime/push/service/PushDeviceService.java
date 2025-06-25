@@ -50,8 +50,8 @@ public class PushDeviceService {
         if (request == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received createDevice request, app ID: {}, activation ID: {}, token: {}, platform: {}", request.getAppId(),
-                request.getActivationId(), maskPushToken(request.getToken()), request.getPlatform());
+        logger.info("action: createDevice, state: initiated, appId: {}, activationId: {}, token: {}, platform: {}, environment: {}, activationStatus: {}, userId: {}", request.getAppId(),
+                request.getActivationId(), maskPushToken(request.getToken()), request.getPlatform(), request.getEnvironment(), request.getActivationStatus(), request.getUserId());
 
         final String errorMessage = CreateDeviceRequestValidator.validate(request);
         if (errorMessage != null) {
@@ -61,7 +61,7 @@ public class PushDeviceService {
         final AppCredentialsEntity appCredentials = findAppCredentials(request.getAppId());
 
         deviceRegistrationService.createOrUpdateDevice(request, appCredentials);
-        logger.info("The createDevice request succeeded, app ID: {}, activation ID: {}, platform: {}", request.getAppId(), request.getActivationId(), request.getPlatform());
+        logger.info("action: createDevice, state: succeeded, appId: {}, activationId: {}, platform: {}, environment: {}", request.getAppId(), request.getActivationId(), request.getPlatform(), request.getEnvironment());
         return new Response();
     }
 
@@ -73,8 +73,8 @@ public class PushDeviceService {
         if (request == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received createDeviceMultipleActivations request, app ID: {}, activation IDs: {}, token: {}, platform: {}",
-                request.getAppId(), request.getActivationIds(), maskPushToken(request.getToken()), request.getPlatform());
+        logger.info("action: createDeviceMultipleActivations, state: initiated, appId: {}, activationIds: {}, token: {}, platform: {}, environment: {}",
+                request.getAppId(), request.getActivationIds(), maskPushToken(request.getToken()), request.getPlatform(), request.getEnvironment());
 
         final String errorMessage = CreateDeviceRequestValidator.validate(request);
         if (errorMessage != null) {
@@ -84,7 +84,7 @@ public class PushDeviceService {
         final AppCredentialsEntity appCredentials = findAppCredentials(request.getAppId());
 
         deviceRegistrationService.createOrUpdateDevices(request, appCredentials);
-        logger.info("The createDeviceMultipleActivations request succeeded, app ID: {}, activation IDs: {}, platform: {}", request.getAppId(), request.getActivationIds(), request.getPlatform());
+        logger.info("action: createDeviceMultipleActivations, state: succeeded, appId: {}, activationIds: {}, platform: {}, environment: {}", request.getAppId(), request.getActivationIds(), request.getPlatform(), request.getEnvironment());
         return new Response();
     }
 
@@ -92,7 +92,7 @@ public class PushDeviceService {
         if (request == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received updateDeviceStatus request, activation ID: {}", request.getActivationId());
+        logger.info("action: updateDeviceStatus, state: initiated, activationId: {}", request.getActivationId());
 
         final String errorMessage = UpdateDeviceStatusRequestValidator.validate(request);
         if (errorMessage != null) {
@@ -100,7 +100,7 @@ public class PushDeviceService {
         }
 
         deviceRegistrationService.updateStatus(request);
-        logger.info("The updateDeviceStatus request succeeded, activation ID: {}", request.getActivationId());
+        logger.info("action: updateDeviceStatus, state: succeeded, activationId: {}", request.getActivationId());
         return new Response();
     }
 
@@ -108,7 +108,7 @@ public class PushDeviceService {
         if (request == null) {
             throw new PushServerException("Request object must not be empty");
         }
-        logger.info("Received deleteDevice request, app ID: {}, token: {}", request.getAppId(), maskPushToken(request.getToken()));
+        logger.info("action: deleteDevice, state: initiated, appId: {}, token: {}", request.getAppId(), maskPushToken(request.getToken()));
 
         final String errorMessage = DeleteDeviceRequestValidator.validate(request);
         if (errorMessage != null) {
@@ -116,7 +116,7 @@ public class PushDeviceService {
         }
 
         deviceRegistrationService.delete(request.getAppId(), request.getToken());
-        logger.info("The deleteDevice request succeeded, app ID: {}", request.getAppId());
+        logger.info("action: deleteDevice, state: succeeded, appId: {}", request.getAppId());
         return new Response();
     }
 

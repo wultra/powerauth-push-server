@@ -37,7 +37,7 @@ public class GetApplicationListResponse {
     private List<PushServerApplication> applicationList = new ArrayList<>();
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public GetApplicationListResponse() {
     }

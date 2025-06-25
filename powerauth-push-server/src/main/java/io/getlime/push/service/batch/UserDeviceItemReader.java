@@ -46,7 +46,7 @@ public class UserDeviceItemReader extends JpaPagingItemReader<UserDevice> {
         // Configure queries and reader
         this.setEntityManagerFactory(entityManagerFactory);
         this.setQueryString("select " +
-                " new io.getlime.push.repository.model.aggregate.UserDevice(d.userId, d.id, d.activationId, c.campaignId, d.appCredentials.id, d.platform, d.pushToken) " +
+                " new io.getlime.push.repository.model.aggregate.UserDevice(d.userId, d.id, d.activationId, c.campaignId, d.appCredentials.id, d.platform, d.environment, d.pushToken) " +
                 " from PushCampaignUserEntity c, PushDeviceRegistrationEntity d " +
                 " where c.userId = d.userId and c.campaignId = :campaignId");
         // Map parameters to query

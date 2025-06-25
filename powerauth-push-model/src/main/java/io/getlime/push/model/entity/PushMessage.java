@@ -34,7 +34,7 @@ public class PushMessage {
     private PushMessageBody body;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public PushMessage() {
         attributes = new PushMessageAttributes();

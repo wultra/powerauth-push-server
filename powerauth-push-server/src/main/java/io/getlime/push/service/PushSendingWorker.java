@@ -24,16 +24,14 @@ import com.eatthepath.pushy.apns.util.TokenUtil;
 import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.firebase.messaging.AndroidConfig;
-import com.google.firebase.messaging.AndroidNotification;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.MessagingErrorCode;
+import com.google.firebase.messaging.*;
 import com.wultra.core.rest.client.base.RestClientException;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.FcmMissingTokenException;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.PushMessageAttributes;
 import io.getlime.push.model.entity.PushMessageBody;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.Priority;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.apns.ApnsRejectionReason;
@@ -44,11 +42,10 @@ import io.getlime.push.service.hms.HmsClient;
 import io.getlime.push.service.hms.HmsSendResponse;
 import io.getlime.push.service.hms.request.AndroidNotification.Importance;
 import io.getlime.push.service.hms.request.ClickAction;
-import io.getlime.push.util.CaCertUtil;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import io.opentelemetry.context.Context;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -70,9 +67,9 @@ import java.util.function.Consumer;
  * @author Petr Dvorak, petr@wulta.com
  */
 @Service
+@AllArgsConstructor
+@Slf4j
 public class PushSendingWorker {
-
-    private static final Logger logger = LoggerFactory.getLogger(PushSendingWorker.class);
 
     // FCM data only notification keys
     private static final String FCM_NOTIFICATION_KEY            = "_notification";
@@ -86,20 +83,7 @@ public class PushSendingWorker {
 
     private final PushServiceConfiguration pushServiceConfiguration;
     private final FcmModelConverter fcmConverter;
-    private final CaCertUtil caCertUtil;
-
-    /**
-     * Constructor with push service configuration, model converter and CA certificate utility class.
-     * @param pushServiceConfiguration Push service configuration.
-     * @param fcmConverter FCM converter class.
-     * @param caCertUtil CA certificate utility class.
-     */
-    @Autowired
-    public PushSendingWorker(PushServiceConfiguration pushServiceConfiguration, FcmModelConverter fcmConverter, CaCertUtil caCertUtil) {
-        this.pushServiceConfiguration = pushServiceConfiguration;
-        this.fcmConverter = fcmConverter;
-        this.caCertUtil = caCertUtil;
-    }
+    private final CaCertificateService caCertificateService;
 
     // Android related methods
 
@@ -159,71 +143,60 @@ public class PushSendingWorker {
      * @param pushToken Push token used to deliver the message.
      * @param callback Callback that is called after the asynchronous executions is completed.
      */
-    void sendMessageToAndroid(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) {
+    void sendMessageToFcm(final FcmClient fcmClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) {
+        logger.info("action: sendMessageToFcm, state: initiated");
 
-        // Build Android message
-        final Message message = buildAndroidMessage(pushMessageBody, attributes, priority, pushToken);
+        final Message message = buildFcmMessage(pushMessageBody, attributes, priority, pushToken);
 
         // Extraction of FCM success response
-        final Consumer<ResponseEntity<FcmSuccessResponse>> onSuccess = responseEntity -> {
+        final Consumer<ResponseEntity<FcmSuccessResponse>> onSuccess = Context.current().wrapConsumer(responseEntity -> {
             final FcmSuccessResponse response = responseEntity.getBody();
             if (response != null && response.getName() != null) {
                 if (response.getName().matches(FCM_RESPONSE_VALID_REGEXP)) {
-                    logger.info("Notification sent successfully, response: {}.", response.getName());
+                    logger.info("action: sendMessageToFcm, state: succeeded, response: {}", response.getName());
                     callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                 } else {
-                    logger.error("Invalid response received from FCM, notification sending failed - unexpected response name: {}.", response.getName());
+                    logger.warn("action: sendMessageToFcm, state: failed, response: {}", response.getName());
                     callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                 }
             } else {
                 // This state should not happen, only in case when response from server is invalid
-                logger.error("Invalid response received from FCM, notification sending failed - empty or invalid response.");
+                logger.warn("action: sendMessageToFcm, state: failed, error: {}, response: {} ", "empty or invalid response", response);
                 callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
             }
-        };
+        });
 
         // Callback when FCM request fails
-        final Consumer<Throwable> onError = t -> {
+        final Consumer<Throwable> onError = Context.current().wrapConsumer(t -> {
             if (t instanceof final RestClientException restClientException) {
                 final MessagingErrorCode errorCode = fcmConverter.convertExceptionToErrorCode(restClientException);
-                logger.warn("FCM server returned error response: {}.", (restClientException).getResponse());
+                logger.warn("action: sendMessageToFcm, state: failed, response: {}, error: {}, message: {}", restClientException.getResponse(), errorCode, t.getMessage());
                 switch (errorCode) {
                     case UNREGISTERED, INVALID_ARGUMENT -> {
-                        logger.info("Push message rejected by FCM gateway, device registration for token: {} is invalid and will be removed. Error: {}", pushToken, errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                         return;
                     }
                     case UNAVAILABLE, INTERNAL, QUOTA_EXCEEDED -> {
                         // TODO - implement throttling of messages, see:
                         // https://firebase.google.com/docs/cloud-messaging/admin/errors
-                        logger.warn("Push message rejected by FCM gateway, message status set to PENDING. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
                         return;
                     }
-                    case SENDER_ID_MISMATCH, THIRD_PARTY_AUTH_ERROR -> {
-                        logger.warn("Push message rejected by FCM gateway. Error: {}", errorCode);
-                        callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
-                        return;
-                    }
                     default -> {
-                        logger.error("Unexpected error code received from FCM gateway. Error: {}", errorCode);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                         return;
                     }
                 }
             }
-
-            // Unexpected errors
-            logger.error("Unexpected error occurred while sending push message: {}.", t.getMessage());
             logger.debug("Exception details:", t);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
-        };
+        });
 
         // Perform request to FCM asynchronously, either of the consumers is called in case of success or error
         try {
             fcmClient.exchange(message, false, onSuccess, onError);
         } catch (FcmMissingTokenException ex) {
-            logger.error("Error occurred: {}", ex.getMessage());
+            logger.warn("action: sendMessageToFcm, state: failed, error: {}", ex.getMessage());
             logger.debug("Exception detail:", ex);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
         }
@@ -240,38 +213,40 @@ public class PushSendingWorker {
      * @param callback Callback that is called after the asynchronous executions is completed.
      * @throws PushServerException In case any issue happens while sending the push message.
      */
-    void sendMessageToHuawei(final HmsClient hmsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) throws PushServerException {
+    void sendMessageToHms(final HmsClient hmsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final PushSendingCallback callback) throws PushServerException {
+        logger.info("action: sendMessageToHms, state: initiated");
         final io.getlime.push.service.hms.request.Message message = buildHmsMessage(pushMessageBody, attributes, priority, pushToken);
 
-        final Consumer<HmsSendResponse> successConsumer = response -> {
+        final Consumer<HmsSendResponse> successConsumer = Context.current().wrapConsumer(response -> {
             final String requestId = response.requestId();
             if (HmsClient.SUCCESS_CODE.equals(response.code())) {
-                logger.info("Notification sent successfully, request ID: {}", requestId);
+                logger.info("action: sendMessageToHms, state: succeeded, requestId: {}", requestId);
+
                 callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
             } else {
-                logger.error("Notification sending failed, request ID: {}, code: {}, message: {}", requestId, response.code(), response.msg());
+                logger.warn("action: sendMessageToHms, state: failed, requestId: {}, code: {}, message: {}", requestId, response.code(), response.msg());
                 callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
             }
-        };
+        });
 
-        final Consumer<Throwable> throwableConsumer = throwable -> {
-            logger.error("Invalid response received from HSM, notification sending failed.", throwable);
+        final Consumer<Throwable> throwableConsumer = Context.current().wrapConsumer(throwable -> {
+            logger.warn("action: sendMessageToHms, state: failed, error: {}", throwable.getMessage(),throwable);
             callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
-        };
+        });
 
         hmsClient.sendMessage(message, false)
                 .subscribe(successConsumer, throwableConsumer);
     }
 
     /**
-     * Build Android Message object from Push message body.
+     * Build FCM Message object from Push message body.
      * @param pushMessageBody Push message body.
      * @param attributes Push message attributes.
      * @param priority Push message priority.
      * @param pushToken Push token.
      * @return Android Message object.
      */
-    private Message buildAndroidMessage(final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken) {
+    private Message buildFcmMessage(final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken) {
         // convert data from Map<String, Object> to Map<String, String>
         final Map<String, Object> extras = pushMessageBody.getExtras();
         final Map<String, String> data = new LinkedHashMap<>();
@@ -311,14 +286,18 @@ public class PushSendingWorker {
 
         if (pushServiceConfiguration.isFcmDataNotificationOnly()) { // notification only through data map
             data.put(FCM_NOTIFICATION_KEY, fcmConverter.convertNotificationToString(notification));
-        } else if (isMessageNotSilent(attributes)) {
+        } else if (!isMessageSilent(attributes)) {
             androidConfigBuilder.setNotification(notification);
         }
+
+        final DeliveryPriority deliveryPriorityApns = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
+        final ApnsConfig apnsConfig = ApnsPayloadGenerator.payloadForFcm(pushMessageBody, isMessageSilent(attributes), deliveryPriorityApns);
 
         return Message.builder()
                 .setToken(pushToken)
                 .putAllData(data)
                 .setAndroidConfig(androidConfigBuilder.build())
+                .setApnsConfig(apnsConfig)
                 .build();
     }
 
@@ -362,7 +341,7 @@ public class PushSendingWorker {
             notificationBuilder.bodyLocArgs(List.of(pushMessageBody.getBodyLocArgs()));
         }
 
-        if (isMessageNotSilent(attributes)) {
+        if (!isMessageSilent(attributes)) {
             androidConfigBuilder.notification(notificationBuilder.build());
         }
 
@@ -385,9 +364,9 @@ public class PushSendingWorker {
                 .build();
     }
 
-    private static boolean isMessageNotSilent(final PushMessageAttributes attributes) {
+    private static boolean isMessageSilent(final PushMessageAttributes attributes) {
         // if there are no attributes, assume the message is not silent
-        return attributes == null || !attributes.getSilent();
+        return attributes != null && attributes.getSilent();
     }
 
     /**
@@ -407,7 +386,7 @@ public class PushSendingWorker {
         return Optional.empty();
     }
 
-    // iOS related methods
+    // APNs related methods
 
     /**
      * Prepare and connect APNs client.
@@ -418,42 +397,23 @@ public class PushSendingWorker {
      * @implSpec APNS environment {@code development} or {@code production} values can be used to override global settings.
      * If {@code null} or unknown value is passed, the global configuration is used.
      */
-    ApnsClient prepareApnsClient(final AppCredentialsEntity credentials) throws PushServerException {
-        final String environment = credentials.getIosEnvironment();
+    ApnsClient prepareApnsClient(final AppCredentialsEntity credentials, final ApnsEnvironment environment) throws PushServerException {
         final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder()
                 .setProxyHandlerFactory(apnsClientProxy())
                 .setConcurrentConnections(pushServiceConfiguration.getConcurrentConnections())
                 .setConnectionTimeout(Duration.ofMillis(pushServiceConfiguration.getApnsConnectTimeout()))
                 .setIdlePingInterval(Duration.ofMillis(pushServiceConfiguration.getIdlePingInterval()))
-                .setTrustedServerCertificateChain(caCertUtil.allCerts());
+                .setTrustedServerCertificateChain(caCertificateService.allCerts());
 
-        final String appId = credentials.getAppId();
-        // Determine the APNs environment by looking at per-app config first and if no recognized value is present,
-        // use the default configuration. Note that "equalsIgnoreCase" optimizes for null parameter, so the first two
-        // if-else branches are performed quickly (we do not need to worry about the fact that "null" will likely be
-        // the most common value there).
-        if ("development".equalsIgnoreCase(environment)) {
-            logger.info("Using APNs development host, application ID: {}", appId);
+        if (environment == ApnsEnvironment.DEVELOPMENT) {
             apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
-        } else if ("production".equalsIgnoreCase(environment)) {
-            logger.info("Using APNs production host, application ID: {}", appId);
-            apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
         } else {
-            if (environment != null) {
-                logger.warn("Invalid APNS host environment specified: \"{}\". Use \"development\" or \"production\", application ID: {}", environment, appId);
-            }
-            if (pushServiceConfiguration.isApnsUseDevelopment()) {
-                logger.info("Using APNs development host by applying the global push server configuration, application ID: {}", appId);
-                apnsClientBuilder.setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
-            } else {
-                logger.info("Using APNs production host by applying the global push server configuration, application ID: {}", appId);
-                apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
-            }
+            apnsClientBuilder.setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST);
         }
 
-        final String teamId = credentials.getIosTeamId();
-        final String keyId = credentials.getIosKeyId();
-        final byte[] apnsPrivateKey = credentials.getIosPrivateKey();
+        final String teamId = credentials.getApnsTeamId();
+        final String keyId = credentials.getApnsKeyId();
+        final byte[] apnsPrivateKey = credentials.getApnsPrivateKey();
 
         try {
             final ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(new ByteArrayInputStream(apnsPrivateKey), teamId, keyId);
@@ -502,25 +462,25 @@ public class PushSendingWorker {
      * @param attributes Push message attributes.
      * @param priority Push message priority.
      * @param pushToken Push token.
-     * @param iosTopic APNs topic, usually same as bundle ID.
+     * @param apnsTopic APNs topic, usually same as bundle ID.
      * @param callback Callback that is called after the asynchronous executions is completed.
      */
-    void sendMessageToIos(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final String iosTopic, final PushSendingCallback callback) {
-
+    void sendMessageToApns(final ApnsClient apnsClient, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String pushToken, final String apnsTopic, final PushSendingCallback callback) {
+        logger.info("action: sendMessageToApns, state: initiated");
         final String token = TokenUtil.sanitizeTokenString(pushToken);
         final boolean isSilent = attributes != null && attributes.getSilent(); // In case there are no attributes, the message is not silent
-        final String payload = PayloadBuilder.buildApnsPayload(pushMessageBody, isSilent);
+        final String payload = ApnsPayloadGenerator.payloadForApns(pushMessageBody, isSilent);
         final Instant validUntil = pushMessageBody.getValidUntil();
         final PushType pushType = isSilent ? PushType.BACKGROUND : PushType.ALERT; // iOS 13 and higher requires apns-push-type value to be set
         final DeliveryPriority deliveryPriority = (Priority.NORMAL == priority) ? DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
-        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, iosTopic, payload, validUntil, deliveryPriority, pushType, pushMessageBody.getCollapseKey());
+        final SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, apnsTopic, payload, validUntil, deliveryPriority, pushType, pushMessageBody.getCollapseKey());
         final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = apnsClient.sendNotification(pushNotification);
 
-        sendNotificationFuture.whenCompleteAsync((response, cause) -> {
+        sendNotificationFuture.whenCompleteAsync(Context.current().wrapConsumer((response, cause) -> {
             if (response != null) {
                 final UUID apnsId = response.getApnsId();
                 if (response.isAccepted()) {
-                    logger.info("Notification sent successfully, APNs ID: {}.", apnsId);
+                    logger.info("action: sendMessageToApns, state: succeeded, apnsId: {}", apnsId);
                     callback.didFinishSendingMessage(PushSendingCallback.Result.OK);
                 } else {
                     final Optional<String> rejectionReasonOptional = response.getRejectionReason();
@@ -528,23 +488,16 @@ public class PushSendingWorker {
                     if (rejectionReasonOptional.isPresent()) {
                         rejectionReason = rejectionReasonOptional.get();
                     }
-
-                    if (ApnsRejectionReason.EXPIRED_PROVIDER_TOKEN.isEqualToText(rejectionReason)) {
-                        logger.info("Notification rejected by the APNs gateway due to expired push token, APNs ID: {}.", response.getApnsId());
-                    } else {
-                        logger.info("Notification rejected by the APNs gateway: {}, APNs ID: {}.", rejectionReason != null ? rejectionReason : "UnknownReason", response.getApnsId());
-                    }
+                    logger.warn("action: sendMessageToApns, state: failed, apnsId: {}, reason: {}, topic: {}", apnsId, rejectionReason != null ? rejectionReason : "UnknownReason", apnsTopic);
 
                     // Determine if the push token should be deleted.
                     if (ApnsRejectionReason.BAD_DEVICE_TOKEN.isEqualToText(rejectionReason)) {
                         logger.debug("Deleting push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.DEVICE_TOKEN_NOT_FOR_TOPIC.isEqualToText(rejectionReason)) {
-                        logger.warn("Notification was sent to incorrect topic: {}.", iosTopic);
                         logger.debug("Deleting push token: {}", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.TOPIC_DISALLOWED.isEqualToText(rejectionReason)) {
-                        logger.warn("Notification was sent to incorrect topic: {}.", iosTopic);
                         logger.debug("Deleting push token: {}.", pushToken);
                         callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED_DELETE);
                     } else if (ApnsRejectionReason.EXPIRED_PROVIDER_TOKEN.isEqualToText(rejectionReason)) {
@@ -565,11 +518,11 @@ public class PushSendingWorker {
             } else {
                 // In this case, the delivery failed because the future failed, not because APNs rejected the
                 // notification payload. This means that we should be able to attempt resending the message.
-                logger.error("Push message sending failed. Error: {}", cause.getMessage());
+                logger.error("action: sendMessageToApns, state: failed, error: {}", cause.getMessage(),cause);
                 logger.debug("Exception detail:", cause);
                 callback.didFinishSendingMessage(PushSendingCallback.Result.PENDING);
             }
-        });
+        }));
     }
 
 }

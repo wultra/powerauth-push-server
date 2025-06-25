@@ -17,18 +17,20 @@
 package io.getlime.push.model.entity;
 
 import io.getlime.push.model.enumeration.Mode;
+import lombok.ToString;
 
 /**
  * Base push message sending result.
  *
  * @author Petr Dvorak, petr@wultra.com
  */
+@ToString
 public class BasePushMessageSendResult {
 
     private final Mode mode;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public BasePushMessageSendResult() {
         this.mode = Mode.SYNCHRONOUS;

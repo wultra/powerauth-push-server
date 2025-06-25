@@ -37,7 +37,7 @@ public class RemoveAndroidRequest {
     private String appId;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public RemoveAndroidRequest() {
     }

@@ -71,7 +71,7 @@ public class PushDeviceRegistrationEntity implements Serializable {
     /**
      * Platform.
      */
-    @Column(name = "platform", nullable = false, updatable = false)
+    @Column(name = "platform", nullable = false)
     @Convert(converter = PlatformConverter.class)
     private Platform platform;
 
@@ -80,6 +80,12 @@ public class PushDeviceRegistrationEntity implements Serializable {
      */
     @Column(name = "push_token", nullable = false)
     private String pushToken;
+
+    /**
+     * Environment for APNs (optional).
+     */
+    @Column(name = "environment")
+    private String environment;
 
     /**
      * Timestamp last registered.

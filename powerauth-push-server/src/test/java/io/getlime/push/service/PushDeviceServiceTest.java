@@ -19,6 +19,7 @@ package io.getlime.push.service;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.request.CreateDeviceForActivationsRequest;
 import io.getlime.push.model.request.CreateDeviceRequest;
@@ -69,7 +70,25 @@ class PushDeviceServiceTest {
         request.setAppId("my_app");
         request.setActivationId("a1");
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
+
+        final Response response = tested.createDevice(request);
+        verify(deviceRegistrationService).createOrUpdateDevice(request, credentials);
+        assertEquals("OK", response.getStatus());
+    }
+
+    @Test
+    void testCreateDevice_APNs_environment_success() throws Exception {
+        final AppCredentialsEntity credentials = new AppCredentialsEntity();
+        when(appCredentialsRepository.findFirstByAppId("my_app"))
+                .thenReturn(Optional.of(credentials));
+
+        final CreateDeviceRequest request = new CreateDeviceRequest();
+        request.setAppId("my_app");
+        request.setActivationId("a1");
+        request.setToken("t1");
+        request.setPlatform(MobilePlatform.APNS);
+        request.setEnvironment(ApnsEnvironment.DEVELOPMENT);
 
         final Response response = tested.createDevice(request);
         verify(deviceRegistrationService).createOrUpdateDevice(request, credentials);
@@ -92,7 +111,7 @@ class PushDeviceServiceTest {
         request.setAppId("non_existent");
         request.setActivationId("a1");
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         final PushServerException exception = assertThrows(PushServerException.class,
                 () -> tested.createDevice(request));
@@ -109,7 +128,7 @@ class PushDeviceServiceTest {
 
         final CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
         request.setAppId("my_app");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
         request.setToken("t2");
         request.getActivationIds().addAll(List.of("a1", "a2"));
 
@@ -149,7 +168,7 @@ class PushDeviceServiceTest {
 
         final CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
         request.setAppId("non-existent");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
         request.setToken("t2");
         request.getActivationIds().addAll(List.of("a1", "a2"));
 

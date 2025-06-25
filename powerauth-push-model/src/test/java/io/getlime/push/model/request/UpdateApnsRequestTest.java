@@ -25,11 +25,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test for {@link UpdateIosRequest}.
+ * Test for {@link UpdateApnsRequest}.
  *
  * @author Lubos Racansky, lubos.racansky@wultra.com
  */
-class UpdateIosRequestTest {
+class UpdateApnsRequestTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -39,7 +39,7 @@ class UpdateIosRequestTest {
                 {"environment":null}
                 """;
 
-        final UpdateIosRequest result = objectMapper.readValue(json, UpdateIosRequest.class);
+        final UpdateApnsRequest result = objectMapper.readValue(json, UpdateApnsRequest.class);
 
         assertNull(result.getEnvironment());
     }
@@ -51,7 +51,7 @@ class UpdateIosRequestTest {
                 """;
 
         assertThrows(ValueInstantiationException.class, () ->
-                objectMapper.readValue(json, UpdateIosRequest.class));
+                objectMapper.readValue(json, UpdateApnsRequest.class));
     }
 
     @ParameterizedTest
@@ -61,7 +61,7 @@ class UpdateIosRequestTest {
                 {"environment":"%s"}
                 """.formatted(jsonParam);
 
-        final UpdateIosRequest result = objectMapper.readValue(json, UpdateIosRequest.class);
+        final UpdateApnsRequest result = objectMapper.readValue(json, UpdateApnsRequest.class);
 
         assertEquals(expected, result.getEnvironment());
     }

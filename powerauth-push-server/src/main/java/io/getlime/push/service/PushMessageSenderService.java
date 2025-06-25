@@ -16,14 +16,15 @@
 
 package io.getlime.push.service;
 
+import com.eatthepath.pushy.apns.ApnsClient;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
 import io.getlime.push.model.entity.*;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.Mode;
 import io.getlime.push.model.enumeration.Priority;
 import io.getlime.push.model.validator.PushMessageValidator;
-import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.PushDeviceRepository;
 import io.getlime.push.repository.dao.PushMessageDAO;
 import io.getlime.push.repository.model.AppCredentialsEntity;
@@ -48,7 +49,6 @@ import java.util.concurrent.Phaser;
 public class PushMessageSenderService {
 
     private final PushSendingWorker pushSendingWorker;
-    private final AppCredentialsRepository appCredentialsRepository;
     private final PushDeviceRepository pushDeviceRepository;
     private final PushMessageDAO pushMessageDAO;
     private final LoadingCache<String, AppRelatedPushClient> appRelatedPushClientCache;
@@ -79,7 +79,8 @@ public class PushMessageSenderService {
             validatePushMessage(pushMessage);
 
             // Fetch connected devices
-            final List<PushDeviceRegistrationEntity> devices = getPushDevices(pushClient.getAppCredentials().getId(), pushMessage.getUserId(), pushMessage.getActivationId());
+            final AppCredentialsEntity appCredentials = pushClient.getAppCredentials();
+            final List<PushDeviceRegistrationEntity> devices = getPushDevices(appCredentials.getId(), pushMessage.getUserId(), pushMessage.getActivationId());
 
             // Iterate over all devices for given user
             for (final PushDeviceRegistrationEntity device : devices) {
@@ -96,32 +97,36 @@ public class PushMessageSenderService {
                     registerPhaserForMode(phaser, mode);
 
                     final Platform platform = device.getPlatform();
-                    if (platform == Platform.IOS) {
-                        if (pushClient.getApnsClient() == null) {
-                            logger.error("Push message cannot be sent to APNS because APNS is not configured in push server.");
+                    if (platform == Platform.IOS || platform == Platform.APNS) {
+                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getApns();
+                        final PushSendingCallback callback = createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser);
+                        final String apnsEnvironment = resolveApnsEnvironment(device.getEnvironment(), appCredentials.getApnsEnvironment());
+                        if (apnsEnvironment == null) {
+                            logger.error("Push message cannot be sent because APNs development host is requested, however the server is in production mode. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
+                            callback.didFinishSendingMessage(PushSendingCallback.Result.FAILED);
                             arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
                         }
-                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getIos();
-                        pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getIosBundle(), createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
-                    } else if (platform == Platform.ANDROID) {
+                        final ApnsClient apnsClient = ApnsEnvironment.PRODUCTION.getKey().equals(apnsEnvironment) ? pushClient.getApnsClientProduction() : pushClient.getApnsClientDevelopment();
+                        pushSendingWorker.sendMessageToApns(apnsClient, pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), device.getPushToken(), pushClient.getAppCredentials().getApnsBundle(), callback);
+                    } else if (platform == Platform.ANDROID || platform == Platform.FCM) {
                         if (pushClient.getFcmClient() == null) {
                             logger.error("Push message cannot be sent to FCM because FCM is not configured in push server.");
                             arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
                         }
                         final String token = device.getPushToken();
-                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getAndroid();
-                        pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
-                    } else if (platform == Platform.HUAWEI) {
+                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getFcm();
+                        pushSendingWorker.sendMessageToFcm(pushClient.getFcmClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
+                    } else if (platform == Platform.HUAWEI || platform == Platform.HMS) {
                         if (pushClient.getHmsClient() == null) {
                             logger.error("Push message cannot be sent to HMS because HMS is not configured in push server.");
                             arriveAndDeregisterPhaserForMode(phaser, mode);
                             continue;
                         }
                         final String token = device.getPushToken();
-                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getHuawei();
-                        pushSendingWorker.sendMessageToHuawei(pushClient.getHmsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
+                        final PushMessageSendResult.PlatformResult platformResult = sendResult.getHms();
+                        pushSendingWorker.sendMessageToHms(pushClient.getHmsClient(), pushMessage.getBody(), pushMessage.getAttributes(), pushMessage.getPriority(), token, createPushSendingCallback(mode, device, platformResult, pushMessageObject, phaser));
                     }
                 }
             }
@@ -175,8 +180,8 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      *                             the error can be found in exception message.
      */
-    public void sendCampaignMessage(String appId, Platform platform, String token, PushMessageBody pushMessageBody, String userId, Long deviceId, String activationId) throws PushServerException {
-        sendCampaignMessage(appId, platform, token, pushMessageBody, null, Priority.HIGH, userId, deviceId, activationId);
+    public void sendCampaignMessage(String appId, Platform platform, String environment, String token, PushMessageBody pushMessageBody, String userId, Long deviceId, String activationId) throws PushServerException {
+        sendCampaignMessage(appId, platform, environment, token, pushMessageBody, null, Priority.HIGH, userId, deviceId, activationId);
     }
 
     /**
@@ -184,7 +189,8 @@ public class PushMessageSenderService {
      * credentials for given application. Return the result in the callback.
      *
      * @param appId App ID.
-     * @param platform Mobile platform (iOS, Android).
+     * @param platform Mobile platform (APNs, FCM, HMS).
+     * @param environment APNs environment (optional).
      * @param token Push message token.
      * @param pushMessageBody Push message body.
      * @param attributes Push message attributes.
@@ -195,18 +201,26 @@ public class PushMessageSenderService {
      * @throws PushServerException In case any issue happens while sending the push message. Detailed information about
      * the error can be found in exception message.
      */
-    public void sendCampaignMessage(final String appId, Platform platform, final String token, PushMessageBody pushMessageBody, PushMessageAttributes attributes, Priority priority, String userId, Long deviceId, String activationId) throws PushServerException {
+    public void sendCampaignMessage(final String appId, final Platform platform, final String environment, final String token, final PushMessageBody pushMessageBody, final PushMessageAttributes attributes, final Priority priority, final String userId, final Long deviceId, final String activationId) throws PushServerException {
         final AppRelatedPushClient pushClient = prepareClients(appId);
 
         final PushMessageEntity pushMessageObject = pushMessageDAO.storePushMessageObject(pushMessageBody, attributes, userId, activationId, deviceId);
 
         switch (platform) {
-            case IOS ->
-                    pushSendingWorker.sendMessageToIos(pushClient.getApnsClient(), pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getIosBundle(), createPushSendingCallback(token, pushMessageObject, pushClient));
-            case ANDROID ->
-                    pushSendingWorker.sendMessageToAndroid(pushClient.getFcmClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
-            case HUAWEI ->
-                    pushSendingWorker.sendMessageToHuawei(pushClient.getHmsClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
+            case IOS, APNS -> {
+                final String environmentAppConfig = pushClient.getAppCredentials().getApnsEnvironment();
+                final String apnsEnvironment = resolveApnsEnvironment(environment, environmentAppConfig);
+                if (apnsEnvironment == null) {
+                    logger.error("Push message cannot be sent because APNs development host is requested, however the server is in production mode. Check configuration of application property 'powerauth.push.service.apns.useDevelopment'.");
+                    return;
+                }
+                final ApnsClient apnsClient = ApnsEnvironment.PRODUCTION.getKey().equals(apnsEnvironment) ? pushClient.getApnsClientProduction() : pushClient.getApnsClientDevelopment();
+                pushSendingWorker.sendMessageToApns(apnsClient, pushMessageBody, attributes, priority, token, pushClient.getAppCredentials().getApnsBundle(), createPushSendingCallback(token, pushMessageObject, pushClient));
+            }
+            case ANDROID, FCM ->
+                    pushSendingWorker.sendMessageToFcm(pushClient.getFcmClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
+            case HUAWEI, HMS ->
+                    pushSendingWorker.sendMessageToHms(pushClient.getHmsClient(), pushMessageBody, attributes, priority, token, createPushSendingCallback(token, pushMessageObject, pushClient));
         }
     }
 
@@ -222,12 +236,6 @@ public class PushMessageSenderService {
                 }
             }
         };
-    }
-
-    // Lookup application credentials by appID and throw exception in case application is not found.
-    private AppCredentialsEntity getAppCredentials(String appId) throws PushServerException {
-        return appCredentialsRepository.findFirstByAppId(appId).orElseThrow(() ->
-            new PushServerException("Application not found: " + appId));
     }
 
     // Return list of devices related to given user or activation ID (if present). List of devices is related to particular application as well.
@@ -285,6 +293,22 @@ public class PushMessageSenderService {
         }
     }
 
+    private String resolveApnsEnvironment(final String environmentDevice, final String environmentAppConfig) {
+        String environment = environmentAppConfig;
+        if (environment == null) {
+            environment = configuration.isApnsUseDevelopment() ? ApnsEnvironment.DEVELOPMENT.getKey() : ApnsEnvironment.PRODUCTION.getKey();
+        }
+        if (environmentDevice != null) {
+            if (environmentDevice.equals(ApnsEnvironment.PRODUCTION.getKey()) || environment.equals(ApnsEnvironment.DEVELOPMENT.getKey())) {
+                environment = environmentDevice;
+            } else {
+                // The case when configuration is in production mode and device is in development mode is not allowed
+                environment = null;
+            }
+        }
+        return environment;
+    }
+
     /**
      * Arrive and deregister phaser based on the mode. For {@link Mode#SYNCHRONOUS}, the method provides deregistration. Otherwise,
      * for {@link Mode#ASYNCHRONOUS}, it is a noop method.
@@ -305,7 +329,7 @@ public class PushMessageSenderService {
      * @param phaser Phaser.
      * @param mode Mode.
      */
-    private static void registerPhaserForMode(Phaser phaser,Mode mode) {
+    private static void registerPhaserForMode(Phaser phaser, Mode mode) {
         if (mode == Mode.SYNCHRONOUS && phaser != null) {
             phaser.register();
         }

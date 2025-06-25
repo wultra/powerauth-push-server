@@ -42,7 +42,7 @@ public class ListOfUsersFromCampaignResponse {
     private ListOfUsers users;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public ListOfUsersFromCampaignResponse() {
     }

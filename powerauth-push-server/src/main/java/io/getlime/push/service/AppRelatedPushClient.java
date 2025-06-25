@@ -37,12 +37,17 @@ public class AppRelatedPushClient {
     private AppCredentialsEntity appCredentials;
 
     /**
-     * APNS client instance, used for iOS applications.
+     * APNS client instance, used for Apple Push Notification service in development mode.
      */
-    private ApnsClient apnsClient;
+    private ApnsClient apnsClientDevelopment;
 
     /**
-     * FCM client instance, used for Android applications.
+     * APNS client instance, used for Apple Push Notification service in production mode.
+     */
+    private ApnsClient apnsClientProduction;
+
+    /**
+     * FCM client instance, used for Firebase Cloud Messaging.
      */
     private FcmClient fcmClient;
 

@@ -27,20 +27,47 @@ public enum MobilePlatform {
 
     /**
      * iOS Platform.
+     *
+     * @deprecated use {@link #APNS}
      */
     @JsonProperty("ios")
+    @Deprecated
     IOS,
 
     /**
      * Android Platform.
+     *
+     * @deprecated use {@link #FCM}
      */
     @JsonProperty("android")
+    @Deprecated
     ANDROID,
 
     /**
      * Huawei Platform.
+     *
+     * @deprecated use {@link #HMS}
      */
     @JsonProperty("huawei")
-    HUAWEI
+    @Deprecated
+    HUAWEI,
+
+    /**
+     * APNs Platform.
+     */
+    @JsonProperty("apns")
+    APNS,
+
+    /**
+     * FCM Platform.
+     */
+    @JsonProperty("fcm")
+    FCM,
+
+    /**
+     * HMS Platform.
+     */
+    @JsonProperty("hms")
+    HMS
 
 }

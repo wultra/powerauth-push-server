@@ -46,8 +46,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * Test of {@link DeviceRegistrationService}
@@ -83,11 +83,65 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.setActivationId("a1");
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         tested.createOrUpdateDevice(request, credentials);
 
         assertRegistrationExists("a1", "t1");
+    }
+
+    @Test
+    void testCreateOrUpdateDevice_activationDetailsIncluded() throws Exception {
+        final AppCredentialsEntity credentials = createAppCredentials(APP_NAME);
+
+        final CreateDeviceRequest request = new CreateDeviceRequest();
+        request.setAppId(APP_NAME);
+        request.setActivationId("a1");
+        request.setToken("t1");
+        request.setPlatform(MobilePlatform.FCM);
+        request.setActivationStatus(ActivationStatus.ACTIVE);
+        request.setUserId("joe");
+
+        tested.createOrUpdateDevice(request, credentials);
+
+        assertRegistrationExists("a1", "t1");
+        verify(powerAuthClient, never()).getActivationStatus(anyString());
+    }
+
+    @Test
+    void testCreateOrUpdateDevice_missingUserIdInRequest() throws Exception {
+        final AppCredentialsEntity credentials = createAppCredentials(APP_NAME);
+        when(powerAuthClient.getActivationStatus("a1"))
+                .thenReturn(createActivationStatusResponse("a1"));
+
+        final CreateDeviceRequest request = new CreateDeviceRequest();
+        request.setAppId(APP_NAME);
+        request.setActivationId("a1");
+        request.setToken("t1");
+        request.setPlatform(MobilePlatform.FCM);
+        request.setActivationStatus(ActivationStatus.ACTIVE);
+        request.setUserId(null);
+
+        tested.createOrUpdateDevice(request, credentials);
+
+        assertRegistrationExists("a1", "t1");
+        verify(powerAuthClient).getActivationStatus("a1");
+    }
+
+    @Test
+    void testCreateOrUpdateDevice_statusCreated() {
+        final AppCredentialsEntity credentials = createAppCredentials(APP_NAME);
+
+        final CreateDeviceRequest request = new CreateDeviceRequest();
+        request.setAppId(APP_NAME);
+        request.setActivationId("a1");
+        request.setToken("t1");
+        request.setPlatform(MobilePlatform.FCM);
+        request.setActivationStatus(ActivationStatus.REMOVED);
+        request.setUserId("joe");
+
+        final PushServerException exception = assertThrows(PushServerException.class, () -> tested.createOrUpdateDevice(request, credentials));
+        assertEquals("Device registration failed because associated activation is REMOVED", exception.getMessage());
     }
 
     @Test
@@ -107,7 +161,7 @@ class DeviceRegistrationServiceTest {
                 request.setAppId(APP_NAME);
                 request.setActivationId("a1");
                 request.setToken("t1");
-                request.setPlatform(MobilePlatform.IOS);
+                request.setPlatform(MobilePlatform.APNS);
                 tested.createOrUpdateDevice(request, credentials);
                 return null;
             });
@@ -130,7 +184,7 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.setActivationId("a1");
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         final PushServerException ex = assertThrows(PushServerException.class,
                 () -> tested.createOrUpdateDevice(request, credentials));
@@ -149,7 +203,7 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.getActivationIds().addAll(List.of("a1", "a2"));
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         tested.createOrUpdateDevices(request, credentials);
 
@@ -167,7 +221,7 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.getActivationIds().addAll(List.of("a1", "a1"));
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         tested.createOrUpdateDevices(request, credentials);
 
@@ -187,7 +241,7 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.getActivationIds().addAll(List.of("a1", "a2"));
         request.setToken("t1_new");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         tested.createOrUpdateDevices(request, credentials);
 
@@ -206,7 +260,7 @@ class DeviceRegistrationServiceTest {
         request.setAppId(APP_NAME);
         request.getActivationIds().add("a1");
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.FCM);
 
         assertRegistrationExists("a_other", "t1");
         assertRegistrationExists("a_different", "t1");
@@ -224,7 +278,7 @@ class DeviceRegistrationServiceTest {
         device.setActivationId("a1");
         device.setAppCredentials(createAppCredentials(APP_NAME));
         device.setTimestampLastRegistered(new Date());
-        device.setPlatform(Platform.IOS);
+        device.setPlatform(Platform.APNS);
         device.setPushToken("t1");
         device.setActive(false);
         deviceRepository.save(device);
@@ -246,7 +300,7 @@ class DeviceRegistrationServiceTest {
         device.setActivationId("a1");
         device.setAppCredentials(createAppCredentials(APP_NAME));
         device.setTimestampLastRegistered(new Date());
-        device.setPlatform(Platform.IOS);
+        device.setPlatform(Platform.APNS);
         device.setPushToken("t1");
         device.setActive(false);
         deviceRepository.save(device);

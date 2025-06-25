@@ -15,6 +15,7 @@
  */
 package io.getlime.push.model.validator;
 
+import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.request.CreateDeviceForActivationsRequest;
 import io.getlime.push.model.request.CreateDeviceRequest;
 
@@ -70,6 +71,9 @@ public class CreateDeviceRequestValidator {
         }
         if (request.getPlatform() == null) {
             return "Platform must not be null.";
+        }
+        if (request.getPlatform() != MobilePlatform.APNS && request.getEnvironment() != null) {
+            return "Environment specified for a platform that does not support environment setting.";
         }
         if (request.getToken() == null || request.getToken().isEmpty()) {
             return "Push token must not be null or empty.";

@@ -37,6 +37,9 @@ class PlatformConverter implements AttributeConverter<Platform, String> {
             case IOS -> "ios";
             case ANDROID -> "android";
             case HUAWEI -> "huawei";
+            case APNS -> "apns";
+            case FCM -> "fcm";
+            case HMS -> "hms";
         };
     }
 
@@ -50,6 +53,9 @@ class PlatformConverter implements AttributeConverter<Platform, String> {
             case "ios" -> Platform.IOS;
             case "android" -> Platform.ANDROID;
             case "huawei" -> Platform.HUAWEI;
+            case "apns" -> Platform.APNS;
+            case "fcm" -> Platform.FCM;
+            case "hms" -> Platform.HMS;
             default -> throw new IllegalArgumentException("No mapping for platform: " + dbData);
         };
     }

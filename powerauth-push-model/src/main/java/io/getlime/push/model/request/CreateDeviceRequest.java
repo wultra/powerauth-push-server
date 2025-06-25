@@ -15,12 +15,13 @@
  */
 package io.getlime.push.model.request;
 
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.MobilePlatform;
+import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * Request object used for device registration.
@@ -29,6 +30,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateDeviceRequest {
 
     /**
@@ -49,10 +53,27 @@ public class CreateDeviceRequest {
     private MobilePlatform platform;
 
     /**
+     * Environment for APNs (optional).
+     */
+    private ApnsEnvironment environment;
+
+    /**
      * Activation ID.
      */
     @NotBlank
     @Schema(description = "Activation ID.", format = "UUID (level 4)", maxLength = 37, example = "099e5e30-47b1-41c7-b49b-3bf28e811fca")
     private String activationId;
+
+    /**
+     * Activation status.
+     */
+    @Schema(description = "Activation status.")
+    private ActivationStatus activationStatus;
+
+    /**
+     * User ID.
+     */
+    @Schema(description = "User ID.")
+    private String userId;
 
 }

@@ -23,6 +23,7 @@ import com.wultra.security.powerauth.client.model.response.GetActivationStatusRe
 import io.getlime.core.rest.model.base.request.ObjectRequest;
 import io.getlime.core.rest.model.base.response.Response;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.model.enumeration.MobilePlatform;
 import io.getlime.push.model.request.CreateDeviceRequest;
 import io.getlime.push.repository.AppCredentialsRepository;
@@ -78,7 +79,8 @@ class PushDeviceControllerTest {
         request.setAppId("my_app");
         request.setActivationId("a1");
         request.setToken("t1");
-        request.setPlatform(MobilePlatform.ANDROID);
+        request.setPlatform(MobilePlatform.APNS);
+        request.setEnvironment(ApnsEnvironment.PRODUCTION);
 
         tested.createDevice(new ObjectRequest<>(request));
 
@@ -86,6 +88,7 @@ class PushDeviceControllerTest {
         assertEquals(1, entities.size());
         assertEquals("a1", entities.get(0).getActivationId());
         assertEquals("t1", entities.get(0).getPushToken());
+        assertEquals(ApnsEnvironment.PRODUCTION.getKey(), entities.get(0).getEnvironment());
     }
 
     @Test

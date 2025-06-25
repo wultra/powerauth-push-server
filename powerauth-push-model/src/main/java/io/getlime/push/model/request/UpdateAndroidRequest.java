@@ -51,7 +51,7 @@ public class UpdateAndroidRequest {
     private String privateKeyBase64;
 
     /**
-     * Default constructor.
+     * No-arg constructor.
      */
     public UpdateAndroidRequest() {
     }

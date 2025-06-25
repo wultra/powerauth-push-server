@@ -17,7 +17,9 @@ package io.getlime.push.service;
 
 import com.eatthepath.pushy.apns.ApnsClient;
 import com.github.benmanes.caffeine.cache.CacheLoader;
+import io.getlime.push.configuration.PushServiceConfiguration;
 import io.getlime.push.errorhandling.exceptions.PushServerException;
+import io.getlime.push.model.enumeration.ApnsEnvironment;
 import io.getlime.push.repository.AppCredentialsRepository;
 import io.getlime.push.repository.model.AppCredentialsEntity;
 import io.getlime.push.service.fcm.FcmClient;
@@ -42,6 +44,8 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
     private final AppCredentialsRepository appCredentialsRepository;
 
     private final PushSendingWorker pushSendingWorker;
+
+    private final PushServiceConfiguration configuration;
 
     /**
      * Smartly reload {@link AppRelatedPushClient}.
@@ -85,13 +89,18 @@ public class AppRelatedPushClientCacheLoader implements CacheLoader<String, AppR
         final AppRelatedPushClient pushClient = new AppRelatedPushClient();
         pushClient.setAppCredentials(credentials);
 
-        if (credentials.getIosPrivateKey() != null) {
-            final ApnsClient apnsClient = pushSendingWorker.prepareApnsClient(credentials);
-            pushClient.setApnsClient(apnsClient);
+        if (credentials.getApnsPrivateKey() != null) {
+            final ApnsClient apnsClientProduction = pushSendingWorker.prepareApnsClient(credentials, ApnsEnvironment.PRODUCTION);
+            pushClient.setApnsClientProduction(apnsClientProduction);
+            final String environmentAppConfig = credentials.getApnsEnvironment();
+            if ((ApnsEnvironment.DEVELOPMENT.getKey().equals(environmentAppConfig)) || configuration.isApnsUseDevelopment()) {
+                final ApnsClient apnsClientDevelopment = pushSendingWorker.prepareApnsClient(credentials, ApnsEnvironment.DEVELOPMENT);
+                pushClient.setApnsClientDevelopment(apnsClientDevelopment);
+            }
         }
 
-        if (credentials.getAndroidPrivateKey() != null) {
-            final FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getAndroidProjectId(), credentials.getAndroidPrivateKey());
+        if (credentials.getFcmPrivateKey() != null) {
+            final FcmClient fcmClient = pushSendingWorker.prepareFcmClient(credentials.getFcmProjectId(), credentials.getFcmPrivateKey());
             pushClient.setFcmClient(fcmClient);
         }
 
