@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <!-- Add new APNS columns -->
     <changeSet id="1" logicalFilePath="powerauth-push-server/1.10.x/20241029-add-new-platforms.xml" author="Roman Strobl">
@@ -39,12 +40,13 @@
         </addColumn>
     </changeSet>
 
+    <!-- changeSets id 3 and 4 are omitted on purpose, since they were faulty -->
+
     <!-- Migrate app credentials: iOS to APNs -->
-    <changeSet id="3" logicalFilePath="powerauth-push-server/1.10.x/20241029-add-new-platforms.xml" author="Roman Strobl">
-        <preConditions onFail="MARK_RAN">
+    <changeSet id="5" logicalFilePath="powerauth-push-server/1.10.x/20241029-add-new-platforms.xml" author="Lubos Racansky">
+        <preConditions>
             <!-- Ensure this runs only if the apns_* columns were created in this script -->
             <and>
-                <changeSetExecuted id="1" author="Roman Strobl" />
                 <columnExists tableName="push_app_credentials" columnName="apns_private_key"/>
                 <columnExists tableName="push_app_credentials" columnName="apns_team_id"/>
                 <columnExists tableName="push_app_credentials" columnName="apns_key_id"/>
@@ -63,11 +65,10 @@
     </changeSet>
 
     <!-- Migrate Android to FCM -->
-    <changeSet id="4" logicalFilePath="powerauth-push-server/1.10.x/20241029-add-new-platforms.xml" author="Roman Strobl">
-        <preConditions onFail="MARK_RAN">
+    <changeSet id="6" logicalFilePath="powerauth-push-server/1.10.x/20241029-add-new-platforms.xml" author="Lubos Racansky">
+        <preConditions>
             <!-- Ensure this runs only if the fcm_* columns were created in this script -->
             <and>
-                <changeSetExecuted id="2" author="Roman Strobl" />
                 <columnExists tableName="push_app_credentials" columnName="fcm_private_key"/>
                 <columnExists tableName="push_app_credentials" columnName="fcm_project_id"/>
             </and>
