@@ -30,6 +30,7 @@ import com.wultra.push.repository.AppCredentialsRepository;
 import com.wultra.push.repository.PushDeviceRepository;
 import com.wultra.push.repository.model.AppCredentialsEntity;
 import com.wultra.push.repository.model.PushDeviceRegistrationEntity;
+import com.wultra.security.powerauth.client.model.response.GetActivationStatusResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

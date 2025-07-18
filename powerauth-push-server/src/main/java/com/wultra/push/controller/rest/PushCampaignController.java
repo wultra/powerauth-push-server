@@ -34,8 +34,7 @@ import com.wultra.push.repository.model.PushCampaignEntity;
 import com.wultra.push.repository.model.PushCampaignUserEntity;
 import com.wultra.push.repository.serialization.JsonSerialization;
 import io.swagger.v3.oas.annotations.Operation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -49,11 +48,10 @@ import java.util.Optional;
  *
  * @author Martin Tupy, martin.tupy.work@gmail.com
  */
+@Slf4j
 @RestController
 @RequestMapping(value = "push/campaign")
 public class PushCampaignController {
-
-    private static final Logger logger = LoggerFactory.getLogger(PushCampaignController.class);
 
     private final AppCredentialsRepository appCredentialsRepository;
     private final PushCampaignRepository pushCampaignRepository;
@@ -91,12 +89,14 @@ public class PushCampaignController {
     public ObjectResponse<CreateCampaignResponse> createCampaign(@RequestBody ObjectRequest<CreateCampaignRequest> request) throws PushServerException {
         final CreateCampaignRequest requestObject = request.getRequestObject();
         if (requestObject == null) {
+            logger.error("action: createCampaign, state: failed, error: Request object must not be empty");
             throw new PushServerException("Request object must not be empty");
         }
         final String appId = requestObject.getAppId();
-        logger.info("Received createCampaign request, app ID: {}", appId);
+        logger.info("action: createCampaign, state: initiated, applicationId: {}", appId);
         final String errorMessage = CreateCampaignRequestValidator.validate(requestObject);
         if (errorMessage != null) {
+            logger.error("action: createCampaign, state: failed, error: {}", errorMessage);
             throw new PushServerException(errorMessage);
         }
 
@@ -112,7 +112,7 @@ public class PushCampaignController {
         campaign = pushCampaignRepository.save(campaign);
         final CreateCampaignResponse response = new CreateCampaignResponse();
         response.setId(campaign.getId());
-        logger.info("The createCampaign request succeeded, app ID: {}, campaign ID: {}", appId, campaign.getId());
+        logger.info("action: createCampaign, state: succeeded, campaignId: {}", campaign.getId());
         return new ObjectResponse<>(response);
     }
 
@@ -126,7 +126,7 @@ public class PushCampaignController {
     @Operation(summary = "Delete a campaign",
                   description = "Specified with id. Also users associated with this campaign are going to be deleted. If deletion was applied then deleted status is true. False if such campaign does not exist")
     public ObjectResponse<DeleteCampaignResponse> deleteCampaign(@PathVariable(value = "id") Long campaignId) {
-        logger.info("Received deleteCampaign request, campaign ID: {}", campaignId);
+        logger.info("action: deleteCampaign, state: initiated, campaignId: {}", campaignId);
         final DeleteCampaignResponse deleteCampaignResponse = new DeleteCampaignResponse();
         final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
         if (campaignEntityOptional.isEmpty()) {
@@ -136,7 +136,7 @@ public class PushCampaignController {
             deleteCampaignResponse.setDeleted(true);
         }
         pushCampaignUserRepository.deleteByCampaignId(campaignId);
-        logger.info("The deleteCampaign request succeeded, campaign ID: {}", campaignId);
+        logger.info("action: deleteCampaign, state: succeeded, deleted: {}", deleteCampaignResponse.isDeleted());
         return new ObjectResponse<>(deleteCampaignResponse);
     }
 
@@ -151,7 +151,7 @@ public class PushCampaignController {
     @Operation(summary = "Return details about campaign",
                   description = "Campaign specified by id. Details contain campaign id, application id, status if campaign was sent and message.")
     public ObjectResponse<CampaignResponse> getCampaign(@PathVariable(value = "id") Long campaignId) throws PushServerException {
-        logger.debug("Received getCampaign request, campaign ID: {}", campaignId);
+        logger.info("action: getCampaign, state: initiated, campaignId: {}", campaignId);
         final PushCampaignEntity campaign = findPushCampaignById(campaignId);
         final CampaignResponse campaignResponse = new CampaignResponse();
         campaignResponse.setId(campaign.getId());
@@ -159,7 +159,7 @@ public class PushCampaignController {
         campaignResponse.setAppId(campaign.getAppCredentials().getAppId());
         final PushMessageBody message = jsonSerialization.deserializePushMessageBody(campaign.getMessage());
         campaignResponse.setMessage(message);
-        logger.debug("The getCampaign request succeeded, campaign ID: {}", campaignId);
+        logger.info("action: getCampaign, state: succeeded");
         return new ObjectResponse<>(campaignResponse);
     }
 
@@ -176,7 +176,7 @@ public class PushCampaignController {
                   description = "Restricted with all param. This parameter decides if return campaigns that are 'only sent'(statement false)" +
                           " or return all registered campaigns (statement true). Details are same as in getCampaign method")
     public ObjectResponse<ListOfCampaignsResponse> getListOfCampaigns(@RequestParam(value = "all", required = false) boolean all) throws PushServerException {
-        logger.debug("Received getListOfCampaigns request");
+        logger.info("action: getListOfCampaigns, state: initiated, all: {}", all);
         // Fetch campaigns from the repository
         final Iterable<PushCampaignEntity> campaignList;
         if (all) {
@@ -195,7 +195,7 @@ public class PushCampaignController {
             campaignResponse.setMessage(pushMessageBody);
             listOfCampaignsResponse.add(campaignResponse);
         }
-        logger.debug("The getListOfCampaigns request succeeded");
+        logger.info("action: getListOfCampaigns, state: succeeded, size: {}", listOfCampaignsResponse.size());
         return new ObjectResponse<>(listOfCampaignsResponse);
     }
 
@@ -213,9 +213,9 @@ public class PushCampaignController {
                   description = "Users are identified in request body as an array of strings in request body.")
     public Response addUsersToCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) throws PushServerException {
         checkRequestNullity(request);
-        logger.info("Received addUsersToCampaign request, campaign ID: {}, users: {}", id, request.getRequestObject());
-        assureExistsPushCampaignById(id);
         final ListOfUsers listOfUsers = request.getRequestObject();
+        logger.info("action: addUsersToCampaign, state: initiated, campaignId: {}, size: {}", id, listOfUsers.size());
+        assureExistsPushCampaignById(id);
         for (String user : listOfUsers) {
             if (pushCampaignUserRepository.findFirstByUserIdAndCampaignId(user, id) == null) {
                 final PushCampaignUserEntity pushCampaignUserEntity = new PushCampaignUserEntity();
@@ -223,11 +223,11 @@ public class PushCampaignController {
                 pushCampaignUserEntity.setUserId(user);
                 pushCampaignUserEntity.setTimestampCreated(new Date());
                 pushCampaignUserRepository.save(pushCampaignUserEntity);
-                logger.info("The addUsersToCampaign request succeeded, campaign ID: {}", id);
             } else {
                 logger.warn("Duplicate user entry for push campaign: {}", user);
             }
         }
+        logger.info("action: addUsersToCampaign, state: succeeded");
         return new Response();
     }
 
@@ -244,7 +244,7 @@ public class PushCampaignController {
                           "Users are shown in paginated format based on parameters assigned in URI. " +
                           "Page param defines which page to show (start from 0) and size param which defines how many user ids to show per page")
     public PagedResponse<ListOfUsersFromCampaignResponse> getListOfUsersFromCampaign(@PathVariable(value = "id") Long id, Pageable pageable) {
-        logger.debug("Received getListOfUsersFromCampaign request, campaign ID: {}", id);
+        logger.info("action: getListOfUsersFromCampaign, state: initiated, campaignId: {}", id);
         ListOfUsersFromCampaignResponse listOfUsersFromCampaignResponse = new ListOfUsersFromCampaignResponse();
         List<PushCampaignUserEntity> users = pushCampaignUserRepository.findAllByCampaignId(id, pageable);
         ListOfUsers listOfUsers = new ListOfUsers();
@@ -256,7 +256,7 @@ public class PushCampaignController {
         PagedResponse<ListOfUsersFromCampaignResponse> listOfUsersPagedResponse = new PagedResponse<>(listOfUsersFromCampaignResponse);
         listOfUsersPagedResponse.setPage(pageable.getPageNumber());
         listOfUsersPagedResponse.setSize(pageable.getPageSize());
-        logger.debug("The getListOfUsersFromCampaign request succeeded, campaign ID: {}", id);
+        logger.info("action: getListOfUsersFromCampaign, state: succeeded, size: {}", listOfUsers.size());
         return listOfUsersPagedResponse;
     }
 
@@ -272,12 +272,12 @@ public class PushCampaignController {
                   description = "Delete users from certain campaign specified with {id} variable in URI." +
                           "Users are described as list of their ids in Request body")
     public Response deleteUsersFromCampaign(@PathVariable(value = "id") Long id, @RequestBody ObjectRequest<ListOfUsers> request) {
-        logger.info("Received deleteUsersFromCampaign request, campaign ID: {}, users: {}", id, request.getRequestObject());
         ListOfUsers listOfUsers = request.getRequestObject();
+        logger.info("action: deleteUsersFromCampaign, state: initiated, campaignId: {}, size: {}", id, listOfUsers.size());
         for (String user : listOfUsers) {
             pushCampaignUserRepository.deleteByCampaignIdAndUserId(id, user);
         }
-        logger.info("The deleteUsersFromCampaign request succeeded, campaign ID: {}", id);
+        logger.info("action: deleteUsersFromCampaign, state: succeeded");
         return new Response();
     }
 
@@ -301,6 +301,7 @@ public class PushCampaignController {
      */
     private void checkRequestNullity(ObjectRequest<?> request) throws PushServerException {
         if (request.getRequestObject() == null) {
+            logger.error("action: checkRequestNullity, state: failed, error: Empty requestObject data");
             throw new PushServerException("Empty requestObject data");
         }
     }
@@ -324,6 +325,7 @@ public class PushCampaignController {
     private void assureExistsPushCampaignById(Long campaignId) throws PushServerException {
         final Optional<PushCampaignEntity> campaignEntityOptional = pushCampaignRepository.findById(campaignId);
         if (campaignEntityOptional.isEmpty()) {
+            logger.error("action: assureExistsPushCampaignById, state: failed, campaignId: {}, error: Campaign with entered ID does not exist", campaignId);
             throw new PushServerException("Campaign with entered ID does not exist");
         }
     }
