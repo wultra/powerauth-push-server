@@ -19,7 +19,7 @@ package com.wultra.push.controller.rest;
 
 import com.wultra.security.powerauth.client.v3.PowerAuthClient;
 import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
-import com.wultra.security.powerauth.client.model.response.GetActivationStatusResponse;
+import com.wultra.security.powerauth.client.model.response.v3.GetActivationStatusResponse;
 import com.wultra.core.rest.model.base.request.ObjectRequest;
 import com.wultra.core.rest.model.base.response.Response;
 import com.wultra.push.errorhandling.exceptions.PushServerException;
@@ -30,7 +30,6 @@ import com.wultra.push.repository.AppCredentialsRepository;
 import com.wultra.push.repository.PushDeviceRepository;
 import com.wultra.push.repository.model.AppCredentialsEntity;
 import com.wultra.push.repository.model.PushDeviceRegistrationEntity;
-import com.wultra.security.powerauth.client.model.response.GetActivationStatusResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

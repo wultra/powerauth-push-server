@@ -37,7 +37,7 @@ import com.wultra.security.powerauth.crypto.lib.encryptor.model.EncryptorId;
 import com.wultra.security.powerauth.crypto.lib.encryptor.model.EncryptorParameters;
 import com.wultra.security.powerauth.crypto.lib.encryptor.model.v3.ClientEciesSecrets;
 import com.wultra.security.powerauth.crypto.lib.util.KeyConvertor;
-import com.wultra.security.powerauth.rest.api.model.request.ActivationLayer2Request;
+import com.wultra.security.powerauth.rest.api.model.request.v3.ActivationLayer2Request;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
