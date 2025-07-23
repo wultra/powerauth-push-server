@@ -16,6 +16,9 @@
 
 package com.wultra.push.service;
 
+import com.wultra.security.powerauth.client.v3.PowerAuthClient;
+import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
+import com.wultra.security.powerauth.client.model.response.v3.GetActivationStatusResponse;
 import com.wultra.push.errorhandling.exceptions.PushServerException;
 import com.wultra.push.model.enumeration.MobilePlatform;
 import com.wultra.push.model.request.CreateDeviceForActivationsRequest;
@@ -26,9 +29,6 @@ import com.wultra.push.repository.PushDeviceRepository;
 import com.wultra.push.repository.model.AppCredentialsEntity;
 import com.wultra.push.repository.model.Platform;
 import com.wultra.push.repository.model.PushDeviceRegistrationEntity;
-import com.wultra.security.powerauth.client.PowerAuthClient;
-import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
-import com.wultra.security.powerauth.client.model.response.GetActivationStatusResponse;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

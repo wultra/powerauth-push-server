@@ -16,7 +16,7 @@
 package com.wultra.push.service;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.wultra.security.powerauth.client.PowerAuthClient;
+import com.wultra.security.powerauth.client.v3.PowerAuthClient;
 import com.wultra.security.powerauth.client.model.entity.Application;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
 import com.wultra.push.errorhandling.exceptions.PushServerException;
