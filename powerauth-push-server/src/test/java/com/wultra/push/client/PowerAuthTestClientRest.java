@@ -93,7 +93,7 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
         }
 
         // Create application version if it does not exist
-        com.wultra.security.powerauth.client.model.response.GetApplicationDetailResponse detail = powerAuthClient.getApplicationDetail(applicationId);
+        com.wultra.security.powerauth.client.model.response.v3.GetApplicationDetailResponse detail = powerAuthClient.getApplicationDetail(applicationId);
         masterPublicKey = detail.getMasterPublicKey();
         boolean versionExists = false;
         for (ApplicationVersion appVersion: detail.getVersions()) {
