@@ -82,7 +82,7 @@
         <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
 
         <!-- Documentation Dependencies -->
-        <springdoc-openapi-starter-webmvc-ui.version>2.8.13</springdoc-openapi-starter-webmvc-ui.version>
+        <springdoc-openapi-starter-webmvc-ui.version>2.8.14</springdoc-openapi-starter-webmvc-ui.version>
         <swagger-annotations-jakarta.version>2.2.40</swagger-annotations-jakarta.version>
     </properties>
 
