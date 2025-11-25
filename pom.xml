@@ -80,6 +80,7 @@
         <firebase-admin.version>9.7.0</firebase-admin.version>
         <logstash.version>8.1</logstash.version>
         <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
+        <central.publishing.plugin.version>0.9.0</central.publishing.plugin.version>
 
         <!-- Documentation Dependencies -->
         <springdoc-openapi-starter-webmvc-ui.version>2.8.14</springdoc-openapi-starter-webmvc-ui.version>
@@ -138,6 +139,16 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>${central.publishing.plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -307,8 +318,6 @@
                     <name>!useInternalRepo</name>
                 </property>
             </activation>
-            <properties>
-            </properties>
             <distributionManagement>
                 <snapshotRepository>
                     <id>central-portal-snapshots-distribution</id>
@@ -319,6 +328,23 @@
                     <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
                 </repository>
             </distributionManagement>
+            <properties>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>${env.server_id}</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
+                            <waitMaxTime>${env.wait_max_time}</waitMaxTime>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
