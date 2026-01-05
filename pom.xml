@@ -83,7 +83,7 @@
         <central.publishing.plugin.version>0.9.0</central.publishing.plugin.version>
 
         <!-- Documentation Dependencies -->
-        <springdoc-openapi-starter-webmvc-ui.version>2.8.14</springdoc-openapi-starter-webmvc-ui.version>
+        <springdoc-openapi-starter-webmvc-ui.version>3.0.1</springdoc-openapi-starter-webmvc-ui.version>
         <swagger-annotations-jakarta.version>2.2.41</swagger-annotations-jakarta.version>
     </properties>
 
