@@ -1,4 +1,4 @@
-FROM ibm-semeru-runtimes:open-21.0.8_9-jre
+FROM ibm-semeru-runtimes:open-21.0.9_10-jre-noble
 
 LABEL maintainer="Wultra <hello@wultra.com>"
 
@@ -9,13 +9,16 @@ ENV JAVA_HOME=/opt/java/openjdk \
     TZ=UTC \
     APP_PATH="/app/powerauth-push-server.war" \
     EXTLIB_PATH="/app/extlib" \
-    OJDBC_VERSION="23.8.0.25.04"
+    OJDBC_VERSION="23.8.0.25.04" \
+    MSSQL_JDBC_VERSION="13.2.1.jre11"
 
 # Upgrade OS and dependencies
 RUN apt-get -y update  \
     && apt-get -y upgrade \
     && apt-get -y install bash wget \
-    && mkdir -p ${EXTLIB_PATH} && wget --no-verbose https://repo1.maven.org/maven2/com/oracle/database/jdbc/ojdbc11/${OJDBC_VERSION}/ojdbc11-${OJDBC_VERSION}.jar -O ${EXTLIB_PATH}/ojdbc11.jar \
+    && mkdir -p ${EXTLIB_PATH} \
+    && wget --no-verbose https://repo1.maven.org/maven2/com/oracle/database/jdbc/ojdbc11/${OJDBC_VERSION}/ojdbc11-${OJDBC_VERSION}.jar -O ${EXTLIB_PATH}/ojdbc11.jar \
+    && wget --no-verbose https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/${MSSQL_JDBC_VERSION}/mssql-jdbc-${MSSQL_JDBC_VERSION}.jar -O ${EXTLIB_PATH}/mssql-jdbc.jar \
 # Uninstall packages which are no longer needed and clean apt caches
     && apt-get -y remove wget gettext-base \
     && apt-get -y purge --auto-remove \
