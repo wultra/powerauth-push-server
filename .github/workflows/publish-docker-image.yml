@@ -121,7 +121,7 @@ jobs:
           mkdir -p ./${{ matrix.app }}/docker-init/liquibase/data/
           cp -r ./docs/db/changelog/changesets/${{ matrix.app }} ./${{ matrix.app }}/docker-init/liquibase/data
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Log in to ACR
