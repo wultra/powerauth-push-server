@@ -79,7 +79,7 @@ jobs:
           server-password: INTERNAL_PASSWORD
       - name: Install Cosign
         if: ${{ needs.set-environment.outputs.should_push == 'true' }}
-        uses: sigstore/cosign-installer@v4.0.0
+        uses: sigstore/cosign-installer@v4.1.0
         with:
           cosign-release: 'v3.0.2'
       - name: Check Cosign version
