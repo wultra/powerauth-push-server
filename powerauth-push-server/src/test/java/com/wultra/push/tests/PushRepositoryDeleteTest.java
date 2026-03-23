@@ -12,6 +12,7 @@ import com.wultra.push.repository.model.PushDeviceRegistrationEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,13 +49,13 @@ class PushRepositoryDeleteTest {
         createCampaignUser(campaign.getId(), "user3");
         
         // Verify data exists
-        assertEquals(3, pushCampaignUserRepository.count());
+        assertEquals(3, pushCampaignUserRepository.findAllByCampaignId(campaign.getId(), Pageable.unpaged()).size());
         
         // Execute delete
         pushCampaignUserRepository.deleteByCampaignId(campaign.getId());
         
         // Verify deletion
-        assertEquals(0, pushCampaignUserRepository.count());
+        assertEquals(0, pushCampaignUserRepository.findAllByCampaignId(campaign.getId(), Pageable.unpaged()).size());
     }
 
     @Test
@@ -67,13 +68,13 @@ class PushRepositoryDeleteTest {
         createCampaignUser(campaign.getId(), "user2");
         
         // Verify data exists
-        assertEquals(2, pushCampaignUserRepository.count());
+        assertEquals(2, pushCampaignUserRepository.findAllByCampaignId(campaign.getId(), Pageable.unpaged()).size());
         
         // Execute delete for specific user
         pushCampaignUserRepository.deleteByCampaignIdAndUserId(campaign.getId(), "user1");
         
         // Verify deletion
-        assertEquals(1, pushCampaignUserRepository.count());
+        assertEquals(1, pushCampaignUserRepository.findAllByCampaignId(campaign.getId(), Pageable.unpaged()).size());
         assertNotNull(pushCampaignUserRepository.findFirstByUserIdAndCampaignId("user2", campaign.getId()));
         assertNull(pushCampaignUserRepository.findFirstByUserIdAndCampaignId("user1", campaign.getId()));
     }
