@@ -17,6 +17,8 @@
 package com.wultra.push.repository;
 
 import com.wultra.push.repository.model.PushDeviceRegistrationEntity;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,6 +81,8 @@ public interface PushDeviceRepository extends CrudRepository<PushDeviceRegistrat
      * @param rid Credentials database record ID.
      * @param pushToken Push Token.
      */
+    @Modifying
+    @Query("DELETE FROM PushDeviceRegistrationEntity d WHERE d.appCredentials.id = ?1 AND d.pushToken = ?2")
     void deleteAllByAppCredentialsIdAndPushToken(Long rid, String pushToken);
 
 }

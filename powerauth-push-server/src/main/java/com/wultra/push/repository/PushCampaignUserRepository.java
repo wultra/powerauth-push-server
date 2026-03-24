@@ -18,6 +18,8 @@ package com.wultra.push.repository;
 
 import com.wultra.push.repository.model.PushCampaignUserEntity;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
@@ -56,6 +58,8 @@ public interface PushCampaignUserRepository extends PagingAndSortingRepository<P
      * Delete all users who are associated with given campaign.
      * @param campaignId Campaign ID.
      */
+    @Modifying
+    @Query("DELETE FROM PushCampaignUserEntity u WHERE u.campaignId = ?1")
     void deleteByCampaignId(Long campaignId);
 
     /**
@@ -63,5 +67,7 @@ public interface PushCampaignUserRepository extends PagingAndSortingRepository<P
      * @param campaignId Campaign ID.
      * @param userId User ID.
      */
+    @Modifying
+    @Query("DELETE FROM PushCampaignUserEntity u WHERE u.campaignId = ?1 AND u.userId = ?2")
     void deleteByCampaignIdAndUserId(Long campaignId, String userId);
 }

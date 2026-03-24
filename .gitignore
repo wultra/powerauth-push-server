@@ -28,3 +28,6 @@ rebel.xml
 
 # Compiled class files
 **/*.class
+
+# Copilot Instructions
+.github/copilot-instructions.md
