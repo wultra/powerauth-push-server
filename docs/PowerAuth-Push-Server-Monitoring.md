@@ -200,10 +200,10 @@ PowerAuth Push Server uses a JDBC connection pool **HikariCP**. Monitoring the p
 
 **Metrics produced by the server**
 
-- `hikaricp_connections{pool="HikariPool-PowerAuth-Push-Server", state="active"}`
-- `hikaricp_connections{pool="HikariPool-PowerAuth-Push-Server", state="idle"}`
-- `hikaricp_connections{pool="HikariPool-PowerAuth-Push-Server", state="pending"}`
-- `hikaricp_connections{pool="HikariPool-PowerAuth-Push-Server", state="max"}`
+- `hikaricp_connections{pool="HikariPool-Push-Server", state="active"}`
+- `hikaricp_connections{pool="HikariPool-Push-Server", state="idle"}`
+- `hikaricp_connections{pool="HikariPool-Push-Server", state="pending"}`
+- `hikaricp_connections{pool="HikariPool-Push-Server", state="max"}`
 
 Key signals:
 
@@ -222,9 +222,9 @@ Key signals:
 
 **Metrics produced by the server**
 
-- `hikaricp_connections_acquire_seconds_sum{pool="HikariPool-PowerAuth-Push-Server"}`
-- `hikaricp_connections_acquire_seconds_count{pool="HikariPool-PowerAuth-Push-Server"}`
-- `hikaricp_connections_acquire_seconds_max{pool="HikariPool-PowerAuth-Push-Server"}`
+- `hikaricp_connections_acquire_seconds_sum{pool="HikariPool-Push-Server"}`
+- `hikaricp_connections_acquire_seconds_count{pool="HikariPool-Push-Server"}`
+- `hikaricp_connections_acquire_seconds_max{pool="HikariPool-Push-Server"}`
 
 Use:
 
