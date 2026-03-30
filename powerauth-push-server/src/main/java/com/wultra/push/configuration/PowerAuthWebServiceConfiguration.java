@@ -15,9 +15,9 @@
  */
 package com.wultra.push.configuration;
 
-import com.wultra.security.powerauth.client.v3.PowerAuthClient;
+import com.wultra.security.powerauth.client.v4.PowerAuthClient;
 import com.wultra.security.powerauth.client.model.error.PowerAuthClientException;
-import com.wultra.security.powerauth.rest.client.v3.PowerAuthRestClient;
+import com.wultra.security.powerauth.rest.client.v4.PowerAuthRestClient;
 import com.wultra.security.powerauth.rest.client.PowerAuthRestClientConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
