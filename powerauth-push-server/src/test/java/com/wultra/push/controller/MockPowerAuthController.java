@@ -25,24 +25,18 @@ import com.wultra.security.powerauth.client.model.request.BlockActivationRequest
 import com.wultra.security.powerauth.client.model.request.CommitActivationRequest;
 import com.wultra.security.powerauth.client.model.request.InitActivationRequest;
 import com.wultra.security.powerauth.client.model.request.UnblockActivationRequest;
-import com.wultra.security.powerauth.client.model.request.v3.GetActivationStatusRequest;
+import com.wultra.security.powerauth.client.model.request.v4.GetActivationStatusRequest;
+import com.wultra.security.powerauth.client.model.request.v4.PrepareActivationRequest;
 import com.wultra.security.powerauth.client.model.response.*;
-import com.wultra.security.powerauth.client.model.response.v3.GetActivationStatusResponse;
-import com.wultra.security.powerauth.client.model.response.v3.GetApplicationDetailResponse;
-import com.wultra.security.powerauth.client.model.response.v3.PrepareActivationResponse;
-import com.wultra.security.powerauth.crypto.lib.generator.KeyGenerator;
-import com.wultra.security.powerauth.crypto.lib.model.exception.CryptoProviderException;
-import com.wultra.security.powerauth.crypto.lib.util.KeyConvertor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.wultra.security.powerauth.client.model.response.v4.GetActivationStatusResponse;
+import com.wultra.security.powerauth.client.model.response.v4.GetApplicationDetailResponse;
+import com.wultra.security.powerauth.client.model.response.v4.PrepareActivationResponse;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.KeyPair;
-import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -53,11 +47,9 @@ import java.util.UUID;
  * @author Roman Strobl, roman.strobl@wultra.com
  */
 @RestController
-@RequestMapping("powerauth-java-server/rest/v3")
+@RequestMapping("powerauth-java-server/rest/v4")
 @Profile("test")
 public class MockPowerAuthController {
-
-    private static final Logger logger = LoggerFactory.getLogger(MockPowerAuthController.class);
 
     private final Set<String> blockedActivations = new HashSet<>();
 
@@ -86,14 +78,6 @@ public class MockPowerAuthController {
         version.setApplicationKey("key");
         version.setApplicationSecret("secret");
         response.getVersions().add(version);
-        try {
-            final KeyPair keyPair = new KeyGenerator().generateKeyPair();
-            final KeyConvertor keyConvertor = new KeyConvertor();
-            response.setMasterPublicKey(Base64.getEncoder().encodeToString(keyConvertor.convertPublicKeyToBytes(keyPair.getPublic())));
-        } catch (CryptoProviderException e) {
-            // Exception cannot occur when cryptography provider is set correctly
-            logger.error(e.getMessage(), e);
-        }
         return new ObjectResponse<>(response);
     }
 
@@ -120,7 +104,7 @@ public class MockPowerAuthController {
     }
 
     @PostMapping("activation/prepare")
-    public ObjectResponse<PrepareActivationResponse> prepareActivation(@RequestBody ObjectRequest<GetActivationStatusRequest> request) {
+    public ObjectResponse<PrepareActivationResponse> prepareActivation(@RequestBody ObjectRequest<PrepareActivationRequest> request) {
         final PrepareActivationResponse response = new PrepareActivationResponse();
         response.setActivationId(""); // enough to pass the checks
         response.setActivationStatus(ActivationStatus.PENDING_COMMIT);

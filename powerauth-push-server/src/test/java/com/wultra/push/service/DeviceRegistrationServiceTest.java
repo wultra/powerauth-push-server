@@ -16,9 +16,9 @@
 
 package com.wultra.push.service;
 
-import com.wultra.security.powerauth.client.v3.PowerAuthClient;
+import com.wultra.security.powerauth.client.v4.PowerAuthClient;
 import com.wultra.security.powerauth.client.model.enumeration.ActivationStatus;
-import com.wultra.security.powerauth.client.model.response.v3.GetActivationStatusResponse;
+import com.wultra.security.powerauth.client.model.response.v4.GetActivationStatusResponse;
 import com.wultra.push.errorhandling.exceptions.PushServerException;
 import com.wultra.push.model.enumeration.MobilePlatform;
 import com.wultra.push.model.request.CreateDeviceForActivationsRequest;
