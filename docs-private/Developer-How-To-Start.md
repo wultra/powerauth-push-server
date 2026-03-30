@@ -14,6 +14,7 @@ of the PowerAuth Push Server. You can use higher versions, but make sure to chec
 
 ## Push Server
 
+
 ### Build
 
 From the repository root, build all modules with:
@@ -34,9 +35,11 @@ mvn -pl powerauth-push-server -am clean install
 * The default DB for development is _PostgreSQL_.
 * Database changes are driven by Liquibase.
 
+
 #### Set up
 
 Ensure you have a database installed and running, and that you have an admin account.
+
 
 ##### Create a user and a database
 
@@ -56,6 +59,7 @@ CREATE DATABASE powerauth OWNER powerauth;
 By default, local development in this repository uses the `powerauth` user without a password.
 If your local PostgreSQL setup requires password authentication, set a password for the user
 and update the matching datasource and Liquibase settings in the commands below.
+
 
 ##### Load the data with Liquibase
 
@@ -111,6 +115,7 @@ For additional details, see:
 
 The working directory is `powerauth-push-server`.
 
+
 #### CLI
 
 ```shell
@@ -119,11 +124,13 @@ java -jar target/powerauth-push-server-x.y.z.war --spring.profiles.active=dev
 
 The exact WAR filename can be found in the `target/` directory.
 
+
 #### Maven
 
 ```shell
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
+
 
 #### IntelliJ IDEA
 
@@ -154,17 +161,20 @@ You can check other APIs on:
 
 ### Generate SQL script (optional)
 
+
 #### PostgreSQL
 
 ```shell
 liquibase --changeLogFile=./docs/db/changelog/changesets/powerauth-push-server/db.changelog-module.xml --output-file=./docs/sql/postgresql/generated-postgresql-script.sql updateSQL --url=offline:postgresql
 ```
 
+
 #### Oracle
 
 ```shell
 liquibase --changeLogFile=./docs/db/changelog/changesets/powerauth-push-server/db.changelog-module.xml --output-file=./docs/sql/oracle/generated-oracle-script.sql updateSQL --url=offline:oracle
 ```
+
 
 #### MS SQL
 
