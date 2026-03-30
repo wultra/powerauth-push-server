@@ -70,7 +70,7 @@ public class PowerAuthTestClientRest implements PowerAuthTestClient {
     }
 
     public String initializeApplication(String applicationName, String applicationVersion) throws PowerAuthClientException {
-        // Create athe application if it does not exist
+        // Create the application if it does not exist
         final List<Application> applications = powerAuthClient.getApplicationList().getApplications();
         boolean applicationExists = false;
         for (Application app: applications) {
