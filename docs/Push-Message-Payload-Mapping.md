@@ -60,21 +60,21 @@ In case a push message is marked with the `silent` flag, we add `content-availab
 
 Attributes of the abstract push message object are mapped to FCM payload in following way:
 
-| Abstract Message Attribute      | FCM Mapped Attributes         |
-|---------------------------------|-------------------------------|
-| `title`                         | `notification.title`          |
-| `titleLocKey`                   | `notification.title_loc_key`  |
-| `titleLocArgs`                  | `notification.title_loc_args` |
-| `body`                          | `notification.body`           |
-| `bodyLocKey`                    | `notification.body_loc_key`   |
-| `bodyLocArgs`                   | `notification.body_loc_args`  |
-| `badge`                         | _ignored_                     |
-| `category`                      | `notification.tag`            |
-| `sound`                         | `notification.sound`          |
-| `icon`                          | `notification.icon`           |
-| `collapseKey`                   | `collapse_key`                |
-| `validUntil`                    | _ignored_                     |
-| `extras`                        | `data`                        |
+| Abstract Message Attribute      | FCM Mapped Attributes             |
+|---------------------------------|-----------------------------------|
+| `title`                         | `notification.title`              |
+| `titleLocKey`                   | `notification.title_loc_key`      |
+| `titleLocArgs`                  | `notification.title_loc_args`     |
+| `body`                          | `notification.body`               |
+| `bodyLocKey`                    | `notification.body_loc_key`       |
+| `bodyLocArgs`                   | `notification.body_loc_args`      |
+| `badge`                         | `notification.notification_count` |
+| `category`                      | `notification.tag`                |
+| `sound`                         | `notification.sound`              |
+| `icon`                          | `notification.icon`               |
+| `collapseKey`                   | `collapse_key`                    |
+| `validUntil`                    | _ignored_                         |
+| `extras`                        | `data`                            |
 
 For the documentation of the FCM payload reference, please read the official Google documentation:
 
@@ -97,7 +97,7 @@ Attributes of the abstract push message object are mapped to HMS payload in foll
 | `body`                     | `notification.body`           |                            |                                                                                                                    |
 | `bodyLocKey`               | `notification.body_loc_key`   |                            |                                                                                                                    |
 | `bodyLocArgs`              | `notification.body_loc_args`  |                            |                                                                                                                    |
-| `badge`                    | _ignored_                     |                            |                                                                                                                    |
+| `badge`                    | `notification.badge.set_num`  |                            |                                                                                                                    |
 | `category`                 | `notification.tag`            |                            |                                                                                                                    |
 | `sound`                    | `notification.sound`          |                            |                                                                                                                    |
 | `icon`                     | `notification.icon`           |                            |                                                                                                                    |

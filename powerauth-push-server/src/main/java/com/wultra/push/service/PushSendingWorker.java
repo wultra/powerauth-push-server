@@ -41,6 +41,7 @@ import com.wultra.push.service.fcm.model.FcmSuccessResponse;
 import com.wultra.push.service.hms.HmsClient;
 import com.wultra.push.service.hms.HmsSendResponse;
 import com.wultra.push.service.hms.request.AndroidNotification.Importance;
+import com.wultra.push.service.hms.request.BadgeNotification;
 import com.wultra.push.service.hms.request.ClickAction;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -275,6 +276,10 @@ public class PushSendingWorker {
                 .setSound(pushMessageBody.getSound())
                 .setTag(pushMessageBody.getCategory());
 
+        if (pushMessageBody.getBadge() != null) {
+            builder.setNotificationCount(pushMessageBody.getBadge());
+        }
+
         if (pushMessageBody.getTitleLocArgs() != null) {
             builder.addAllTitleLocalizationArgs(Arrays.asList(pushMessageBody.getTitleLocArgs()));
         }
@@ -334,6 +339,11 @@ public class PushSendingWorker {
                         .type(ClickAction.TYPE_START_APP)
                         .build());
 
+        if (pushMessageBody.getBadge() != null) {
+            notificationBuilder.badge(BadgeNotification.builder()
+                    .setNum(pushMessageBody.getBadge())
+                    .build());
+        }
         if (pushMessageBody.getTitleLocArgs() != null) {
             notificationBuilder.titleLocArgs(List.of(pushMessageBody.getTitleLocArgs()));
         }
