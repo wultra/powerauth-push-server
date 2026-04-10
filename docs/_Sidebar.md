@@ -10,6 +10,8 @@
 
 [Configuration Properties](./Configuration-Properties.md)
 
+[Monitoring](./Monitoring.md)
+
 **Integration Tutorials**
 
 [Integrate with Push Server](./Push-Server-Integration.md)
