@@ -10,7 +10,7 @@
 
 [Configuration Properties](./Configuration-Properties.md)
 
-[Monitoring](./Monitoring.md)
+[Monitoring](./PowerAuth-Push-Server-Monitoring.md)
 
 **Integration Tutorials**
 
