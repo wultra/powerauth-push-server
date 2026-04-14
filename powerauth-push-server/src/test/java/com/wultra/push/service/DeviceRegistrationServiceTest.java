@@ -76,7 +76,7 @@ class DeviceRegistrationServiceTest {
     @Test
     void testCreateOrUpdateDevice_createNew() throws Exception {
         final AppCredentialsEntity credentials = createAppCredentials(APP_NAME);
-        when(powerAuthClient.getActivationStatus("a1"))
+        when(powerAuthClient.getActivationDetail("a1"))
                 .thenReturn(createActivationStatusResponse("a1"));
 
         final CreateDeviceRequest request = new CreateDeviceRequest();
@@ -111,7 +111,7 @@ class DeviceRegistrationServiceTest {
     @Test
     void testCreateOrUpdateDevice_missingUserIdInRequest() throws Exception {
         final AppCredentialsEntity credentials = createAppCredentials(APP_NAME);
-        when(powerAuthClient.getActivationStatus("a1"))
+        when(powerAuthClient.getActivationDetail("a1"))
                 .thenReturn(createActivationStatusResponse("a1"));
 
         final CreateDeviceRequest request = new CreateDeviceRequest();
@@ -125,7 +125,7 @@ class DeviceRegistrationServiceTest {
         tested.createOrUpdateDevice(request, credentials);
 
         assertRegistrationExists("a1", "t1");
-        verify(powerAuthClient).getActivationStatus("a1");
+        verify(powerAuthClient).getActivationDetail("a1");
     }
 
     @Test
@@ -147,7 +147,7 @@ class DeviceRegistrationServiceTest {
     @Test
     @DirtiesContext
     void testCreateDevice_parallel() throws Exception {
-        when(powerAuthClient.getActivationStatus("a1"))
+        when(powerAuthClient.getActivationDetail("a1"))
                 .thenReturn(createActivationStatusResponse("a1"));
 
         final int nThreads = 5;
@@ -177,7 +177,7 @@ class DeviceRegistrationServiceTest {
     @Sql
     void testCreateOrUpdateDevice_multipleRecords() throws Exception {
         final AppCredentialsEntity credentials = appCredentialsRepository.findById(1L).get();
-        when(powerAuthClient.getActivationStatus("a1"))
+        when(powerAuthClient.getActivationDetail("a1"))
                 .thenReturn(createActivationStatusResponse("a1"));
 
         final CreateDeviceRequest request = new CreateDeviceRequest();
@@ -194,9 +194,9 @@ class DeviceRegistrationServiceTest {
     @Test
     void testCreateOrUpdateDevices_createNew() throws Exception {
         final AppCredentialsEntity credentials = createAppCredentials(APP_NAME);
-        when(powerAuthClient.getActivationStatus("a1"))
+        when(powerAuthClient.getActivationDetail("a1"))
                 .thenReturn(createActivationStatusResponse("a1"));
-        when(powerAuthClient.getActivationStatus("a2"))
+        when(powerAuthClient.getActivationDetail("a2"))
                 .thenReturn(createActivationStatusResponse("a2"));
 
         final CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
@@ -214,7 +214,7 @@ class DeviceRegistrationServiceTest {
     @Test
     void testCreateOrUpdateDevices_withDuplicities() throws Exception {
         final AppCredentialsEntity credentials = createAppCredentials(APP_NAME);
-        when(powerAuthClient.getActivationStatus("a1"))
+        when(powerAuthClient.getActivationDetail("a1"))
                 .thenReturn(createActivationStatusResponse("a1"));
 
         final CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
@@ -232,9 +232,9 @@ class DeviceRegistrationServiceTest {
     @Sql
     void testCreateOrUpdateDevices_update() throws Exception {
         final AppCredentialsEntity credentials = appCredentialsRepository.findById(1L).get();
-        when(powerAuthClient.getActivationStatus("a1"))
+        when(powerAuthClient.getActivationDetail("a1"))
                 .thenReturn(createActivationStatusResponse("a1"));
-        when(powerAuthClient.getActivationStatus("a2"))
+        when(powerAuthClient.getActivationDetail("a2"))
                 .thenReturn(createActivationStatusResponse("a2"));
 
         final CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
@@ -253,7 +253,7 @@ class DeviceRegistrationServiceTest {
     @Sql
     void testCreateOrUpdateDevices_multipleRecords() throws Exception {
         final AppCredentialsEntity credentials = createAppCredentials(APP_NAME);
-        when(powerAuthClient.getActivationStatus("a1"))
+        when(powerAuthClient.getActivationDetail("a1"))
                 .thenReturn(createActivationStatusResponse("a1"));
 
         final CreateDeviceForActivationsRequest request = new CreateDeviceForActivationsRequest();
@@ -305,7 +305,7 @@ class DeviceRegistrationServiceTest {
         device.setActive(false);
         deviceRepository.save(device);
 
-        when(powerAuthClient.getActivationStatus("a1"))
+        when(powerAuthClient.getActivationDetail("a1"))
                 .thenReturn(createActivationStatusResponse("a1"));
 
         final List<PushDeviceRegistrationEntity> entities = deviceRepository.findByActivationId("a1");
@@ -316,7 +316,7 @@ class DeviceRegistrationServiceTest {
         request.setActivationId("a1");
 
         tested.updateStatus(request);
-        verify(powerAuthClient).getActivationStatus("a1");
+        verify(powerAuthClient).getActivationDetail("a1");
 
         final List<PushDeviceRegistrationEntity> entities2 = deviceRepository.findByActivationId("a1");
         assertEquals(1, entities2.size());
