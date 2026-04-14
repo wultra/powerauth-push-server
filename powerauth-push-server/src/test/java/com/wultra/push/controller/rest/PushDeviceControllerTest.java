@@ -71,7 +71,7 @@ class PushDeviceControllerTest {
     @Test
     void testCreateDevice() throws Exception {
         createAppCredentials("my_app");
-        when(powerAuthClient.getActivationDetail("a1"))
+        when(powerAuthClient.getActivationStatusWithoutBlob("a1"))
                 .thenReturn(createActivationStatusResponse("a1"));
 
 
@@ -94,7 +94,7 @@ class PushDeviceControllerTest {
     @Test
     void testCreateDevice_missingApplication() throws Exception {
         createAppCredentials("my_app");
-        when(powerAuthClient.getActivationDetail("a2"))
+        when(powerAuthClient.getActivationStatusWithoutBlob("a2"))
                 .thenReturn(createActivationStatusResponse("a2"));
 
         final CreateDeviceRequest request = new CreateDeviceRequest();
@@ -112,7 +112,7 @@ class PushDeviceControllerTest {
     @Test
     void testCreateDevice_parallel() throws Exception {
         createAppCredentials("my_app");
-        when(powerAuthClient.getActivationDetail("a3"))
+        when(powerAuthClient.getActivationStatusWithoutBlob("a3"))
                 .thenReturn(createActivationStatusResponse("a3"));
 
         final int nThreads = 5;
