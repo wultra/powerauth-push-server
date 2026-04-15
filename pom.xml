@@ -70,9 +70,9 @@
     <properties>
         <!--  Wultra Dependencies  -->
         <wultra-core.version>2.1.0</wultra-core.version>
-        <powerauth.version>2.0.1</powerauth.version>
+        <powerauth.version>2.1.0-SNAPSHOT</powerauth.version>
         <powerauth-crypto.version>2.0.1</powerauth-crypto.version>
-        <powerauth-restful-integration.version>2.0.0</powerauth-restful-integration.version>
+        <powerauth-restful-integration.version>2.1.0-SNAPSHOT</powerauth-restful-integration.version>
 
         <!-- Library Versions -->
         <pushy.version>0.15.4</pushy.version>

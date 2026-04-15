@@ -254,7 +254,7 @@ public class DeviceRegistrationService {
      */
     private void fetchAndUpdateActivationForDevice(PushDeviceRegistrationEntity device, String activationId) throws PushServerException {
         try {
-            final GetActivationStatusResponse activation = powerAuthClient.getActivationStatus(activationId);
+            final GetActivationStatusResponse activation = powerAuthClient.getActivationStatusWithoutBlob(activationId);
             if (activation == null) {
                 throw new PushServerException("Device registration failed because associated activation was not found");
             }
@@ -291,7 +291,7 @@ public class DeviceRegistrationService {
 
     private ActivationStatus fetchActivationStatus(final String activationId) throws PushServerException {
         try {
-            return powerAuthClient.getActivationStatus(activationId).getActivationStatus();
+            return powerAuthClient.getActivationStatusWithoutBlob(activationId).getActivationStatus();
         } catch (PowerAuthClientException ex) {
             logger.warn(ex.getMessage(), ex);
             throw new PushServerException("Update device status failed because activation status is unknown");
