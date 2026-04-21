@@ -2,7 +2,7 @@ FROM liquibase:4.33.0-alpine
 
 LABEL maintainer="Wultra <hello@wultra.com>"
 
-COPY powerauth-push-server/docker-init/liquibase/data /liquibase/changelog
+COPY docs/db/changelog/changesets/powerauth-push-server /liquibase/
 COPY powerauth-push-server/docker-init/docker-entrypoint.sh /docker-entrypoint.sh
 
 RUN rm /liquibase/internal/lib/snowflake-jdbc.jar
