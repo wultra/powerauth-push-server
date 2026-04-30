@@ -27,7 +27,7 @@ RUN apt-get -y update  \
     && groupadd -r powerauth && useradd -r -g powerauth -s /sbin/nologin powerauth
 
 # Deploy and run applications
-COPY ./powerauth-push-server/docker/images-and-libs/powerauth-push-server.war "${APP_PATH}"
+COPY ./powerauth-push-server/target/powerauth-push-server*.war "${APP_PATH}"
 
 # Docker configuration
 EXPOSE 8080
