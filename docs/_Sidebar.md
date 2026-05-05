@@ -12,6 +12,8 @@
 
 [Monitoring](./PowerAuth-Push-Server-Monitoring.md)
 
+[Artifact Signing](./Artifact-Signing.md)
+
 **Integration Tutorials**
 
 [Integrate with Push Server](./Push-Server-Integration.md)
