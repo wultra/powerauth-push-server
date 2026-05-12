@@ -16,7 +16,6 @@
 
 package com.wultra.push.client;
 
-import com.fasterxml.jackson.databind.Module;
 import com.wultra.core.rest.client.base.DefaultRestClient;
 import com.wultra.core.rest.client.base.RestClient;
 import com.wultra.core.rest.client.base.RestClientConfiguration;
@@ -38,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import tools.jackson.databind.JacksonModule;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -77,7 +77,7 @@ public class PushServerClient {
      * @param modules Optional jackson modules.
      * @throws PushServerClientException Thrown in case REST client initialization fails.
      */
-    public PushServerClient(final RestClientConfiguration config, final Module... modules) throws PushServerClientException {
+    public PushServerClient(final RestClientConfiguration config, final JacksonModule... modules) throws PushServerClientException {
         try {
             this.restClient = new DefaultRestClient(config, modules);
         } catch (RestClientException ex) {

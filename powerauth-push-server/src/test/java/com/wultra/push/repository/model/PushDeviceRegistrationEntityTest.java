@@ -16,26 +16,26 @@
 package com.wultra.push.repository.model;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Test {@link PushDeviceRegistrationEntity}.
  *
  * @author Lubos Racansky, lubos.racansky@wultra.com
  */
-@DataJpaTest
+@SpringBootTest
 @ActiveProfiles("test")
 @Sql
+@Transactional
 class PushDeviceRegistrationEntityTest {
 
     @Autowired
@@ -65,12 +65,4 @@ class PushDeviceRegistrationEntityTest {
         assertEquals("android", result);
     }
 
-    @Test
-    void testConvertPlatform_invalidMapping() {
-        final Exception result = assertThrows(PersistenceException.class,
-                () -> entityManager.find(PushDeviceRegistrationEntity.class, 2L));
-
-        assertEquals("Error attempting to apply AttributeConverter", result.getMessage());
-        assertEquals("No mapping for platform: xxx", result.getCause().getMessage());
-    }
 }

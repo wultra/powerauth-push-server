@@ -29,14 +29,11 @@ import com.wultra.push.repository.serialization.JsonSerialization;
 import com.wultra.push.service.PushMessageSenderService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.job.parameters.InvalidJobParametersException;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
+import org.springframework.batch.core.launch.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -119,7 +116,7 @@ public class SendCampaignController {
         } catch (JobInstanceAlreadyCompleteException e) {
             logger.error("action: sendCampaign, state: failed, error: {}", e.getMessage());
             throw new PushServerException("Job instance already completed", e);
-        } catch (JobParametersInvalidException e) {
+        } catch (InvalidJobParametersException e) {
             logger.error("action: sendCampaign, state: failed, error: {}", e.getMessage());
             throw new PushServerException("Job parameters are invalid", e);
         }

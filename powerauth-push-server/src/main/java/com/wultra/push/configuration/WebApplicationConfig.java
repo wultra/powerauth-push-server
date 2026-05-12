@@ -16,63 +16,31 @@
 package com.wultra.push.configuration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.List;
+import tools.jackson.databind.SerializationFeature;
 
 /**
- * Default implementation of WebMvcConfigurerAdapter.
+ * Default Web application configuration.
  *
  * @author Petr Dvorak
  */
 @Configuration
-public class WebApplicationConfig implements WebMvcConfigurer {
+public class WebApplicationConfig {
 
     /**
-     * Custom object mapper to make sure that dates and other values serialize
-     * correctly.
+     * Customize the Jackson 3 JsonMapper to match the application's serialization requirements.
      *
-     * @return A new object mapper.
+     * @return A customizer for the JsonMapper builder.
      */
     @Bean
-    public ObjectMapper objectMapper() {
-        final Jackson2ObjectMapperFactoryBean bean = new Jackson2ObjectMapperFactoryBean();
-        bean.setIndentOutput(true);
-        bean.setDateFormat(new StdDateFormat());
-        bean.afterPropertiesSet();
-        final ObjectMapper objectMapper = bean.getObject();
-        if (objectMapper != null) {
-            objectMapper.registerModule(new JavaTimeModule());
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        }
-        return objectMapper;
-    }
-
-    /**
-     * Set custom JSON converter.
-     *
-     * @return New custom converter with a correct object mapper.
-     */
-    private MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-        final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setObjectMapper(objectMapper());
-        return converter;
-    }
-
-    /**
-     * Register the JSON converters.
-     */
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(mappingJackson2HttpMessageConverter());
+    public JsonMapperBuilderCustomizer pushServerJsonMapperCustomizer() {
+        return builder -> builder
+                .enable(SerializationFeature.INDENT_OUTPUT)
+                .changeDefaultPropertyInclusion(v -> JsonInclude.Value.construct(
+                        JsonInclude.Include.NON_NULL,
+                        JsonInclude.Include.USE_DEFAULTS));
     }
 
 }

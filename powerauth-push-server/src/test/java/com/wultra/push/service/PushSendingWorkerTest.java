@@ -25,10 +25,10 @@ import com.wultra.push.model.enumeration.Priority;
 import com.wultra.push.service.fcm.FcmClient;
 import com.wultra.push.service.fcm.FcmModelConverter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.Consumer;
 
@@ -39,8 +39,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Jan Dusil, jan.dusil@wultra.com
  */
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class PushSendingWorkerTest {
 
     @Mock

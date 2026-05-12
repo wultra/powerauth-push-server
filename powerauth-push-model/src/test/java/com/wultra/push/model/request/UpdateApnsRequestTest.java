@@ -15,12 +15,12 @@
  */
 package com.wultra.push.model.request;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import com.wultra.push.model.enumeration.ApnsEnvironment;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,7 +34,7 @@ class UpdateApnsRequestTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    void testEnvironmentNull() throws Exception {
+    void testEnvironmentNull() {
         final String json = """
                 {"environment":null}
                 """;
@@ -50,13 +50,13 @@ class UpdateApnsRequestTest {
                 {"environment":"invalid"}
                 """;
 
-        assertThrows(ValueInstantiationException.class, () ->
+        assertThrows(JacksonException.class, () ->
                 objectMapper.readValue(json, UpdateApnsRequest.class));
     }
 
     @ParameterizedTest
     @CsvSource({"development,DEVELOPMENT", "DEVELOPMENT,DEVELOPMENT", "production,PRODUCTION", "PRODUCTION,PRODUCTION"})
-    void testEnvironment(final String jsonParam, final ApnsEnvironment expected) throws Exception {
+    void testEnvironment(final String jsonParam, final ApnsEnvironment expected) {
         final String json = """
                 {"environment":"%s"}
                 """.formatted(jsonParam);

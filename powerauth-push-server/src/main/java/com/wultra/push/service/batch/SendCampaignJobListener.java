@@ -18,9 +18,9 @@ package com.wultra.push.service.batch;
 
 import com.wultra.push.repository.PushCampaignRepository;
 import com.wultra.push.repository.model.PushCampaignEntity;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.listener.JobExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;

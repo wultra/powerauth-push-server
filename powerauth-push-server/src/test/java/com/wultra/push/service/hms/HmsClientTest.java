@@ -15,7 +15,6 @@
  */
 package com.wultra.push.service.hms;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wultra.push.configuration.PushServiceConfiguration;
 import com.wultra.push.repository.model.AppCredentialsEntity;
 import com.wultra.push.service.hms.request.Message;
@@ -29,6 +28,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -60,7 +60,7 @@ class HmsClientTest {
     private PushServiceConfiguration pushServiceConfiguration;
 
     @Test
-    void testSendMessage() throws Exception {
+    void testSendMessage() {
         Assumptions.assumeTrue(StringUtils.isNotBlank(projectId), "HMS projectId must be configured");
         Assumptions.assumeTrue(StringUtils.isNotBlank(clientId), "HMS clientId must be configured");
         Assumptions.assumeTrue(StringUtils.isNotBlank(clientSecret), "HMS clientSecret must be configured");
