@@ -16,16 +16,14 @@
 
 package com.wultra.push.repository.serialization;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wultra.push.errorhandling.exceptions.PushServerException;
 import com.wultra.push.model.entity.PushMessageBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Helper class for data serialization and deserialization.
@@ -59,7 +57,7 @@ public class JsonSerialization {
         PushMessageBody pushMessageBody;
         try {
             pushMessageBody = objectMapper.readValue(message, PushMessageBody.class);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             logger.error(e.getMessage(), e);
             throw new PushServerException("Failed parsing from JSON", e);
         }
@@ -77,7 +75,7 @@ public class JsonSerialization {
         String messageString;
         try {
             messageString = objectMapper.writeValueAsString(message);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.error(e.getMessage(), e);
             throw new PushServerException("Failed parsing into JSON", e);
         }

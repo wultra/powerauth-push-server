@@ -29,14 +29,11 @@ import com.wultra.push.repository.serialization.JsonSerialization;
 import com.wultra.push.service.PushMessageSenderService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.job.parameters.InvalidJobParametersException;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.job.parameters.JobParametersBuilder;
+import org.springframework.batch.core.launch.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,7 +53,7 @@ import java.util.Optional;
 @RequestMapping(value = "push/campaign/send")
 public class SendCampaignController {
 
-    private final JobLauncher jobLauncher;
+    private final JobOperator jobOperator;
     private final Job job;
     private final PushCampaignRepository pushCampaignRepository;
     private final PushMessageSenderService pushMessageSenderService;
@@ -64,18 +61,18 @@ public class SendCampaignController {
 
     /**
      * Constructor with autowired dependencies.
-     * @param jobLauncher Batch job launcher.
+     * @param jobOperator Batch job operator (Spring Batch 6 replacement for {@code JobLauncher}).
      * @param job Job instance.
      * @param pushCampaignRepository Push campaign repository.
      * @param pushMessageSenderService Push message sender service.
      * @param jsonSerialization Helper JSON serialization class.
      */
     @Autowired
-    public SendCampaignController(JobLauncher jobLauncher,
+    public SendCampaignController(JobOperator jobOperator,
                                   Job job,
                                   PushCampaignRepository pushCampaignRepository,
                                   PushMessageSenderService pushMessageSenderService, JsonSerialization jsonSerialization) {
-        this.jobLauncher = jobLauncher;
+        this.jobOperator = jobOperator;
         this.job = job;
         this.pushCampaignRepository = pushCampaignRepository;
         this.pushMessageSenderService = pushMessageSenderService;
@@ -107,7 +104,7 @@ public class SendCampaignController {
                     .addLong("campaignId", id)
                     .addDate("timestamp", new Date())
                     .toJobParameters();
-            jobLauncher.run(job, jobParameters);
+            jobOperator.start(job, jobParameters);
             logger.info("action: sendCampaign, state: succeeded");
             return new Response();
         } catch (JobExecutionAlreadyRunningException e) {
@@ -119,7 +116,7 @@ public class SendCampaignController {
         } catch (JobInstanceAlreadyCompleteException e) {
             logger.error("action: sendCampaign, state: failed, error: {}", e.getMessage());
             throw new PushServerException("Job instance already completed", e);
-        } catch (JobParametersInvalidException e) {
+        } catch (InvalidJobParametersException e) {
             logger.error("action: sendCampaign, state: failed, error: {}", e.getMessage());
             throw new PushServerException("Job parameters are invalid", e);
         }

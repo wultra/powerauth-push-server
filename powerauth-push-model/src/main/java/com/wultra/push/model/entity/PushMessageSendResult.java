@@ -34,17 +34,17 @@ public class PushMessageSendResult extends BasePushMessageSendResult {
     /**
      * Data associated with push messages sent to APNs.
      */
-    private final PlatformResult apns;
+    private PlatformResult apns;
 
     /**
      * Data associated with push messages sent to FCM.
      */
-    private final PlatformResult fcm;
+    private PlatformResult fcm;
 
     /**
      * Data associated with push messages sent to HMS.
      */
-    private final PlatformResult hms;
+    private PlatformResult hms;
 
     /**
      * No-arg constructor.

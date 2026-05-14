@@ -22,8 +22,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -52,9 +52,6 @@ class PushMessageControllerTest {
 
     @MockitoBean
     private PushMessageSenderService pushMessageSenderService;
-
-    @Captor
-    private ArgumentCaptor<List<PushMessage>> pushMessagesCaptor;
 
     @Autowired
     private MockMvc mockMvc;
@@ -102,9 +99,10 @@ class PushMessageControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("OK"));
 
-        verify(pushMessageSenderService).sendPushMessage(eq("mobile-app"), eq(Mode.SYNCHRONOUS), pushMessagesCaptor.capture());
+        ArgumentCaptor<List<PushMessage>> captor = ArgumentCaptor.captor();
+        verify(pushMessageSenderService).sendPushMessage(eq("mobile-app"), eq(Mode.SYNCHRONOUS), captor.capture());
 
-        final List<PushMessage> pushMessages = pushMessagesCaptor.getValue();
+        final List<PushMessage> pushMessages = captor.getValue();
         assertEquals(1, pushMessages.size());
 
         final PushMessage pushMessage = pushMessages.iterator().next();

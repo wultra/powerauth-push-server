@@ -72,6 +72,7 @@ public class CreateDeviceForActivationsRequest {
             arraySchema = @Schema(description = "Activation IDs."),
             schema = @Schema(description = "Activation ID.", format = "UUID (level 4)", maxLength = 37, example = "099e5e30-47b1-41c7-b49b-3bf28e811fca")
     )
-    private final List<@NotBlank String> activationIds = new ArrayList<>();
+    @Builder.Default
+    private List<@NotBlank String> activationIds = new ArrayList<>();
 
 }

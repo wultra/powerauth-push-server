@@ -22,8 +22,8 @@ import com.eatthepath.pushy.apns.proxy.HttpProxyHandlerFactory;
 import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
 import com.eatthepath.pushy.apns.util.TokenUtil;
 import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import com.google.firebase.messaging.*;
 import com.wultra.core.rest.client.base.RestClientException;
 import com.wultra.push.configuration.PushServiceConfiguration;
@@ -361,8 +361,8 @@ public class PushSendingWorker {
             data = null;
         } else {
             try {
-                data = new ObjectMapper().writeValueAsString(extras);
-            } catch (JsonProcessingException e) {
+                data = JsonMapper.shared().writeValueAsString(extras);
+            } catch (JacksonException e) {
                 throw new PushServerException("Failed to serialize extras to JSON", e);
             }
         }

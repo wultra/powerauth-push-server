@@ -16,8 +16,6 @@
 
 package com.wultra.push.tests;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wultra.core.rest.model.base.response.ObjectResponse;
 import com.wultra.push.api.PowerAuthTestClient;
 import com.wultra.push.client.PushServerClient;
@@ -38,12 +36,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
 import java.util.*;
@@ -63,6 +64,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(locations = "classpath:application-test.properties")
 @ActiveProfiles("test")
 @Sql(scripts = "classpath:/sql/batch-init-h2.sql")
+@AutoConfigureTestRestTemplate
 class PushServerTests {
 
     private static final String MOCK_PUSH_TOKEN = "1234567890987654321234567890";

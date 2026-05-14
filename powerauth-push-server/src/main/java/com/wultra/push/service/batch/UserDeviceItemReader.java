@@ -18,7 +18,7 @@ package com.wultra.push.service.batch;
 import com.wultra.push.configuration.PushServiceConfiguration;
 import com.wultra.push.repository.model.aggregate.UserDevice;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.infrastructure.item.database.JpaPagingItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -43,6 +43,7 @@ public class UserDeviceItemReader extends JpaPagingItemReader<UserDevice> {
      */
     @Autowired
     public UserDeviceItemReader(EntityManagerFactory entityManagerFactory, PushServiceConfiguration configuration) {
+        super(entityManagerFactory);
         // Configure queries and reader
         this.setEntityManagerFactory(entityManagerFactory);
         this.setQueryString("select " +

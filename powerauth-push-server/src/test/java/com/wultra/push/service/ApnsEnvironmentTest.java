@@ -35,10 +35,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -66,7 +66,7 @@ public class ApnsEnvironmentTest {
     @Autowired
     private LoadingCache<String, AppRelatedPushClient> appRelatedPushClientCache;
 
-    @SpyBean
+    @MockitoSpyBean
     private PushSendingWorker pushSendingWorker;
 
     private PowerAuthTestClient powerAuthTestClient;

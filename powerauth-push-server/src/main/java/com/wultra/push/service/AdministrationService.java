@@ -250,6 +250,7 @@ public class AdministrationService {
      * @param appId Application identifier.
      * @throws PushServerException Thrown when application credentials entity does not exist.
      */
+    @Deprecated
     public void removeAndroidAppCredentials(final String appId) throws PushServerException {
         removeFcmAppCredentials(appId);
     }
