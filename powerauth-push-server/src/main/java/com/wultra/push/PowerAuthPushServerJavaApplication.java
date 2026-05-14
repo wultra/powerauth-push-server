@@ -16,15 +16,20 @@
 package com.wultra.push;
 
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.EnableJdbcJobRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.transaction.annotation.Isolation;
 
 /**
  * Spring Boot main class
  */
 @SpringBootApplication
 @EnableBatchProcessing
+// Required since Spring Batch 6 / Spring Boot 4: @EnableBatchProcessing now provisions a
+// ResourcelessJobRepository (in-memory), set ISOLATION_DEFAULT level.
+@EnableJdbcJobRepository(isolationLevelForCreate = Isolation.DEFAULT)
 @EnableRetry
 public class PowerAuthPushServerJavaApplication {
 
