@@ -99,7 +99,7 @@ class PushMessageControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("OK"));
 
-        ArgumentCaptor<List<PushMessage>> captor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<List<PushMessage>> captor = ArgumentCaptor.captor();
         verify(pushMessageSenderService).sendPushMessage(eq("mobile-app"), eq(Mode.SYNCHRONOUS), captor.capture());
 
         final List<PushMessage> pushMessages = captor.getValue();
