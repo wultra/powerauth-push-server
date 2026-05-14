@@ -20,7 +20,7 @@ import com.wultra.push.service.batch.storage.ItemStorageSet;
 import com.wultra.push.service.batch.storage.UserDeviceStorageSet;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 /**

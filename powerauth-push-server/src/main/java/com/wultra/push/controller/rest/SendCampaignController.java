@@ -53,7 +53,7 @@ import java.util.Optional;
 @RequestMapping(value = "push/campaign/send")
 public class SendCampaignController {
 
-    private final JobLauncher jobLauncher;
+    private final JobOperator jobOperator;
     private final Job job;
     private final PushCampaignRepository pushCampaignRepository;
     private final PushMessageSenderService pushMessageSenderService;
@@ -61,18 +61,18 @@ public class SendCampaignController {
 
     /**
      * Constructor with autowired dependencies.
-     * @param jobLauncher Batch job launcher.
+     * @param jobOperator Batch job operator (Spring Batch 6 replacement for {@code JobLauncher}).
      * @param job Job instance.
      * @param pushCampaignRepository Push campaign repository.
      * @param pushMessageSenderService Push message sender service.
      * @param jsonSerialization Helper JSON serialization class.
      */
     @Autowired
-    public SendCampaignController(JobLauncher jobLauncher,
+    public SendCampaignController(JobOperator jobOperator,
                                   Job job,
                                   PushCampaignRepository pushCampaignRepository,
                                   PushMessageSenderService pushMessageSenderService, JsonSerialization jsonSerialization) {
-        this.jobLauncher = jobLauncher;
+        this.jobOperator = jobOperator;
         this.job = job;
         this.pushCampaignRepository = pushCampaignRepository;
         this.pushMessageSenderService = pushMessageSenderService;
@@ -104,7 +104,7 @@ public class SendCampaignController {
                     .addLong("campaignId", id)
                     .addDate("timestamp", new Date())
                     .toJobParameters();
-            jobLauncher.run(job, jobParameters);
+            jobOperator.start(job, jobParameters);
             logger.info("action: sendCampaign, state: succeeded");
             return new Response();
         } catch (JobExecutionAlreadyRunningException e) {
