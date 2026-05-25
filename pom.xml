@@ -75,7 +75,7 @@
         <powerauth-restful-integration.version>2.2.0-SNAPSHOT</powerauth-restful-integration.version>
 
         <!-- Library Versions -->
-        <pushy.version>0.15.4</pushy.version>
+        <pushy.version>0.15.6</pushy.version>
         <google-api-client.version>2.9.0</google-api-client.version>
         <firebase-admin.version>9.9.0</firebase-admin.version>
         <logstash.version>9.0</logstash.version>
