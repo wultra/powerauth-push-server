@@ -14,4 +14,4 @@ No action is required.
 
 ### Spring Boot 4 and Jackson 3
 
-PowerAuth Cloud has been migrated to Spring Boot 4 and Jackson 3.
+PowerAuth Push Server has been migrated to Spring Boot 4 and Jackson 3.
