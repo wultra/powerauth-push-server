@@ -80,7 +80,7 @@
         <firebase-admin.version>9.9.0</firebase-admin.version>
         <logstash.version>9.0</logstash.version>
         <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
-        <central.publishing.plugin.version>0.10.0</central.publishing.plugin.version>
+        <central.publishing.plugin.version>0.11.0</central.publishing.plugin.version>
 
         <!-- Documentation Dependencies -->
         <springdoc-openapi-starter-webmvc-ui.version>3.0.3</springdoc-openapi-starter-webmvc-ui.version>
