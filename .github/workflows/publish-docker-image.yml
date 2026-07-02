@@ -15,7 +15,7 @@ on:
       products_to_build:
         description: Array of product names for which build will be done.
         type: string
-        default: '["powerauth-push-server"]'
+        default: '["push-server"]'
         required: true
   pull_request:
     branches:
@@ -63,7 +63,7 @@ jobs:
       COSIGN_PUBLIC_KEY: ${{ secrets.COSIGN_PUBLIC_KEY }}
     strategy:
       matrix:
-        app: ${{ fromJSON(github.event.inputs.products_to_build || '["powerauth-push-server"]') }}
+        app: ${{ fromJSON(github.event.inputs.products_to_build || '["push-server"]') }}
     steps:
       - uses: actions/checkout@v6
 
@@ -78,7 +78,7 @@ jobs:
         uses: wultra/wultra-infrastructure/.github/actions/build-maven@develop
         id: build-maven
         with:
-          module_to_build: ${{ matrix.app }}
+          module_to_build: 'powerauth-${{ matrix.app }}'
           project_path: ''
           generate_sbom: 'true'
 
@@ -92,7 +92,7 @@ jobs:
       - name: Build and push Docker image
         uses: wultra/wultra-infrastructure/.github/actions/build-and-push-docker@develop
         with:
-          dockerfile_folder_path: './${{ matrix.app }}/docker'
+          dockerfile_folder_path: './powerauth-${{ matrix.app }}/docker'
           should_push: ${{ needs.set-environment.outputs.should_push }}
           tags: ${{ steps.resolve-docker-tags.outputs.tags }}
           has_sbom: true
@@ -100,7 +100,7 @@ jobs:
       - name: Build and push Docker init image
         uses: wultra/wultra-infrastructure/.github/actions/build-and-push-docker@develop
         with:
-          dockerfile_folder_path: './${{ matrix.app }}/docker-init'
+          dockerfile_folder_path: './powerauth-${{ matrix.app }}/docker-init'
           should_push: ${{ needs.set-environment.outputs.should_push }}
           tags: ${{ steps.resolve-docker-tags.outputs.init_tags }}
           has_sbom: false
