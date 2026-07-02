@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.0.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -79,7 +79,7 @@
         <google-api-client.version>2.9.0</google-api-client.version>
         <firebase-admin.version>9.9.0</firebase-admin.version>
         <logstash.version>9.0</logstash.version>
-        <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
+        <cyclonedx-maven-plugin.version>2.9.2</cyclonedx-maven-plugin.version>
         <central.publishing.plugin.version>0.11.0</central.publishing.plugin.version>
 
         <!-- Documentation Dependencies -->
