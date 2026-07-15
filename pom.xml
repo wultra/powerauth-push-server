@@ -71,7 +71,7 @@
         <!--  Wultra Dependencies  -->
         <wultra-core.version>2.2.0-SNAPSHOT</wultra-core.version>
         <powerauth.version>2.2.0-SNAPSHOT</powerauth.version>
-        <powerauth-crypto.version>2.2.0-SNAPSHOT</powerauth-crypto.version>
+        <powerauth-crypto.version>2.2.0</powerauth-crypto.version>
         <powerauth-restful-integration.version>2.2.0-SNAPSHOT</powerauth-restful-integration.version>
 
         <!-- Library Versions -->
