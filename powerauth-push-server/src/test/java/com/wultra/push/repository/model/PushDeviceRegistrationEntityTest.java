@@ -43,7 +43,7 @@ class PushDeviceRegistrationEntityTest {
 
     @Test
     void testConvertPlatform_load() {
-        final var tested = entityManager.find(PushDeviceRegistrationEntity.class, 1L);
+        final var tested = entityManager.find(PushDeviceRegistrationEntity.class, 2001L);
 
         assertEquals(Platform.IOS, tested.getPlatform());
     }
@@ -51,7 +51,7 @@ class PushDeviceRegistrationEntityTest {
     @Test
     void testConvertPlatform_save() {
         final var tested = new PushDeviceRegistrationEntity();
-        tested.setAppCredentials(entityManager.getReference(AppCredentialsEntity.class, 1L));
+        tested.setAppCredentials(entityManager.getReference(AppCredentialsEntity.class, 1001L));
         tested.setPlatform(Platform.ANDROID);
         tested.setTimestampLastRegistered(new Date());
         tested.setPushToken("token1");
