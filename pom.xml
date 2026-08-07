@@ -79,7 +79,7 @@
         <google-api-client.version>2.9.0</google-api-client.version>
         <firebase-admin.version>9.10.0</firebase-admin.version>
         <logstash.version>9.0</logstash.version>
-        <cyclonedx-maven-plugin.version>2.9.2</cyclonedx-maven-plugin.version>
+        <cyclonedx-maven-plugin.version>2.9.3</cyclonedx-maven-plugin.version>
         <central.publishing.plugin.version>0.11.0</central.publishing.plugin.version>
 
         <!-- Documentation Dependencies -->
