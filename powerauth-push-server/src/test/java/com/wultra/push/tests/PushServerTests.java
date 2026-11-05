@@ -30,7 +30,9 @@ import com.wultra.push.model.enumeration.Mode;
 import com.wultra.push.model.request.CreateDeviceForActivationsRequest;
 import com.wultra.push.model.request.CreateDeviceRequest;
 import com.wultra.push.model.response.*;
+import com.wultra.push.repository.AppCredentialsRepository;
 import com.wultra.push.repository.PushDeviceRepository;
+import com.wultra.push.repository.model.AppCredentialsEntity;
 import com.wultra.push.repository.model.PushDeviceRegistrationEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,6 +86,9 @@ class PushServerTests {
 
     @Autowired
     private PushServerAppCredentialConfiguration appCredentialConfig;
+
+    @Autowired
+    private AppCredentialsRepository appCredentialsRepository;
 
     private PushServerClient pushServerClient;
 
@@ -450,6 +455,99 @@ class PushServerTests {
         assertEquals(1, devices2.size());
         assertEquals(rowId, devices2.get(0).getId());
         pushDeviceRepository.deleteAll(devices2);
+    }
+
+    @Test
+    void removeApnsTest() throws Exception {
+        final String appId = "remove-apns-test-app";
+        saveAllPushCredentials(appId);
+
+        assertEquals("OK", pushServerClient.removeApns(appId).getStatus());
+
+        final AppCredentialsEntity actual = appCredentialsRepository.findFirstByAppId(appId).orElseThrow();
+        assertApnsRemoved(actual);
+        assertFcmPresent(actual);
+        assertHmsPresent(actual);
+    }
+
+    @Test
+    void removeFcmTest() throws Exception {
+        final String appId = "remove-fcm-test-app";
+        saveAllPushCredentials(appId);
+
+        assertEquals("OK", pushServerClient.removeFcm(appId).getStatus());
+
+        final AppCredentialsEntity actual = appCredentialsRepository.findFirstByAppId(appId).orElseThrow();
+        assertApnsPresent(actual);
+        assertFcmRemoved(actual);
+        assertHmsPresent(actual);
+    }
+
+    @Test
+    void removeHmsTest() throws Exception {
+        final String appId = "remove-hms-test-app";
+        saveAllPushCredentials(appId);
+
+        assertEquals("OK", pushServerClient.removeHms(appId).getStatus());
+
+        final AppCredentialsEntity actual = appCredentialsRepository.findFirstByAppId(appId).orElseThrow();
+        assertApnsPresent(actual);
+        assertFcmPresent(actual);
+        assertHmsRemoved(actual);
+    }
+
+    private void saveAllPushCredentials(final String appId) {
+        final AppCredentialsEntity credentials = appCredentialsRepository.findFirstByAppId(appId).orElseGet(AppCredentialsEntity::new);
+        credentials.setAppId(appId);
+        credentials.setApnsBundle("test-bundle");
+        credentials.setApnsPrivateKey(new byte[32]);
+        credentials.setApnsKeyId("test-key");
+        credentials.setApnsTeamId("test-team-id");
+        credentials.setApnsEnvironment("development");
+        credentials.setFcmProjectId("test-project");
+        credentials.setFcmPrivateKey(new byte[128]);
+        credentials.setHmsProjectId("test-hms-project");
+        credentials.setHmsClientId("test-hms-client");
+        credentials.setHmsClientSecret("test-hms-secret");
+        appCredentialsRepository.save(credentials);
+    }
+
+    private static void assertApnsPresent(final AppCredentialsEntity actual) {
+        assertEquals("test-bundle", actual.getApnsBundle());
+        assertArrayEquals(new byte[32], actual.getApnsPrivateKey());
+        assertEquals("test-key", actual.getApnsKeyId());
+        assertEquals("test-team-id", actual.getApnsTeamId());
+        assertEquals("development", actual.getApnsEnvironment());
+    }
+
+    private static void assertApnsRemoved(final AppCredentialsEntity actual) {
+        assertNull(actual.getApnsBundle());
+        assertNull(actual.getApnsPrivateKey());
+        assertNull(actual.getApnsKeyId());
+        assertNull(actual.getApnsTeamId());
+        assertNull(actual.getApnsEnvironment());
+    }
+
+    private static void assertFcmPresent(final AppCredentialsEntity actual) {
+        assertEquals("test-project", actual.getFcmProjectId());
+        assertArrayEquals(new byte[128], actual.getFcmPrivateKey());
+    }
+
+    private static void assertFcmRemoved(final AppCredentialsEntity actual) {
+        assertNull(actual.getFcmProjectId());
+        assertNull(actual.getFcmPrivateKey());
+    }
+
+    private static void assertHmsPresent(final AppCredentialsEntity actual) {
+        assertEquals("test-hms-project", actual.getHmsProjectId());
+        assertEquals("test-hms-client", actual.getHmsClientId());
+        assertEquals("test-hms-secret", actual.getHmsClientSecret());
+    }
+
+    private static void assertHmsRemoved(final AppCredentialsEntity actual) {
+        assertNull(actual.getHmsProjectId());
+        assertNull(actual.getHmsClientId());
+        assertNull(actual.getHmsClientSecret());
     }
 
     private ObjectResponse<CreateCampaignResponse> createCampaign() throws Exception {

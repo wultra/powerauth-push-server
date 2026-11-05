@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed `PushServerClient` APNs, FCM and HMS credential removal failing with `404` due to encoded `appId` query parameter [(#1186)](https://github.com/wultra/powerauth-push-server/issues/1186)
+
 ## [2.2.0] - 2026-07-20
 
 ### Added

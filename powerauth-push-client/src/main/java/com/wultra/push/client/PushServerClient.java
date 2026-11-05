@@ -669,7 +669,7 @@ public class PushServerClient {
      */
     public Response removeApns(String appId) throws PushServerClientException {
         logger.info("call={}, callType={}, action: removeApns, state: initiated, appId: {}", "/admin/app/apns", "DELETE", appId);
-        final Response response = deleteImpl("/admin/app/apns?appId=" + appId);
+        final Response response = deleteImpl("/admin/app/apns", buildAppIdParams(appId));
         logger.info("call={}, callType={}, action: removeApns, state: succeeded", "/admin/app/apns", "DELETE");
         return response;
     }
@@ -736,7 +736,7 @@ public class PushServerClient {
      */
     public Response removeFcm(String appId) throws PushServerClientException {
         logger.info("call={}, callType={}, action: removeFcm, state: initiated, appId: {}", "/admin/app/fcm", "DELETE", appId);
-        final Response response = deleteImpl("/admin/app/fcm?appId=" + appId);
+        final Response response = deleteImpl("/admin/app/fcm", buildAppIdParams(appId));
         logger.info("call={}, callType={}, action: removeFcm, state: succeeded", "/admin/app/fcm", "DELETE");
         return response;
     }
@@ -799,7 +799,7 @@ public class PushServerClient {
      */
     public Response removeHms(String appId) throws PushServerClientException {
         logger.info("call={}, callType={}, action: removeHms, state: initiated, appId: {}", "/admin/app/hms", "DELETE", appId);
-        final Response response = deleteImpl("/admin/app/hms?appId=" + appId);
+        final Response response = deleteImpl("/admin/app/hms", buildAppIdParams(appId));
         logger.info("call={}, callType={}, action: removeHms, state: succeeded", "/admin/app/hms", "DELETE");
         return response;
     }
@@ -1045,12 +1045,13 @@ public class PushServerClient {
      * Prepare DELETE response. Uses default {@link Response} type reference for response.
      *
      * @param url specific url of method
+     * @param queryParams query parameters
      * @return Object obtained after processing the response JSON.
      * @throws PushServerClientException In case of network, response / JSON processing, or other IO error.
      */
-    private Response deleteImpl(String url) throws PushServerClientException {
+    private Response deleteImpl(String url, MultiValueMap<String, String> queryParams) throws PushServerClientException {
         try {
-            return restClient.delete(url, new ParameterizedTypeReference<Response>(){}).getBody();
+            return restClient.delete(url, queryParams, null, new ParameterizedTypeReference<Response>(){}).getBody();
         } catch (RestClientException ex) {
             logger.debug(ex.getMessage(), ex);
             throw new PushServerClientException(ex, new Error("PUSH_SERVER_CLIENT_ERROR", "HTTP DELETE request failed."));
@@ -1104,6 +1105,17 @@ public class PushServerClient {
         } else {
             result.put("size", Collections.singletonList("100"));
         }
+        return result;
+    }
+
+    /**
+     * Build query parameter map containing the application identifier.
+     * @param appId Application credentials entity ID.
+     * @return Query parameter map.
+     */
+    private static MultiValueMap<String, String> buildAppIdParams(String appId) {
+        final MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
+        result.add("appId", appId);
         return result;
     }
 
