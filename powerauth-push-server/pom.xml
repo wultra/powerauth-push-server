@@ -230,6 +230,10 @@
                         <goals>
                             <goal>build-info</goal>
                         </goals>
+                        <configuration>
+                            <!-- Maven 3.10 super-POM sets project.build.outputTimestamp to 1980-02-01 (reproducible builds), which build-info uses by default -->
+                            <time>${maven.build.timestamp}</time>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
